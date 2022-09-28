@@ -15,14 +15,14 @@ from time import perf_counter
 # Domain & Height
 #------------------------------------------------------------------------------
 # width
-xa, xb = (0, np.pi)
-ya, yb = (0, 0.5*np.pi)
+xa, xb = (0, 2*np.pi)
+ya, yb = (0, 2*np.pi)
 
 #time   
 t0, tf = (0, 2*np.pi)
 
 # height h(t,x) = h(x)  
-h0, delta, k1, k2 = (0.5, 0.1, 4, 1) # delta < h0 so height positive
+h0, delta, k1, k2 = (0.3, 0.1, 3, 1) # delta < h0 so height positive
 
 str_h = "%0.1f + %0.1f \sin(%d x) \cos(%d y)"%(h0, delta, k1, k2) #for graph title
 
@@ -70,11 +70,10 @@ def f(t,X): # = h^3 p'' + (h^3)' p'
 # numerical solution
 #------------------------------------------------------------------------------   
 # plot settings
-view_theta = 10 # pan view angle up/down
-view_phi = 20  # pan view angle left-right
-figs = True
+view_theta = 20 # pan view angle up/down
+view_phi = 30  # pan view angle left-right
 
-def solve(NX=100, Nt = 1):
+def solve(NX=100, Nt = 1, figs=True):
     start = perf_counter()
     
     # grid sizing
@@ -128,55 +127,49 @@ def solve(NX=100, Nt = 1):
             # Prepare to build rows [i*Ny : (i+1)*Ny] of D
             
             # Initialize 5 diagonals... 
-            
-            # for columns [i*Ny, (i+1)*Ny]
             P_center = np.zeros(Ny) #P(i,j)    central diagonal 
-            P_north = np.zeros(Ny)  #P(i, j-1) lower diagonal
-            P_south = np.ones(Ny)   #P(i, j+1) upper diagonal 
-            
-            # for columns [(i-1)*Ny, i*Ny]
-            P_east = np.ones(Ny)    #P(i+1, j) right diagonal
-            
-            # for columns [i*Ny, (i+1)*Ny]
-            P_west = np.ones(Ny)    #P(i-1, j) left diagonal
+            P_west = np.zeros(Ny)  #P(i, j-1) lower diagonal
+            P_east = np.ones(Ny)   #P(i, j+1) upper diagonal 
+            P_south = np.ones(Ny)    #P(i-1, j) left diagonal
+            P_north = np.ones(Ny)    #P(i+1, j) north diagonal
         
             for j in range(Ny): # ys[j]
             
                 # Find h(t,X) on grid                  
                 h_c = hs[k][i][j]     #h(i,j)    
-                h_N = hs[k][i][(j-1)%Ny] #h(i, j-1)
-                h_S = hs[k][i][(j+1)%Ny] #h(i, j+1)
-                h_E = hs[k][(i+1)%Nx][j] #h(i+1, j)
-                h_W = hs[k][(i-1)%Nx][j] #h(i-1, j)
+                h_N = hs[k][(i+1)%Nx][j] #h(i+1, j)
+                h_S = hs[k][(i-1)%Nx][j] #h(i-1, j)
+                h_E = hs[k][i][(j+1)%Ny] #h(i, j+1)
+                h_W = hs[k][i][(j-1)%Ny] #h(i, j-1)
                 
                 # build diagonals
                 
                 #P(i,j) central diagonal
-                P_center_x = (h_E**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + 2*h_c**3 + 3*h_W*h_c**2 + 3*h_c*h_W**2 + h_W**3) #Pij from Px
-                P_center_y = (h_S**3 + 3*h_c*h_S**2 + 3*h_S*h_c**2 + 2*h_c**3 + 3*h_N*h_c**2 + 3*h_c*h_N**2 + h_N**3) #Pij from Py
-                P_center[j] = -P_center_x/(8*dx**2) - P_center_y/(8*dy**2)
-                
-                #P(i, j-1) lower diagonal
-                P_north[(j-1)%Ny] = (h_c**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + h_N**3)/(8*dy**2)
-                
-                #P(i, j+1) upper diagonal
-                P_south[(j+1)%Ny] = (h_c**3 + 3*h_c*h_S**2 + 3*h_S*h_c**2 + h_S**3)/(8*dy**2)
-                
-                #P(i-1, j) left diagonal
-                P_west[j] = (h_c**3 + 3*h_W**2*h_c + 3*h_W*h_c**2 + h_W**2)/(8*dx**2)
+                P_center_x = -(h_N**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + 2*h_c**3 + 3*h_S*h_c**2 + 3*h_c*h_S**2 + h_S**3)/(8*dx**2) #Pij from Px
+                P_center_y = -(h_E**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + 2*h_c**3 + 3*h_W*h_c**2 + 3*h_c*h_W**2 + h_W**3)/(8*dy**2) #Pij from Py
+                P_center[j] = P_center_x + P_center_y
                 
                 #P(i+1, j) right diagonal
-                P_east[j] = (h_c**3 + 3*h_E**2*h_c + 3*h_E*h_c**2 + h_E**2)/(8*dx**2)
+                P_north[j] = (h_c**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + h_N**3)/(8*dx**2)
+                
+                #P(i-1, j) left diagonal
+                P_south[j] = (h_c**3 + 3*h_c*h_S**2 + 3*h_S*h_c**2 + h_S**3)/(8*dx**2)
+                
+                #P(i, j-1) lower diagonal
+                P_west[j]  = (h_c**3 + 3*h_c*h_W**2 + 3*h_W*h_c**2 + h_W**3)/(8*dy**2)
+                
+                #P(i, j+1) upper diagonal
+                P_east[j]  = (h_c**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + h_E**3)/(8*dy**2)
 
             
             # Make three (Ny * Ny) matrices with these diagonals
-            D_i_left = np.diagflat(P_west)
-            D_i_center = np.diagflat(P_north[0:Ny-1], -1) + np.diagflat(P_center) + np.diagflat(P_south[1:Ny], 1)
-            D_i_right = np.diagflat(P_east)
+            D_i_left = np.diagflat(P_south)
+            D_i_center = np.diagflat(P_west[0:Ny-1], -1) + np.diagflat(P_center) + np.diagflat(P_east[1:Ny], 1)
+            D_i_right = np.diagflat(P_north)
             
             # adjust for periodic boundary in y
-            D_i_center[0][Ny-1] = P_north[Ny-1] #
-            D_i_center[Ny-1][0] = P_south[0]
+            D_i_center[0][Ny-1] = P_west[Ny-1]
+            D_i_center[Ny-1][0] = P_east[0]
             
             # input rows [i*Nx : (i+1)*Nx] into D
             # adjust for periodic boundary in x
@@ -197,8 +190,8 @@ def solve(NX=100, Nt = 1):
         D[Nx*Ny-1] = 1 # [1 ... 1]
         f_n[k][Nx*Ny - 1] = 0
         
-        #return D
         
+        #return D
         # solve for p
         solve_start = perf_counter()
         p_n = sp.spsolve(D, f_n[k]) # [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
@@ -257,7 +250,7 @@ def conveg(trials=6, N0=5):
     
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(N, 1, 0)) # max over time
+        infNorms[i] = np.max(solve(N, 1, False)) # max over time
         dxs[i] = ((xb - xa) / N)
         dxs_sqr[i] = dxs[i]**2
         
@@ -271,21 +264,4 @@ def conveg(trials=6, N0=5):
 
     pp.legend()
     pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, N/2, trials))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

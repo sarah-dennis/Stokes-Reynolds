@@ -19,7 +19,7 @@ xa, xb = (0, 4*np.pi)
 t0, tf = (0, 2*np.pi)
 
 # height h(t,x) = h(x)  # delta < h0 so height positive
-h0, delta, k = (0.15, 0.1, 4)
+h0, delta, k = (0.5, 0.1, 4)
 str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
 
 def h(t, x):
@@ -141,7 +141,7 @@ def solve(Nx=100, Nt = 1, figrs=1):
         p_n = np.linalg.solve(D, f_n[i])
     
     
-        #return D, p_n
+        return D
     
         
         # plotting ( still inside time loop )
