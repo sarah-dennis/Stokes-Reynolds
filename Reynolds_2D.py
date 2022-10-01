@@ -18,22 +18,29 @@ from time import perf_counter
 xa, xb = (0, 2*np.pi)
 ya, yb = (0, 2*np.pi)
 
+
 #time   
 t0, tf = (0, 2*np.pi)
 
 # height h(t,x) = h(x)  
-h0, delta, k1, k2 = (0.3, 0.1, 3, 1) # delta < h0 so height positive
+h0, delta, k1, k2 = (0.3, 0.1, 1, 2) # delta < h0 so height positive
+
+# problem likely in y and not x
 
 str_h = "%0.1f + %0.1f \sin(%d x) \cos(%d y)"%(h0, delta, k1, k2) #for graph title
 
 def h(t, X):
     x, y = X
-    return h0 + delta * np.sin(k1*x) * np.cos(k2*y)
+    return h0 + delta * np.sin(k1*x) *np.cos(k2*y)
 
 def h_dX(t, X): # = [hx, hy]
     x, y = X
     return [delta * k1 * np.cos(k1*x)* np.cos(k2*y), -delta * k2 * np.sin(k1*x) * np.sin(k2*y)]
                 
+def h_periodic():
+    
+    return np.isclose(h(t0, (xa, ya)), h(t0, (xa, yb))) and np.isclose(h(t0, (xa, ya)), h(t0, (xb, ya)))
+
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
 #------------------------------------------------------------------------------
@@ -41,7 +48,7 @@ def h_dX(t, X): # = [hx, hy]
 
 # set "exact" p(X)
 
-alpha, beta = (2, 1)
+alpha, beta = (1,1)
 def p(X):
     x, y = X
     return -np.sin(alpha*x)*np.cos(beta*y)
@@ -55,6 +62,11 @@ def p_dX(X): # = [p_x, p_y]
 def p_dXX(X): # = [p_xx, p_yy]
     x, y = X
     return [alpha**2 * np.sin(alpha*x) * np.cos(beta*y) , beta**2 * np.sin(alpha*x) * np.cos(beta*y)]
+
+
+def p_periodic():
+    
+    return np.isclose(p((xa, ya)), p((xa, yb))) and np.isclose(p((xa, ya)), p((xb, ya)))
 
 # calculate RHS f(x,t)
 
@@ -72,9 +84,13 @@ def f(t,X): # = h^3 p'' + (h^3)' p'
 # plot settings
 view_theta = 20 # pan view angle up/down
 view_phi = 30  # pan view angle left-right
+# figs= [0: no plot, 1: slice (x, y0), 2: slice (x0, y), 3: plot 3D]
 
-def solve(NX=100, Nt = 1, figs=True):
+def solve(NX=100, Nt = 1, fig=3):
     start = perf_counter()
+    
+    #if not h_periodic() or not p_periodic():
+    #    return False
     
     # grid sizing
     Ny = NX
@@ -158,7 +174,7 @@ def solve(NX=100, Nt = 1, figs=True):
                 #P(i, j-1) lower diagonal
                 P_west[j]  = (h_c**3 + 3*h_c*h_W**2 + 3*h_W*h_c**2 + h_W**3)/(8*dy**2)
                 
-                #P(i, j+1) upper diagonal
+                #P(i, j+1) upper diagonal 
                 P_east[j]  = (h_c**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + h_E**3)/(8*dy**2)
 
             
@@ -192,39 +208,73 @@ def solve(NX=100, Nt = 1, figs=True):
         
         
         #return D
-        # solve for p
+        # solve for p_n
         solve_start = perf_counter()
         p_n = sp.spsolve(D, f_n[k]) # [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_end = perf_counter()
         
         # plotting
-        if k == 0 and figs: #plot at time t = ts[k]
+        if fig != 0 and k == 0: #plot at time t = ts[k]
+            
+            if fig == 1: #(x, y0, p)
+                y0 = 1
+                p_n_1D_x = np.zeros(Nx)
+                p_exact_1D_x = np.zeros(Nx)
+
+                for i in range(Nx):
+                    
+                    p_n_1D_x[i] = p_n[i*Nx + y0] 
+                    p_exact_1D_x[i] = p_exact[i*Nx+y0]
+                    
+                pp.figure()
+                pp.plot(xs, p_n_1D_x, label="$p_n(y_0)$")
+                pp.plot(xs, p_exact_1D_x, label="$p_n(y_0)$")
+                pp.title("$p= %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
+                pp.xlabel('x')
+                pp.ylabel('p')
+                pp.legend()
+
+            if fig == 2: #(x0, y, p)
+                x0 = 1
+                p_n_1D_y = p_n[x0*Nx:x0*Nx + Ny]
+                p_exact_1D_y = p_exact[x0*Nx:x0*Nx + Ny]
+
+                    
+                pp.figure()
+                pp.plot(ys, p_n_1D_y, label="$p_n(x_0)$")
+                pp.plot(ys, p_exact_1D_y, label="$p(x_0)$")
+                pp.title("$p= %s$ | $h=%s$ | $N_y=%d$"%(str_p, str_h, Ny))
+                pp.xlabel('y')
+                pp.ylabel('p')
+                pp.legend()
+                
+        
+            if fig == 3: #(x, y, p)
+                p_n_2D = np.zeros((Nx, Ny))
+                p_exact_2D = np.zeros((Nx, Ny))
+                
+                for i in range(Nx):
+                    for j in range(Ny):
+                        p_n_2D[i,j] = p_n[i*Nx + j]
+                        p_exact_2D[i,j] = p_exact[i*Nx + j]
                         
-            p_n_2D = np.zeros((Nx, Ny))
-            p_exact_2D = np.zeros((Nx, Ny))
-            
-            for i in range(Nx):
-                for j in range(Ny):
-                    p_n_2D[i,j] = p_n[i*Nx + j]
-                    p_exact_2D[i,j] = p_exact[i*Nx + j]
+                X, Y = np.meshgrid(xs, ys)        
                     
-            X, Y = np.meshgrid(xs, ys)        
-                    
-            pp.figure()
-            ax = pp.axes(projection='3d')
-            ax.plot_surface(X, Y, p_n_2D, label="$p_N$", rstride=1, cstride=1,cmap='viridis')
-            pp.title("$p= %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
-            pp.xlabel('x')
-            pp.ylabel('y')
-            ax.view_init(view_theta, view_phi)
-            
-            pp.figure()
-            ax = pp.axes(projection='3d')
-            ax.plot_surface(X, Y, p_exact_2D, label="$p_exact$", rstride=1, cstride=1, cmap='viridis')
-            pp.title("$p = %s$ | $h=%s$ | exact"%(str_p, str_h))
-            pp.xlabel('x')
-            pp.ylabel('y')
-            ax.view_init(view_theta, view_phi)
+                pp.figure()
+                ax = pp.axes(projection='3d')
+                ax.plot_surface(X, Y, p_n_2D, label="$p_N$", rstride=1, cstride=1,cmap='viridis')
+                pp.title("$p= %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
+                pp.xlabel('x')
+                pp.ylabel('y')
+                ax.view_init(view_theta, view_phi)
+                
+                pp.figure()
+                ax = pp.axes(projection='3d')
+                ax.plot_surface(X, Y, p_exact_2D, label="$p_exact$", rstride=1, cstride=1, cmap='viridis')
+                pp.title("$p = %s$ | $h=%s$ | exact"%(str_p, str_h))
+                pp.xlabel('x')
+                pp.ylabel('y')
+                ax.view_init(view_theta, view_phi)
     
         # error at t = ts[i]     
         inf_norms[k] = np.max(np.abs(np.subtract(p_exact,p_n)))
@@ -250,7 +300,7 @@ def conveg(trials=6, N0=5):
     
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(N, 1, False)) # max over time
+        infNorms[i] = np.max(solve(N, 1, 0)) # max over time
         dxs[i] = ((xb - xa) / N)
         dxs_sqr[i] = dxs[i]**2
         
