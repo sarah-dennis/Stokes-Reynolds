@@ -7,53 +7,67 @@ Created on Tue Jun 21 09:43:24 2022
 """
 
 import numpy as np
-from scipy.sparse import linalg as sp
+import scipy.sparse.linalg as spl
 from matplotlib import pyplot as pp
 from time import perf_counter
 
 #------------------------------------------------------------------------------
 # Domain & Height
 #------------------------------------------------------------------------------
-# width
-xa, xb = (0, 2*np.pi)
+
+# space & time
+xa, xb = (0, 4*np.pi)
 ya, yb = (0, 2*np.pi)
-
-
-#time   
 t0, tf = (0, 2*np.pi)
 
-# height h(t,x) = h(x)  
-h0, delta, k1, k2 = (0.3, 0.1, 1, 2) # delta < h0 so height positive
-
-# problem likely in y and not x
-
-str_h = "%0.1f + %0.1f \sin(%d x) \cos(%d y)"%(h0, delta, k1, k2) #for graph title
+# height h(t,x) = h(x)
+  
+h0, delta = (0.2, 0.15) # delta < h0 so height positive
+k1, k2 = (2, 5) 
 
 def h(t, X):
     x, y = X
     return h0 + delta * np.sin(k1*x) *np.cos(k2*y)
 
+str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d y)"%(h0, delta, k1, k2) #for graph title
+
+
 def h_dX(t, X): # = [hx, hy]
     x, y = X
     return [delta * k1 * np.cos(k1*x)* np.cos(k2*y), -delta * k2 * np.sin(k1*x) * np.sin(k2*y)]
-                
-def h_periodic():
+
+def eval_height(ts, xs, ys): 
+    Nt = len(ts)
+    Nx = len(xs)
+    Ny = len(ys)
+    hs = np.zeros((Nt, Nx, Ny))
+    for k in range(Nt): 
+        for i in range(Nx):
+            for j in range(Ny):
+                hs[k][i][j] = h(ts[k], (xs[i], ys[j]))
+    return hs
     
-    return np.isclose(h(t0, (xa, ya)), h(t0, (xa, yb))) and np.isclose(h(t0, (xa, ya)), h(t0, (xb, ya)))
 
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
 #------------------------------------------------------------------------------
-# (h^3 p')' = f(h)
+# (h^3 P')' = f(h)
 
-# set "exact" p(X)
+# Pressure P(xy)
 
-alpha, beta = (1,1)
+alpha, beta = (3,-2)
 def p(X):
     x, y = X
     return -np.sin(alpha*x)*np.cos(beta*y)
 
 str_p = "-\sin(%d x)\cos(%d y)"%(alpha, beta) #for graph title
+
+def eval_p(xys):
+    Nxy = len(xys)
+    p_exact = np.zeros(Nxy)
+    for i in range(Nxy):
+        p_exact[i] = p(xys[i])
+    return p_exact
 
 def p_dX(X): # = [p_x, p_y]
     x, y = X
@@ -63,11 +77,6 @@ def p_dXX(X): # = [p_xx, p_yy]
     x, y = X
     return [alpha**2 * np.sin(alpha*x) * np.cos(beta*y) , beta**2 * np.sin(alpha*x) * np.cos(beta*y)]
 
-
-def p_periodic():
-    
-    return np.isclose(p((xa, ya)), p((xa, yb))) and np.isclose(p((xa, ya)), p((xb, ya)))
-
 # calculate RHS f(x,t)
 
 def f(t,X): # = h^3 p'' + (h^3)' p' 
@@ -75,94 +84,83 @@ def f(t,X): # = h^3 p'' + (h^3)' p'
     pxx, pyy = p_dXX(X)
     hx, hy = h_dX(t, X)
     
-    return (h(t,X)**3) * (pxx + pyy) + 3*h(t,X)**2 * (hx*px + hy*py)
+    return h(t,X)**3 * (pxx + pyy) + 3*h(t,X)**2 * (hx*px + hy*py)
+
+def eval_f(ts, xys):
+    Nt = len(ts)
+    Nxy = len(xys)
+    f_n = np.zeros((Nt, Nxy)) #f[t][xy]
+    for i in range (Nt):
+        for j in range(Nxy):
+            f_n[i][j] = f(ts[i], xys[j])
+    return f_n
+    
 
 
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
 # plot settings
-view_theta = 20 # pan view angle up/down
-view_phi = 30  # pan view angle left-right
-# figs= [0: no plot, 1: slice (x, y0), 2: slice (x0, y), 3: plot 3D]
+view_theta = 30 # pan view angle up/down
+view_phi =60  # pan view angle left-right
+# figs= [0: return D p_n, 1: slice (x, y0), 2: slice (x0, y), 3: plot 3D]
 
-def solve(NX=100, Nt = 1, fig=3):
+def solve(Nx=100, Ny=100, Nt = 1, fig=3):
     start = perf_counter()
     
-    #if not h_periodic() or not p_periodic():
-    #    return False
-    
-    # grid sizing
-    Ny = NX
-    Nx = NX
+    # grid 
+    dt = (tf - t0)/Nt
     dx = (xb - xa)/Nx
     dy = (yb - ya)/Ny
-    dt = (tf - t0)/Nt
-    
-    # time t
+
     ts = [t0 + i*dt for i in range(Nt)]
-    
-    # space X = (x, y) 
     xs = [xa + i*dx for i in range(Nx)]
     ys = [ya + i*dy for i in range(Ny)]
-
-    xys = np.zeros((Nx*Ny,2)) #[(x0,y0), (x0, y1), ..., (x0, yN), (x1, y0), ..., (xN, yN)]
+    
+    # flat space [(x0,y0), (x0, y1), ..., (x0, yN), (x1, y0), ..., (xN, yN)]
+    xys = np.zeros((Nx*Ny,2)) 
     for i in range(len(xys)):
-        xys[i] = [xs[i//Nx], ys[i%Ny]]
+        xys[i] = [xs[i//Nx], ys[i%Ny]]  
 
-    # height h(t,X)
-    hs = np.zeros((Nt, Nx, Ny)) #h[t][x][y]
-    for k in range(Nt): 
-        for i in range(Nx):
-            for j in range(Ny):
-                hs[k][i][j] = h(ts[k], (xs[i], ys[j]))
+    # height h(t,X) = h[t][x][y]
+    hs = eval_height(ts, xs, ys)
     
-    #RHS f(t,X)
-    f_n = np.zeros((Nt, Nx*Ny)) #f[t][xy]
-    for i in range (Nt):
-        for j in range(Nx*Ny):
-            f_n[i][j] = f(ts[i], xys[j])
+    # RHS f(t,X) = f_n[t][xy]
+    f_n = eval_f(ts, xys)
         
-    #exact p(t, X)
-    p_exact = np.zeros(Nx*Ny)
-    for i in range(Nx*Ny):
-        p_exact[i] = p(xys[i])
-         
-        
+    # exact solution p(t, X) = p[xys]
+    p_exact = eval_p(xys)
+    
     # Loop over time t = ts[i]
-    
     inf_norms = np.zeros(Nt) 
-    
-    # construct finite difference matrix
     for k in range(Nt): #time: ts[k]
     
+        # construct finite difference matrix D
         D = np.zeros((Nx*Ny, Nx*Ny))
         
         for i in range(Nx): # xs[i]
             
-            # Prepare to build rows [i*Ny : (i+1)*Ny] of D
+            # Build rows [i*Ny : (i+1)*Ny] of D
             
             # Initialize 5 diagonals... 
-            P_center = np.zeros(Ny) #P(i,j)    central diagonal 
-            P_west = np.zeros(Ny)  #P(i, j-1) lower diagonal
-            P_east = np.ones(Ny)   #P(i, j+1) upper diagonal 
+            P_center = np.zeros(Ny)  #P(i,j)    central diagonal 
+            P_west = np.zeros(Ny)    #P(i, j-1) lower diagonal
+            P_east = np.ones(Ny)     #P(i, j+1) upper diagonal 
             P_south = np.ones(Ny)    #P(i-1, j) left diagonal
             P_north = np.ones(Ny)    #P(i+1, j) north diagonal
         
             for j in range(Ny): # ys[j]
             
                 # Find h(t,X) on grid                  
-                h_c = hs[k][i][j]     #h(i,j)    
+                h_c = hs[k][i][j]        #h(i,j)    
                 h_N = hs[k][(i+1)%Nx][j] #h(i+1, j)
                 h_S = hs[k][(i-1)%Nx][j] #h(i-1, j)
                 h_E = hs[k][i][(j+1)%Ny] #h(i, j+1)
                 h_W = hs[k][i][(j-1)%Ny] #h(i, j-1)
                 
-                # build diagonals
-                
                 #P(i,j) central diagonal
-                P_center_x = -(h_N**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + 2*h_c**3 + 3*h_S*h_c**2 + 3*h_c*h_S**2 + h_S**3)/(8*dx**2) #Pij from Px
-                P_center_y = -(h_E**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + 2*h_c**3 + 3*h_W*h_c**2 + 3*h_c*h_W**2 + h_W**3)/(8*dy**2) #Pij from Py
+                P_center_x = -(h_N**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + 2*h_c**3 + 3*h_S*h_c**2 + 3*h_c*h_S**2 + h_S**3)/(8* dx**2) #Pij from Px
+                P_center_y = -(h_E**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + 2*h_c**3 + 3*h_W*h_c**2 + 3*h_c*h_W**2 + h_W**3)/(8* dy**2) #Pij from Py
                 P_center[j] = P_center_x + P_center_y
                 
                 #P(i+1, j) right diagonal
@@ -180,50 +178,52 @@ def solve(NX=100, Nt = 1, fig=3):
             
             # Make three (Ny * Ny) matrices with these diagonals
             D_i_left = np.diagflat(P_south)
-            D_i_center = np.diagflat(P_west[0:Ny-1], -1) + np.diagflat(P_center) + np.diagflat(P_east[1:Ny], 1)
+            D_i_center = np.diagflat(P_west[1:Ny], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Ny-1], 1)
             D_i_right = np.diagflat(P_north)
             
             # adjust for periodic boundary in y
-            D_i_center[0][Ny-1] = P_west[Ny-1]
-            D_i_center[Ny-1][0] = P_east[0]
+            D_i_center[0][Ny-1] = P_west[0]
+            D_i_center[Ny-1][0] = P_east[Ny-1]
             
             # input rows [i*Nx : (i+1)*Nx] into D
             # adjust for periodic boundary in x
+            
             if i == 0:
                 D[0:Ny, 0:Ny] = D_i_center
                 D[0:Ny, Ny:2*Ny] = D_i_right
                 D[0:Ny, (Nx-1)*Ny:Nx*Ny] = D_i_left
             elif i == Nx-1:
                 D[(Nx-1)*Ny:Nx*Ny, 0:Ny] = D_i_right
-                D[(Nx-1)*Ny:Nx*Ny, (i-1)*Ny:(Nx-1)*Ny] = D_i_left
-                D[(Nx-1)*Ny:Nx*Ny, i*Ny:Nx*Ny] = D_i_center
+                D[(Nx-1)*Ny:Nx*Ny, (Nx-2)*Ny:(Nx-1)*Ny] = D_i_left
+                D[(Nx-1)*Ny:Nx*Ny, (Nx-1)*Ny:Nx*Ny] = D_i_center
             else:
                 D[i*Ny:(i+1)*Ny, (i-1)*Ny:i*Ny] = D_i_left
                 D[i*Ny:(i+1)*Ny, i*Ny:(i+1)*Ny] = D_i_center
                 D[i*Ny:(i+1)*Ny, (i+1)*Ny:(i+2)*Ny] = D_i_right
 
-        # assume sum p'' = 0
-        D[Nx*Ny-1] = 1 # [1 ... 1]
+        # assume sum p'' = 0 
+        D[Nx*Ny - 1] = 1 # [1 ... 1]
         f_n[k][Nx*Ny - 1] = 0
         
+
         
-        #return D
-        # solve for p_n
+        # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_start = perf_counter()
-        p_n = sp.spsolve(D, f_n[k]) # [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
+        p_n = spl.spsolve(D, f_n[k]) 
+        #p_n = np.linalg.solve(D, f_n[k])
         solve_end = perf_counter()
         
-        # plotting
-        if fig != 0 and k == 0: #plot at time t = ts[k]
-            
+        
+        # Plotting at t=ts[0]
+        if k == 0: 
+        
             if fig == 1: #(x, y0, p)
-                y0 = 1
+                y0 = ya
                 p_n_1D_x = np.zeros(Nx)
                 p_exact_1D_x = np.zeros(Nx)
 
                 for i in range(Nx):
-                    
-                    p_n_1D_x[i] = p_n[i*Nx + y0] 
+                    p_n_1D_x[i] = p_n[i*Nx + y0]
                     p_exact_1D_x[i] = p_exact[i*Nx+y0]
                     
                 pp.figure()
@@ -234,11 +234,10 @@ def solve(NX=100, Nt = 1, fig=3):
                 pp.ylabel('p')
                 pp.legend()
 
-            if fig == 2: #(x0, y, p)
-                x0 = 1
+            elif fig == 2: #(x0, y, p)
+                x0 = xa
                 p_n_1D_y = p_n[x0*Nx:x0*Nx + Ny]
                 p_exact_1D_y = p_exact[x0*Nx:x0*Nx + Ny]
-
                     
                 pp.figure()
                 pp.plot(ys, p_n_1D_y, label="$p_n(x_0)$")
@@ -247,9 +246,8 @@ def solve(NX=100, Nt = 1, fig=3):
                 pp.xlabel('y')
                 pp.ylabel('p')
                 pp.legend()
-                
         
-            if fig == 3: #(x, y, p)
+            elif fig == 3: #(x, y, p)
                 p_n_2D = np.zeros((Nx, Ny))
                 p_exact_2D = np.zeros((Nx, Ny))
                 
@@ -276,16 +274,17 @@ def solve(NX=100, Nt = 1, fig=3):
                 pp.ylabel('y')
                 ax.view_init(view_theta, view_phi)
     
-        # error at t = ts[i]     
+        # error at t = ts[k]     
         inf_norms[k] = np.max(np.abs(np.subtract(p_exact,p_n)))
         
-        print ("Solved Nx=%d with error %0.5f at t=%0.2f"%(Nx, inf_norms[k], ts[k]))    
+        print("Solved Nx=%d, Ny=%d"%(Nx, Ny))    
+        print("Error %0.5f at t=%0.2f"%(inf_norms[k], ts[0]))
         
         end = perf_counter()
         
+        print("Total run time = %0.3f"%(end-start))
         print("Solve time = %0.3f"%(solve_end-solve_start))
-        print("run time = %0.3f"%(end-start))
-        print("solve/run ratio %0.4f"%((solve_end-solve_start)/(end-start)))
+        #print("solve/run ratio %0.4f"%((solve_end-solve_start)/(end-start)))
    
     return inf_norms
 
@@ -293,18 +292,22 @@ def solve(NX=100, Nt = 1, fig=3):
 # Convergence
 #------------------------------------------------------------------------------   
 def conveg(trials=6, N0=5):
-    N = N0
+    Nx = N0
+    Ny = N0
+    Nt = 1
+    
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
     
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(N, 1, 0)) # max over time
-        dxs[i] = ((xb - xa) / N)
+        infNorms[i] = np.max(solve(Nx, Ny, Nt, 0)) # max over time
+        dxs[i] = ((xb - xa) / Nx)
         dxs_sqr[i] = dxs[i]**2
         
-        N += 50
+        Nx += 50
+        Ny += 50
     
     pp.figure(trials+1)
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2$')
@@ -313,5 +316,5 @@ def conveg(trials=6, N0=5):
     pp.xlabel('dx')
 
     pp.legend()
-    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, N/2, trials))
+    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, Nx-50, trials))
 
