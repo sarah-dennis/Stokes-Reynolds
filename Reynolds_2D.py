@@ -21,6 +21,9 @@ t0, tf = [0, 0]
 xa, xb = [0, 4*np.pi]
 za, zb = [0, 2*np.pi]
 
+# fixed pressure boundary
+    
+
 # height 
 # h(t,x) = h(x)
 
@@ -90,17 +93,16 @@ def eval_f(ts, Xs):
             f_n[i][j] = f(ts[i], Xs[j])
     return f_n
     
-
-
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
 # plot settings
 view_theta = 30 # pan view angle up/down
 view_phi = 45  # pan view angle left-right
-# figs= [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
+# figs = [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
+# BCs = [0: periodic, 1: fixed pressure]
 
-def solve(Nt, Nx, Nz, fig=3):
+def solve(Nt, Nx, Nz, fig=3, BC=0):
     start = perf_counter()
     
     # grid 
@@ -170,37 +172,143 @@ def solve(Nt, Nx, Nz, fig=3):
                 #P(i, j+1) upper diagonal 
                 P_east[j]  = (h_c**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + h_E**3)/(8*dz**2)
 
-            
-            # Make three (Ny * Ny) matrices with these diagonals
-            D_i_left = np.diagflat(P_south)
-            D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
-            D_i_right = np.diagflat(P_north)
-            
-            # adjust for periodic boundary in z
-            D_i_center[0][Nz-1] = P_west[0]
-            D_i_center[Nz-1][0] = P_east[Nz-1]
-            
-            # input rows [i*Nx : (i+1)*Nx] into D
-            # adjust for periodic boundary in x
-            
-            if i == 0:
-                D[0:Nz, 0:Nz] = D_i_center
-                D[0:Nz, Nz:2*Nz] = D_i_right
-                D[0:Nz, (Nx-1)*Nz:Nx*Nz] = D_i_left
-            elif i == Nx-1:
-                D[(Nx-1)*Nz:Nx*Nz, 0:Nz] = D_i_right
-                D[(Nx-1)*Nz:Nx*Nz, (Nx-2)*Nz:(Nx-1)*Nz] = D_i_left
-                D[(Nx-1)*Nz:Nx*Nz, (Nx-1)*Nz:Nx*Nz] = D_i_center
-            else:
-                D[i*Nz:(i+1)*Nz, (i-1)*Nz:i*Nz] = D_i_left
-                D[i*Nz:(i+1)*Nz, i*Nz:(i+1)*Nz] = D_i_center
-                D[i*Nz:(i+1)*Nz, (i+1)*Nz:(i+2)*Nz] = D_i_right
 
-        # assume sum p'' = 0 
+            if BC == 0:
+                
+                # Make three (Ny * Ny) matrices with these diagonals
+                D_i_left = np.diagflat(P_south)
+                D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
+                D_i_right = np.diagflat(P_north)
+                
+                # add corners to D_i_center
+                D_i_center[0][Nz-1] = P_west[0]
+                D_i_center[Nz-1][0] = P_east[Nz-1]
+                
+                # input rows [i*Nx : (i+1)*Nx] into D
+                if i == 0: # top: [ center | right | ... | left ]
+                    D[0:Nz, 0:Nz] = D_i_center
+                    D[0:Nz, Nz:2*Nz] = D_i_right
+                    D[0:Nz, (Nx-1)*Nz:Nx*Nz] = D_i_left
+                elif i == Nx-1: #bottom: [ right | ... | left | center ]
+                    D[(Nx-1)*Nz:Nx*Nz, 0:Nz] = D_i_right
+                    D[(Nx-1)*Nz:Nx*Nz, (Nx-2)*Nz:(Nx-1)*Nz] = D_i_left
+                    D[(Nx-1)*Nz:Nx*Nz, (Nx-1)*Nz:Nx*Nz] = D_i_center
+                else: #standard: [ ... | left | center | right | ... ]
+                    D[i*Nz:(i+1)*Nz, (i-1)*Nz:i*Nz] = D_i_left
+                    D[i*Nz:(i+1)*Nz, i*Nz:(i+1)*Nz] = D_i_center
+                    D[i*Nz:(i+1)*Nz, (i+1)*Nz:(i+2)*Nz] = D_i_right
+            
+            elif BC == 1:
+                p0 = 0
+                
+                if i == 0:
+                    P_center = np.ones(Nz)
+                    P_west = np.ones(Nz)
+                    P_east = np.ones(Nz)
+                    
+                    P_north[0] = 1
+                    P_north[Nz-1] = 1
+                    
+                    P_south = np.ones(Nz)
+                    
+                    f_n[k][0:Nz] = p0 #p(xa, zs[0:Nz])
+                    
+                elif i == 1:
+                    P_south = np.ones(Nz)
+                    
+                    P_north[0] = 1
+                    P_north[Nz-1] = 1
+                    
+                    P_center[0] = 1
+                    P_center[Nz-1] = 1
+                    P_west[0] = 1
+                    P_west[1] = 1
+                    P_east[Nz-2] = 1
+                    P_east[Nz-1] = 1
+                    
+                    f_n[k][Nz] = p0 #p(xs[1], za)
+                    f_n[k][2*Nz - 1] = p0 #p(xs[1], zb)
+                    
+
+                elif i == Nx-2:
+                    P_south[0] = 1
+                    P_south[Nz-1] = 1
+                    
+                    P_center[0] = 1
+                    P_center[Nz-1] = 1
+                    P_west[0] = 1
+                    P_west[1] = 1
+                    P_east[Nz-2] = 1
+                    P_east[Nz-1] = 1
+                    
+                    P_north = np.ones(Nz)
+                    
+                    f_n[k][(Nx-2)*Nz] = p0# p(xs[Nx-2], za)
+                    f_n[k][Nx*(Nz-1)-1] = p0# p(xs[Nx-2], zb)
+                    
+                
+                elif i == Nx-1:
+                    P_north = np.ones(Nz)
+                    
+                    P_south[0] = 1
+                    P_south[Nz-1] = 1
+                    
+                    P_center = np.ones(Nz)
+                    P_west = np.ones(Nz)
+                    P_east = np.ones(Nz)
+                    
+                    f_n[k][(Nx-1)*Nz] = p0# p(xb, za)
+                    f_n[k][(Nx-1)*Nz+1:Nx*Nz - 2] = p0#p(xb, zs[1:Nx-1])
+                    f_n[k][Nx*Nz - 1] = p0#p(xb, zb)
+                    
+        
+                else: 
+                    
+                    P_south[0] = 1
+                    P_south[Nz-1] = 1
+                    
+                    P_north[0] = 1
+                    P_north[Nz-1] = 1
+                    
+                    P_center[0] = 1
+                    P_center[Nz-1] = 1
+                    P_west[0] = 1
+                    P_west[1] = 1
+                    P_east[Nz-2] = 1
+                    P_east[Nz-1] = 1
+                    
+                    f_n[k][i*Nz] = p0#p(xs[i], zs[0]) 
+                    f_n[k][Nx * (i+1) - 1] = p0#p(xs[Nx * (i+1) - 1], zs[Nz-1])
+                
+                # Make three (Ny * Ny) matrices with these diagonals
+                D_i_left = np.diagflat(P_south)
+                D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
+                D_i_right = np.diagflat(P_north)
+                
+                # add corners to D_i_center
+                D_i_center[0][Nz-1] = P_west[0]
+                D_i_center[Nz-1][0] = P_east[Nz-1]
+                
+                # input rows [i*Nx : (i+1)*Nx] into D
+                if i == 0: # top: [ center | right | ... | left ]
+                    D[0:Nz, 0:Nz] = D_i_center
+                    D[0:Nz, Nz:2*Nz] = D_i_right
+                    D[0:Nz, (Nx-1)*Nz:Nx*Nz] = D_i_left
+                elif i == Nx-1: #bottom: [ right | ... | left | center ]
+                    D[(Nx-1)*Nz:Nx*Nz, 0:Nz] = D_i_right
+                    D[(Nx-1)*Nz:Nx*Nz, (Nx-2)*Nz:(Nx-1)*Nz] = D_i_left
+                    D[(Nx-1)*Nz:Nx*Nz, (Nx-1)*Nz:Nx*Nz] = D_i_center
+                else: #standard: [ ... | left | center | right | ... ]
+                    D[i*Nz:(i+1)*Nz, (i-1)*Nz:i*Nz] = D_i_left
+                    D[i*Nz:(i+1)*Nz, i*Nz:(i+1)*Nz] = D_i_center
+                    D[i*Nz:(i+1)*Nz, (i+1)*Nz:(i+2)*Nz] = D_i_right
+                    
+                
+                
+
+        # closure: assume sum p'' = 0 
         D[Nx*Nz - 1] = 1 # [1 ... 1]
         f_n[k][Nx*Nz - 1] = 0
-        
-
         
         # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_start = perf_counter()
