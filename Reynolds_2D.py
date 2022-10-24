@@ -98,7 +98,7 @@ def eval_f(ts, Xs):
 # plot settings
 view_theta = 30 # pan view angle up/down
 view_phi = 45  # pan view angle left-right
-# figs= [0: return D p_n, 1: slice (x, y0), 2: slice (x0, y), 3: plot 3D]
+# figs= [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
 
 def solve(Nt, Nx, Nz, fig=3):
     start = perf_counter()
