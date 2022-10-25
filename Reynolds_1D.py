@@ -13,7 +13,7 @@ from matplotlib import pyplot as pp
 # Domain & Height
 #------------------------------------------------------------------------------
 # width
-xa, xb = (0, 4*np.pi)
+xa, xb = (0, 2*np.pi)
 
 #time
 t0, tf = (0, 2*np.pi)
@@ -39,6 +39,9 @@ def p(x):
 
 str_p = "-\sin(%dx)"%(alpha) #for graph title
 
+p_xa = p(xa)
+p_xb = p(xb)
+
 def p_dx(x):
     return -alpha * np.cos(alpha*x)
 
@@ -52,7 +55,7 @@ def f(t,x): # = h^3 u'' + (h^3)' u'
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
-def solve(Nx=100, Nt = 1, figrs=1):
+def solve(Nx=100, Nt = 1, figrs=1, BC=0):
     
     dx = (xb - xa)/Nx
     dt = (tf-t0)/Nt
@@ -108,42 +111,60 @@ def solve(Nx=100, Nt = 1, figrs=1):
         # combine as upper, middle, lower diagonals
         D = np.diagflat(-D_center) + np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1)
     
-    
+        
         # adjust for periodic boundary...
-        
-        # -- set top right corner to D_lower with j = 0
-        
-        hl = hs[i][Nx-1] 
-        hc  = hs[i][0]       
-        hr = hs[i][1] 
-        
-        D[0, Nx-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
-        
-        # -- set bottom left corner to D_upper at j = N-1 
-        
-        hl = hs[i][Nx-2] 
-        hc  = hs[i][Nx-1]       
-        hr = hs[i][0] 
-        
-        D[Nx-1, 0] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
-
-        # singular finite difference matrix
-        D = D / (8 * dx**2)
-        
-        # assume sum p'' = 0 
-        
-        for k in range(Nx):
-            D[Nx-1, k] = 1
+        if BC == 0:
+            # -- set top right corner to D_lower with j = 0
             
-        f_n[i][Nx-1] = 0
+            hl = hs[i][Nx-1] 
+            hc  = hs[i][0]       
+            hr = hs[i][1] 
+            
+            D[0, Nx-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
+            
+            # -- set bottom left corner to D_upper at j = N-1 
+            
+            hl = hs[i][Nx-2] 
+            hc  = hs[i][Nx-1]       
+            hr = hs[i][0] 
+            
+            D[Nx-1, 0] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
+            
+            # finialize finite difference matrix
+            
+            D = D / (8 * dx**2)
+            
+            # closure: assume sum p'' = 0 
+            
+            for k in range(Nx):
+                D[Nx-1, k] = 1
+                
+            f_n[i][Nx-1] = 0
+        
+        #adjust for fixed pressure boundary
+        elif BC == 1:
+            
+            # finialize finite difference matrix
+            D = D / (8 * dx**2)
+            
+            # -- set top row D to [1, 0, ...] and f[0] = p_inlet
+            D[0,0] = 1
+            D[0,1] = 0
+            f_n[i][0] = p_xa
+            
+            # -- set bottom row Dto [ ... , 0, 1] and f[Nx-1] = p_outlet
+            D[Nx-1,Nx-1] = 1
+            D[Nx-1,Nx-2] = 0
+            f_n[i][Nx-1] = p_xb
+        
+        
+
+        
+
         
         # solve for p
         p_n = np.linalg.solve(D, f_n[i])
-    
-    
-        return D
-    
-        
+
         # plotting ( still inside time loop )
         if (i*figrs) % Nt == 0: 
             
