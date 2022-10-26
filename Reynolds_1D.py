@@ -12,21 +12,33 @@ from matplotlib import pyplot as pp
 #------------------------------------------------------------------------------
 # Domain & Height
 #------------------------------------------------------------------------------
+# Grid sizing (Nx, Nt) given at run time
+
 # width
-xa, xb = (0, 2*np.pi)
+xa, xb = (0, 2)
 
-#time
-t0, tf = (0, 2*np.pi)
+# Height
+# y = h(x)
+# -- option 1: Sinusoidal height 
+# h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
+# str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
 
-# height h(t,x) = h(x)  # delta < h0 so height positive
-h0, delta, k = (0.5, 0.1, 4)
-str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
+# def h(t, x):
+#     return h0 + delta * np.sin(k*x)
 
-def h(t, x):
-    return h0 + delta * np.sin(k*x)
+# def h_dx(t,x):
+#     return delta * k * np.cos(k*x)
 
-def h_dx(t,x):
-    return delta * k * np.cos(k*x)
+# -- option 2: Wedge height 
+h0, hf = (0.5, 0.02) #h0 = inital height, hf: final height
+delta = (hf - h0)/(xb - xa) # appropriate slope
+
+def h(x):
+    return delta * (x - xa) + h0
+
+def h_dx(x):
+    return delta
+str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
                 
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
@@ -39,41 +51,34 @@ def p(x):
 
 str_p = "-\sin(%dx)"%(alpha) #for graph title
 
-p_xa = p(xa)
-p_xb = p(xb)
-
 def p_dx(x):
     return -alpha * np.cos(alpha*x)
 
 def p_dxx(x): 
     return alpha**2 * np.sin(alpha*x)
 
-def f(t,x): # = h^3 u'' + (h^3)' u' 
-    return (h(t,x) ** 3) * p_dxx(x) + 3 * h(t,x)**2 * h_dx(t,x) * p_dx(x)
+def f(x): # = h^3 u'' + (h^3)' u' 
+    return (h(x) ** 3) * p_dxx(x) + 3 * h(x)**2 * h_dx(x) * p_dx(x)
 
 
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
-def solve(Nx=100, Nt = 1, figrs=1, BC=0):
+def solve(Nx=100, figrs=1, BC=0):
     
     dx = (xb - xa)/Nx
-    dt = (tf-t0)/Nt
 
     xs = [xa + i*dx for i in range(Nx)]
-    ts = [t0 + i*dt for i in range(Nt)]
     
     # construct height on grid
-    hs = np.zeros((Nt,Nx)) #h[t][x]
-    for i in range(Nt): 
-        for j in range(Nx):
-            hs[i][j] = h(ts[i], xs[j])
+    hs = np.zeros(Nx) #h[t][x]
+    for i in range(Nx):
+            hs[i] = h(xs[i])
     
     # construct f on grid
-    f_n = np.zeros((Nt, Nx)) #f[t][x]
-    for i in range (Nt):
-        for j in range(Nx):
-            f_n[i][j] = f(ts[i], xs[j])
+    f_n = np.zeros(Nx) #f[x]
+    for i in range(Nx):
+        f_n[i] = f(xs[i])
         
     # construct exact solution on grid
     p_exact = np.zeros(Nx)
@@ -84,122 +89,112 @@ def solve(Nx=100, Nt = 1, figrs=1, BC=0):
     # At each time t = ts[i]
     
     # construct finite difference matrix with h(t)
-    inf_norms = np.zeros(Nt)  
+    inf_norm_err = 0
     
-    for i in range(Nt): #time: ts[i]
     
-        # initilise diagonals of differnce matrix
-        D_lower = np.ones(Nx-1)
-        D_center = np.ones(Nx)
-        D_upper = np.ones(Nx-1)
-        
-        for j in range(Nx): #space: xs[j]
-        
-            # Find h(t,x) at x = [xs[j-1], xs[j], xs[j+1]] = [hl, hc, hr]
-            hl = hs[i][(j-1) % Nx] 
-            hc = hs[i][j % Nx]       
-            hr = hs[i][(j+1) % Nx] 
-            
-            D_center[j] = hr**3 + 3*hc * (hr**2 + hr*hc + hc*hl + hl**2) + 2*hc**3 + hl**3 # * -1, below
-            
-            if j < Nx-1:
-                D_upper[j] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
-                
-            if j > 0:
-                D_lower[j-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
-        
-        # combine as upper, middle, lower diagonals
-        D = np.diagflat(-D_center) + np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1)
+    # initilise diagonals of differnce matrix
+    D_lower = np.ones(Nx-1)
+    D_center = np.ones(Nx)
+    D_upper = np.ones(Nx-1)
     
+    for i in range(Nx): #space: xs[j]
+    
+        # Find h(t,x) at x = [xs[j-1], xs[j], xs[j+1]] = [hl, hc, hr]
+        hl = hs[(i-1) % Nx] 
+        hc = hs[i % Nx]       
+        hr = hs[(i+1) % Nx] 
         
-        # adjust for periodic boundary...
-        if BC == 0:
-            # -- set top right corner to D_lower with j = 0
-            
-            hl = hs[i][Nx-1] 
-            hc  = hs[i][0]       
-            hr = hs[i][1] 
-            
-            D[0, Nx-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
-            
-            # -- set bottom left corner to D_upper at j = N-1 
-            
-            hl = hs[i][Nx-2] 
-            hc  = hs[i][Nx-1]       
-            hr = hs[i][0] 
-            
-            D[Nx-1, 0] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
-            
-            # finialize finite difference matrix
-            
-            D = D / (8 * dx**2)
-            
-            # closure: assume sum p'' = 0 
-            
-            for k in range(Nx):
-                D[Nx-1, k] = 1
-                
-            f_n[i][Nx-1] = 0
+        D_center[i] = hr**3 + 3*hc * (hr**2 + hr*hc + hc*hl + hl**2) + 2*hc**3 + hl**3 # * -1, below
         
-        #adjust for fixed pressure boundary
-        elif BC == 1:
+        if i < Nx-1:
+            D_upper[i] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
             
-            # finialize finite difference matrix
-            D = D / (8 * dx**2)
-            
-            # -- set top row D to [1, 0, ...] and f[0] = p_inlet
-            D[0,0] = 1
-            D[0,1] = 0
-            f_n[i][0] = p_xa
-            
-            # -- set bottom row Dto [ ... , 0, 1] and f[Nx-1] = p_outlet
-            D[Nx-1,Nx-1] = 1
-            D[Nx-1,Nx-2] = 0
-            f_n[i][Nx-1] = p_xb
-        
-        
+        if i > 0:
+            D_lower[i-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
+    
+    # combine as upper, middle, lower diagonals
+    D = np.diagflat(-D_center) + np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1)
 
+    
+    # adjust for periodic boundary...
+    if BC == 0:
         
+        # -- set top right corner to D_lower with j = 0
+        hl = hs[Nx-1] 
+        hc  = hs[0]       
+        hr = hs[1] 
+        D[0, Nx-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
+        
+        # -- set bottom left corner to D_upper at j = N-1 
+        hl = hs[Nx-2] 
+        hc  = hs[Nx-1]       
+        hr = hs[0] 
+        D[Nx-1, 0] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
+        
+        # Scaling...
+        D = D / (8 * dx**2)
+        
+        # closure: assume sum p'' = 0 
+        D[Nx-1, : ] = 1
+        f_n[Nx-1] = 0
+    
+    # adjust for fixed pressure boundary
+    elif BC == 1:
+        
+        # Scaling...
+        D = D / (8 * dx**2)
+        
+        # -- set top row D to [1, 0, ...] and f[0] = p_inlet
+        D[0,0] = 1
+        D[0,1] = 0
+        f_n[0] = p(xs[0])
+        
+        # -- set bottom row Dto [ ... , 0, 1] and f[Nx-1] = p_outlet
+        D[Nx-1,Nx-1] = 1
+        D[Nx-1,Nx-2] = 0
+        f_n[Nx-1] = p(xs[Nx-1])
 
-        
-        # solve for p
-        p_n = np.linalg.solve(D, f_n[i])
+    # solve for p
+    p_n = np.linalg.solve(D, f_n)
+    #return p_n
+    
+    inf_norm_err = np.max(np.abs(np.subtract(p_exact,p_n)))
+    print ("Solved Nx=%d with error %0.5f"%(Nx, inf_norm_err))    
 
-        # plotting ( still inside time loop )
-        if (i*figrs) % Nt == 0: 
-            
-            pp.figure()
-            
-            pp.plot(xs, p_exact, label="$p$", color='r')
-            
-            pp.plot(xs, p_n, label="$p_N$", color='b');
-            
-            #plot h^3 u'
-            # hs_cube = [h**3 for h in hs[i]]
-            # p_dxs = [p_dx(x) for x in xs]
-            # inner = [hs_cube[i] * p_dxs[i] for i in range(Nx)]
-            # pp.plot(xs, inner, label="$h^3 p'$", color='black');
-            
-            #plot f
-            #pp.plot(xs, f_n[i], label="f", color='g')
-            
-            pp.xlabel('x')
-            pp.ylabel('p(x)')
-            pp.legend()
-            
-            pp.title("$(h^3p')'= f$ | $p = %s$ | $h=%s$ | $N_x=%d$ | $t = %d$"%(str_p, str_h, Nx, ts[i]))
+
+    # plotting ( still inside time loop )
+    if figrs: 
         
+        pp.figure()
         
-        # error at t = ts[i]     
-        inf_norms[i] = np.max(np.abs(np.subtract(p_exact,p_n)))
+        pp.plot(xs, p_exact, label="$p$", color='r')
         
-        print ("Solved Nx=%d with error %0.5f at t=%d"%(Nx, inf_norms[i], ts[i]))    
-    return inf_norms
+        pp.plot(xs, p_n, label="$p_N$", color='b');
+        
+        #plot h^3 u'
+        # hs_cube = [h**3 for h in hs
+        # p_dxs = [p_dx(x) for x in xs]
+        # inner = [hs_cube[i] * p_dxs[i] for i in range(Nx)]
+        # pp.plot(xs, inner, label="$h^3 p'$", color='black');
+        
+        #plot f
+        # pp.plot(xs, f_n, label="f", color='g')
+        
+        #plot h
+        pp.plot(xs, hs, label="h", color='g')
+        
+        pp.xlabel('x')
+        pp.ylabel('p(x)')
+        pp.legend()
+        
+        pp.title("$(h^3p')'= f$ | $p = %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
+
+    return inf_norm_err
 
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
-def conveg(trials=6, N0=5):
+def conveg(trials=10, N0=5, BC=1, figrs=0):
     N = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -207,7 +202,7 @@ def conveg(trials=6, N0=5):
     
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(N, 1)) # max over time
+        infNorms[i] = np.max(solve(N, figrs, BC)) # max over time
         dxs[i] = ((xb - xa) / N)
         dxs_sqr[i] = dxs[i]**2
         
