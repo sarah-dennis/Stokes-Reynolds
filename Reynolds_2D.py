@@ -38,7 +38,7 @@ def h_dX(t, X): # = [h_x, h_z]
     x, z = X
     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
-# option 2: wedge height
+# option 2: wedge height 
 # h(X) = hf + mx
 
 # h0, hf = [0.5, 0.02] # h0 > hf > 0
@@ -138,7 +138,8 @@ def eval_f(ts, Xs):
 view_theta = 30 # pan view angle up/down
 view_phi = 45  # pan view angle left-right
 # figs = [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
-# BCs = [0: periodic, 1: fixed pressure]
+
+# BCs = [0: periodic, 1: fixed pressure, 2: fixed x & peridic z]
 
 def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
     start = perf_counter()
