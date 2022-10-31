@@ -18,7 +18,7 @@ from time import perf_counter
 t0, tf = [0, 0]
 
 # -- space --------------------------------------------------------------------
-xa, xb = [0, 2*np.pi]
+xa, xb = [0, 1]
 za, zb = [0, 4*np.pi]
 
 # -- height --------------------------------------------------------------------
@@ -26,31 +26,31 @@ za, zb = [0, 4*np.pi]
 # option 1: sinusoidal height
 #h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
-h0, h_delta = [0.2, 0.15] # delta < h0 
-h_alpha, h_beta = [3, 2]
+# h0, h_delta = [0.2, 0.15] # delta < h0 
+# h_alpha, h_beta = [3, 2]
 
-str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
+# str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
 
-def h(t, X):
-    return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
+# def h(t, X):
+#     return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
 
-def h_dX(t, X): # = [h_x, h_z]
-    x, z = X
-    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+# def h_dX(t, X): # = [h_x, h_z]
+#     x, z = X
+#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
 # option 2: wedge height 
 # h(X) = hf + mx
 
-# h0, hf = [0.5, 0.02] # h0 > hf > 0
-# h_m = (2*hf - h0)/(xb - xa)
+h0, hf = [0.5, 0.02] # h0 > hf > 0
+h_m = (2*hf - h0)/(xb - xa)
 
-# str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
+str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
 
-# def h(t, X):
-#     return hf + h_m*X[0]
+def h(t, X):
+    return hf + h_m*X[0]
 
-# def h_dX(t, X): # = [h_x, h_z]
-#     return [h_m, 0]
+def h_dX(t, X): # = [h_x, h_z]
+    return [h_m, 0]
 
 # -------------------------
 
@@ -139,7 +139,7 @@ view_theta = 30 # pan view angle up/down
 view_phi = 45  # pan view angle left-right
 # figs = [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
 
-# BCs = [0: periodic, 1: fixed pressure, 2: fixed x & peridic z]
+# BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
 
 def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
     start = perf_counter()
@@ -409,6 +409,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
+#TODO: update for 2d convergence
 def conveg(trials=6, N0=5):
     Nx = N0
     Nz = N0
