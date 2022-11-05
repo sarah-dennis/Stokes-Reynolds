@@ -18,7 +18,8 @@ from time import perf_counter
 t0, tf = [0, 0]
 
 # -- space --------------------------------------------------------------------
-xa, xb = [0, 1]
+xa, xb = [0, 2*np.pi]
+
 za, zb = [0, 4*np.pi]
 
 # -- height --------------------------------------------------------------------
@@ -26,31 +27,31 @@ za, zb = [0, 4*np.pi]
 # option 1: sinusoidal height
 #h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
-# h0, h_delta = [0.2, 0.15] # delta < h0 
-# h_alpha, h_beta = [3, 2]
+h0, h_delta = [0.2, 0.15] # delta < h0 
+h_alpha, h_beta = [3, 2]
 
-# str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
-
-# def h(t, X):
-#     return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
-
-# def h_dX(t, X): # = [h_x, h_z]
-#     x, z = X
-#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
-
-# option 2: wedge height 
-# h(X) = hf + mx
-
-h0, hf = [0.5, 0.02] # h0 > hf > 0
-h_m = (2*hf - h0)/(xb - xa)
-
-str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
+str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
 
 def h(t, X):
-    return hf + h_m*X[0]
+    return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
 
 def h_dX(t, X): # = [h_x, h_z]
-    return [h_m, 0]
+    x, z = X
+    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+
+# option 2: wedge height (must use BC = 1 or 2)
+# h(X) = hf + mx
+
+# h0, hf = [0.5, 0.001] # h0 > hf > 0
+# h_m = (2*hf - h0)/(xb - xa)
+
+# str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
+
+# def h(t, X):
+#     return hf + h_m*X[0]
+
+# def h_dX(t, X): # = [h_x, h_z]
+#     return [h_m, 0]
 
 # -------------------------
 
@@ -72,7 +73,7 @@ def plot_surface(Nx=100, Nz=100):
     pp.figure()
     ax = pp.axes(projection='3d')
     ax.plot_surface(X.T, Y.T, h_2D, label="$h$", rstride=1, cstride=1,cmap='viridis')
-    pp.title("h(x,z) =  %s"%(str_h))
+    pp.title("$h(x,z) =  %s$"%(str_h))
     pp.xlabel('x')
     pp.ylabel('z')
     ax.view_init(view_theta, view_phi)
@@ -322,6 +323,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                     
             
         # ------ D is ready now! ----------------------------------
+        
         # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_start = perf_counter()
         p_n = spl.spsolve(D, f_n[k])
@@ -395,12 +397,12 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
         # error at t = ts[k]     
         inf_norms[k] = np.max(np.abs(np.subtract(p_exact,p_n)))
         
-        print("Solved Nx=%d, Nz=%d"%(Nx, Nz))    
+        print("Solved with Nx=%d, Nz=%d"%(Nx, Nz))    
         print("Error %0.5f at t=%0.2f"%(inf_norms[k], ts[0]))
         
         end = perf_counter()
         
-        print("Total run time = %0.3f"%(end-start))
+        print("Run time = %0.3f"%(end-start))
         print("Solve time = %0.3f"%(solve_end-solve_start))
         #print("solve/run ratio %0.4f"%((solve_end-solve_start)/(end-start)))
         print("\n")
@@ -409,24 +411,33 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
-#TODO: update for 2d convergence
-def conveg(trials=6, N0=5):
+def conveg(trials=10, N0=20, BC=1):
     Nx = N0
-    Nz = N0
     Nt = 1
     
+    dNx = 20
+    
     infNorms = np.zeros(trials)
+    
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
     
+    fig = 0
+
+    
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(Nx, Nz, Nt, 0)) # max over time
-        dxs[i] = ((xb - xa) / Nx)
-        dxs_sqr[i] = dxs[i]**2
+        if i == trials-1: #make 3D plot at the last iteration
+            fig = 3
+       
+        print('starting trial %d of %d'%(i, trials))
+            
+        infNorms[i] = np.max(solve(Nt, Nx, Nx, fig, BC)) # max over time
         
-        Nx += 50
-        Nz += 50
+        dxs[i] = ((xb - xa) / Nx)
+        dxs_sqr[i] = 2*dxs[i]**2
+        
+        Nx += dNx
     
     pp.figure(trials+1)
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2$')
@@ -435,7 +446,7 @@ def conveg(trials=6, N0=5):
     pp.xlabel('dx')
 
     pp.legend()
-    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, Nx-50, trials))
+    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, Nx-dNx, trials))
 
 
 

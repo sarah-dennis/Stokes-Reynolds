@@ -20,20 +20,18 @@ xa, xb = (0, 2*np.pi)
 alpha = 4
 def p(x):
     return -np.sin(alpha*x)
-
-    #return -np.cos(alpha*x)
     
 str_p = "-\sin(%dx)"%(alpha) #for graph title
 
 def f(x):  #u'' = f
     return alpha**2 * np.sin(alpha*x)
  
-    #return alpha**2 * np.cos(alpha*x) 
+    #return alpha**2 * np.cos(alpha*x)     
 
 #------------------------------------------------------------------------------
 # Discretization  
 #------------------------------------------------------------------------------   
-def solve(Nx=10, fig_k=0):
+def solve(Nx=100, fig_k=0):
     print(f'solving  N = {Nx}')
     dx = (xb - xa)/(Nx)
 
@@ -64,7 +62,6 @@ def solve(Nx=10, fig_k=0):
     #assume sum pi = 0
     D[Nx-1, 0:Nx] = 1
     f_n[Nx-1] = 0
-    
     
     #solve for u
     p_n = np.linalg.solve(D, f_n) 
