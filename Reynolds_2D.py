@@ -18,40 +18,43 @@ from time import perf_counter
 t0, tf = [0, 0]
 
 # -- space --------------------------------------------------------------------
-xa, xb = [0, 2*np.pi]
+xa, xb = [0, 1]
 
-za, zb = [0, 4*np.pi]
+za, zb = [0, 2*np.pi]
 
 # -- height --------------------------------------------------------------------
 
 # option 1: sinusoidal height
 #h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
-h0, h_delta = [0.2, 0.15] # delta < h0 
-h_alpha, h_beta = [3, 2]
+# h0, h_delta = [0.2, 0.15] # delta < h0 
+# h_alpha, h_beta = [3, 2]
 
-str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
+# str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
 
-def h(t, X):
-    return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
+# def h(t, X):
+#     return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
 
-def h_dX(t, X): # = [h_x, h_z]
-    x, z = X
-    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+# def h_dX(t, X): # = [h_x, h_z]
+#     x, z = X
+#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
 # option 2: wedge height (must use BC = 1 or 2)
 # h(X) = hf + mx
 
-# h0, hf = [0.5, 0.001] # h0 > hf > 0
-# h_m = (2*hf - h0)/(xb - xa)
+h0, hf = [0.5, 0.001] # h0 > hf > 0
+h_m = (2*hf - h0)/(xb - xa)
 
-# str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
+str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
 
-# def h(t, X):
-#     return hf + h_m*X[0]
+def h(t, X):
+    return hf + h_m*X[0]
 
-# def h_dX(t, X): # = [h_x, h_z]
-#     return [h_m, 0]
+def h_dX(t, X): # = [h_x, h_z]
+    return [h_m, 0]
+
+def h_dt(t,X):
+    return 0
 
 # -------------------------
 
@@ -88,7 +91,7 @@ def eval_height(ts, xs, zs):
     
 
 #------------------------------------------------------------------------------
-# Manf. solution & RHS
+# Manf. solution
 #------------------------------------------------------------------------------
 # (h^3 P')' = f(h)
 
@@ -116,14 +119,29 @@ def p_dXX(X):
     p_zz = p_beta**2 * np.sin(p_alpha*X[0]) * np.cos(p_beta*X[1])
     return [p_xx , p_zz]
 
-# calculate RHS f(x,t)
+#------------------------------------------------------------------------------
+# RHS f(h(x,t)) = ht + 0.5 ((h Ux)x + (h Uz)z)
+#------------------------------------------------------------------------------
 
-def f(t,X): # = h^3 p'' + (h^3)' p' 
+# 
+# calculate RHS f(x,t) = ht + 0.5 (hx Ux + h Uxx + hz Uz + h Uzz)
+
+# manufactured RHS
+# f = h^3 p'' + (h^3)' p' 
+def f(t,X): 
     p_x, p_z = p_dX(X)
     p_xx, p_zz = p_dXX(X)
     h_x, h_z = h_dX(t, X)
     
     return h(t,X)**3 * (p_xx + p_zz) + 3*h(t,X)**2 * (h_x*p_x + h_z*p_z)
+
+# Reynolds RHS
+# def f(t, X):
+#     h_x, h_z = h_dX(t, X)
+#     h_t = h_dt(t,X)
+#     h_ = h(t,X)
+
+#     return  0.5*h_*(h_x + h_z)
 
 def eval_f(ts, Xs):
     f_n = np.zeros((len(ts), len(Xs))) #f[t][xz]
@@ -180,8 +198,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
             # Build rows [i*Nz : (i+1)*Nz]
             
             # Initialize 5 diagonals... 
-            P_center = np.zeros(Nz)  #P(i,j)    central diagonal 
-            P_west = np.zeros(Nz)    #P(i, j-1) lower diagonal
+            P_center = np.zeros(Nz)   #P(i,j)    central diagonal 
+            P_west = np.zeros(Nz)     #P(i, j-1) lower diagonal
             P_east = np.zeros(Nz)     #P(i, j+1) upper diagonal 
             P_south = np.zeros(Nz)    #P(i-1, j) left diagonal
             P_north = np.zeros(Nz)    #P(i+1, j) north diagonal
@@ -213,11 +231,11 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                 P_east[j]  = (h_c**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + h_E**3)/(8*dz**2)
 
             
-            #input rows into D, adjust for boundary conditions
+            #input rows [i*Nx : (i+1)*Nx] into D, adjust for boundary conditions
             
             if BC == 0: #periodic 
             
-                # Make three (Ny * Ny) matrices with these diagonals
+                # Make three (Nz * Nz) matrices with these diagonals
                 D_i_left = np.diagflat(P_south)
                 D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
                 D_i_right = np.diagflat(P_north)
@@ -225,10 +243,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                 # adjust for periodic boundary in z
                 D_i_center[0][Nz-1] = P_west[0]
                 D_i_center[Nz-1][0] = P_east[Nz-1]
-                
-                # input rows [i*Nx : (i+1)*Nx] into D
-                # adjust for periodic boundary in x
-                
+
+                # enter into D
                 if i == 0:
                     D[0:Nz, 0:Nz] = D_i_center
                     D[0:Nz, Nz:2*Nz] = D_i_right
@@ -248,7 +264,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
             
             elif BC == 1: #fixed in x and z
             
-                if i == 0 or i == Nx-1: #fix pressure at x0 and xf
+                #set pressure at x0 and xf
+                if i == 0 or i == Nx-1: 
                 
                     P_center = np.ones(Nz)
                     
@@ -259,7 +276,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                     
                     f_n[k][i*Nz:(i+1)*Nz] = [ p( (xs[i], zs[j]) ) for j in range(0, Nz)] #p(xa, zs[0:Nz])
                     
-                else: #fix pressure at z0 and zf
+                #set pressure at z0 and zf  
+                else: 
                     P_center[0] = 1
                     P_center[Nz-1] = 1
                     
@@ -275,7 +293,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                     f_n[k][i*Nz] = p((xs[i], zs[0]))
                     f_n[k][i*Nz + Nz-1] = p((xs[i], zs[Nz-1]))
 
-                # Make three (Ny * Ny) matrices with these diagonals
+                # Make three (Nz * Nz) matrices with these diagonals
                 D_i_left = np.diagflat(P_south)
                 D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
                 D_i_right = np.diagflat(P_north)
@@ -291,7 +309,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                     
             elif BC == 2: #fixed pressure in x, periodic in z
             
-                if i == 0 or i == Nx-1: #fix pressure at x0 and xf
+                #fix pressure at x0 and xf
+                if i == 0 or i == Nx-1: 
                 
                     P_center = np.ones(Nz)
                     
@@ -302,20 +321,18 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
                     
                     f_n[k][i*Nz:(i+1)*Nz] = [ p( (xs[i], zs[j]) ) for j in range(0, Nz)] #p(xa, zs[0:Nz])
                
-                # Make three (Ny * Ny) matrices with these diagonals
+                # Make three (Nz * Nz) matrices with these diagonals
                 D_i_left = np.diagflat(P_south)
                 D_i_center = np.diagflat(P_west[1:Nz], -1) + np.diagflat(P_center) + np.diagflat(P_east[0:Nz-1], 1)
                 D_i_right = np.diagflat(P_north)
                     
-            
                 #input rows into D
                 if i == 0 or i == Nx-1:
                     D[i*Nz:(i+1)*Nz, i*Nz:(i+1)*Nz] = D_i_center
-                else:
-                    # add corners to D_i_center -- make periodic in z
+                else: 
+                    # adjust for periodic boundary in z
                     D_i_center[0][Nz-1] = P_west[0]
                     D_i_center[Nz-1][0] = P_east[Nz-1]
-                    
                     
                     D[i*Nz:(i+1)*Nz, (i-1)*Nz:i*Nz] = D_i_left
                     D[i*Nz:(i+1)*Nz, i*Nz:(i+1)*Nz] = D_i_center
@@ -410,8 +427,11 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=0):
 
 #------------------------------------------------------------------------------
 # Convergence
-#------------------------------------------------------------------------------   
-def conveg(trials=10, N0=20, BC=1):
+#------------------------------------------------------------------------------ 
+  
+
+# BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
+def conveg(trials=8, N0=20, BC=1):
     Nx = N0
     Nt = 1
     
@@ -435,7 +455,7 @@ def conveg(trials=10, N0=20, BC=1):
         infNorms[i] = np.max(solve(Nt, Nx, Nx, fig, BC)) # max over time
         
         dxs[i] = ((xb - xa) / Nx)
-        dxs_sqr[i] = 2*dxs[i]**2
+        dxs_sqr[i] = dxs[i]**2
         
         Nx += dNx
     
