@@ -15,30 +15,30 @@ from matplotlib import pyplot as pp
 # Grid sizing (Nx, Nt) given at run time
 
 # width
-xa, xb = (0, 2)
+xa, xb = (0, 2*np.pi)
 
 # Height
 # y = h(x)
 # -- option 1: Sinusoidal height 
-# h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
-# str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
-
-# def h(t, x):
-#     return h0 + delta * np.sin(k*x)
-
-# def h_dx(t,x):
-#     return delta * k * np.cos(k*x)
-
-# -- option 2: Wedge height 
-h0, hf = (0.5, 0.02) #h0 = inital height, hf: final height
-delta = (hf - h0)/(xb - xa) # appropriate slope
+h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
+str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
 
 def h(x):
-    return delta * (x - xa) + h0
+    return h0 + delta * np.sin(k*x)
 
 def h_dx(x):
-    return delta
-str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
+    return delta * k * np.cos(k*x)
+
+# -- option 2: Wedge height 
+# h0, hf = (0.5, 0.1) #h0 = inital height, hf: final height
+# delta = (hf - h0)/(xb - xa) # appropriate slope
+
+# def h(x):
+#     return delta * (x - xa) + h0
+
+# def h_dx(x):
+#     return delta
+# str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
                 
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
@@ -93,9 +93,9 @@ def solve(Nx=100, figrs=1, BC=0):
     
     
     # initilise diagonals of differnce matrix
-    D_lower = np.ones(Nx-1)
+    D_lower = np.ones(Nx)
     D_center = np.ones(Nx)
-    D_upper = np.ones(Nx-1)
+    D_upper = np.ones(Nx)
     
     for i in range(Nx): #space: xs[j]
     
@@ -104,35 +104,40 @@ def solve(Nx=100, figrs=1, BC=0):
         hc = hs[i % Nx]       
         hr = hs[(i+1) % Nx] 
         
-        D_center[i] = hr**3 + 3*hc * (hr**2 + hr*hc + hc*hl + hl**2) + 2*hc**3 + hl**3 # * -1, below
+        # option 1: h^3 = [(h + h)/2]^3
+        #P(i) central diagonal
+        # D_center[i] = -(hr**3 + 3*hc * (hr**2 + hr*hc + hc*hl + hl**2) + 2*hc**3 + hl**3)/(8*(dx**2))
         
-        if i < Nx-1:
-            D_upper[i] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
-            
-        if i > 0:
-            D_lower[i-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
+        # #P(i+1) upper diagonal
+        # D_upper[i] = (hr**3 + 3*hc*hr * (hc + hr) + hc**3)/(8*(dx**2))
+    
+        # #P(i-1) lower diagonal
+        # D_lower[i] = (hl**3 + 3*hc*hl * (hc + hl) + hc**3)/(8*(dx**2))
+        
+        #option 2: h^3 = (h^3 + h^3)/2
+        #P(i) central diagonal
+        D_center[i] = -(hr**3 + 2*hc**3 + hl**3)/(2*(dx**2)) 
+        
+        #P(i+1) upper diagonal
+        D_upper[i] = (hr**3 + hc**3)/(2*(dx**2))
+        
+        #P(i-1) lower diagonal
+        D_lower[i] = (hl**3 + + hc**3)/(2*(dx**2))
+        
+        
     
     # combine as upper, middle, lower diagonals
-    D = np.diagflat(-D_center) + np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1)
+    D = np.diagflat(D_center) + np.diagflat(D_lower[1:Nx], -1) + np.diagflat(D_upper[0:Nx-1], 1)
 
     
     # adjust for periodic boundary...
     if BC == 0:
         
         # -- set top right corner to D_lower with j = 0
-        hl = hs[Nx-1] 
-        hc  = hs[0]       
-        hr = hs[1] 
-        D[0, Nx-1] = hl**3 + 3*hc*hl * (hc + hl) + hc**3
+        D[0, Nx-1] = D_lower[0]
         
         # -- set bottom left corner to D_upper at j = N-1 
-        hl = hs[Nx-2] 
-        hc  = hs[Nx-1]       
-        hr = hs[0] 
-        D[Nx-1, 0] = hr**3 + 3*hc*hr * (hc + hr) + hc**3
-        
-        # Scaling...
-        D = D / (8 * dx**2)
+        D[Nx-1, 0] = D_upper[Nx-1]
         
         # closure: assume sum p'' = 0 
         D[Nx-1, : ] = 1
@@ -141,15 +146,12 @@ def solve(Nx=100, figrs=1, BC=0):
     # adjust for fixed pressure boundary
     elif BC == 1:
         
-        # Scaling...
-        D = D / (8 * dx**2)
-        
         # -- set top row D to [1, 0, ...] and f[0] = p_inlet
         D[0,0] = 1
         D[0,1] = 0
         f_n[0] = p(xs[0])
         
-        # -- set bottom row Dto [ ... , 0, 1] and f[Nx-1] = p_outlet
+        # -- set bottom row D to [ ... , 0, 1] and f[Nx-1] = p_outlet
         D[Nx-1,Nx-1] = 1
         D[Nx-1,Nx-2] = 0
         f_n[Nx-1] = p(xs[Nx-1])
@@ -161,8 +163,6 @@ def solve(Nx=100, figrs=1, BC=0):
     inf_norm_err = np.max(np.abs(np.subtract(p_exact,p_n)))
     print ("Solved Nx=%d with error %0.5f"%(Nx, inf_norm_err))    
 
-
-    # plotting ( still inside time loop )
     if figrs: 
         
         pp.figure()

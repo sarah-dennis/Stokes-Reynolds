@@ -42,7 +42,7 @@ za, zb = [0, 2*np.pi]
 # option 2: wedge height (must use BC = 1 or 2)
 # h(X) = hf + mx
 
-h0, hf = [0.5, 0.001] # h0 > hf > 0
+h0, hf = [0.5, 0.2] # h0 > hf > 0
 h_m = (2*hf - h0)/(xb - xa)
 
 str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
@@ -213,7 +213,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 h_W = hs[k][i][(j-1)%Nz] #h(i, j-1)
                 
                 #option 1: h^3 = [(h + h)/2]^3
-                # #P(i,j) central diagonal
+                #P(i,j) central diagonal
                 # P_center_x = -(h_N**3 + 3*h_c*h_N**2 + 3*h_N*h_c**2 + 2*h_c**3 + 3*h_S*h_c**2 + 3*h_c*h_S**2 + h_S**3)/(8* dx**2) #Pij from Px
                 # P_center_z = -(h_E**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + 2*h_c**3 + 3*h_W*h_c**2 + 3*h_c*h_W**2 + h_W**3)/(8* dz**2) #Pij from Py
                 # P_center[j] = P_center_x + P_center_z
@@ -230,8 +230,8 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 # #P(i, j+1) upper diagonal 
                 # P_east[j]  = (h_c**3 + 3*h_c*h_E**2 + 3*h_E*h_c**2 + h_E**3)/(8*dz**2)
                 
-                #option 2: h^3 = (h^3 + h^3)/2
-                #P(i,j) central diagonal
+                # #option 2: h^3 = (h^3 + h^3)/2
+                # #P(i,j) central diagonal
                 P_center_x = -(h_N**3 + 2*h_c**3 + h_S**3)/(2* dx**2) #Pij from Px
                 P_center_z = -(h_E**3 + 2*h_c**3 + h_W**3)/(2* dz**2) #Pij from Py
                 P_center[j] = P_center_x + P_center_z
@@ -478,7 +478,7 @@ def conveg(trials=8, N0=20, BC=2):
         dx = (xb - xa) / Nx
         dz = (zb - za) / Nz
         dxs[i] = dx
-        dxs_sqr[i] = (dx**2) #+ (dz**2)
+        dxs_sqr[i] = (dx**2) + (dz**2)
         
         Nx += dNx
         Nz += dNz
