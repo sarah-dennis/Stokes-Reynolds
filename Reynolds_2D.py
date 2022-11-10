@@ -14,13 +14,17 @@ from time import perf_counter
 #------------------------------------------------------------------------------
 # Domain
 #------------------------------------------------------------------------------
+# plot settings
+view_theta = 10 # up/down
+view_phi = 180  # left-right
+
 # -- time --------------------------------------------------------------------
 t0, tf = [0, 0]
 
 # -- space --------------------------------------------------------------------
 xa, xb = [0, 1]
 
-za, zb = [0, 2*np.pi]
+za, zb = [0, 1]
 
 # -- height --------------------------------------------------------------------
 
@@ -28,7 +32,7 @@ za, zb = [0, 2*np.pi]
 #h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
 # h0, h_delta = [0.2, 0.15] # delta < h0 
-# h_alpha, h_beta = [3, 2]
+# h_alpha, h_beta = [1, 1]
 
 # str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
 
@@ -42,7 +46,7 @@ za, zb = [0, 2*np.pi]
 # option 2: wedge height (must use BC = 1 or 2)
 # h(X) = hf + mx
 
-h0, hf = [0.5, 0.2] # h0 > hf > 0
+h0, hf = [0.08, 0.01] # h0 > hf > 0
 h_m = (2*hf - h0)/(xb - xa)
 
 str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
@@ -53,14 +57,15 @@ def h(t, X):
 def h_dX(t, X): # = [h_x, h_z]
     return [h_m, 0]
 
+# h(t) vs x(t) -- > which is really h(x(t))
 def h_dt(t,X):
     return 0
 
 # -------------------------
 
-def plot_surface(Nx=100, Nz=100):
-    dx = (xb - xa)/Nx
-    dz = (zb - za)/Nz
+def plot_Height(Nx=100, Nz=100):
+    dx = (xb - xa)/(Nx-1)
+    dz = (zb - za)/(Nz-1)
     h_2D = np.zeros((Nx, Nz))
     xs = [xa + i*dx for i in range(Nx)]
     zs = [za + i*dz for i in range(Nz)]  
@@ -152,20 +157,18 @@ def eval_f(ts, Xs):
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
-# plot settings
-view_theta = 30 # pan view angle up/down
-view_phi = 45  # pan view angle left-right
 # figs = [0: return D p_n, 1: slice (x, z0), 2: slice (x0, z), 3: plot 3D]
 
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
+BCs_txt = ['x & z periodic', 'x & z prescribed', 'x prescribed, z periodic']
 
-def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
+def solve(Nt=1, Nx=100, Nz=100, fig=4, BC=1):
     start = perf_counter()
     
     # grid 
-    dt = (tf - t0)/Nt
-    dx = (xb - xa)/Nx
-    dz = (zb - za)/Nz
+    dt = 0
+    dx = (xb - xa)/(Nx-1)
+    dz = (zb - za)/(Nz-1)
 
     ts = [t0 + i*dt for i in range(Nt)]
     xs = [xa + i*dx for i in range(Nx)]
@@ -203,7 +206,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
             P_south = np.zeros(Nz)    #P(i-1, j) left diagonal
             P_north = np.zeros(Nz)    #P(i+1, j) north diagonal
         
-            for j in range(Nz): # ys[j]
+            for j in range(Nz): # zs[j]
             
                 # Find h(t,X) on grid                  
                 h_c = hs[k][i][j]        #h(i,j)    
@@ -263,7 +266,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 D_i_center[0][Nz-1] = P_west[0]
                 D_i_center[Nz-1][0] = P_east[Nz-1]
 
-                # enter into D
+                # enter (Nz * Nz) blocks into D
                 if i == 0:
                     D[0:Nz, 0:Nz] = D_i_center
                     D[0:Nz, Nz:2*Nz] = D_i_right
@@ -283,7 +286,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
             
             elif BC == 1: #fixed in x and z
             
-                #set pressure at x0 and xf
+                #prescribe pressure at x0 and xf
                 if i == 0 or i == Nx-1: 
                 
                     P_center = np.ones(Nz)
@@ -293,7 +296,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                     P_south = np.zeros(Nz)    
                     P_north = np.zeros(Nz)
                     
-                    f_n[k][i*Nz:(i+1)*Nz] = [ p( (xs[i], zs[j]) ) for j in range(0, Nz)] #p(xa, zs[0:Nz])
+                    f_n[k][i*Nz:(i+1)*Nz] = [p((xs[i], zs[j])) for j in range(0, Nz)] #p(xs[i], zs[0:Nz])
                     
                 #set pressure at z0 and zf  
                 else: 
@@ -363,7 +366,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
         # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_start = perf_counter()
         p_n = spl.spsolve(D, f_n[k])
-        
+        return p_n
         #p_n = np.linalg.solve(D, f_n[k])
         solve_end = perf_counter()
         
@@ -383,7 +386,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 pp.figure()
                 pp.plot(xs, p_n_1D_x, label="$p_n(y_0)$")
                 pp.plot(xs, p_exact_1D_x, label="$p_n(y_0)$")
-                pp.title("$p= %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
+                pp.title("$p=%s$ | $h=%s$ \n $N_x=%d$ | BC: %s"%(str_p, str_h, Nx, BCs_txt[BC]))
                 pp.xlabel('x')
                 pp.ylabel('p')
                 pp.legend()
@@ -396,7 +399,7 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 pp.figure()
                 pp.plot(zs, p_n_1D_z, label="$p_n(x_0)$")
                 pp.plot(zs, p_exact_1D_z, label="$p(x_0)$")
-                pp.title("$p= %s$ | $h=%s$ | $N_y=%d$"%(str_p, str_h, Nz))
+                pp.title("$p=%s$ | $h=%s$ \n $N_z =%d$ | BC: %s"%(str_p, str_h, Nz, BCs_txt[BC]))
                 pp.xlabel('z')
                 pp.ylabel('p')
                 pp.legend()
@@ -417,9 +420,9 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 pp.figure()
                 ax = pp.axes(projection='3d')
                 ax.plot_surface(X.T, Y.T, p_n_2D, label="$p_N$", rstride=1, cstride=1,cmap='viridis')
-                pp.title("$p= %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
+                pp.title("$p= %s$ | $h=%s$ \n $N_x, N_z=%d, %d$ | BC: %s"%(str_p, str_h, Nx, Nz, BCs_txt[BC]))
                 pp.xlabel('x')
-                pp.ylabel('y')
+                pp.ylabel('z')
                 ax.view_init(view_theta, view_phi)
                 
                 pp.figure()
@@ -429,34 +432,54 @@ def solve(Nt=1, Nx=100, Nz=100, fig=3, BC=1):
                 pp.xlabel('x')
                 pp.ylabel('z')
                 ax.view_init(view_theta, view_phi)
+            
+            elif fig==4: #Error p_n - p_exact
+                
+                p_n_2D = np.zeros((Nx, Nz))
+                p_exact_2D = np.zeros((Nx, Nz))
+                
+                for i in range(Nx):
+                    for j in range(Nz):
+                        
+                        p_n_2D[i,j] = p_n[i*Nz + j]
+                        p_exact_2D[i,j] = p_exact[i*Nz + j]
+                        
+                X, Y = np.meshgrid(xs, zs)        
+                    
+                pp.figure()
+                ax = pp.axes(projection='3d')
+                ax.plot_surface(X.T, Y.T, p_n_2D - p_exact_2D, label="$Error$", rstride=1, cstride=1,cmap='viridis')
+                pp.title("Error | $N_x=%d$ , $N_z=%d$ | $dx =%.3f$ $dz = %.3f$ \n | $h(x,z) = %s$ | BC: %s"%(Nx, Nz, dx, dz, str_h, BCs_txt[BC]))
+                pp.xlabel('x')
+                pp.ylabel('z')
+                ax.view_init(view_theta, view_phi)
+               
     
         # error at t = ts[k]     
         inf_norms[k] = np.max(np.abs(np.subtract(p_exact,p_n)))
         
-        print("Solved with Nx=%d, Nz=%d"%(Nx, Nz))    
+        print("Solved x:[%.1f,%.1f] z:[%.1f, %.1f] with (Nx=%d, Nz=%d)~(dx=%.3f, dz=%.3f) and BC: %s"%(xa, xb, za, zb, Nx, Nz, dx, dz, BCs_txt[BC]))    
         print("Error %0.5f at t=%0.2f"%(inf_norms[k], ts[0]))
         
         end = perf_counter()
         
-        print("Run time = %0.3f"%(end-start))
         print("Solve time = %0.3f"%(solve_end-solve_start))
+        print("Run time = %0.3f"%(end-start))
         #print("solve/run ratio %0.4f"%((solve_end-solve_start)/(end-start)))
         print("\n")
     return inf_norms
 
 #------------------------------------------------------------------------------
-# Convergence
+# Convergence -- fix 
 #------------------------------------------------------------------------------ 
-  
-
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
-def conveg(trials=8, N0=20, BC=2):
+def conveg(trials=5, N0=10, BC=1):
     Nx = N0
     Nz = N0
     Nt = 1
     
-    dNx = 20
-    dNz = 20
+    dNx = 2
+    dNz = 2
     
     infNorms = np.zeros(trials)
     
@@ -469,25 +492,25 @@ def conveg(trials=8, N0=20, BC=2):
     for i in range(trials):
         
         if i == trials-1: #make 3D plot at the last iteration
-            fig = 3
+            fig = 4
        
         print('starting trial %d of %d'%(i+1, trials))
             
-        infNorms[i] = np.max(solve(Nt, Nx, Nx, fig, BC)) # max over time
+        infNorms[i] = np.max(solve(Nt, Nx, Nx, fig, BC)) #max over time
         
-        dx = (xb - xa) / Nx
-        dz = (zb - za) / Nz
+        dx = (xb - xa) / (Nx-1)
+        dz = (zb - za) / (Nz-1)
         dxs[i] = dx
         dxs_sqr[i] = (dx**2) + (dz**2)
         
-        Nx += dNx
-        Nz += dNz
+        Nx *= dNx
+        Nz *= dNz
     
     pp.figure(trials+1)
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2 + dz^2$')
-    pp.loglog(dxs, infNorms, color='b', label='Linf Error')
-    
+    pp.loglog(dxs, infNorms, color='b', label='$L_\inf$ Error')
+    pp.xticks(dxs[::2])
     pp.xlabel('$dx$')
 
     pp.legend()
-    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, Nx-dNx, trials))
+    pp.title('$N_x$=%i to $N_x$=%i over %i trials | Bc: %s \n $h(x,z)=%s$ | $p(x,z)=%s$'%(N0, Nx-dNx, trials, BCs_txt[BC], str_h, str_p))

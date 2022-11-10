@@ -12,7 +12,7 @@ from matplotlib import pyplot as pp
 #------------------------------------------------------------------------------
 # Domain & Height
 #------------------------------------------------------------------------------
-# Grid sizing (Nx, Nt) given at run time
+# Grid sizing Nx given at run time
 
 # width
 xa, xb = (0, 2*np.pi)
@@ -20,25 +20,25 @@ xa, xb = (0, 2*np.pi)
 # Height
 # y = h(x)
 # -- option 1: Sinusoidal height 
-h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
-str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
-
-def h(x):
-    return h0 + delta * np.sin(k*x)
-
-def h_dx(x):
-    return delta * k * np.cos(k*x)
-
-# -- option 2: Wedge height 
-# h0, hf = (0.5, 0.1) #h0 = inital height, hf: final height
-# delta = (hf - h0)/(xb - xa) # appropriate slope
+# h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
+# str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
 
 # def h(x):
-#     return delta * (x - xa) + h0
+#     return h0 + delta * np.sin(k*x)
 
 # def h_dx(x):
-#     return delta
-# str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
+#     return delta * k * np.cos(k*x)
+
+# -- option 2: Wedge height 
+h0, hf = (0.01, 0.001) #h0 = inital height, hf: final height
+delta = (hf - h0)/(xb - xa) # appropriate slope
+
+def h(x):
+    return delta * (x - xa) + h0
+
+def h_dx(x):
+    return delta
+str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
                 
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
@@ -66,7 +66,7 @@ def f(x): # = h^3 u'' + (h^3)' u'
 #------------------------------------------------------------------------------   
 def solve(Nx=100, figrs=1, BC=0):
     
-    dx = (xb - xa)/Nx
+    dx = (xb - xa)/(Nx-1)
 
     xs = [xa + i*dx for i in range(Nx)]
     
@@ -85,21 +85,16 @@ def solve(Nx=100, figrs=1, BC=0):
     for i in range(Nx):
         p_exact[i] = p(xs[i])
                 
-             
-    # At each time t = ts[i]
-    
-    # construct finite difference matrix with h(t)
     inf_norm_err = 0
-    
     
     # initilise diagonals of differnce matrix
     D_lower = np.ones(Nx)
     D_center = np.ones(Nx)
     D_upper = np.ones(Nx)
     
-    for i in range(Nx): #space: xs[j]
+    for i in range(Nx): #space: xs[i]
     
-        # Find h(t,x) at x = [xs[j-1], xs[j], xs[j+1]] = [hl, hc, hr]
+        # Find h(t,x) at x = [xs[i-1], xs[i], xs[i+1]] = [hl, hc, hr]
         hl = hs[(i-1) % Nx] 
         hc = hs[i % Nx]       
         hr = hs[(i+1) % Nx] 
@@ -125,7 +120,6 @@ def solve(Nx=100, figrs=1, BC=0):
         D_lower[i] = (hl**3 + + hc**3)/(2*(dx**2))
         
         
-    
     # combine as upper, middle, lower diagonals
     D = np.diagflat(D_center) + np.diagflat(D_lower[1:Nx], -1) + np.diagflat(D_upper[0:Nx-1], 1)
 
@@ -202,7 +196,7 @@ def conveg(trials=10, N0=5, BC=1, figrs=0):
     
     for i in range(trials):
         
-        infNorms[i] = np.max(solve(N, figrs, BC)) # max over time
+        infNorms[i] = solve(N, figrs, BC)
         dxs[i] = ((xb - xa) / N)
         dxs_sqr[i] = dxs[i]**2
         
