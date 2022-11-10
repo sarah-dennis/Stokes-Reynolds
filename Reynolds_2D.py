@@ -22,44 +22,44 @@ view_phi = 180  # left-right
 t0, tf = [0, 0]
 
 # -- space --------------------------------------------------------------------
-xa, xb = [0, 1]
+xa, xb = [0, 2*np.pi]
 
-za, zb = [0, 1]
+za, zb = [0, 2*np.pi]
 
 # -- height --------------------------------------------------------------------
 
 # option 1: sinusoidal height
 #h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
-# h0, h_delta = [0.2, 0.15] # delta < h0 
-# h_alpha, h_beta = [1, 1]
+h0, h_delta = [0.2, 0.15] # delta < h0 
+h_alpha, h_beta = [1, 1]
 
-# str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
+str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
 
-# def h(t, X):
-#     return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
+def h(t, X):
+    return h0 + h_delta * np.sin(h_alpha*X[0]) * np.cos(h_beta*X[1])
 
-# def h_dX(t, X): # = [h_x, h_z]
-#     x, z = X
-#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+def h_dX(t, X): # = [h_x, h_z]
+    x, z = X
+    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
 # option 2: wedge height (must use BC = 1 or 2)
 # h(X) = hf + mx
 
-h0, hf = [0.08, 0.01] # h0 > hf > 0
-h_m = (2*hf - h0)/(xb - xa)
+# h0, hf = [0.08, 0.01] # h0 > hf > 0
+# h_m = (2*hf - h0)/(xb - xa)
 
-str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
+# str_h = "%0.2f + %0.2f x"%(h0, h_m) #for graph title
 
-def h(t, X):
-    return hf + h_m*X[0]
+# def h(t, X):
+#     return hf + h_m*X[0]
 
-def h_dX(t, X): # = [h_x, h_z]
-    return [h_m, 0]
+# def h_dX(t, X): # = [h_x, h_z]
+#     return [h_m, 0]
 
-# h(t) vs x(t) -- > which is really h(x(t))
-def h_dt(t,X):
-    return 0
+# # h(t) vs x(t) -- > which is really h(x(t))
+# def h_dt(t,X):
+#     return 0
 
 # -------------------------
 
@@ -366,7 +366,6 @@ def solve(Nt=1, Nx=100, Nz=100, fig=4, BC=1):
         # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
         solve_start = perf_counter()
         p_n = spl.spsolve(D, f_n[k])
-        return p_n
         #p_n = np.linalg.solve(D, f_n[k])
         solve_end = perf_counter()
         
