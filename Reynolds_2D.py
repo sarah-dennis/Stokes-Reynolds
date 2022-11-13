@@ -12,14 +12,8 @@ from time import perf_counter
 from matplotlib import pyplot as pp
 import _graphics as graph
 
-#------------------------------------------------------------------------------
-# Numerics
-#------------------------------------------------------------------------------
-Nx = 50
-Nz = 50
 # figs = [0: none, 1: numerical & exact pressure, 2: error]
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
-
 
 #------------------------------------------------------------------------------
 # Domain
@@ -326,7 +320,7 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
         graph.plot_3D(p_n_2D, xs, zs, title)
     
     elif fig==2: # Error
-        title = "Error | $N_x=%d$ , $N_z=%d$ | $dx =%.3f$ $dz = %.3f$ \n | $%s$ | BC: %s"%(Nx, Nz, dx, dz, h_str, BCs_txt[BC])
+        title = "Error: $p_n - p_exact$ | $N_x=%d$ , $N_z=%d$ | $dx =%.3f$ $dz = %.3f$ \n | $%s$ | BC: %s"%(Nx, Nz, dx, dz, h_str, BCs_txt[BC])
         graph.plot_3D(p_n_2D-p_exact_2D, xs, zs, title)
        
     print("Solved x:[%.1f,%.1f] z:[%.1f, %.1f] with (Nx=%d, Nz=%d) and BC: %s"%(x0, xf, z0, zf, Nx, Nz, BCs_txt[BC]))    
@@ -344,7 +338,7 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
 # Convergence
 #------------------------------------------------------------------------------ 
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
-def conveg(trials=6, N0=10, BC=1):
+def conveg(trials=5, N0=10, BC=1):
     trial_Nx = N0
     trial_Nz = N0
     
@@ -366,7 +360,7 @@ def conveg(trials=6, N0=10, BC=1):
         
         dx = (xf - x0) / (trial_Nx-1)
         dz = (zf - z0) / (trial_Nz-1)
-        dxs[i] = dx
+        dxs[i] = dx + dz
         dxs_sqr[i] = (dx**2) + (dz**2)
         
         trial_Nx *= 2
@@ -374,6 +368,7 @@ def conveg(trials=6, N0=10, BC=1):
     
     pp.figure(trials+1)
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2 + dz^2$')
+    pp.loglog(dxs, dxs, color='g', label='$dx + dz$')
     pp.loglog(dxs, infNorms, color='b', label='$L_\inf$ Error')
     pp.xticks(dxs[::2])
     pp.xlabel('$dx$')
