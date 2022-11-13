@@ -24,10 +24,10 @@ Nz = 50
 #------------------------------------------------------------------------------
 # Domain
 #------------------------------------------------------------------------------
-x0, xf = [1, 2]
+x0, xf = [0, 2*np.pi]
 z0, zf = [0, 2*np.pi]
     
-def make_grid_space(Nx, Nz, x0, xf, z0, zf):
+def make_grid(Nx, Nz, x0, xf, z0, zf):
     dx = (xf-x0)/(Nx-1)
     dz = (zf-z0)/(Nz-1)
     xs = [x0 + i*dx for i in range(Nx)]
@@ -36,7 +36,7 @@ def make_grid_space(Nx, Nz, x0, xf, z0, zf):
 
 # Evaluate f(x, z) on grid
 # returns f[x][z]
-def eval_grid_space(f, xs, zs):
+def eval_grid(f, xs, zs):
     f_n = np.zeros((len(xs),len(zs))) #f[t][x][z]
     for i in range(len(xs)):
         for j in range(len(zs)):
@@ -55,35 +55,33 @@ def unravel(A_flat, Nx, Nz):
 # option 1: sinusoidal height
 ## h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 
-# h0, h_delta = [0.2, 0.15] # delta < h0 
-# h_alpha, h_beta = [1, 1]
+h0, h_delta = [0.2, 0.15] # delta < h0 
+h_alpha, h_beta = [1, 1]
 
-# str_h = "%0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) #for graph title
+h_str = "h(x,z) = %0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) 
+def h(x, z):
+    return h0 + h_delta * np.sin(h_alpha*x) * np.cos(h_beta*z)
 
-# def h(t, x, z):
-#     return h0 + h_delta * np.sin(h_alpha*x) * np.cos(h_beta*z)
-
-# def h_dX(t, x, z): # = [h_x, h_z]
-#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+def h_dX(x, z): # = [h_x, h_z]
+    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
 # option 2: wedge height (must use BC = 1 or 2)
 ## h(X) = hf + mx
 
-h0, hf = [0.1, 0.01] # h0 > hf > 0
-#h_m = (2*hf - h0)/(xf - x0)
-h_m = (2*hf - h0)/(xf - x0)
+# h0, hf = [0.1, 0.01] # h0 > hf > 0
+# h_m = (2*hf - h0)/(xf - x0)
 
-h_str = "h(x) = %0.2f + %0.2f x"%(h0, h_m)
+# h_str = "h(x) = %0.2f + %0.2f x"%(h0, h_m)
 
-def h(x, z):
-    return hf + h_m*x
+# def h(x, z):
+#     return hf + h_m*(x-xf)
 
-def h_dX(x, z): # = [h_t, h_x, h_z]
-    return [h_m, 0]
+# def h_dX(x, z): # = [h_t, h_x, h_z]
+#     return [h_m, 0]
 
 def plot_height():
-    xs, zs = make_grid_space(graph.Nx, graph.Nz, x0, xf, z0, zf)
-    h_grid = eval_grid_space(h, xs, zs)
+    xs, zs = make_grid(graph.Nx, graph.Nz, x0, xf, z0, zf)
+    h_grid = eval_grid(h, xs, zs)
     graph.plot_3D(h_grid, xs, zs, "Height: $%s$"%h_str)
 
 
@@ -94,7 +92,7 @@ def plot_height():
 
 # Pressure P(xy)
 
-p_alpha, p_beta = [1,0]
+p_alpha, p_beta = [1,1]
 def p(x, z):
     return -np.sin(p_alpha*x)*np.cos(p_beta*z)
 
@@ -111,8 +109,8 @@ def p_dXX(x, z):
     return [p_xx , p_zz]
 
 def plot_pressure():
-    xs, zs = make_grid_space(graph.Nx, graph.Nz, x0, xf, z0, zf)
-    p_grid = eval_grid_space(p, xs, zs)
+    xs, zs = make_grid(graph.Nx, graph.Nz, x0, xf, z0, zf)
+    p_grid = eval_grid(p, xs, zs)
     graph.plot_3D(p_grid, xs, zs, "Pressure: $%s$"%p_str)
     
 #------------------------------------------------------------------------------
@@ -149,13 +147,13 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
     err = 1
     
     # grid 
-    xs, zs = make_grid_space(Nx, Nz, x0, xf, z0, zf)
+    xs, zs = make_grid(Nx, Nz, x0, xf, z0, zf)
     dx = (xf-x0)/(Nx-1)
     dz = (zf-z0)/(Nz-1)
     
 
     # RHS f(x, z) = f_n[xz]
-    f_n = eval_grid_space(f, xs, zs).ravel()
+    f_n = eval_grid(f, xs, zs).ravel()
         
     
     # finite difference matrix D
@@ -309,6 +307,7 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
                 
         
     # ------ D is ready now! ----------------------------------
+    
     # solve for p_n = [p00, p01, p02, ..., p0N, p10, p11, ..., pNN]
     solve_start = perf_counter()
     p_n = spl.spsolve(D, f_n)
@@ -318,7 +317,7 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
     p_n_2D = unravel(p_n, Nx, Nz)
 
     # error  
-    p_exact_2D = eval_grid_space(p, xs, zs)
+    p_exact_2D = eval_grid(p, xs, zs)
     err = np.max(np.abs(np.subtract(p_exact_2D,p_n_2D)))
     
     # Plotting
@@ -342,10 +341,10 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
     return err
 
 #------------------------------------------------------------------------------
-# Convergence -- fix 
+# Convergence
 #------------------------------------------------------------------------------ 
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
-def conveg(trials=5, N0=10, BC=1):
+def conveg(trials=6, N0=10, BC=1):
     trial_Nx = N0
     trial_Nz = N0
     
@@ -354,7 +353,7 @@ def conveg(trials=5, N0=10, BC=1):
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
     
-    fig = 2
+    fig = 0
 
     for i in range(trials):
         

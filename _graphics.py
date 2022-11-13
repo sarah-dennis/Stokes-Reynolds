@@ -10,7 +10,7 @@ import numpy as np
 from matplotlib import pyplot as pp
     
 theta = 30
-phi = 90
+phi = 30
 
 Nx=100
 Nz=100
