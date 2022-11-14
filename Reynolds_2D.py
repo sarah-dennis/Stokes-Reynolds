@@ -20,13 +20,19 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 x0, xf = [0, 2*np.pi]
 z0, zf = [0, 2*np.pi]
-    
-def make_grid(Nx, Nz, x0, xf, z0, zf):
+ 
+#------------------------------------------------------------------------------ 
+# grid helpers
+#------------------------------------------------------------------------------ 
+def make_grid(Nx, x0, xf):
     dx = (xf-x0)/(Nx-1)
-    dz = (zf-z0)/(Nz-1)
     xs = [x0 + i*dx for i in range(Nx)]
+    return [xs, dx]
+
+def make_grid_periodic(Nz, z0, zf):
+    dz = (zf - z0)/Nz
     zs = [z0 + j*dz for j in range(Nz)]
-    return [xs, zs]
+    return [zs, dz]
 
 # Evaluate f(x, z) on grid
 # returns f[x][z]
@@ -44,23 +50,36 @@ def unravel(A_flat, Nx, Nz):
             A[i][j] = A_flat[i*Nz + j]
     return A
 
-# -- height --------------------------------------------------------------------
-
+#------------------------------------------------------------------------------ 
+# Height 
+#------------------------------------------------------------------------------ 
+def plot_height():
+    xs, dx = make_grid(graph.Nx, x0, xf)
+    zs, dz = make_grid(graph.Nz, z0, zf)
+    h_grid = eval_grid(h, xs, zs)
+    graph.plot_3D(h_grid, xs, zs, "Height: $%s$"%h_str)
+    
+#-----------------------------------------------------------------------------
 # option 1: sinusoidal height
-## h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
-
+#    -> h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
+#    -> any boundary conditions 
+#-----------------------------------------------------------------------------
 h0, h_delta = [0.2, 0.15] # delta < h0 
 h_alpha, h_beta = [1, 1]
 
 h_str = "h(x,z) = %0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) 
+
 def h(x, z):
     return h0 + h_delta * np.sin(h_alpha*x) * np.cos(h_beta*z)
 
 def h_dX(x, z): # = [h_x, h_z]
     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
+#-----------------------------------------------------------------------------
 # option 2: wedge height (must use BC = 1 or 2)
-## h(X) = hf + mx
+#   -> h(X) = hf + mx
+#   -> only fixed pressure BCs
+#-----------------------------------------------------------------------------
 
 # h0, hf = [0.1, 0.01] # h0 > hf > 0
 # h_m = (2*hf - h0)/(xf - x0)
@@ -73,20 +92,11 @@ def h_dX(x, z): # = [h_x, h_z]
 # def h_dX(x, z): # = [h_t, h_x, h_z]
 #     return [h_m, 0]
 
-def plot_height():
-    xs, zs = make_grid(graph.Nx, graph.Nz, x0, xf, z0, zf)
-    h_grid = eval_grid(h, xs, zs)
-    graph.plot_3D(h_grid, xs, zs, "Height: $%s$"%h_str)
-
-
 #------------------------------------------------------------------------------
-# Manf. solution
+# Exact Pressure
 #------------------------------------------------------------------------------
-# (h^3 P')' = f(h)
 
-# Pressure P(xy)
-
-p_alpha, p_beta = [1,1]
+p_alpha, p_beta = [2,1]
 def p(x, z):
     return -np.sin(p_alpha*x)*np.cos(p_beta*z)
 
@@ -103,7 +113,8 @@ def p_dXX(x, z):
     return [p_xx , p_zz]
 
 def plot_pressure():
-    xs, zs = make_grid(graph.Nx, graph.Nz, x0, xf, z0, zf)
+    xs, dx = make_grid(graph.Nx, x0, xf)
+    zs, dz = make_grid(graph.Nz, z0, zf)
     p_grid = eval_grid(p, xs, zs)
     graph.plot_3D(p_grid, xs, zs, "Pressure: $%s$"%p_str)
     
@@ -112,6 +123,7 @@ def plot_pressure():
 #------------------------------------------------------------------------------
 # manufactured solution 
 # f = h^3 p'' + (h^3)' p' 
+
 def f(x, z): 
     p_x, p_z = p_dX(x, z)
     p_xx, p_zz = p_dXX(x, z)
@@ -119,37 +131,35 @@ def f(x, z):
     
     return h(x, z)**3 * (p_xx + p_zz) + 3*h(x, z)**2 * (h_x*p_x + h_z*p_z)
 
-# Reynolds RHS
-# f = ht + 0.5 ((h Ux)x + (h Uz)z)
-# def f(t, X):
-#     h_x, h_z = h_dX(t, X)
-#     h_t = h_dt(t,X)
-#     h_ = h(t,X)
-
-#     return  0.5*h_*(h_x + h_z)
-
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
 
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
 # figs = [0: none, 1: numerical & exact pressure, 2: error]
+
 BCs_txt = ['x & z periodic', 'x & z prescribed', 'x prescribed, z periodic']
 
-def solve(Nx=100, Nz=100, fig=2, BC=1):
+def solve(Nx=100, Nz=100, fig_type=2, BC=1):
+    
     start = perf_counter()
     err = 1
     
     # grid 
-    xs, zs = make_grid(Nx, Nz, x0, xf, z0, zf)
-    dx = (xf-x0)/(Nx-1)
-    dz = (zf-z0)/(Nz-1)
-    
+    if BC == 0: 
+        xs, dx = make_grid_periodic(Nx, x0, xf)
+        zs, dz = make_grid_periodic(Nz, z0, zf)
+    elif BC == 1:
+        xs, dx = make_grid(Nx, x0, xf)
+        zs, dz = make_grid(Nz, z0, zf)
+    elif BC ==2:
+        xs, dx = make_grid(Nx, x0, xf)
+        zs, dz = make_grid_periodic(Nz, z0, zf)
+         
 
     # RHS f(x, z) = f_n[xz]
     f_n = eval_grid(f, xs, zs).ravel()
         
-    
     # finite difference matrix D
     D = np.zeros((Nx*Nz, Nx*Nz))
     
@@ -315,13 +325,12 @@ def solve(Nx=100, Nz=100, fig=2, BC=1):
     err = np.max(np.abs(np.subtract(p_exact_2D,p_n_2D)))
     
     # Plotting
-    if fig == 1: # p_n(x, z)
-        title = "$%s$ | $%s$ \n $N_x, N_z=%d, %d$ | BC: %s"%(p_str, h_str, Nx, Nz, BCs_txt[BC])
-        graph.plot_3D(p_n_2D, xs, zs, title)
-    
-    elif fig==2: # Error
-        title = "Error: $p_n - p_exact$ | $N_x=%d$ , $N_z=%d$ | $dx =%.3f$ $dz = %.3f$ \n | $%s$ | BC: %s"%(Nx, Nz, dx, dz, h_str, BCs_txt[BC])
-        graph.plot_3D(p_n_2D-p_exact_2D, xs, zs, title)
+    if fig_type == 1:
+        title1 = "$%s$ | $%s$ \n $N_x, N_z=%d, %d$ | BC: %s"%(p_str, h_str, Nx, Nz, BCs_txt[BC])
+        graph.plot_3D(p_n_2D, xs, zs, title1)
+    elif fig_type == 2:
+        title2 = "Error: $p_n - p_{exact}$ | $N_x=%d$ , $N_z=%d$ | $dx =%.3f$ $dz = %.3f$ \n | $%s$ | BC: %s"%(Nx, Nz, dx, dz, h_str, BCs_txt[BC])
+        graph.plot_3D(p_n_2D-p_exact_2D, xs, zs, title2)
        
     print("Solved x:[%.1f,%.1f] z:[%.1f, %.1f] with (Nx=%d, Nz=%d) and BC: %s"%(x0, xf, z0, zf, Nx, Nz, BCs_txt[BC]))    
     print("Max error %0.5f"%(err))
@@ -347,29 +356,36 @@ def conveg(trials=5, N0=10, BC=1):
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
     
-    fig = 0
-
+    fig_type = 0 # solve with no figures
+    
     for i in range(trials):
         
-        if i == trials-1: #make 3D plot at the last iteration
-            fig = 2
+        if i == trials-1: #solve with error plot on last iteration
+            fig_type = 2
        
         print('starting trial %d of %d'%(i+1, trials))
             
-        infNorms[i] = solve(trial_Nx, trial_Nx, fig, BC)
+        infNorms[i] = solve(trial_Nx, trial_Nx, fig_type, BC)
         
-        dx = (xf - x0) / (trial_Nx-1)
-        dz = (zf - z0) / (trial_Nz-1)
+        if BC==0: 
+            dx = (xf - x0) / (trial_Nx)
+            dz = (zf - z0) / (trial_Nz)
+        elif BC==1:
+            dx = (xf - x0) / (trial_Nx-1)
+            dz = (zf - z0) / (trial_Nz-1)
+        elif BC==2:
+            dx = (xf - x0) / (trial_Nx-1)
+            dz = (zf - z0) / (trial_Nz)
+            
         dxs[i] = dx + dz
         dxs_sqr[i] = (dx**2) + (dz**2)
         
         trial_Nx *= 2
         trial_Nz *= 2
     
-    pp.figure(trials+1)
+    pp.figure()
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2 + dz^2$')
-    pp.loglog(dxs, dxs, color='g', label='$dx + dz$')
-    pp.loglog(dxs, infNorms, color='b', label='$L_\inf$ Error')
+    pp.loglog(dxs, infNorms, color='b', label='$L_{\infty}$ Error')
     pp.xticks(dxs[::2])
     pp.xlabel('$dx$')
 

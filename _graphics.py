@@ -27,3 +27,34 @@ def plot_3D(f_2D, xs, zs, title):
     pp.xlabel('x')
     pp.ylabel('z')
     ax.view_init(theta, phi)
+
+def plot_2D_multi(fs, xs, title, labels):
+    fig = pp.figure()
+    ax = fig.add_subplot()
+    colors = ['r', 'b', 'g', 'o', 'p']
+    for i in range(len(fs)):
+        
+        ax.plot(xs, fs[i], label=labels[i], color=colors[i])
+    
+    #ax.set_xlim([0, 1])
+    #ax.set_ylim([0, 1])
+
+    ax.set_xlabel('x')
+    #ax.set_ylabel()
+    pp.title(title)
+    fig.legend()
+    return fig
+    
+def plot_2D(f, xs, title):
+    fig = pp.figure()
+    pp.plot(xs, f, label="h", color='g')
+    
+    
+    #ax.set_xlim([0, 1])
+    #ax.set_ylim([0, 1])
+
+    pp.xlabel('x')
+    #ax.set_ylabel()
+    pp.title(title)
+    fig.legend()
+    return fig

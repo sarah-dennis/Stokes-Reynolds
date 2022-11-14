@@ -8,11 +8,10 @@ Created on Tue Jun 21 09:43:24 2022
 
 import numpy as np
 from matplotlib import pyplot as pp
-
+import _graphics as graph
 #------------------------------------------------------------------------------
 # Domain & Height
 #------------------------------------------------------------------------------
-# Grid sizing Nx given at run time
 
 # width
 xa, xb = (0, 2*np.pi)
@@ -20,36 +19,36 @@ xa, xb = (0, 2*np.pi)
 # Height
 # y = h(x)
 # -- option 1: Sinusoidal height 
-# h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
-# str_h = "%0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
-
-# def h(x):
-#     return h0 + delta * np.sin(k*x)
-
-# def h_dx(x):
-#     return delta * k * np.cos(k*x)
-
-# -- option 2: Wedge height 
-h0, hf = (0.01, 0.001) #h0 = inital height, hf: final height
-delta = (hf - h0)/(xb - xa) # appropriate slope
+h0, delta, k = (0.5, 0.1, 4) # delta < h0 so height positive
+h_str = "h(x) = %0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
 
 def h(x):
-    return delta * (x - xa) + h0
+    return h0 + delta * np.sin(k*x)
 
 def h_dx(x):
-    return delta
-str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
+    return delta * k * np.cos(k*x)
+
+# -- option 2: Wedge height 
+# h0, hf = (0.01, 0.001) #h0 = inital height, hf: final height
+# delta = (hf - h0)/(xb - xa) # appropriate slope
+
+# def h(x):
+#     return delta * (x - xa) + h0
+
+# def h_dx(x):
+#     return delta
+# str_h = "%0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
                 
 #------------------------------------------------------------------------------
 # Manf. solution & RHS
 #------------------------------------------------------------------------------
 # (h^3 u')' = f(h)
 
-alpha = 2
+alpha = 1
 def p(x):
     return -np.sin(alpha*x)
 
-str_p = "-\sin(%dx)"%(alpha) #for graph title
+p_str = "p(x) = -\sin(%dx)"%(alpha) #for graph title
 
 def p_dx(x):
     return -alpha * np.cos(alpha*x)
@@ -64,6 +63,9 @@ def f(x): # = h^3 u'' + (h^3)' u'
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------   
+#figrs = [Exact and numerical Pressure, Error, Height]
+#BCs = [periodic, fixed]
+
 def solve(Nx=100, figrs=1, BC=0):
     
     dx = (xb - xa)/(Nx-1)
@@ -157,32 +159,17 @@ def solve(Nx=100, figrs=1, BC=0):
     inf_norm_err = np.max(np.abs(np.subtract(p_exact,p_n)))
     print ("Solved Nx=%d with error %0.5f"%(Nx, inf_norm_err))    
 
-    if figrs: 
+    if figrs == 1:
+        title = "Exact vs. Numerical Pressure \n $%s$ | $%s$"%(p_str,h_str)
+        labels = ["exact", "numerical"]
+        graph.plot_2D_multi([p_exact, p_n], xs, title, labels)
+    elif figrs == 2:
+        title = "Model Error | $N_x=%d$, $dx = %.2f$ \n $%s$ | $%s$"%(Nx, dx, p_str,h_str)
+        graph.plot_2D(p_exact-p_n, xs, title)
+    elif figrs == 3:
+        title = "Height $%s$"%h_str
+        graph.plot_2D(hs, xs, title)
         
-        pp.figure()
-        
-        pp.plot(xs, p_exact, label="$p$", color='r')
-        
-        pp.plot(xs, p_n, label="$p_N$", color='b');
-        
-        #plot h^3 u'
-        # hs_cube = [h**3 for h in hs
-        # p_dxs = [p_dx(x) for x in xs]
-        # inner = [hs_cube[i] * p_dxs[i] for i in range(Nx)]
-        # pp.plot(xs, inner, label="$h^3 p'$", color='black');
-        
-        #plot f
-        # pp.plot(xs, f_n, label="f", color='g')
-        
-        #plot h
-        pp.plot(xs, hs, label="h", color='g')
-        
-        pp.xlabel('x')
-        pp.ylabel('p(x)')
-        pp.legend()
-        
-        pp.title("$(h^3p')'= f$ | $p = %s$ | $h=%s$ | $N_x=%d$"%(str_p, str_h, Nx))
-
     return inf_norm_err
 
 #------------------------------------------------------------------------------
