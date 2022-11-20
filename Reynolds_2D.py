@@ -34,8 +34,6 @@ def make_grid_periodic(Nz, z0, zf):
     zs = [z0 + j*dz for j in range(Nz)]
     return [zs, dz]
 
-# Evaluate f(x, z) on grid
-# returns f[x][z]
 def eval_grid(f, xs, zs):
     f_n = np.zeros((len(xs),len(zs))) #f[t][x][z]
     for i in range(len(xs)):
@@ -53,12 +51,7 @@ def unravel(A_flat, Nx, Nz):
 #------------------------------------------------------------------------------ 
 # Height 
 #------------------------------------------------------------------------------ 
-def plot_height():
-    xs, dx = make_grid(graph.Nx, x0, xf)
-    zs, dz = make_grid(graph.Nz, z0, zf)
-    h_grid = eval_grid(h, xs, zs)
-    graph.plot_3D(h_grid, xs, zs, "Height: $%s$"%h_str)
-    
+
 #-----------------------------------------------------------------------------
 # option 1: sinusoidal height
 #    -> h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
@@ -92,6 +85,13 @@ def h_dX(x, z): # = [h_x, h_z]
 # def h_dX(x, z): # = [h_t, h_x, h_z]
 #     return [h_m, 0]
 
+       
+def plot_height():
+    xs, dx = make_grid(graph.Nx, x0, xf)
+    zs, dz = make_grid(graph.Nz, z0, zf)
+    h_grid = eval_grid(h, xs, zs)
+    graph.plot_3D(h_grid, xs, zs, "Height: $%s$"%h_str)
+    
 #------------------------------------------------------------------------------
 # Exact Pressure
 #------------------------------------------------------------------------------
