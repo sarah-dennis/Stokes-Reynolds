@@ -140,7 +140,7 @@ def f(x, z):
 
 BCs_txt = ['x & z periodic', 'x & z prescribed', 'x prescribed, z periodic']
 
-def solve(Nx=100, Nz=100, fig_type=2, BC=1):
+def solve(Nx=100, Nz=100, fig_type=1, BC=1):
     
     start = perf_counter()
     err = 1

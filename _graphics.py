@@ -45,9 +45,9 @@ def plot_2D_multi(fs, xs, title, labels):
     fig.legend()
     return fig
     
-def plot_2D(f, xs, title):
+def plot_2D(f, xs, title, label):
     fig = pp.figure()
-    pp.plot(xs, f, label="h", color='g')
+    pp.plot(xs, f, label=label, color='g')
     
     
     #ax.set_xlim([0, 1])
