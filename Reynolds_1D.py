@@ -105,14 +105,18 @@ def h_dx(x):
     return 0 # for manf_rhs()
 
 p0 = 0 #p0
-pf = -1 #p3
+pf = 5 #p3
 
 # max presure for Rayleigh step
 
-p2 = (h1**3*h2**3*l3**2 + h1**3 *h3**3*l2*l3 - h1**6*l2*l3 -h1**3*h2**3*l1*l3)*p0 - (h1**3*h3**3*l1*l2 - h2**3*h3**3*l1**2 - h1**6*l2*l3 + h1**3*h2**3*l1*l3)*pf -6*U*eta*(h1**3*h3*l1*l2*l3 - h1**4*l1*l2*l3 - h1**3*h2*l1*l3*(h2**3*l3+h3**3*l2) + h1**4*l1*l3*(h2**3*l3+h3**3*l2) + h1**3*h2*l3**2*(h1**3*l2+h2**3*l1) -h1**3*h3*l3**2*(h1**3*l2+h2**3*l1)+h2**3*l1**2*l3*(h3-h1))/(h1**3*h2**3*l3**2+h1**3*h3**3*l2*l3-l1*l2*h1**3*h3**3-l1**2*h2**2*h3**3)
 
+p2a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
+p2b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
+p2c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
+p2d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
+p2=(p2a+p2b-p2c)/p2d
 
-p1 = (6*U*eta*(l3*(h2-h3)*(h1**3*l2+h2**3*l1)-l1*(h2-h1)*(h2**3*l3+h3**3*l2))-(h2**3*l3+h3**3*l2)*p0 + (h2**3*l3 + h3**3*l2)*p2 + (h1**3*l2 + h2**3*l1)*pf)/(h1**3*l2+h2**3*l1)
+p1=p0 +h3**3/h1**3*l1/l3*(pf-p2)-6*U*eta*l1/h1**3*(h3-h1)
 
 print("extrema: %.2f, %.2f, %.2f, %.2f"%(p0, p1, p2, pf))
 #------------------------------------------------------------------------------
@@ -120,6 +124,7 @@ print("extrema: %.2f, %.2f, %.2f, %.2f"%(p0, p1, p2, pf))
 #------------------------------------------------------------------------------
 # # RHS = (h^3 p')'
 
+# sinsuoidal exact pressure
 alpha = 1
 def p(x):
     return -np.sin(alpha*x)
@@ -131,6 +136,16 @@ def p_dx(x):
 
 def p_dxx(x): 
     return alpha**2 * np.sin(alpha*x)
+
+#step bearing exact pressure
+# def p(x):
+#     if x <= xm1:
+#         return p0 + 
+#     elif x <= xm2:
+#         return h2
+#     else: 
+#         return h3
+
 
 def manf_rhs(Nx, xs):
     f_n = np.zeros(Nx) #f[x]
