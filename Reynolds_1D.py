@@ -13,16 +13,20 @@ import _graphics as graph
 # Fluid constants
 #------------------------------------------------------------------------------
 # viscosity
-eta = 1 
+eta = 2
 
 #------------------------------------------------------------------------------
 # Domain & Height
 #------------------------------------------------------------------------------
 # width
-xa, xb = (0, 2)
+xa, xb = (0, 2*np.pi)
 
 # lower surface velocity
-U = 2
+U = 1
+
+#boundry presures
+p0 = 0
+pf = 0
 
 # Height
 
@@ -36,8 +40,7 @@ U = 2
 # def h_dx(x):
 #     return delta * k * np.cos(k*x)
 
-#p0 = 0
-#pf = 0
+
 
 # -- option 2: Wedge height 
 # h0, hf = (1, 0.8) #h0 = inital height, hf: final height
@@ -50,103 +53,116 @@ U = 2
 # def h_dx(x):
 #     return delta
 
-          
-# p0 = 0
-# pf = 0
+
    
-# # -- option 3: Rayleigh step height
-# h1, h2 = (1, 0.1)
-# xm = (xb-xa)/2
-# l1 = xm - xa
-# l2 = xb - xm
+# -- option 3: Rayleigh step height
+h1, h2 = (1, 0.1)
+x1 = (xb-xa)/2
+l1 = x1 - xa
+l2 = xb - x1
 
-# h_str = "h(x_0:x_m) = %0.1f, h(x_M:x_N) = %0.1f"%(h1, h2) 
-
-# def h(x):
-#     if x <= xm:
-#         return h1
-#     else:
-#         return h2
-    
-# def h_dx(x):
-#     return 0
-
-# p0 = 0
-
-# # max presure for Rayleigh step
-# def p_max(h1, h2, l1, l2, p0):
-#     return (6*eta*U*(h1 - h2)*l1) / (h1**3 + h2**3*(l1/l2)) + p0
-
-# def p_min(h1, h2, l1, l2, p0):
-#     return (-6*eta*U*(h1 - h2)*l1) / (h1**3 + h2**3*(l1/l2)) + p0
-
-# pm = p_max(h1, h2, l1, l2, p0)
-# pf = p_min(h1, h2, l1, l2, pm)
-
-# -- option 4: 3-step height
-h1, h2, h3 = (0.5, 0.3, 0.4)
-xm1 = (xb-xa)/3
-xm2 = 2*(xb-xa)/3
-l1 = xm1 - xa
-l2 = xm2 - xm1
-l3 = xb - xm2
-
-h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
+h_str = "h(x_0:x_m) = %0.1f, h(x_M:x_N) = %0.1f"%(h1, h2) 
 
 def h(x):
-    if x <= xm1:
+    if x <= x1:
         return h1
-    elif x <= xm2:
+    else:
         return h2
-    else: 
-        return h3
     
-def h_dx(x): 
-    return 0 # for manf_rhs()
-
-p0 = 0 #p0
-pf = 5 #p3
-
-# max presure for Rayleigh step
+def h_dx(x):
+    return 0 # only used in manf_rhs()
 
 
-p2a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
-p2b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
-p2c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
-p2d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
-p2=(p2a+p2b-p2c)/p2d
+# -- option 4: 3-step height
+# h1, h2, h3 = (0.5, 0.3, 0.4)
+# x1 = (xb-xa)/3
+# x2 = 2*(xb-xa)/3
+# l1 = x1 - xa
+# l2 = x2 - x1
+# l3 = xb - x2
 
-p1=p0 +h3**3/h1**3*l1/l3*(pf-p2)-6*U*eta*l1/h1**3*(h3-h1)
 
-print("extrema: %.2f, %.2f, %.2f, %.2f"%(p0, p1, p2, pf))
-#------------------------------------------------------------------------------
-# RHS: Manf & Exact solution
-#------------------------------------------------------------------------------
-# # RHS = (h^3 p')'
+# h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
 
-# sinsuoidal exact pressure
-alpha = 1
-def p(x):
-    return -np.sin(alpha*x)
-
-p_str = "p(x) = -\sin(%dx)"%(alpha) #for graph title
-
-def p_dx(x):
-    return -alpha * np.cos(alpha*x)
-
-def p_dxx(x): 
-    return alpha**2 * np.sin(alpha*x)
-
-#step bearing exact pressure
-# def p(x):
-#     if x <= xm1:
-#         return p0 + 
-#     elif x <= xm2:
+# def h(x):
+#     if x <= x1:
+#         return h1
+#     elif x <= x2:
 #         return h2
 #     else: 
 #         return h3
+    
+# def h_dx(x): 
+#     return 0 # only used in manf_rhs()
+
+#------------------------------------------------------------------------------
+# RHS: Manf with Exact solution
+#------------------------------------------------------------------------------
+# # RHS = (h^3 p')'
+
+# option 1: sinsuoidal exact pressure 
+#TODO: update with (actual) exact pressure for sinusoidal height from Takeyuchi 4.2?
+# alpha = 1
+# def p(x):
+#     return -np.sin(alpha*x)
+
+# p_str = "p(x) = -\sin(%dx)"%(alpha) #for graph title
+
+# def p_dx(x):
+#     return -alpha * np.cos(alpha*x)
+
+# def p_dxx(x): 
+#     return alpha**2 * np.sin(alpha*x)
 
 
+
+#option 2: wedge height exact pressure
+#TODO: update with actual exact pressure for wedge height
+
+#option 3: Rayleigh step exact pressure
+
+def p_dx(x):
+    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+    px_out = -l2/l1*px_in 
+    if x <= x1:
+        return px_in
+    else:
+        return px_out 
+
+
+def p(x):
+    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+    px_out = -l2/l1*px_in 
+    
+    p1 = px_in*l1 + p0 #max pressure
+    
+    if x <= x1:
+        return px_in*(x-x1)+p1
+    else:
+        return px_out*(x-xb)+pf
+    
+def p_dxx(x): # <-- this really isnt good enough
+    eps = (xb-xa)/100
+    if x - eps < x1 and x + eps > x1:
+        return -100
+    else:
+        return 0
+    return 
+
+#option 4: 3-step exact presssure
+
+# p2_a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
+# p2_b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
+# p2_c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
+# p2_d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
+# p2=(p2_a+p2_b-p2_c)/p2_d
+
+# p1=p0 +h3**3/h1**3*l1/l3*(pf-p2)-6*U*eta*l1/h1**3*(h3-h1)
+
+
+
+
+# Make RHS vetor using exact solution
 def manf_rhs(Nx, xs):
     f_n = np.zeros(Nx) #f[x]
     for i in range(Nx):
@@ -183,16 +199,20 @@ def discr_hx(Nx, dx, h, xs, BC):
     #graph.plot_2D_multi([hs_dx, hs], xs, "height", ["hx", "h"])
     return hs_dx
 
-p_str = "p(x) \; unknown"
+# p_str = "p(x) \; unknown"
 
 #------------------------------------------------------------------------------
 # numerical solution
-#------------------------------------------------------------------------------   
-#figrs = [Exact and numerical Pressure, Error]
+#------------------------------------------------------------------------------
+# Nx = number of spacial grid points, BCs dep.
 
 #BCs = [0: periodic, 1: fixed]
 
-def solve(Nx=100, figrs=1, BC=1, exact_sol=False):
+#RHS = [0: reynolds, 1: exact]
+
+#Err = [0: no error report, 1: error numerical vs exact]
+
+def solve(Nx=100, BC=1, RHS=1, ERR=1, FIG=1):
     
     if BC==0: #periodic
         dx = (xb - xa)/(Nx)
@@ -203,16 +223,8 @@ def solve(Nx=100, figrs=1, BC=1, exact_sol=False):
     xs = [xa + i*dx for i in range(Nx)]
 
     # construct RHS on grid
-    if exact_sol: 
-        inf_norm_err = 0
-        f_n = manf_rhs(Nx, xs)
-    
-        if BC == 1: # set boundary pressures to exact solution
-            pa = p(xs[0])
-            pb = p(xs[-1])
-        
-        
-    else: #Reynolds RHS
+   
+    if RHS == 0: #Reynolds RHS
         hx_n = discr_hx(Nx, dx, h, xs, BC)
         f_n = 6 * eta * U * hx_n
         
@@ -220,7 +232,17 @@ def solve(Nx=100, figrs=1, BC=1, exact_sol=False):
             pa = p0
             pb = pf
 
+    elif RHS == 1: #manf with exact solution
+         
+         f_n = manf_rhs(Nx, xs)
+     
+         if BC == 1: # set boundary pressures to exact solution
+             pa = p(xs[0])
+             pb = p(xs[-1])
 
+    if ERR ==1:
+        inf_norm_err = 0
+        
     # initilise diagonals of differnce matrix
     D_lower = np.ones(Nx)
     D_center = np.ones(Nx)
@@ -277,7 +299,7 @@ def solve(Nx=100, figrs=1, BC=1, exact_sol=False):
     
     # Plotting and error 
     
-    if exact_sol:
+    if ERR:
         p_exact = np.zeros(Nx)
         for i in range(Nx):
             p_exact[i] = p(xs[i])
@@ -285,44 +307,44 @@ def solve(Nx=100, figrs=1, BC=1, exact_sol=False):
         inf_norm_err = np.max(np.abs(np.subtract(p_exact,p_n)))
         print ("Solved Nx=%d with error %0.5f"%(Nx, inf_norm_err))  
         
-        if figrs == 1:
-            title = "Exact vs. Numerical Pressure \n $%s$ | $%s$"%(p_str,h_str)
+        if FIG: 
+            
+            title = "Exact vs. Numerical Pressure \n $%s$"%(h_str)
             labels = ["exact", "numerical"]
-            
             graph.plot_2D_multi([p_exact, p_n], xs, title, labels)
-            
-        elif figrs == 2:
-            title = "Model Error | $N_x=%d$, $dx = %.2f$ \n $%s$ | $%s$"%(Nx, dx, p_str,h_str)
-            label="Error"
+                
+            title = "Model Error | $N_x=%d$, $dx = %.2f$ \n $%s$"%(Nx, dx, h_str)
+            label="error"
             graph.plot_2D(p_exact-p_n, xs, title, label)
         
         return inf_norm_err
     
     else: 
-        if figrs == 1:
-            title = "Numerical Pressure | $N_x=%d$, $dx = %.2f$ \n $%s$ "%(Nx, dx, h_str)
-            labels = ["$p(x)$", "$h(x)$"]
-            hs = [h(x) for x in xs]
-            graph.plot_2D_multi([p_n, hs] , xs, title, labels)
+        title = "Numerical Pressure and Height| $N_x=%d$, $dx = %.2f$ \n $%s$ "%(Nx, dx, h_str)
+        labels = ["$p(x)$", "$h(x)$"]
+        hs = [h(x) for x in xs]
+        graph.plot_2D_multi([p_n, hs] , xs, title, labels)
         
-        #max pressure check for step height
-        print("Max numerical pressure: %.3f"%np.max(p_n))
-        print("Min numerical pressure: %.3f"%np.min(p_n))
-        
-        #return p_n
+      
+        return p_n
 
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
-def conveg(trials=10, N0=5, BC=1, figrs=0):
+#BCs = [0: periodic, 1: fixed]
+
+#RHS = [0: reynolds, 1: exact]
+
+def conveg(trials=15, N0=5, BC=1, RHS=0):
     N = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
-    
+    fig=0
     for i in range(trials):
+        if i== trials-1: fig=1
         
-        infNorms[i] = solve(N, figrs, BC, exact_sol=True)
+        infNorms[i] = solve(N, BC, RHS, ERR=1, FIG=fig)
         
         if BC==0: #periodic
             
