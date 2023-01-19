@@ -19,7 +19,7 @@ eta = 2
 # Domain & Height
 #------------------------------------------------------------------------------
 # width
-xa, xb = (0, 2*np.pi)
+x0, xf = (0, 2*np.pi)
 
 # lower surface velocity
 U = 1
@@ -37,31 +37,31 @@ pf = 0
 # def h(x):
 #     return h0 + delta * np.sin(k*x)
 
-# def h_dx(x):
+# def h_dx(x):  # only used in manf_rhs()
 #     return delta * k * np.cos(k*x)
 
 
 
 # -- option 2: Wedge height 
 # h0, hf = (1, 0.8) #h0 = inital height, hf: final height
-# delta = (hf - h0)/(xb - xa) # appropriate slope
-# h_str = "h(x) = %0.1f + %0.2f (x - %d)"%(h0, delta, xa) #for graph title
+# delta = (hf - h0)/(xf - x0) # appropriate slope
+# h_str = "h(x) = %0.1f + %0.2f (x - %d)"%(h0, delta, x0) #for graph title
    
 # def h(x):
-#     return delta * (x - xa) + h0
+#     return delta * (x - x0) + h0
 
-# def h_dx(x):
+# def h_dx(x):  # only used in manf_rhs()
 #     return delta
 
 
    
 # -- option 3: Rayleigh step height
 h1, h2 = (1, 0.1)
-x1 = (xb-xa)/2
-l1 = x1 - xa
-l2 = xb - x1
+x1 = (xf-x0)/2
+l1 = x1 - x0
+l2 = xf - x1
 
-h_str = "h(x_0:x_m) = %0.1f, h(x_M:x_N) = %0.1f"%(h1, h2) 
+h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_f) = %0.1f"%(h1, h2) 
 
 def h(x):
     if x <= x1:
@@ -75,7 +75,7 @@ def h_dx(x):
 
 # -- option 4: 3-step height
 # h1, h2, h3 = (0.5, 0.3, 0.4)
-# x1 = (xb-xa)/3
+# x1 = (xf-xa)/3
 # x2 = 2*(xb-xa)/3
 # l1 = x1 - xa
 # l2 = x2 - x1
@@ -106,12 +106,10 @@ def h_dx(x):
 # def p(x):
 #     return -np.sin(alpha*x)
 
-# p_str = "p(x) = -\sin(%dx)"%(alpha) #for graph title
-
-# def p_dx(x):
+# def p_dx(x):  # only used in manf_rhs()
 #     return -alpha * np.cos(alpha*x)
 
-# def p_dxx(x): 
+# def p_dxx(x):  # only used in manf_rhs()
 #     return alpha**2 * np.sin(alpha*x)
 
 
@@ -120,15 +118,6 @@ def h_dx(x):
 #TODO: update with actual exact pressure for wedge height
 
 #option 3: Rayleigh step exact pressure
-
-def p_dx(x):
-    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
-    px_out = -l2/l1*px_in 
-    if x <= x1:
-        return px_in
-    else:
-        return px_out 
-
 
 def p(x):
     px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
@@ -139,10 +128,19 @@ def p(x):
     if x <= x1:
         return px_in*(x-x1)+p1
     else:
-        return px_out*(x-xb)+pf
+        return px_out*(x-xf)+pf
     
-def p_dxx(x): # <-- this really isnt good enough
-    eps = (xb-xa)/100
+def p_dx(x):  # only used in manf_rhs()
+    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+    px_out = -l2/l1*px_in 
+    if x <= x1:
+        return px_in
+    else:
+        return px_out 
+    
+    
+def p_dxx(x): # only used in manf_rhs() and really isnt good enough
+    eps = 1/100
     if x - eps < x1 and x + eps > x1:
         return -100
     else:
@@ -155,9 +153,11 @@ def p_dxx(x): # <-- this really isnt good enough
 # p2_b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
 # p2_c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
 # p2_d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
-# p2=(p2_a+p2_b-p2_c)/p2_d
+# p2 = (p2_a+p2_b-p2_c)/p2_d
 
-# p1=p0 +h3**3/h1**3*l1/l3*(pf-p2)-6*U*eta*l1/h1**3*(h3-h1)
+# p1=p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
+
+
 
 
 
@@ -199,8 +199,6 @@ def discr_hx(Nx, dx, h, xs, BC):
     #graph.plot_2D_multi([hs_dx, hs], xs, "height", ["hx", "h"])
     return hs_dx
 
-# p_str = "p(x) \; unknown"
-
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------
@@ -215,12 +213,12 @@ def discr_hx(Nx, dx, h, xs, BC):
 def solve(Nx=100, BC=1, RHS=1, ERR=1, FIG=1):
     
     if BC==0: #periodic
-        dx = (xb - xa)/(Nx)
+        dx = (xf - x0)/(Nx)
         
     elif BC==1: #fixed
-        dx = (xb - xa)/(Nx-1)
+        dx = (xf - x0)/(Nx-1)
 
-    xs = [xa + i*dx for i in range(Nx)]
+    xs = [x0 + i*dx for i in range(Nx)]
 
     # construct RHS on grid
    
@@ -333,7 +331,7 @@ def solve(Nx=100, BC=1, RHS=1, ERR=1, FIG=1):
 #------------------------------------------------------------------------------   
 #BCs = [0: periodic, 1: fixed]
 
-#RHS = [0: reynolds, 1: exact]
+#RHS = [0: reynolds, 1: manf]
 
 def conveg(trials=15, N0=5, BC=1, RHS=0):
     N = N0
@@ -348,11 +346,11 @@ def conveg(trials=15, N0=5, BC=1, RHS=0):
         
         if BC==0: #periodic
             
-            dx = (xb - xa)/(N)
+            dx = (xf - x0)/(N)
             
         elif BC==1: #fixed
         
-            dx = (xb - xa)/(N-1)
+            dx = (xf - x0)/(N-1)
         
         dxs[i] = dx
         dxs_sqr[i] = dxs[i]**2
