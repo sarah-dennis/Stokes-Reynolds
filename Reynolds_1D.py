@@ -25,8 +25,8 @@ x0, xf = (0, 2*np.pi)
 U = 1
 
 #boundry presures
-p0 = 0
-pf = 0
+p0 = 1
+pf = -1
 
 # Height
 
@@ -56,44 +56,44 @@ pf = 0
 
    
 # -- option 3: Rayleigh step height
-h1, h2 = (1, 0.1)
-x1 = (xf-x0)/2
-l1 = x1 - x0
-l2 = xf - x1
+# h1, h2 = (1, 0.1)
+# x1 = (xf-x0)/2
+# l1 = x1 - x0
+# l2 = xf - x1
 
-h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_f) = %0.1f"%(h1, h2) 
-
-def h(x):
-    if x <= x1:
-        return h1
-    else:
-        return h2
-    
-def h_dx(x):
-    return 0 # only used in manf_rhs()
-
-
-# -- option 4: 3-step height
-# h1, h2, h3 = (0.5, 0.3, 0.4)
-# x1 = (xf-xa)/3
-# x2 = 2*(xb-xa)/3
-# l1 = x1 - xa
-# l2 = x2 - x1
-# l3 = xb - x2
-
-
-# h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
+# h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_f) = %0.1f"%(h1, h2) 
 
 # def h(x):
 #     if x <= x1:
 #         return h1
-#     elif x <= x2:
+#     else:
 #         return h2
-#     else: 
-#         return h3
     
-# def h_dx(x): 
+# def h_dx(x):
 #     return 0 # only used in manf_rhs()
+
+
+# -- option 4: 3-step height
+h1, h2, h3 = (0.5, 0.3, 0.4)
+x1 = (xf-x0)/3
+x2 = 2*(xf-x0)/3
+l1 = x1 - x0
+l2 = x2 - x1
+l3 = xf - x2
+
+
+h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
+
+def h(x):
+    if x <= x1:
+        return h1
+    elif x <= x2:
+        return h2
+    else: 
+        return h3
+    
+def h_dx(x): 
+    return 0 # only used in manf_rhs()
 
 #------------------------------------------------------------------------------
 # RHS: Manf with Exact solution
@@ -119,50 +119,76 @@ def h_dx(x):
 
 #option 3: Rayleigh step exact pressure
 
-def p(x):
-    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
-    px_out = -l2/l1*px_in 
+# def p(x):
+#     px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+#     px_out = -l2/l1*px_in 
     
-    p1 = px_in*l1 + p0 #max pressure
+#     p1 = px_in*l1 + p0 #max pressure
     
-    if x <= x1:
-        return px_in*(x-x1)+p1
-    else:
-        return px_out*(x-xf)+pf
+#     if x <= x1:
+#         return px_in*(x-x1)+p1
+#     else:
+#         return px_out*(x-xf)+pf
     
-def p_dx(x):  # only used in manf_rhs()
-    px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
-    px_out = -l2/l1*px_in 
-    if x <= x1:
-        return px_in
-    else:
-        return px_out 
+# def p_dx(x):  # only used in manf_rhs()
+#     px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+#     px_out = -l2/l1*px_in 
+#     if x <= x1:
+#         return px_in
+#     else:
+#         return px_out 
     
     
-def p_dxx(x): # only used in manf_rhs() and really isnt good enough
-    eps = 1/100
-    if x - eps < x1 and x + eps > x1:
-        return -100
-    else:
-        return 0
-    return 
+# def p_dxx(x): # only used in manf_rhs() and really isnt good enough
+#     eps = 1/100
+#     if x - eps < x1 and x + eps > x1:
+#         return -100
+#     else:
+#         return 0
+#     return 
 
 #option 4: 3-step exact presssure
 
-# p2_a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
-# p2_b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
-# p2_c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
-# p2_d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
-# p2 = (p2_a+p2_b-p2_c)/p2_d
+p2_a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
+p2_b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
+p2_c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
+p2_d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
+p2 = (p2_a+p2_b-p2_c)/p2_d
 
-# p1=p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
-
-
+p1 = p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
 
 
+def p(x):
+    px_middle = ( h1**3/l1 * (p2-p0) + 6*U*eta*(h2-h1) )/(h1**3 * l2 / l1 + h2**3)
+    px_left = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h1))*-12*eta/h1**3
+    px_right = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h3))*-12*eta/h3**3
+    
+
+    if x <= x1:
+        return px_left*(x-x1)+p1
+    elif x<= x2:
+        return px_middle*(x-x2)+p2
+    else:
+        return px_right*(x-xf)+pf
 
 
-# Make RHS vetor using exact solution
+def p_dx(x):
+    px_middle = ( h1**3/l1 * (p2-p0) + 6*U*eta*(h2-h1) )/(h1**3 * l2 / l1 * h2**3)
+    px_left = (-h2**3 / (12*eta)*px_middle - U/2*(h2-h1))*-12*eta/h1**3
+    px_right = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h3))*-12*eta/h3**3
+    
+    if x <= x1:
+        return px_left
+    elif x <= x2:
+        return px_middle
+    else:
+        return px_right
+    
+    
+def p_dxx(x):
+    return 0
+    
+#Make RHS vetor using exact solution
 def manf_rhs(Nx, xs):
     f_n = np.zeros(Nx) #f[x]
     for i in range(Nx):
@@ -210,7 +236,7 @@ def discr_hx(Nx, dx, h, xs, BC):
 
 #Err = [0: no error report, 1: error numerical vs exact]
 
-def solve(Nx=100, BC=1, RHS=1, ERR=1, FIG=1):
+def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
     
     if BC==0: #periodic
         dx = (xf - x0)/(Nx)
@@ -333,7 +359,7 @@ def solve(Nx=100, BC=1, RHS=1, ERR=1, FIG=1):
 
 #RHS = [0: reynolds, 1: manf]
 
-def conveg(trials=15, N0=5, BC=1, RHS=0):
+def conveg(trials=10, N0=5, BC=1, RHS=0):
     N = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
