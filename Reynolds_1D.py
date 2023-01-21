@@ -19,14 +19,17 @@ eta = 2
 # Domain & Height
 #------------------------------------------------------------------------------
 # width
-x0, xf = (0, 2*np.pi)
+x0, xf = (0, 1)
+
+h_scale = 10
 
 # lower surface velocity
-U = 1
+U = 2
 
-#boundry presures
-p0 = 1
-pf = -1
+#boundry pressures
+p0 = 0
+pf = 10
+# with exact solution and fixed BCs: p0, pf update to p(x0), p(xf)
 
 # Height
 
@@ -45,7 +48,7 @@ pf = -1
 # -- option 2: Wedge height 
 # h0, hf = (1, 0.8) #h0 = inital height, hf: final height
 # delta = (hf - h0)/(xf - x0) # appropriate slope
-# h_str = "h(x) = %0.1f + %0.2f (x - %d)"%(h0, delta, x0) #for graph title
+# h_str = "h(x) = %0.1f + %0.2f (x - %d)"%(h0, delta, x0) #for graph/title
    
 # def h(x):
 #     return delta * (x - x0) + h0
@@ -56,7 +59,7 @@ pf = -1
 
    
 # -- option 3: Rayleigh step height
-# h1, h2 = (1, 0.1)
+# h1, h2 = (1, 1)
 # x1 = (xf-x0)/2
 # l1 = x1 - x0
 # l2 = xf - x1
@@ -74,13 +77,14 @@ pf = -1
 
 
 # -- option 4: 3-step height
-h1, h2, h3 = (0.5, 0.3, 0.4)
+h1, h2, h3 = (0.5, 0.25, 0.4)
+
 x1 = (xf-x0)/3
 x2 = 2*(xf-x0)/3
+
 l1 = x1 - x0
 l2 = x2 - x1
 l3 = xf - x2
-
 
 h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
 
@@ -92,16 +96,28 @@ def h(x):
     else: 
         return h3
     
-def h_dx(x): 
-    return 0 # only used in manf_rhs()
+def h_dx(x):
+    e = 0.001
+    if x1 + e > x and x1-e < x or x2+e >x and x2-e < x:
+        return -1
+    else:
+        return 0 # only used in manf_rhs()
 
 #------------------------------------------------------------------------------
 # RHS: Manf with Exact solution
 #------------------------------------------------------------------------------
-# # RHS = (h^3 p')'
+
+#Make RHS vetor using exact solution 
+# RHS = (h^3 p')' = h^3 p'' + 3h^2 h' p'
+def manf_rhs(Nx, xs):
+    f_n = np.zeros(Nx) #f[x]
+    for i in range(Nx):
+        f_n[i] = (h(xs[i]) ** 3) * p_dxx(xs[i]) + 3 * h(xs[i])**2 * h_dx(xs[i]) * p_dx(xs[i])
+    return f_n
 
 # option 1: sinsuoidal exact pressure 
 #TODO: update with (actual) exact pressure for sinusoidal height from Takeyuchi 4.2?
+
 # alpha = 1
 # def p(x):
 #     return -np.sin(alpha*x)
@@ -119,81 +135,60 @@ def h_dx(x):
 
 #option 3: Rayleigh step exact pressure
 
+# p1 = p0 + l1*6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
+# px_in = (p1-p0)/l1
+# px_out = (pf-p1)/l2
+
 # def p(x):
-#     px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
-#     px_out = -l2/l1*px_in 
-    
-#     p1 = px_in*l1 + p0 #max pressure
-    
 #     if x <= x1:
 #         return px_in*(x-x1)+p1
 #     else:
 #         return px_out*(x-xf)+pf
     
-# def p_dx(x):  # only used in manf_rhs()
-#     px_in = 6*eta*U*(h1-h2)/(h1**3+h2**3*l1/l2)
-#     px_out = -l2/l1*px_in 
+# def p_dx(x):  # only used in manf_rhs() 
 #     if x <= x1:
 #         return px_in
 #     else:
 #         return px_out 
     
     
-# def p_dxx(x): # only used in manf_rhs() and really isnt good enough
-#     eps = 1/100
-#     if x - eps < x1 and x + eps > x1:
-#         return -100
-#     else:
-#         return 0
-#     return 
+# def p_dxx(x): # only used in manf_rhs() and wrong at x1
+#     return 0
 
 #option 4: 3-step exact presssure
 
-p2_a = (h1**3*l2/l1+h2**3)*(h3**3/l3*pf + 6*U*eta*(h2-h3))
-p2_b = (h2**3 + h3**3*l2/l3)*(h1**3/l1*p0 - 6*U*eta*(h2-h1))
-p2_c = h3**3/l3*(h1**3*l2/l1+h2**3)*(p0+h3**3/h1**3*l1/l3*pf-6*U*eta*l1/h1**3*(h3-h1))
-p2_d = h1**3/l1*(h2**3+h3**3*l2/l3) - h3**6/l3**2*l1/h1**3*(h1**3*l2/l1+h2**3)
-p2 = (p2_a+p2_b-p2_c)/p2_d
+p2_a = (h1**3 * l2/l1 + h2**3) * (h3**3 * pf/l3 + 6*U*eta * (h2-h3))
+p2_b = (h2**3 + h3**3 * l2/l3) * (h1**3 * p0/l1 - 6*U*eta * (h2-h1))
+p2_c = h3**3/l3 * (h1**3 * l2/l1 + h2**3) * (p0 + h3**3/h1**3 * l1/l3 *pf - 6*U*eta* l1/h1**3 * (h3-h1))
+p2_d = h1**3/l1 * (h2**3 + h3**3 * l2/l3) - h3**6/l3**2 * l1/h1**3 * (h1**3 * l2/l1 + h2**3)
+
+p2 = (p2_a + p2_b - p2_c)/p2_d
 
 p1 = p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
 
-
-def p(x):
-    px_middle = ( h1**3/l1 * (p2-p0) + 6*U*eta*(h2-h1) )/(h1**3 * l2 / l1 + h2**3)
-    px_left = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h1))*-12*eta/h1**3
-    px_right = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h3))*-12*eta/h3**3
-    
-
+def p(x): 
+    slope = p_dx(x)
     if x <= x1:
-        return px_left*(x-x1)+p1
+        return slope * (x-x0) + p0
     elif x<= x2:
-        return px_middle*(x-x2)+p2
+        return slope * (x-x1) + p1
     else:
-        return px_right*(x-xf)+pf
+        return slope * (x-x2) + p2
 
 
 def p_dx(x):
-    px_middle = ( h1**3/l1 * (p2-p0) + 6*U*eta*(h2-h1) )/(h1**3 * l2 / l1 * h2**3)
-    px_left = (-h2**3 / (12*eta)*px_middle - U/2*(h2-h1))*-12*eta/h1**3
-    px_right = (-h2**3 / (12*eta)*px_middle + U/2*(h2-h3))*-12*eta/h3**3
-    
     if x <= x1:
-        return px_left
+        return (p1-p0)/l1
     elif x <= x2:
-        return px_middle
+        return (p2-p1)/l2
     else:
-        return px_right
+        return (pf-p2)/l3
     
     
-def p_dxx(x):
+def p_dxx(x): # only used in manf_rhs() is wrong at x1, x2
     return 0
-    
-#Make RHS vetor using exact solution
-def manf_rhs(Nx, xs):
-    f_n = np.zeros(Nx) #f[x]
-    for i in range(Nx):
-        f_n[i] = (h(xs[i]) ** 3) * p_dxx(xs[i]) + 3 * h(xs[i])**2 * h_dx(xs[i]) * p_dx(xs[i])
-    return f_n
+ 
+
 
 #------------------------------------------------------------------------------
 # RHS: Reynolds equation 
@@ -210,9 +205,10 @@ def discr_hx(Nx, dx, h, xs, BC):
         D[0][Nx-1] = -1
         D[Nx-1][0] = 1
         
-    if BC == 1: #prescribed 
+    elif BC == 1: #prescribed 
         None
         # boundary heights are not used
+        
         
     D = D/(2*dx)
     
@@ -222,51 +218,51 @@ def discr_hx(Nx, dx, h, xs, BC):
         
     hs_dx = D@hs 
 
-    #graph.plot_2D_multi([hs_dx, hs], xs, "height", ["hx", "h"])
+    #graph.plot_2D_multi([hs_dx[1:-1], hs[1:-1]], xs[1:-1], "height", ["hx", "h"])
     return hs_dx
 
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------
-# Nx = number of spacial grid points, BCs dep.
+# Nx = number of spacial grid points, BCs depending.
 
 #BCs = [0: periodic, 1: fixed]
 
 #RHS = [0: reynolds, 1: exact]
 
-#Err = [0: no error report, 1: error numerical vs exact]
+#Err = [0: no error, 1: show numerical vs exact error plot and return error]
 
 def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
     
-    if BC==0: #periodic
+    # Make a grid 
+    if BC == 0: #periodic
         dx = (xf - x0)/(Nx)
         
-    elif BC==1: #fixed
+    elif BC == 1: #fixed
         dx = (xf - x0)/(Nx-1)
 
     xs = [x0 + i*dx for i in range(Nx)]
 
-    # construct RHS on grid
-   
+
+
+    # Find RHS on grid 
     if RHS == 0: #Reynolds RHS
+        # TODO: hx_n has error for step heights!
         hx_n = discr_hx(Nx, dx, h, xs, BC)
+        #return hx_n
         f_n = 6 * eta * U * hx_n
-        
-        if BC == 1: # set boundary pressures to something!
-            pa = p0
-            pb = pf
-
+    
     elif RHS == 1: #manf with exact solution
-         
          f_n = manf_rhs(Nx, xs)
-     
-         if BC == 1: # set boundary pressures to exact solution
-             pa = p(xs[0])
-             pb = p(xs[-1])
 
-    if ERR ==1:
+    # Final checks
+    if BC == 0 and p0 != pf:
+        print("p(x) not periodic on [%.1f, %.1f]"%(x0, xf))
+            
+    if ERR == 1:
         inf_norm_err = 0
-        
+    
+
     # initilise diagonals of differnce matrix
     D_lower = np.ones(Nx)
     D_center = np.ones(Nx)
@@ -305,25 +301,25 @@ def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
         D[Nx-1, : ] = 1
         f_n[Nx-1] = 0
     
-    # adjust for fixed pressure boundary
+    # adjust for fixed pressure boundary ...
     elif BC == 1:
         
         # -- set top row D to [1, 0, ...] and f[0] = p_inlet
         D[0,0] = 1
         D[0,1] = 0
-        f_n[0] = pa
+        f_n[0] = p0
         
         # -- set bottom row D to [ ... , 0, 1] and f[Nx-1] = p_outlet
         D[Nx-1,Nx-1] = 1
         D[Nx-1,Nx-2] = 0
-        f_n[Nx-1] = pb
+        f_n[Nx-1] = pf
 
     # solve for p
     p_n = np.linalg.solve(D, f_n)
     
     # Plotting and error 
     
-    if ERR:
+    if ERR == 1:
         p_exact = np.zeros(Nx)
         for i in range(Nx):
             p_exact[i] = p(xs[i])
@@ -331,12 +327,14 @@ def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
         inf_norm_err = np.max(np.abs(np.subtract(p_exact,p_n)))
         print ("Solved Nx=%d with error %0.5f"%(Nx, inf_norm_err))  
         
-        if FIG: 
-            
-            title = "Exact vs. Numerical Pressure \n $%s$"%(h_str)
-            labels = ["exact", "numerical"]
-            graph.plot_2D_multi([p_exact, p_n], xs, title, labels)
-                
+        if FIG == 1: 
+
+            title = "Pressure and Height \n $%s$"%(h_str)
+            labels = ["exact", "numerical", "height"]
+            hs = [h(x)*h_scale for x in xs]
+            graph.plot_2D_multi([p_exact, p_n, hs], xs, title, labels)
+             
+            pp.figure()
             title = "Model Error | $N_x=%d$, $dx = %.2f$ \n $%s$"%(Nx, dx, h_str)
             label="error"
             graph.plot_2D(p_exact-p_n, xs, title, label)
@@ -344,10 +342,11 @@ def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
         return inf_norm_err
     
     else: 
-        title = "Numerical Pressure and Height| $N_x=%d$, $dx = %.2f$ \n $%s$ "%(Nx, dx, h_str)
-        labels = ["$p(x)$", "$h(x)$"]
-        hs = [h(x) for x in xs]
-        graph.plot_2D_multi([p_n, hs] , xs, title, labels)
+        if FIG==1:
+            title = "Numerical Pressure and Height| $N_x=%d$, $dx = %.2f$ \n $%s$ "%(Nx, dx, h_str)
+            labels = ["$p(x)$", "$h(x)$"]
+            hs = [h(x) for x in xs]
+            graph.plot_2D_multi([p_n, hs] , xs, title, labels)
         
       
         return p_n
@@ -359,7 +358,7 @@ def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
 
 #RHS = [0: reynolds, 1: manf]
 
-def conveg(trials=10, N0=5, BC=1, RHS=0):
+def conveg(trials=10, N0=10, BC=1, RHS=0):
     N = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -385,6 +384,7 @@ def conveg(trials=10, N0=5, BC=1, RHS=0):
     
     pp.figure(trials+1)
     pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2$')
+    pp.loglog(dxs, dxs, color='g', label='$dx$')
     pp.loglog(dxs, infNorms, color='b', label='Linf Error')
     
     pp.xlabel('dx')
