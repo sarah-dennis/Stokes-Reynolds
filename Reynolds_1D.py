@@ -15,33 +15,32 @@ import _graphics as graph
 # viscosity
 eta = 2
 
+#boundary pressures
+p0 = 0
+pf = 0
+
+
 #------------------------------------------------------------------------------
-# Domain & Height
+# Domain & Height Functions
 #------------------------------------------------------------------------------
 # width
-x0, xf = (0, 1)
+x0, xf = (0, np.pi/3)
 
-h_scale = 10
+h_scale = 10 #for graphing height and pressure together
 
 # lower surface velocity
 U = 2
 
-#boundry pressures
-p0 = 0
-pf = 10
-# with exact solution and fixed BCs: p0, pf update to p(x0), p(xf)
-
-# Height
 
 # -- option 1: Sinusoidal height 
-# h0, delta, k = (1, 0.3, 6) # delta < h0 so height positive
-# h_str = "h(x) = %0.1f + %0.1f \cos(%d x)"%(h0, delta, k) #for graph title
+h0, delta, k = (1, 0.3, 1) # delta < h0 so height positive
+h_str = "h(x) = %0.1f (1 + %0.1f \cos(%d x))"%(h0, delta, k) #for graph title
 
-# def h(x):
-#     return h0 + delta * np.sin(k*x)
+def h(x):
+    return h0 * (1 + delta * np.cos(k*x))
 
-# def h_dx(x):  # only used in manf_rhs()
-#     return delta * k * np.cos(k*x)
+def h_dx(x):  # only used in manf_rhs()
+    return -h0 * delta * k * np.sin(k*x)
 
 
 
@@ -77,57 +76,45 @@ pf = 10
 
 
 # -- option 4: 3-step height
-h1, h2, h3 = (0.5, 0.25, 0.4)
+# h1, h2, h3 = (0.5, 0.25, 0.4)
 
-x1 = (xf-x0)/3
-x2 = 2*(xf-x0)/3
+# x1 = (xf-x0)/3
+# x2 = 2*(xf-x0)/3
 
-l1 = x1 - x0
-l2 = x2 - x1
-l3 = xf - x2
+# l1 = x1 - x0
+# l2 = x2 - x1
+# l3 = xf - x2
 
-h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
+# h_str = "h(x_0:x_1) = %0.1f, h(x_1:x_2) = %0.1f, h(x_3:x_3) = %0.1f"%(h1, h2, h3) 
 
-def h(x):
-    if x <= x1:
-        return h1
-    elif x <= x2:
-        return h2
-    else: 
-        return h3
+# def h(x):
+#     if x <= x1:
+#         return h1
+#     elif x <= x2:
+#         return h2
+#     else: 
+#         return h3
     
-def h_dx(x):
-    e = 0.001
-    if x1 + e > x and x1-e < x or x2+e >x and x2-e < x:
-        return -1
-    else:
-        return 0 # only used in manf_rhs()
+# def h_dx(x):
+#     e = 0.001
+#     if x1 + e > x and x1-e < x or x2+e >x and x2-e < x:
+#         return -1
+#     else:
+#         return 0 # only used in manf_rhs()
 
 #------------------------------------------------------------------------------
-# RHS: Manf with Exact solution
+# Pressure Functions: Exact solutions
 #------------------------------------------------------------------------------
 
-#Make RHS vetor using exact solution 
-# RHS = (h^3 p')' = h^3 p'' + 3h^2 h' p'
-def manf_rhs(Nx, xs):
-    f_n = np.zeros(Nx) #f[x]
-    for i in range(Nx):
-        f_n[i] = (h(xs[i]) ** 3) * p_dxx(xs[i]) + 3 * h(xs[i])**2 * h_dx(xs[i]) * p_dx(xs[i])
-    return f_n
+# option 1: sinsuoidal exact pressure
+def p(x):
+    return p0 -6*eta*U * (h(x) + h0)/((k**2 + h0**2)*(2 + delta**2)) * h_dx(x) / h(x)**2
 
-# option 1: sinsuoidal exact pressure 
-#TODO: update with (actual) exact pressure for sinusoidal height from Takeyuchi 4.2?
+def p_dx(x):  # only used in manf_rhs()
+    return 
 
-# alpha = 1
-# def p(x):
-#     return -np.sin(alpha*x)
-
-# def p_dx(x):  # only used in manf_rhs()
-#     return -alpha * np.cos(alpha*x)
-
-# def p_dxx(x):  # only used in manf_rhs()
-#     return alpha**2 * np.sin(alpha*x)
-
+def p_dxx(x):  # only used in manf_rhs()
+    return 
 
 
 #option 2: wedge height exact pressure
@@ -157,38 +144,48 @@ def manf_rhs(Nx, xs):
 
 #option 4: 3-step exact presssure
 
-p2_a = (h1**3 * l2/l1 + h2**3) * (h3**3 * pf/l3 + 6*U*eta * (h2-h3))
-p2_b = (h2**3 + h3**3 * l2/l3) * (h1**3 * p0/l1 - 6*U*eta * (h2-h1))
-p2_c = h3**3/l3 * (h1**3 * l2/l1 + h2**3) * (p0 + h3**3/h1**3 * l1/l3 *pf - 6*U*eta* l1/h1**3 * (h3-h1))
-p2_d = h1**3/l1 * (h2**3 + h3**3 * l2/l3) - h3**6/l3**2 * l1/h1**3 * (h1**3 * l2/l1 + h2**3)
+# p2_a = (h1**3 * l2/l1 + h2**3) * (h3**3 * pf/l3 + 6*U*eta * (h2-h3))
+# p2_b = (h2**3 + h3**3 * l2/l3) * (h1**3 * p0/l1 - 6*U*eta * (h2-h1))
+# p2_c = h3**3/l3 * (h1**3 * l2/l1 + h2**3) * (p0 + h3**3/h1**3 * l1/l3 *pf - 6*U*eta* l1/h1**3 * (h3-h1))
+# p2_d = h1**3/l1 * (h2**3 + h3**3 * l2/l3) - h3**6/l3**2 * l1/h1**3 * (h1**3 * l2/l1 + h2**3)
 
-p2 = (p2_a + p2_b - p2_c)/p2_d
+# p2 = (p2_a + p2_b - p2_c)/p2_d
 
-p1 = p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
+# p1 = p0 + h3**3 / h1**3 * l1/l3 * (pf-p2) - 6*U*eta * l1/h1**3 * (h3-h1)
 
-def p(x): 
-    slope = p_dx(x)
-    if x <= x1:
-        return slope * (x-x0) + p0
-    elif x<= x2:
-        return slope * (x-x1) + p1
-    else:
-        return slope * (x-x2) + p2
+# def p(x): 
+#     slope = p_dx(x)
+#     if x <= x1:
+#         return slope * (x-x0) + p0
+#     elif x<= x2:
+#         return slope * (x-x1) + p1
+#     else:
+#         return slope * (x-x2) + p2
 
 
-def p_dx(x):
-    if x <= x1:
-        return (p1-p0)/l1
-    elif x <= x2:
-        return (p2-p1)/l2
-    else:
-        return (pf-p2)/l3
+# def p_dx(x):
+#     if x <= x1:
+#         return (p1-p0)/l1
+#     elif x <= x2:
+#         return (p2-p1)/l2
+#     else:
+#         return (pf-p2)/l3
     
     
-def p_dxx(x): # only used in manf_rhs() is wrong at x1, x2
-    return 0
+# def p_dxx(x): # only used in manf_rhs() is wrong at x1, x2
+#     return 0
  
+#------------------------------------------------------------------------------
+# RHS: Manf with Exact solution
+#------------------------------------------------------------------------------
 
+#Make RHS vetor using exact solution 
+# RHS = (h^3 p')' = h^3 p'' + 3h^2 h' p'
+def manf_rhs(Nx, xs):
+    f_n = np.zeros(Nx) #f[x]
+    for i in range(Nx):
+        f_n[i] = (h(xs[i]) ** 3) * p_dxx(xs[i]) + 3 * h(xs[i])**2 * h_dx(xs[i]) * p_dx(xs[i])
+    return f_n
 
 #------------------------------------------------------------------------------
 # RHS: Reynolds equation 
@@ -232,7 +229,7 @@ def discr_hx(Nx, dx, h, xs, BC):
 
 #Err = [0: no error, 1: show numerical vs exact error plot and return error]
 
-def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
+def solve(Nx=100, BC=0, RHS=0, ERR=1, FIG=1):
     
     # Make a grid 
     if BC == 0: #periodic
@@ -358,7 +355,7 @@ def solve(Nx=100, BC=1, RHS=0, ERR=1, FIG=1):
 
 #RHS = [0: reynolds, 1: manf]
 
-def conveg(trials=10, N0=10, BC=1, RHS=0):
+def conveg(trials=10, N0=10, BC=0, RHS=0):
     N = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
