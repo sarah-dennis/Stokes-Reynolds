@@ -7,7 +7,7 @@ Created on Wed Jan 25 18:24:34 2023
 """
 
     
-class ExactSol:
+class Pressure:
     
     def __init__(self, p, domain, px=None, pxx=None):
         self.p = p
@@ -25,3 +25,11 @@ class ExactSol:
             
     def plot(domain):
         graph.plot_2D(self.grid_pressure, domain.xs, "Exact Pressure", "p" )
+
+
+class Corrugated(Pressure):
+    
+    def 
+    
+    def p(x):
+        return p0 -6*eta*U * (h(x) + h0)/((k**2 + h0**2)*(2 + delta**2)) * h_dx(x) / h(x)**2
