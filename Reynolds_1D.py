@@ -13,7 +13,7 @@ import _graphics as graph
 
 import domain as dfd
 
-import exactSolutions as esp
+import ExactSolutions as esp
 import heights as hgt
 #------------------------------------------------------------------------------
 # Domain 
@@ -55,8 +55,9 @@ def wedge(domain):
     height = hgt.WedgeHeight(domain, h_min, m)
     p0 = 0
     pN = 0
+    pressure = esp.WedgePressure(domain, height, p0, pN)
     #TODO add wedge exact pressure
-    return height, None
+    return height, pressure
 
 #------------------------------------------------------------------------------
 # Step Height Example
@@ -110,7 +111,7 @@ def reynolds_rhs(domain, height):
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 #height, pressure = twoStep(domain)
 #height, pressure = step(domain)
-height, pressure = corrugated(domain)
+height, pressure =twoStep(domain)
 
 def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
     
@@ -228,7 +229,7 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         
         domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
         
-        height_k, pressure_k = step(domain_k) # change me!
+        height_k, pressure_k = wedge(domain_k) # change me!
         
         infNorms[i] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
         

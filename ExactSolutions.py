@@ -36,6 +36,21 @@ class CorrugatedPressure(ExactPressure):
             #TODO how is this derived?
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
         super().__init__(domain, ps, p_str)
+        
+class WedgePressure(ExactPressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Wedge"
+        ps = np.zeros(domain.Nx)
+        a = height.h_max/height.h_min
+        L = domain.xf - domain.x0
+        
+        for i in range(domain.Nx):
+            X = domain.xs[i]/L
+            Pi = a/(1-a**2)*(1/self.H(X, a)**2 - 1/a**2) - 1/(1-a)*(1/self.H(X, a)-1/a)
+            ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
+        super().__init__(domain, ps, p_str)
+    def H(self, X, a):
+        return a + (1-a)*X
 
 class StepPressure(ExactPressure):
 
@@ -86,7 +101,6 @@ class TwoStepPressure(ExactPressure):
 
         #p1 is pressure at end of first step
         p1 = p0 + h3**3 / h1**3 * l1/l3 * (pN-p2) - 6*domain.U*domain.eta * l1/h1**3 * (h3-h1)
-
 
         #pressure slopes
         m1 = (p1-p0)/l1
