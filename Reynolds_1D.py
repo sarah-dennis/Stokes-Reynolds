@@ -21,24 +21,20 @@ import heights as hgt
 x0 = 0
 xf = 1
 
-BC = 1 # 1: fixed, 0: periodic
+BC = 1 # 1:= fixed, 0:= periodic
 
 Nx = 200
 
 U = 1 #lower surface velocity
 eta = 1 #viscosity
 
-domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
-
-h_scale = 10 #for graphing height and pressure together
-
 #------------------------------------------------------------------------------
 # Corrugated Height example
 #------------------------------------------------------------------------------
 # Jan 29: converges 2nd order 
 def corrugated(domain):
-    h_mid = 0.2 
-    r = 0.1
+    h_mid = 1 
+    r = 0.5
     k = 2*np.pi
     height = hgt.CorrugatedHeight(domain, h_mid, r, k)
     p0 = 0
@@ -51,7 +47,7 @@ def corrugated(domain):
 #------------------------------------------------------------------------------
 def wedge(domain):
     h_min = 0.1
-    m = -1
+    m = -2
     height = hgt.WedgeHeight(domain, h_min, m)
     p0 = 0
     pN = 0
@@ -77,9 +73,9 @@ def step(domain):
 #------------------------------------------------------------------------------
 # Jan 29: converges 1st order 
 def twoStep(domain):
-    h_left = 0.3
-    h_center = 0.1
-    h_right = 0.2
+    h_left = 3
+    h_center = 1
+    h_right = 2
     height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
     p0 = 0
     pN = 0
@@ -89,7 +85,6 @@ def twoStep(domain):
 #------------------------------------------------------------------------------
 # numerical solution
 #------------------------------------------------------------------------------
-
 
 def manf_rhs(domain, height, pressure):
     fs = np.zeros(domain.Nx) #f[x]
@@ -107,11 +102,12 @@ def reynolds_rhs(domain, height):
 #Exact sol = [0: no error, 1: show numerical vs exact error plot and return error]
 # RHS = [0: reynolds, 1: exact]
 
-
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
-#height, pressure = twoStep(domain)
+
+#height, pressure = corrugated(domain)
 #height, pressure = step(domain)
-height, pressure =twoStep(domain)
+height, pressure = twoStep(domain)
+#height, pressure = wedge(domain)
 
 def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
     
@@ -188,14 +184,10 @@ def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
         print ("Solved Nx=%d with error %0.5f"%(domain.Nx, inf_norm_err))  
         
         if FIG == 1: 
-
-            title = "Pressure and Height \n $%s$"%(height.h_str)
-            labels = ["exact", "numerical", "height"]
-            hs_scaled = [h * h_scale for h in height.hs]
-            graph.plot_2D_multi([pressure.ps, ps_numsol, hs_scaled], domain.xs, title, labels)
+            graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, height.h_str)
              
             pp.figure()
-            title = "Model Error | $N_x=%d$, $dx = %.2f$ \n $%s$"%(domain.Nx, domain.dx, height.h_str)
+            title = "Error: Analytic - Numerical Solutions | $N_x=%d$, $dx = %.2f$ \n $%s$"%(domain.Nx, domain.dx, height.h_str)
             graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
         
         return inf_norm_err
@@ -239,13 +231,16 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         Nx_k *= 2
     
     pp.figure(trials+1)
-    pp.loglog(dxs, dxs_sqr, color='r', label='$dx^2$')
-    pp.loglog(dxs, dxs, color='g', label='$dx$')
-    pp.loglog(dxs, infNorms, color='b', label='Linf Error')
-    
-    pp.xlabel('dx')
 
-    pp.legend()
-    pp.title('$N_x$=%i to $N_x$=%i with %i trials'%(N0, Nx_k/2, trials))
+    pp.loglog(dxs, dxs, color='b', label='$\mathcal{O}(dx)$')
+    pp.loglog(dxs, dxs_sqr, color='g', label='$\mathcal{O}(dx^2)$')
+    pp.loglog(dxs, infNorms, color='r', label='$L_{\infty}$ Norm Error')
+
+
+    
+    pp.xlabel('Grid spacing $dx$')
+
+    pp.legend(loc='lower right')
+    pp.title("Convergence for %s"%(height_k.h_str), fontweight ="bold")
     
     

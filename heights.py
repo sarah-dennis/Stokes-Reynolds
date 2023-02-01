@@ -54,7 +54,8 @@ class CorrugatedHeight(Height):
         self.r = r 
         self.k = k
         
-        self.h_str = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) #for graph title
+        self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) #for graph title'
+        self.h_str = "Sinuosoidal Height"
 
         super().__init__(domain, self.h, self.h_str, self.hx)
 
@@ -76,7 +77,8 @@ class WedgeHeight(Height):
         self.xf = domain.xf
         self.h_max = m * (domain.x0 - domain.xf) + h_min
         
-        self.h_str = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0) #for graph title
+        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0) #for graph title
+        self.h_str = "Slider Bearing"
         
         super().__init__(domain, self.h, self.h_str, self.hx)
 
@@ -100,8 +102,8 @@ class StepHeight(Height):
         self.l_left = self.x1-domain.x0
         self.l_right = domain.xf - self.x1
         
-        
-        self.h_str = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right) #for graph title
+        self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right) #for graph title
+        self.h_str = "Step Height"
         
         super().__init__(domain, self.h, self.h_str)
 
@@ -122,7 +124,8 @@ class TwoStepHeight(Height):
         self.l1 = self.x1 - domain.x0
         self.l2 = self.x2 - self.x1
         self.l3 = domain.xf - self.x2
-        self.h_str = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) #for graph title
+        self.h_str = "Square Wave Height"
+        self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) #for graph title
         
         super().__init__(domain, self.h, self.h_str)
 

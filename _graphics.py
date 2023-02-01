@@ -15,7 +15,6 @@ phi = 30
 Nx=100
 Nz=100
 
-
 def plot_3D(f_2D, xs, zs, title):
     
     X, Z = np.meshgrid(xs, zs)
@@ -41,7 +40,7 @@ def plot_2D_multi(fs, xs, title, labels):
 
     ax.set_xlabel('x')
     #ax.set_ylabel()
-    pp.title(title)
+    pp.title(title,  fontweight ="bold")
     fig.legend()
     return fig
     
@@ -58,3 +57,40 @@ def plot_2D(fs, xs, title, label):
     pp.title(title)
     fig.legend()
     return fig
+
+def plot_p_h(ps, ps_num, hs, xs, ex_title):
+
+    # Creating plot with dataset_1
+    fig, ax1 = pp.subplots()
+     
+    color = 'tab:red'
+    ax1.set_xlabel('$x$')
+    ax1.set_ylabel('Pressure $p(x)$', color = color)
+    ax1.plot(xs, ps, color = color)
+    ax1.plot(xs, ps_num, color = color)
+    ax1.tick_params(axis ='y', labelcolor = color)
+    #ax1.set_ylim(0, 0.5)
+     
+    # Adding Twin Axes to plot using dataset_2
+    ax2 = ax1.twinx()
+     
+    color = 'tab:blue'
+    ax2.set_ylabel('Height $h(x)$', color = color)
+    ax2.plot(xs,hs, color = color)
+    ax2.tick_params(axis ='y', labelcolor = color)
+    ax2.set_ylim(0, 3.5)
+     
+    # Adding title
+    pp.title('Pressure for %s'%ex_title, fontweight ="bold")
+     
+    # Show plot
+    pp.show()
+    
+    
+    
+    
+    
+    
+    
+    
+    
