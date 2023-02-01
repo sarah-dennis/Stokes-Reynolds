@@ -104,10 +104,12 @@ def reynolds_rhs(domain, height):
 
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 
+
 #height, pressure = corrugated(domain)
 #height, pressure = step(domain)
 height, pressure = twoStep(domain)
 #height, pressure = wedge(domain)
+
 
 def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
     
@@ -216,17 +218,21 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
     fig=0
-    for i in range(trials):
-        if i == trials-1: fig=1
+    for k in range(trials):
+        if k == trials-1: fig=1
         
         domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
         
-        height_k, pressure_k = wedge(domain_k) # change me!
+        #------------- change me! ----------------------
+        #height_k, pressure_k = wedge(domain_k)
+        #height_k, pressure_k = corrugated(domain_k)
+        height_k, pressure_k = step(domain_k)
+        #height_k, pressure_k = twoStep(domain_k)
         
-        infNorms[i] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
+        infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
         
-        dxs[i] = domain_k.dx
-        dxs_sqr[i] = dxs[i]**2
+        dxs[k] = domain_k.dx
+        dxs_sqr[k] = dxs[k]**2
         
         Nx_k *= 2
     
@@ -242,5 +248,4 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
 
     pp.legend(loc='lower right')
     pp.title("Convergence for %s"%(height_k.h_str), fontweight ="bold")
-    
     
