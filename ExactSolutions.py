@@ -119,5 +119,53 @@ class TwoStepPressure(ExactPressure):
                 ps[i] = m3 *(domain.xs[i]-height.x2) + p2
         
         super().__init__(domain, ps, p_str)
+
+
+
+def StepPressure(ExactPressure):
+    
+    def __init__(self, domain, height, p0, pN, L):
+        #period L
+        
+        n_step = round(2*domain.xf/L)
+        p_str = "%d-Step"%n_step
+
+        ps = np.zeros(n_step)
+        ss = np.zeros(n_step - 1)
+        
+        A = np.identity(n_step)
+        D = np.zeros((n_step-1, n_step-1))
+        
+        B = np.zeros((n_step, n_step-1))
+        B_diag_u = [-1/domain.dx]*(n_step-1) 
+        B_diag_l = [1/domain.dx]*(n_step-1)
+        B[:n_step-1][:] = np.diagflat(B_diag_u)
+        B[1:][:] += np.diagflat(B_diag_l)  
+        
+        
+        C = ??
+        lin_slope = np.zeros()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         
