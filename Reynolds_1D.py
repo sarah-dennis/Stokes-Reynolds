@@ -223,11 +223,12 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         
         domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
         
-        #------------- change me! ----------------------
+        #---- EXAMPLES nnnnnnnnnnnnnnn----------------------
         #height_k, pressure_k = wedge(domain_k)
         #height_k, pressure_k = corrugated(domain_k)
         height_k, pressure_k = step(domain_k)
         #height_k, pressure_k = twoStep(domain_k)
+        #-------------------------------------------------------
         
         infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
         
