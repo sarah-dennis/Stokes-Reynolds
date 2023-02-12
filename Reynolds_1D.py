@@ -74,8 +74,8 @@ def step(domain):
 # Jan 29: converges 1st order 
 def twoStep(domain):
     h_left = 3
-    h_center = 1
-    h_right = 2
+    h_center = 2
+    h_right = 1
     height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
     p0 = 0
     pN = 0
@@ -223,12 +223,13 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         
         domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
         
-        #---- EXAMPLES nnnnnnnnnnnnnnn----------------------
+        #---- EXAMPLES n----------------------
         #height_k, pressure_k = wedge(domain_k)
         #height_k, pressure_k = corrugated(domain_k)
         height_k, pressure_k = step(domain_k)
         #height_k, pressure_k = twoStep(domain_k)
         #-------------------------------------------------------
+
         
         infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
         
