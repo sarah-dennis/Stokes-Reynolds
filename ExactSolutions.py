@@ -52,30 +52,30 @@ class WedgePressure(ExactPressure):
     def H(self, X, a):
         return a + (1-a)*X
 
-# class StepPressure(ExactPressure):
+class StepPressure(ExactPressure):
 
-#     def __init__(self, domain, height, p0, pN):
-#         p_str = "Step"
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Step"
 
-#         ps = np.zeros(domain.Nx)
+        ps = np.zeros(domain.Nx)
         
-#         for i in range(domain.Nx):
+        for i in range(domain.Nx):
 
-#             hl = height.h_left
-#             hr = height.h_right
-#             ll = height.l_left
-#             lr = height.l_right
+            hl = height.h_left
+            hr = height.h_right
+            ll = height.l_left
+            lr = height.l_right
             
-#             m_in = 6*domain.eta*domain.U* (hl - hr) / (hl**3 + hr**3 * ll/lr) 
-#             m_out = (-ll / lr) * m_in
+            m_in = 6*domain.eta*domain.U* (hl - hr) / (hl**3 + hr**3 * ll/lr) 
+            m_out = (-ll / lr) * m_in
             
             
-#             if domain.xs[i] <= height.x1:
-#                 ps[i] = m_in * (domain.xs[i]-domain.xs[0]) + p0
-#             else:
-#                 ps[i] = m_out *(domain.xs[i]-domain.xs[-1]) + pN
+            if domain.xs[i] <= height.x1:
+                ps[i] = m_in * (domain.xs[i]-domain.xs[0]) + p0
+            else:
+                ps[i] = m_out *(domain.xs[i]-domain.xs[-1]) + pN
         
-#         super().__init__(domain, ps, p_str)
+        super().__init__(domain, ps, p_str)
         
 
 class TwoStepPressure(ExactPressure):
@@ -128,18 +128,16 @@ class SquareWavePressure(ExactPressure):
         #period L
         
         p_str = "%d-Step"%height.n_step
-
-        rhs_ps = np.zeros(height.n_step)
-        rhs_ps[0] = -p0/domain.dx
-        rhs_ps[height.n_step-1] = pN/domain.dx
+        n = height.n_step
         
-        rhs_ss = np.zeros(n_step - 1)
+        rhs = np.zeros(2*n + 1)
         
-        for i in range(n_step-1):
- 
+        rhs[0] = -p0/domain.dx
+        rhs[n] = pN/domain.dx
+        
+        for k in range(n):
+            rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
             
-            rhs_ss[i] = 6*domain.eta*domain.U * (h2 - h1)
-        
         A = np.identity(n_step)
         D = np.zeros((n_step-1, n_step-1))
         

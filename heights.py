@@ -34,7 +34,7 @@ class Height:
             self.hxxs = [hxx(x) for x in domain.xs]
          
     def plot(self, domain):
-        graph.plot_2D(self.hs, domain.xs, "Height %s"%self.h_str, "h" )
+        graph.plot_2D(self.hs, domain.xs, "Height: %s"%self.h_str, "h" )
 
 
     def plot_all(self, domain):
@@ -144,17 +144,25 @@ class SquareWaveHeight(Height):
         
         self.r = r
         self.h_avg = h_avg
+        self.n_steps = n_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
-    
+        
+        self.h_steps = np.zeros(n_steps+1)
+        for i in range(n_steps+1):
+            x = domain.x0 + self.step_width * (i + 0.5)
+            self.h_steps[i] = self.h(x)
+        
         self.h_str = "Square Wave Height"
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
-        
+
         super().__init__(domain, self.h, self.h_str)
         
     def h(self, x):
-        sgn = np.sign(np.cos(np.pi * x/self.step_width))
-        return self.r * sgn + self.h_avg
-        
+        if np.sin(np.pi * x/self.step_width) >= 0:
+           return self.h_avg + self.r
+        else:
+           return self.h_avg - self.r
+
     
         
 
