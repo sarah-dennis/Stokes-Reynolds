@@ -124,7 +124,7 @@ class TwoStepHeight(Height):
         self.l1 = self.x1 - domain.x0
         self.l2 = self.x2 - self.x1
         self.l3 = domain.xf - self.x2
-        self.h_str = "Square Wave Height"
+        self.h_str = "Two Step Height"
         self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) #for graph title
         
         super().__init__(domain, self.h, self.h_str)
@@ -137,7 +137,27 @@ class TwoStepHeight(Height):
         else:
             return self.h3
 
+
+class SquareWaveHeight(Height):
     
+    def __init__(self, domain, h_avg, r, n_steps):
+        
+        self.r = r
+        self.h_avg = h_avg
+        self.step_width = (domain.xf - domain.x0)/(n_steps+1)
+    
+        self.h_str = "Square Wave Height"
+        self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
+        
+        super().__init__(domain, self.h, self.h_str)
+        
+    def h(self, x):
+        sgn = np.sign(np.cos(np.pi * x/self.step_width))
+        return self.r * sgn + self.h_avg
+        
+    
+        
+
     
     
     

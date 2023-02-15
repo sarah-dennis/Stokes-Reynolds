@@ -28,8 +28,10 @@ Nx = 200
 U = 1 #lower surface velocity
 eta = 1 #viscosity
 
+# Construct Height and Exact Pressure on grid...
+
 #------------------------------------------------------------------------------
-# Corrugated Height example
+# I. Corrugated Height example
 #------------------------------------------------------------------------------
 # Jan 29: converges 2nd order 
 def corrugated(domain):
@@ -43,7 +45,7 @@ def corrugated(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# Wedge Height example
+# II. Wedge Height example
 #------------------------------------------------------------------------------
 def wedge(domain):
     h_min = 0.1
@@ -56,7 +58,7 @@ def wedge(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# Step Height Example
+# III a. Step Height Example
 #------------------------------------------------------------------------------
 # Jan 29: converges 1st order 
 def step(domain):
@@ -69,13 +71,13 @@ def step(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# Two Step Height Example
+# III b. Two Step Height Example
 #------------------------------------------------------------------------------
 # Jan 29: converges 1st order 
 def twoStep(domain):
-    h_left = 3
-    h_center = 2
-    h_right = 1
+    h_left = 2
+    h_center = 1
+    h_right = 3
     height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
     p0 = 0
     pN = 0
@@ -83,8 +85,14 @@ def twoStep(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# numerical solution
+# Numerical solution
 #------------------------------------------------------------------------------
+
+def reynolds_rhs(domain, height): 
+    fs = np.zeros(domain.Nx) #f[x]
+    for i in range(domain.Nx):
+        fs[i] = 6 * domain.eta * domain.U * height.hxs[i]
+    return fs
 
 def manf_rhs(domain, height, pressure):
     fs = np.zeros(domain.Nx) #f[x]
@@ -92,24 +100,19 @@ def manf_rhs(domain, height, pressure):
         fs[i] = (height.hs[i] ** 3) * pressure.pxxs[i] + 3 * height.hs[i]**2 * height.hxs[i] * pressure.pxs[i]
     return fs
 
-def reynolds_rhs(domain, height):
-    fs = np.zeros(domain.Nx) #f[x]
-    for i in range(domain.Nx):
-        fs[i] = 6 * domain.eta * domain.U * height.hxs[i]
-    return fs
 
-#BCs = [0: periodic, 1: fixed]
-#Exact sol = [0: no error, 1: show numerical vs exact error plot and return error]
-# RHS = [0: reynolds, 1: exact]
-
+#------------------------------------------------------------------------------
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 
-
 #height, pressure = corrugated(domain)
+#height, pressure = wedge(domain)
 #height, pressure = step(domain)
 height, pressure = twoStep(domain)
-#height, pressure = wedge(domain)
+#------------------------------------------------------------------------------
 
+# BCs = [0: periodic, 1: fixed]
+# Exact sol = [0: no error, 1: show numerical vs exact error plot and return error]
+# RHS = [0: reynolds, 1: exact]
 
 def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
     
