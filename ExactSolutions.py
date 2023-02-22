@@ -8,6 +8,7 @@ Created on Wed Jan 25 18:24:34 2023
 import domain as dfd
 import _graphics as graph
 import numpy as np
+import scipy as sp
     
 class ExactPressure:
     
@@ -124,53 +125,45 @@ class TwoStepPressure(ExactPressure):
 
 class SquareWavePressure(ExactPressure):
     
-    def __init__(self, domain, height, p0, pN, L):
-        #period L
-        
-        p_str = "%d-Step"%height.n_step
-        n = height.n_step
+    def __init__(self, domain, height, p0, pN):
+
+        p_str = "%d-Step"%height.n_steps
+        n = height.n_steps
         
         rhs = np.zeros(2*n + 1)
         
         rhs[0] = -p0/domain.dx
         rhs[n] = pN/domain.dx
         
-        for k in range(n):
-            rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
-            
-        A = np.identity(n_step)
-        D = np.zeros((n_step-1, n_step-1))
+        for k in range(1, n+1):
+            rhs[n + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
         
-        B = np.zeros((n_step, n_step-1))
-        B_diag_u = [-1/domain.dx]*(n_step-1) 
-        B_diag_l = [1/domain.dx]*(n_step-1)
-        B[:n_step-1][:]+= np.diagflat(B_diag_u)
-        B[1:][:] += np.diagflat(B_diag_l)  
+        print(rhs)
         
-    
-        C = np.zeros((n_step-1, n_step))
-        C_diag = [h**3 for h in height.hs]
-        C_diag_u = [-h**3 for h in height.hs[1:]]
-        C += np.diagflat(C_diag)
-        C[:][1:]+= np.diagflat(C_diag_u)
-        C[-1][0] = -height.hs[0]**3
+        M = np.zeros((2*n+1, 2*n+1))
+        
+        M[0:n+1,0:n+1] = np.identity(n+1)
+        
+        B = np.zeros((n+1, n))
+        B_diag_neg = [-1/domain.dx]*n
+        B_diag_pos = [1/domain.dx]*n
+        B[:n,:] = np.diagflat(B_diag_neg)
+        B[1:,:] += np.diagflat(B_diag_pos)  
 
-        M = np.zeros((n_step * (n_step-1), n_step * (n_step-1)))
-        M[0:n_step][0:n_step] = A
-        M[0:n_step][n_step:] = B
-        M[n_step:][0:n_step] = C
-        M[n_step:][n_step:] = D
-        
+        C = np.zeros((n, n+1))
+        C_diag_neg = [h**3 for h in height.h_steps[1:-1]]
+        C_diag_pos = [-h**3 for h in height.h_steps[2:]]
+        C[:,:n] = np.diagflat(C_diag_neg)
+        C[:,1:] += np.diagflat(C_diag_pos)
 
+        M[0:n+1, n+1:] = B
+        M[n+1:, 0:n+1] = C
         
-        
-        rhs = np.zeros(2*n_step - 1)
-        rhs[0:n_step] = rhs_ss
-        rhs[n_step:] = rhs_ps
-        
+        print(M)
+
         sol = np.linalg.solve(M, rhs)
-        
-        super().__init__(domain, sol, p_str)
+        #sol = [ss,ps]
+        super().__init__(domain, ps, p_str)
 
         
         
