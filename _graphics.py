@@ -62,14 +62,20 @@ def plot_p_h(ps, ps_num, hs, xs, ex_title):
 
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
-     
-    color = 'tab:red'
+    
     ax1.set_xlabel('$x$')
-    ax1.set_ylabel('Pressure $p(x)$', color = color)
-    ax1.plot(xs, ps, color = color)
-    ax1.plot(xs, ps_num, color = color)
-    ax1.tick_params(axis ='y', labelcolor = color)
+    
+    color = 'tab:red'
+    ax1.plot(xs, ps, color = color, label="exact")
+    
+    color ='tab:purple'
+    ax1.plot(xs, ps_num, color = color, label="numerical")
+    
+    ax1.set_ylabel('Pressure $p(x)$', color = 'black')
+    ax1.tick_params(axis ='y', labelcolor = 'black')
     #ax1.set_ylim(0, 0.5)
+    
+    fig.legend()
      
     # Adding Twin Axes to plot using dataset_2
     ax2 = ax1.twinx()

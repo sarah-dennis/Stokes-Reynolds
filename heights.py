@@ -146,10 +146,9 @@ class SquareWaveHeight(Height):
         self.n_steps = n_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
         
-        self.h_steps = np.zeros(n_steps+2)
-        self.h_steps[0] = h_avg
-        for i in range(1, n_steps+2):
-            x = domain.x0 + self.step_width * (i - 0.5)
+        self.h_steps = np.zeros(n_steps+1)
+        for i in range(n_steps+1):
+            x = domain.x0 + self.step_width * (i + 0.5)
             self.h_steps[i] = self.h(x)
         
         self.h_str = "Square Wave Height"

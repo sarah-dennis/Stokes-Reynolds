@@ -85,6 +85,21 @@ def twoStep(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
+# III c. N-Step Height Example
+#------------------------------------------------------------------------------
+# Jan 29: converges 1st order 
+def squareWave(domain):
+    h_avg = 1
+    r = 0.2
+    n_steps = 101
+    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
+    p0 = 0
+    pN = 0
+    pressure = esp.SquareWavePressure(domain, height, p0, pN)
+    return height, pressure
+
+
+#------------------------------------------------------------------------------
 # Numerical solution
 #------------------------------------------------------------------------------
 
@@ -107,7 +122,8 @@ domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 #height, pressure = corrugated(domain)
 #height, pressure = wedge(domain)
 #height, pressure = step(domain)
-height, pressure = twoStep(domain)
+#height, pressure = twoStep(domain)
+height, pressure = squareWave(domain)
 #------------------------------------------------------------------------------
 
 # BCs = [0: periodic, 1: fixed]
