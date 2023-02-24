@@ -54,7 +54,7 @@ def step(domain):
 def twoStep(domain):
     h_left = 2
     h_center = 1
-    h_right = 3
+    h_right = 2
     height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
     p0 = 0
     pN = 0
@@ -67,11 +67,11 @@ def twoStep(domain):
 # Jan 29: converges 1st order 
 def squareWave(domain):
     h_avg = 1
-    r = 0.2
-    n_steps = 5
+    r = 0.5
+    n_steps = 50
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    p0 = 0
-    pN = 0
+    p0 = 1
+    pN = 0.5
     pressure = exp.SquareWavePressure(domain, height, p0, pN)
     return height, pressure
 

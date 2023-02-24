@@ -12,20 +12,19 @@ import numpy as np
     
 class Pressure:
     
-    def __init__(self, domain, ps, p_str):
+    def __init__(self, domain, ps, p0, pN, p_str):
         self.ps = ps
         self.pxs = dfd.center_diff(ps, domain)
         self.pxxs = dfd.center_second_diff(ps, domain)
         self.p_str = p_str
-        self.p0 = ps[0]
-        self.pf = ps[-1]
+        self.p0 = p0
+        self.pf = pN
             
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Exact Pressure (%s)"%self.p_str, "p" )
         
     def plot_all(self, domain):
         graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Exact Pressure (%s)"%self.p_str, ["p", "px", "pxx"])
-
 
 class CorrugatedPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -36,7 +35,7 @@ class CorrugatedPressure(Pressure):
             hx = height.hxs[i]
             #TODO how is this derived?
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
-        super().__init__(domain, ps, p_str)
+        super().__init__(domain, ps,p0, pN,  p_str)
         
 class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -49,7 +48,7 @@ class WedgePressure(Pressure):
             X = domain.xs[i]/L
             Pi = a/(1-a**2)*(1/self.H(X, a)**2 - 1/a**2) - 1/(1-a)*(1/self.H(X, a)-1/a)
             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
-        super().__init__(domain, ps, p_str)
+        super().__init__(domain, ps, p0, pN, p_str)
     def H(self, X, a):
         return a + (1-a)*X
 
@@ -76,7 +75,7 @@ class StepPressure(Pressure):
             else:
                 ps[i] = m_out *(domain.xs[i]-domain.xs[-1]) + pN
         
-        super().__init__(domain, ps, p_str)
+        super().__init__(domain, ps, p0, pN, p_str)
         
 
 class TwoStepPressure(Pressure):
@@ -119,7 +118,7 @@ class TwoStepPressure(Pressure):
             else:
                 ps[i] = m3 *(domain.xs[i]-height.x2) + p2
         
-        super().__init__(domain, ps, p_str)
+        super().__init__(domain, ps, p0, pN, p_str)
 
 
 
@@ -136,8 +135,8 @@ class SquareWavePressure(Pressure):
         
         #B:= top left corner of M, 1/dx diagonal
         B = np.zeros((n+1, n))
-        B_diag_neg = [-1/domain.dx]*n
-        B_diag_pos = [1/domain.dx]*n
+        B_diag_neg = [-1/height.step_width]*n
+        B_diag_pos = [1/height.step_width]*n
         B[0:n , 0:n] += np.diagflat(B_diag_neg)
         B[1:n+1, 0:n] += np.diagflat(B_diag_pos)  
         
@@ -158,8 +157,8 @@ class SquareWavePressure(Pressure):
 
         rhs = np.zeros(2*n + 1)
         
-        rhs[0] = -p0/domain.dx
-        rhs[n] = pN/domain.dx
+        rhs[0] = -p0/height.step_width
+        rhs[n] = pN/height.step_width
         
         for k in range(n):
             rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
@@ -177,17 +176,18 @@ class SquareWavePressure(Pressure):
         
         #ps:= piecewise-linear p evaluated on grid                                                        
         ps = np.zeros(domain.Nx)
-        Lx = int(1 + height.step_width/domain.dx) # num xs per step 
+        Lx = int(height.step_width/domain.dx) # num xs per step 
 
         xa = domain.x0 
         xb = domain.x0 + height.step_width
         pa = p0
-        for i in range(n):
+        for i in range(n+1):
             ps[i*Lx:(i+1)*Lx] = line(xa, xb, Lx, domain.dx, p_slopes[i], pa)
             xa = xb
             xb += height.step_width
-            pa = p_extrema[i]
-        super().__init__(domain, ps, p_str)
+            if i != n:
+                pa = p_extrema[i]
+        super().__init__(domain, ps, p0, pN, p_str)
 
     
 def line(x0, xf, Lx, dx, m, y0): 
@@ -195,7 +195,6 @@ def line(x0, xf, Lx, dx, m, y0):
     for i in range(Lx): 
         xi = x0 + i * dx
         ys[i] = m*(xi-x0) + y0
-
     return ys # [y0, ..., yf]
         
 

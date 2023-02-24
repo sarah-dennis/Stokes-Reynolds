@@ -22,7 +22,7 @@ xf = 1
 
 BC = 1 # 1:= fixed, 0:= periodic
 
-Nx = 200
+Nx = 150
 
 U = 1 #lower surface velocity
 eta = 1 #viscosity
@@ -119,25 +119,18 @@ def solve(domain, height, pressure, RHS=0, FIG=1):
     inf_norm_err = np.max(np.abs(pressure.ps-ps_numsol))
     print ("Solved Nx=%d with error %0.5f"%(domain.Nx, inf_norm_err))  
         
-        if FIG == 1: 
-            graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, height.h_str)
-             
-            pp.figure()
-            title = "Error: Analytic - Numerical Solutions | $N_x=%d$, $dx = %.2f$ \n $%s$"%(domain.Nx, domain.dx, height.h_str)
-            graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
+    if FIG == 1: 
         
-        return inf_norm_err
-    
+        graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, height.h_str)
+             
+        pp.figure()
+        title = "Error: Analytic - Numerical Solutions | $N_x=%d$, $dx = %.2f$ \n $%s$"%(domain.Nx, domain.dx, height.h_str)
+        graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
+        
+
     else: 
         print("Solved Nx=%d"%domain.Nx) 
-        
-        if FIG==1:
-            title = "Numerical Pressure and Height| $N_x=%d$, $dx = %.2f$ \n $%s$ "%(domain.Nx, domain.dx, height.h_str)
-            labels = ["$p(x)$", "$h(x)$"]
-            graph.plot_2D_multi([ps_numsol, height.hs], domain.xs, title, labels)
-        
-      
-        return ps_numsol
+    return inf_norm_err
 
 #------------------------------------------------------------------------------
 # Convergence
@@ -146,7 +139,7 @@ def solve(domain, height, pressure, RHS=0, FIG=1):
 
 #RHS = [0: reynolds, 1: manf]
 
-def conveg(trials=10, N0=10, BC=1, RHS=0):
+def conveg(trials=15, N0=10, BC=1, RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -160,12 +153,13 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         #---- EXAMPLES n----------------------
         #height_k, pressure_k = eg.wedge(domain_k)
         #height_k, pressure_k = eg.corrugated(domain_k)
-        height_k, pressure_k = eg.step(domain_k)
+        #height_k, pressure_k = eg.step(domain_k)
         #height_k, pressure_k = eg.twoStep(domain_k)
+        height_k, pressure_k = eg.squareWave(domain_k)
         #-------------------------------------------------------
 
         
-        infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, 1, FIG=fig)
+        infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
         
         dxs[k] = domain_k.dx
         dxs_sqr[k] = dxs[k]**2
