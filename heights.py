@@ -17,8 +17,9 @@ class Height:
     # h'(xi) = Height.hx[i]
     # h''(xi) = Height.hxx[i]
 
-    def __init__(self, domain, h, h_str, hx=None, hxx=None):
+    def __init__(self, domain, h, h_str, h_eq, hx=None, hxx=None):
         self.h_str = h_str
+        self.h_eq = h_eq
         
         self.hs = [h(x) for x in domain.xs]
         
@@ -37,9 +38,9 @@ class Height:
         graph.plot_2D(self.hs, domain.xs, "Height: %s"%self.h_str, "h" )
 
 
-    def plot_all(self, domain):
-        #graph.plot_2D_multi([self.hs, self.hxs, self.hxxs], domain.xs, "Height %s"%self.h_str, ["h", "hx", "hxx"])
-        graph.plot_2D_multi([self.hs, self.hxs], domain.xs, "Height %s"%self.h_str, ["h", "hx"])
+    def plot_derivs(self, domain):
+        graph.plot_2D_multi([self.hs, self.hxs, self.hxxs], domain.xs, "Height %s"%self.h_str, ["h", "hx", "hxx"])
+        #graph.plot_2D_multi([self.hs, self.hxs], domain.xs, "Height %s"%self.h_str, ["h", "hx"])
 
 #------------------------------------------------------------------------------
 # Example Height Functions
@@ -54,10 +55,10 @@ class CorrugatedHeight(Height):
         self.r = r 
         self.k = k
         
-        self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) #for graph title'
+        self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) 
         self.h_str = "Sinuosoidal Height"
 
-        super().__init__(domain, self.h, self.h_str, self.hx)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx)
 
     def h(self, x):
         return self.h_mid * (1 + self.r * np.cos(self.k*x))    
@@ -77,10 +78,10 @@ class WedgeHeight(Height):
         self.xf = domain.xf
         self.h_max = m * (domain.x0 - domain.xf) + h_min
         
-        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0) #for graph title
+        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
         self.h_str = "Slider Bearing"
         
-        super().__init__(domain, self.h, self.h_str, self.hx)
+        super().__init__(domain, self.h, self.h_str,self.h_eq, self.hx)
 
 
     def h(self, x):
@@ -102,10 +103,10 @@ class StepHeight(Height):
         self.l_left = self.x1-domain.x0
         self.l_right = domain.xf - self.x1
         
-        self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right) #for graph title
+        self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
         self.h_str = "Step Height"
         
-        super().__init__(domain, self.h, self.h_str)
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
 
     def h(self, x):
         if x <= self.x1:
@@ -125,9 +126,9 @@ class TwoStepHeight(Height):
         self.l2 = self.x2 - self.x1
         self.l3 = domain.xf - self.x2
         self.h_str = "Two Step Height"
-        self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) #for graph title
+        self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) 
         
-        super().__init__(domain, self.h, self.h_str)
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
 
     def h(self, x):
         if x <= self.x1:
@@ -154,7 +155,7 @@ class SquareWaveHeight(Height):
         self.h_str = "Square Wave Height"
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
 
-        super().__init__(domain, self.h, self.h_str)
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
         
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:

@@ -13,8 +13,7 @@ import _graphics as graph
 
 import domain as dfd
 
-import ExactSolutions as esp
-import heights as hgt
+import examples_1D as eg
 #------------------------------------------------------------------------------
 # Domain 
 #------------------------------------------------------------------------------
@@ -28,81 +27,15 @@ Nx = 200
 U = 1 #lower surface velocity
 eta = 1 #viscosity
 
-# Construct Height and Exact Pressure on grid...
-
 #------------------------------------------------------------------------------
-# I. Corrugated Height example
+domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 #------------------------------------------------------------------------------
-# Jan 29: converges 2nd order 
-def corrugated(domain):
-    h_mid = 1 
-    r = 0.5
-    k = 2*np.pi
-    height = hgt.CorrugatedHeight(domain, h_mid, r, k)
-    p0 = 0
-    pN = 0
-    pressure = esp.CorrugatedPressure(domain, height, p0, pN)
-    return height, pressure
-
+#height, pressure = eg. corrugated(domain)
+#height, pressure = eg.wedge(domain)
+#height, pressure = eg.step(domain)
+#height, pressure = eg.twoStep(domain)
+height, pressure = eg.squareWave(domain)
 #------------------------------------------------------------------------------
-# II. Wedge Height example
-#------------------------------------------------------------------------------
-def wedge(domain):
-    h_min = 0.1
-    m = -2
-    height = hgt.WedgeHeight(domain, h_min, m)
-    p0 = 0
-    pN = 0
-    pressure = esp.WedgePressure(domain, height, p0, pN)
-    #TODO add wedge exact pressure
-    return height, pressure
-
-#------------------------------------------------------------------------------
-# III a. Step Height Example
-#------------------------------------------------------------------------------
-# Jan 29: converges 1st order 
-def step(domain):
-    h_left = 0.3
-    h_right = 0.1
-    height = hgt.StepHeight(domain, h_left, h_right)
-    p0 = 0
-    pN = 0
-    pressure = esp.StepPressure(domain, height, p0, pN)
-    return height, pressure
-
-#------------------------------------------------------------------------------
-# III b. Two Step Height Example
-#------------------------------------------------------------------------------
-# Jan 29: converges 1st order 
-def twoStep(domain):
-    h_left = 2
-    h_center = 1
-    h_right = 3
-    height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
-    p0 = 0
-    pN = 0
-    pressure = esp.TwoStepPressure(domain, height, p0, pN)
-    return height, pressure
-
-#------------------------------------------------------------------------------
-# III c. N-Step Height Example
-#------------------------------------------------------------------------------
-# Jan 29: converges 1st order 
-def squareWave(domain):
-    h_avg = 1
-    r = 0.2
-    n_steps = 101
-    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    p0 = 0
-    pN = 0
-    pressure = esp.SquareWavePressure(domain, height, p0, pN)
-    return height, pressure
-
-
-#------------------------------------------------------------------------------
-# Numerical solution
-#------------------------------------------------------------------------------
-
 def reynolds_rhs(domain, height): 
     fs = np.zeros(domain.Nx) #f[x]
     for i in range(domain.Nx):
@@ -114,26 +47,11 @@ def manf_rhs(domain, height, pressure):
     for i in range(domain.Nx):
         fs[i] = (height.hs[i] ** 3) * pressure.pxxs[i] + 3 * height.hs[i]**2 * height.hxs[i] * pressure.pxs[i]
     return fs
-
-
 #------------------------------------------------------------------------------
-domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
-
-#height, pressure = corrugated(domain)
-#height, pressure = wedge(domain)
-#height, pressure = step(domain)
-#height, pressure = twoStep(domain)
-height, pressure = squareWave(domain)
+# Numerical solution
 #------------------------------------------------------------------------------
-
-# BCs = [0: periodic, 1: fixed]
-# Exact sol = [0: no error, 1: show numerical vs exact error plot and return error]
 # RHS = [0: reynolds, 1: exact]
-
-def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
-    
-    if exactSol == 1:
-        inf_norm_err = 0
+def solve(domain, height, pressure, RHS=0, FIG=1):
 
     # Reynolds RHS = 6 eta U hx
     if RHS == 0: 
@@ -198,11 +116,8 @@ def solve(domain, height, pressure, RHS=0, exactSol=1, FIG=1):
     ps_numsol = np.linalg.solve(D, fs)
     
     # Plotting and error 
-    
-    if exactSol == 1:
-        
-        inf_norm_err = np.max(np.abs(pressure.ps-ps_numsol))
-        print ("Solved Nx=%d with error %0.5f"%(domain.Nx, inf_norm_err))  
+    inf_norm_err = np.max(np.abs(pressure.ps-ps_numsol))
+    print ("Solved Nx=%d with error %0.5f"%(domain.Nx, inf_norm_err))  
         
         if FIG == 1: 
             graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, height.h_str)
@@ -243,10 +158,10 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
         
         #---- EXAMPLES n----------------------
-        #height_k, pressure_k = wedge(domain_k)
-        #height_k, pressure_k = corrugated(domain_k)
-        height_k, pressure_k = step(domain_k)
-        #height_k, pressure_k = twoStep(domain_k)
+        #height_k, pressure_k = eg.wedge(domain_k)
+        #height_k, pressure_k = eg.corrugated(domain_k)
+        height_k, pressure_k = eg.step(domain_k)
+        #height_k, pressure_k = eg.twoStep(domain_k)
         #-------------------------------------------------------
 
         

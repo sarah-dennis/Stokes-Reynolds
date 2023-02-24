@@ -8,9 +8,9 @@ Created on Wed Jan 25 18:24:34 2023
 import domain as dfd
 import _graphics as graph
 import numpy as np
-import scipy as sp
+
     
-class ExactPressure:
+class Pressure:
     
     def __init__(self, domain, ps, p_str):
         self.ps = ps
@@ -27,7 +27,7 @@ class ExactPressure:
         graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Exact Pressure (%s)"%self.p_str, ["p", "px", "pxx"])
 
 
-class CorrugatedPressure(ExactPressure):
+class CorrugatedPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Corrugated"
         ps = np.zeros(domain.Nx)
@@ -38,7 +38,7 @@ class CorrugatedPressure(ExactPressure):
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
         super().__init__(domain, ps, p_str)
         
-class WedgePressure(ExactPressure):
+class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Wedge"
         ps = np.zeros(domain.Nx)
@@ -53,7 +53,7 @@ class WedgePressure(ExactPressure):
     def H(self, X, a):
         return a + (1-a)*X
 
-class StepPressure(ExactPressure):
+class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         p_str = "Step"
@@ -79,7 +79,7 @@ class StepPressure(ExactPressure):
         super().__init__(domain, ps, p_str)
         
 
-class TwoStepPressure(ExactPressure):
+class TwoStepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         p_str = "Two Step"
@@ -123,7 +123,7 @@ class TwoStepPressure(ExactPressure):
 
 
 
-class SquareWavePressure(ExactPressure):
+class SquareWavePressure(Pressure):
     
     def __init__(self, domain, height, p0, pN):
 
@@ -164,68 +164,39 @@ class SquareWavePressure(ExactPressure):
         for k in range(n):
             rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
         
-        print("rhs: ", rhs)
+        #print("rhs: ", rhs)
         
         #---------------
         sol = np.linalg.solve(M, rhs)
         
         p_slopes = sol[0:n+1]
         p_extrema =  sol[n+1:2*n+1]
-        print("slopes: ", p_slopes)
-        print("pressures: ", p_extrema)
+        #print("slopes: ", p_slopes)
+        #print("pressures: ", p_extrema)
         #---------------
         
-        #construct ps (linear pressure on grid) from p_extrema and p_slopes
-        
+        #ps:= piecewise-linear p evaluated on grid                                                        
         ps = np.zeros(domain.Nx)
+        Lx = int(1 + height.step_width/domain.dx) # num xs per step 
 
-        x_prev = domain.x0 
-        p_prev = p0
-        slope_k = p_slopes[0]
-        step_k=0
-        
-        for i in range(domain.Nx):
-            x = domain.xs[i]
-           
-            if x > x_prev + height.step_width and step_k < n:
-                step_k += 1
-                
-                p_prev = p_extrema[step_k-1]
-                slope_k = p_slopes[step_k]
-                x_prev += height.step_width
-                
-            ps[i] = slope_k * (x - x_prev) + p_prev
-            
-        
+        xa = domain.x0 
+        xb = domain.x0 + height.step_width
+        pa = p0
+        for i in range(n):
+            ps[i*Lx:(i+1)*Lx] = line(xa, xb, Lx, domain.dx, p_slopes[i], pa)
+            xa = xb
+            xb += height.step_width
+            pa = p_extrema[i]
         super().__init__(domain, ps, p_str)
 
     
+def line(x0, xf, Lx, dx, m, y0): 
+    ys = np.zeros(Lx)
+    for i in range(Lx): 
+        xi = x0 + i * dx
+        ys[i] = m*(xi-x0) + y0
 
-
-
-
-
-
-
-def line(x0, xf, Nx, m, y0):
-    ys = np.zeros(Nx)
-    dx = (xf - x0)/Nx
-    
-    for i in range(Nx):
-        x = x0 + i * dx
-        ys[i] = m*(x-x0) + y0
-    return ys[i]
+    return ys # [y0, ..., yf]
         
 
-
-
-
-
-
-
-
-
-
-
-        
         
