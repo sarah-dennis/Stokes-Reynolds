@@ -21,11 +21,10 @@ x0 = 0
 xf = 1
 
 BC = 1 # 1:= fixed, 0:= periodic
-
-Nx = 150
+Nx = 1000
 
 U = 1 #lower surface velocity
-eta = 1 #viscosity
+eta = 2 #viscosity
 
 #------------------------------------------------------------------------------
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
@@ -51,7 +50,7 @@ def manf_rhs(domain, height, pressure):
 # Numerical solution
 #------------------------------------------------------------------------------
 # RHS = [0: reynolds, 1: exact]
-def solve(domain, height, pressure, RHS=0, FIG=1):
+def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
 
     # Reynolds RHS = 6 eta U hx
     if RHS == 0: 
@@ -139,7 +138,7 @@ def solve(domain, height, pressure, RHS=0, FIG=1):
 
 #RHS = [0: reynolds, 1: manf]
 
-def conveg(trials=15, N0=10, BC=1, RHS=0):
+def conveg(trials=10, N0=10, BC=1, RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)

@@ -124,15 +124,12 @@ class TwoStepPressure(Pressure):
 
 class SquareWavePressure(Pressure):
     
-    def __init__(self, domain, height, p0, pN):
-
+    def build_Matrix(domain, height, p0, pN):
         n = height.n_steps
-        
-        p_str = "%d-Step Square Wave"%n
-
+        hs = height.h_steps 
         #---------------
         M = np.zeros((2*n + 1, 2*n + 1))
-        
+
         #B:= top left corner of M, 1/dx diagonal
         B = np.zeros((n+1, n))
         B_diag_neg = [-1/height.step_width]*n
@@ -142,60 +139,71 @@ class SquareWavePressure(Pressure):
         
         #C:= bottom right corner of M, hj-hi diagonal
         C = np.zeros((n, n+1))
-        C_diag_neg = [-h**3 for h in height.h_steps[0:n]] #h_steps = [h1, h2,...hn+1]
-        C_diag_pos = [h**3 for h in height.h_steps[1:n+1]]
+        C_diag_neg = [-h**3 for h in hs[0:n]] 
+        C_diag_pos = [h**3 for h in hs[1:n+1]]
         C[0:n, 0:n] += np.diagflat(C_diag_neg)
         C[0:n, 1:n+1] += np.diagflat(C_diag_pos)
 
-        #---------------
+        #...
         M[0:n+1, 0:n+1] = np.identity(n+1)
         M[0:n+1, n+1:2*n+1] = B
         M[n+1:2*n+1, 0:n+1] = C
-        #print("M: \n", M)
         
         #---------------
-
         rhs = np.zeros(2*n + 1)
         
         rhs[0] = -p0/height.step_width
         rhs[n] = pN/height.step_width
         
         for k in range(n):
-            rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
+            rhs[n+1 + k] = (hs[k+1] - hs[k]) * 6*domain.eta*domain.U
         
+        return M, rhs
+    
+    def __init__(self, domain, height, p0, pN):
+        p_str = "%d-Step Square Wave"%height.n_steps
+
+        #---------------
+        M, rhs = self.build_Matrix(height.n_steps)
+        
+        #print("M: \n", M)
+        #print("condition number:", np.linalg.cond(M))
         #print("rhs: ", rhs)
         
         #---------------
         sol = np.linalg.solve(M, rhs)
         
-        p_slopes = sol[0:n+1]
-        p_extrema =  sol[n+1:2*n+1]
+        p_slopes = sol[0:height.n_steps+1]
+        p_extrema =  sol[height.n_steps+1:2*height.n_steps+1]
         #print("slopes: ", p_slopes)
         #print("pressures: ", p_extrema)
         #---------------
-        
+
         #ps:= piecewise-linear p evaluated on grid                                                        
         ps = np.zeros(domain.Nx)
-        Lx = int(height.step_width/domain.dx) # num xs per step 
+        
+        k = 0
+        x_k = domain.x0
+        p_k = p0
+        slope_k = p_slopes[k]
 
-        xa = domain.x0 
-        xb = domain.x0 + height.step_width
-        pa = p0
-        for i in range(n+1):
-            ps[i*Lx:(i+1)*Lx] = line(xa, xb, Lx, domain.dx, p_slopes[i], pa)
-            xa = xb
-            xb += height.step_width
-            if i != n:
-                pa = p_extrema[i]
+        for i in range(domain.Nx):
+            x = domain.xs[i]
+            if x > x_k + height.step_width and k < height.n_steps:
+                k += 1
+                x_k += height.step_width
+                p_k = p_extrema[k-1] #p_extrema = [p1, ..., pN-1]
+                slope_k = p_slopes[k]
+
+            ps[i] = slope_k*(x-x_k) + p_k
+  
         super().__init__(domain, ps, p0, pN, p_str)
-
-    
-def line(x0, xf, Lx, dx, m, y0): 
-    ys = np.zeros(Lx)
-    for i in range(Lx): 
-        xi = x0 + i * dx
-        ys[i] = m*(xi-x0) + y0
-    return ys # [y0, ..., yf]
+        
+        
+        
+        
+        
+        
+        
         
 
-        
