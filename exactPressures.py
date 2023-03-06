@@ -124,7 +124,7 @@ class TwoStepPressure(Pressure):
 
 class SquareWavePressure(Pressure):
     
-    def build_Matrix(domain, height, p0, pN):
+    def build_Matrix(self, domain, height, p0, pN):
         n = height.n_steps
         hs = height.h_steps 
         #---------------
@@ -164,7 +164,7 @@ class SquareWavePressure(Pressure):
         p_str = "%d-Step Square Wave"%height.n_steps
 
         #---------------
-        M, rhs = self.build_Matrix(height.n_steps)
+        M, rhs = self.build_Matrix(domain, height, p0, pN)
         
         #print("M: \n", M)
         #print("condition number:", np.linalg.cond(M))
@@ -178,8 +178,7 @@ class SquareWavePressure(Pressure):
         #print("slopes: ", p_slopes)
         #print("pressures: ", p_extrema)
         #---------------
-
-        #ps:= piecewise-linear p evaluated on grid                                                        
+                                                   
         ps = np.zeros(domain.Nx)
         
         k = 0

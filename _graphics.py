@@ -47,15 +47,16 @@ def plot_2D_multi(fs, xs, title, labels):
 def plot_2D(fs, xs, title, label):
     fig = pp.figure()
     pp.plot(xs, fs, label=label, color='g')
+
+    pp.title(title)
     
-    
+    pp.xlabel('x')
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
-
-    pp.xlabel('x')
+    
     #ax.set_ylabel()
-    pp.title(title)
-    fig.legend()
+    #fig.legend()
+    
     return fig
 
 def plot_p_h(ps, ps_num, hs, xs, ex_title):
@@ -77,7 +78,7 @@ def plot_p_h(ps, ps_num, hs, xs, ex_title):
     
     fig.legend()
      
-    # Adding Twin Axes to plot using dataset_2
+    # Adding Twin Axes to plot dataset_2
     ax2 = ax1.twinx()
      
     color = 'tab:blue'

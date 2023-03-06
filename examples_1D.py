@@ -68,13 +68,13 @@ def twoStep(domain):
 def squareWave(domain):
     h_avg = 1
     r = 0.2
-    n_steps = 200
+    n_steps = 84
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
     
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     p0 = 1
-    pN = 0.9
+    pN = 2
     pressure = exp.SquareWavePressure(domain, height, p0, pN)
     return height, pressure
 

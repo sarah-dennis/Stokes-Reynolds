@@ -23,8 +23,8 @@ xf = 1
 BC = 1 # 1:= fixed, 0:= periodic
 Nx = 1000
 
-U = 1 #lower surface velocity
-eta = 2 #viscosity
+U = 10 #lower surface velocity
+eta = 1 #viscosity
 
 #------------------------------------------------------------------------------
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
@@ -123,7 +123,7 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, height.h_str)
              
         pp.figure()
-        title = "Error: Analytic - Numerical Solutions | $N_x=%d$, $dx = %.2f$ \n $%s$"%(domain.Nx, domain.dx, height.h_str)
+        title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)
         graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
         
 
