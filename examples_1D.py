@@ -69,6 +69,7 @@ def squareWave(domain):
     h_avg = 1
     r = 0.2
     n_steps = 84
+    n_steps = 4
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
     
