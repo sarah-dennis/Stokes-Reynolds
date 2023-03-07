@@ -9,7 +9,6 @@ import domain as dfd
 import _graphics as graph
 import numpy as np
 
-    
 class Pressure:
     
     def __init__(self, domain, ps, p0, pN, p_str):
@@ -192,7 +191,7 @@ class SquareWavePressure(Pressure):
                 k += 1
                 x_k += height.step_width
                 p_k = p_extrema[k-1] #p_extrema = [p1, ..., pN-1]
-                slope_k = p_slopes[k]
+                slope_k = p_slopes[k] #slopes = [s1, ..., sN-1, sN]
 
             ps[i] = slope_k*(x-x_k) + p_k
   

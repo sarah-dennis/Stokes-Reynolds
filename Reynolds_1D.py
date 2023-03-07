@@ -12,28 +12,35 @@ from matplotlib import pyplot as pp
 import _graphics as graph
 
 import domain as dfd
+#import heights as hgt
+#import exactPressures as exp
 
-import examples_1D as eg
+import examples_1D as eg 
 #------------------------------------------------------------------------------
-# Domain 
+# Domain & Discretization
 #------------------------------------------------------------------------------
-x0 = 0
-xf = 1
+x0 = 0      # left boundary 
+xf = 1      # right boundary
 
-BC = 1 # 1:= fixed, 0:= periodic
-Nx = 1000
+Nx = 1000   # Number of grid points
+BC = 1      # 1:= fixed, 0:= periodic
 
-U = 10 #lower surface velocity
-eta = 1 #viscosity
+U = 10      # lower surface velocity
+eta = 1     # flouid viscosity
 
-#------------------------------------------------------------------------------
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
+
 #------------------------------------------------------------------------------
-#height, pressure = eg. corrugated(domain)
+# Height & Pressure
+#------------------------------------------------------------------------------
+#height, pressure = eg.corrugated(domain)
 #height, pressure = eg.wedge(domain)
 #height, pressure = eg.step(domain)
 #height, pressure = eg.twoStep(domain)
 height, pressure = eg.squareWave(domain)
+
+#------------------------------------------------------------------------------
+# RHS
 #------------------------------------------------------------------------------
 def reynolds_rhs(domain, height): 
     fs = np.zeros(domain.Nx) #f[x]
@@ -46,6 +53,7 @@ def manf_rhs(domain, height, pressure):
     for i in range(domain.Nx):
         fs[i] = (height.hs[i] ** 3) * pressure.pxxs[i] + 3 * height.hs[i]**2 * height.hxs[i] * pressure.pxs[i]
     return fs
+
 #------------------------------------------------------------------------------
 # Numerical solution
 #------------------------------------------------------------------------------
@@ -131,50 +139,3 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         print("Solved Nx=%d"%domain.Nx) 
     return inf_norm_err
 
-#------------------------------------------------------------------------------
-# Convergence
-#------------------------------------------------------------------------------   
-#BCs = [0: periodic, 1: fixed]
-
-#RHS = [0: reynolds, 1: manf]
-
-def conveg(trials=10, N0=10, BC=1, RHS=0):
-    Nx_k = N0
-    infNorms = np.zeros(trials)
-    dxs = np.zeros(trials)
-    dxs_sqr = np.zeros(trials)
-    fig=0
-    for k in range(trials):
-        if k == trials-1: fig=1
-        
-        domain_k = dfd.Domain(x0, xf, eta, U, Nx_k, BC)
-        
-        #---- EXAMPLES n----------------------
-        #height_k, pressure_k = eg.wedge(domain_k)
-        #height_k, pressure_k = eg.corrugated(domain_k)
-        #height_k, pressure_k = eg.step(domain_k)
-        #height_k, pressure_k = eg.twoStep(domain_k)
-        height_k, pressure_k = eg.squareWave(domain_k)
-        #-------------------------------------------------------
-
-        
-        infNorms[k] = solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
-        
-        dxs[k] = domain_k.dx
-        dxs_sqr[k] = dxs[k]**2
-        
-        Nx_k *= 2
-    
-    pp.figure(trials+1)
-
-    pp.loglog(dxs, dxs, color='b', label='$\mathcal{O}(dx)$')
-    pp.loglog(dxs, dxs_sqr, color='g', label='$\mathcal{O}(dx^2)$')
-    pp.loglog(dxs, infNorms, color='r', label='$L_{\infty}$ Norm Error')
-
-
-    
-    pp.xlabel('Grid spacing $dx$')
-
-    pp.legend(loc='lower right')
-    pp.title("Convergence for %s"%(height_k.h_str), fontweight ="bold")
-    

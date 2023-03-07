@@ -62,9 +62,9 @@ def twoStep(domain):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# III c. N-Step Height Example
+# IV c. N-Step Height Example
 #------------------------------------------------------------------------------
-# Jan 29: converges 1st order 
+# Mar 6: converges 1st order 
 def squareWave(domain):
     h_avg = 1
     r = 0.2
