@@ -25,6 +25,7 @@ xf = 1      # right boundary
 Nx = 1000   # Number of grid points
 BC = 1      # 1:= fixed, 0:= periodic
 
+
 U = 10      # lower surface velocity
 eta = 1     # flouid viscosity
 
@@ -133,9 +134,5 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         pp.figure()
         title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)
         graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
-        
-
-    else: 
-        print("Solved Nx=%d"%domain.Nx) 
+  
     return inf_norm_err
-
