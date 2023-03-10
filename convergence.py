@@ -9,13 +9,15 @@ import Reynolds_1D as ry
 import domain as dfd
 import examples_1D as eg
 from matplotlib import pyplot as pp
+import _graphics as g
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
 #BCs = [0: periodic, 1: fixed]
 #RHS = [0: reynolds, 1: manufactured]
 
-def conveg(trials=10, N0=10, BC=1, RHS=0):
+# dx -> 0
+def conveg(trials=10, N0=50, BC=1, RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -33,9 +35,8 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
         #height_k, pressure_k = eg.twoStep(domain_k)
         height_k, pressure_k = eg.squareWave(domain_k)
         #-------------------------------------------------------
-
-        
-        infNorms[k] = ry.solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
+        err_k, ps_k = ry.solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
+        infNorms[k] = err_k
         
         dxs[k] = domain_k.dx
         dxs_sqr[k] = dxs[k]**2
@@ -47,11 +48,52 @@ def conveg(trials=10, N0=10, BC=1, RHS=0):
     pp.loglog(dxs, dxs, color='b', label='$\mathcal{O}(dx)$')
     pp.loglog(dxs, dxs_sqr, color='g', label='$\mathcal{O}(dx^2)$')
     pp.loglog(dxs, infNorms, color='r', label='$L_{\infty}$ Norm Error')
-
-
     
     pp.xlabel('Grid spacing $dx$')
 
     pp.legend(loc='lower right')
     pp.title("Convergence for %s"%(height_k.h_str), fontweight ="bold")
+
+
+#------------------------------------------------------------------------------
+# Parameter variation
+#------------------------------------------------------------------------------
+
+def shorten_steps(trials=7, n_steps=3):
+    n_steps_k = n_steps
+    domain = dfd.Domain(ry.x0, ry.xf, ry.eta, ry.U, ry.Nx, 1)
     
+    v = np.zeros(trials)
+    x = np.zeros(trials)
+    
+    for k in range(trials):
+        height_k, pressure_k = eg.squareWave(domain, n_steps_k)
+        err_k, ps_k = ry.solve(domain, height_k, pressure_k, 0, 1)
+        
+        v[k] = np.abs(ps_k[1]-ps_k[0])
+
+        x[k] = n_steps_k
+                
+        n_steps_k *=2
+        
+    g.plot_2D(v, x, "Wave Height as steps length decreases", "$|p_1-p_0|$", "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

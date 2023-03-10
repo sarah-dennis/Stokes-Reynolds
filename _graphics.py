@@ -44,17 +44,15 @@ def plot_2D_multi(fs, xs, title, labels):
     fig.legend()
     return fig
     
-def plot_2D(fs, xs, title, label):
+def plot_2D(fs, xs, title, y_label, x_label):
     fig = pp.figure()
-    pp.plot(xs, fs, label=label, color='g')
+    pp.plot(xs, fs, label=y_label, color='g')
 
     pp.title(title)
     
-    pp.xlabel('x')
-    #ax.set_xlim([0, 1])
-    #ax.set_ylim([0, 1])
+    pp.xlabel(x_label)
     
-    #ax.set_ylabel()
+    pp.ylabel(y_label)
     #fig.legend()
     
     return fig

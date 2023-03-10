@@ -22,7 +22,7 @@ import examples_1D as eg
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-Nx = 1000   # Number of grid points
+Nx = 8000   # Number of grid points
 BC = 1      # 1:= fixed, 0:= periodic
 
 
@@ -133,6 +133,9 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
              
         pp.figure()
         title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)
-        graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error")
-  
-    return inf_norm_err
+
+        graph.plot_2D(pressure.ps-ps_numsol, domain.xs, title, "error", "dx")
+        
+    return inf_norm_err, ps_numsol
+
+
