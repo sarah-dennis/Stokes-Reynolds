@@ -7,6 +7,7 @@ Created on Wed Feb 22 10:01:42 2023
 import heights as hgt
 import exactPressures as exp
 import numpy as np
+
 #------------------------------------------------------------------------------
 # I. Corrugated Height example
 #------------------------------------------------------------------------------
@@ -65,9 +66,9 @@ def twoStep(domain):
 # IV c. N-Step Height Example
 #------------------------------------------------------------------------------
 # Mar 6: converges 1st order 
-def squareWave(domain, n_steps=11):
+def squareWave(domain, n_steps=25, r=0.1):
     h_avg = 1
-    r = 0.2
+    
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
     

@@ -57,7 +57,7 @@ def plot_2D(fs, xs, title, y_label, x_label):
     
     return fig
 
-def plot_p_h(ps, ps_num, hs, xs, ex_title):
+def plot_p_h(ps, ps_num, hs, xs, title):
 
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
@@ -86,7 +86,7 @@ def plot_p_h(ps, ps_num, hs, xs, ex_title):
     ax2.set_ylim(0, 3.5)
      
     # Adding title
-    pp.title('Pressure for %s'%ex_title, fontweight ="bold")
+    pp.title(title, fontweight ="bold")
      
     # Show plot
     pp.show()

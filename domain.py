@@ -17,48 +17,48 @@ class Domain:
         self.eta = eta
         self.U = U
         
-        if BC == 0: #periodic
+        if BC == "periodic": #periodic
             self.dx = (xf - x0)/(Nx)
-        elif BC == 1: #fixed
+        elif BC == "fixed": #fixed
             self.dx = (xf - x0)/(Nx-1)
         
         self.xs = [x0 + i*self.dx for i in range(Nx)]
   
     
-def center_diff(fs, Domain):
-    D_lower = -1*np.ones(Domain.Nx)
-    D_upper = np.ones(Domain.Nx)
-    D = np.diagflat(D_lower[1:Domain.Nx], -1) + np.diagflat(D_upper[0:Domain.Nx-1], 1)
+def center_diff(fs, domain):
+    D_lower = -1*np.ones(domain.Nx)
+    D_upper = np.ones(domain.Nx)
+    D = np.diagflat(D_lower[1:domain.Nx], -1) + np.diagflat(D_upper[0:domain.Nx-1], 1)
     
-    if Domain.BC == 0: #periodic 
-        D[0][Domain.Nx-1] = -1
-        D[Domain.Nx-1][0] = 1
+    if domain.BC == "periodic": #periodic 
+        D[0][domain.Nx-1] = -1
+        D[domain.Nx-1][0] = 1
         
-    elif Domain.BC == 1: #prescribed 
+    elif domain.BC == "fixed": #prescribed 
         None # boundary heights are not used
         
-    D = D/(2*Domain.dx)
+    D = D/(2*domain.dx)
         
     fs_dx = D@fs 
  
     return fs_dx
       
-def center_second_diff(fs, Domain):
-    D_lower = np.ones(Domain.Nx-1)
-    D_upper = np.ones(Domain.Nx-1)
-    D_center = -2*np.ones(Domain.Nx)
+def center_second_diff(fs, domain):
+    D_lower = np.ones(domain.Nx-1)
+    D_upper = np.ones(domain.Nx-1)
+    D_center = -2*np.ones(domain.Nx)
     D = np.diagflat(D_lower, -1) +  np.diagflat(D_center, 0)+ np.diagflat(D_upper, 1)
     
-    if Domain.BC == 0: #periodic 
-        D[0][Domain.Nx-1] = 1
-        D[Domain.Nx-1][0] = 1
+    if domain.BC == 0: #periodic 
+        D[0][domain.Nx-1] = 1
+        D[domain.Nx-1][0] = 1
         
-    elif Domain.BC == 1: #prescribed 
+    elif domain.BC == 1: #prescribed 
         #None # boundary heights are not used
-        D[0][Domain.Nx-1] = 0
-        D[Domain.Nx-1][0] = 0
+        D[0][domain.Nx-1] = 0
+        D[domain.Nx-1][0] = 0
         
-    D = D/(Domain.dx**2)
+    D = D/(domain.dx**2)
         
     fs_dxx = D@fs 
  

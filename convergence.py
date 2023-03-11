@@ -17,7 +17,7 @@ import _graphics as g
 #RHS = [0: reynolds, 1: manufactured]
 
 # dx -> 0
-def conveg(trials=10, N0=50, BC=1, RHS=0):
+def conveg(trials=10, N0=50, BC="fixed", RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -58,25 +58,32 @@ def conveg(trials=10, N0=50, BC=1, RHS=0):
 #------------------------------------------------------------------------------
 # Parameter variation
 #------------------------------------------------------------------------------
+#square wave: period --> 0
+def shorten_steps(trials=8, n_steps_0=20):
+    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
+    n_steps_k = n_steps_0
 
-def shorten_steps(trials=7, n_steps=3):
-    n_steps_k = n_steps
-    domain = dfd.Domain(ry.x0, ry.xf, ry.eta, ry.U, ry.Nx, 1)
-    
     v = np.zeros(trials)
     x = np.zeros(trials)
     
     for k in range(trials):
-        height_k, pressure_k = eg.squareWave(domain, n_steps_k)
-        err_k, ps_k = ry.solve(domain, height_k, pressure_k, 0, 1)
+        height_k, pressure_k = eg.squareWave(ry.domain, n_steps)
+        err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
-        v[k] = np.abs(ps_k[1]-ps_k[0])
+        #v[k] = np.abs(ps_k[1]-ps_k[0])
+        #title = "Pressure Drop as steps width decreases"
+        #y_axis = "$|p_1-p_0|$"
+        
+        v[k] = np.max(ps_k)
+        title = "Max Pressure as steps width decreases"
+        y_axis = "$p_{max}$"
+        
 
         x[k] = n_steps_k
                 
-        n_steps_k *=2
+        n_steps_k = n_steps_k * 2 + 1
         
-    g.plot_2D(v, x, "Wave Height as steps length decreases", "$|p_1-p_0|$", "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+    g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
 
 
 

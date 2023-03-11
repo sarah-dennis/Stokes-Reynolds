@@ -25,6 +25,12 @@ class Pressure:
     def plot_all(self, domain):
         graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Exact Pressure (%s)"%self.p_str, ["p", "px", "pxx"])
 
+class UnknownPressure(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Exact Pressure Unknown"
+        ps = np.zeros(domain.Nx)
+        super().__init__(domain, ps, p0, pN,  p_str)
+
 class CorrugatedPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Corrugated"
@@ -34,7 +40,7 @@ class CorrugatedPressure(Pressure):
             hx = height.hxs[i]
             #TODO how is this derived?
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
-        super().__init__(domain, ps,p0, pN,  p_str)
+        super().__init__(domain, ps, p0, pN,  p_str)
         
 class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -185,15 +191,23 @@ class SquareWavePressure(Pressure):
         p_k = p0
         slope_k = p_slopes[k]
 
-        for i in range(domain.Nx):
+        for i in range(domain.Nx-1):
             x = domain.xs[i]
-            if x > x_k + height.step_width and k < height.n_steps:
+
+            if x > domain.x0 + (k+1)*height.step_width:
+
                 k += 1
-                x_k += height.step_width
+                
+                #x_k += height.step_width
+                x_k = domain.x0 + k*height.step_width
+                
                 p_k = p_extrema[k-1] #p_extrema = [p1, ..., pN-1]
+         
                 slope_k = p_slopes[k] #slopes = [s1, ..., sN-1, sN]
 
             ps[i] = slope_k*(x-x_k) + p_k
+        
+        ps[-1] = pN
   
         super().__init__(domain, ps, p0, pN, p_str)
         
