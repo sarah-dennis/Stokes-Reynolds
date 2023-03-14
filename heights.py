@@ -47,7 +47,16 @@ class Height:
 #------------------------------------------------------------------------------
 # All example heights must have a height function h(self, x) 
 # First and second derivative height functions hx(self, x) and hxx(self, x) can be specified
-
+class constHeight(Height):
+    def __init__(self, domain, h0):
+        self.h0 = h0
+        self.h_str = "Constant Height"
+        self.h_eq = "h(x) = %.2f"%h0
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
+        
+    def h(self, x):
+        return self.h0
+    
 class CorrugatedHeight(Height):
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, domain, h_mid, r, k):
@@ -157,7 +166,6 @@ class SquareWaveHeight(Height):
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
         super().__init__(domain, self.h, self.h_str, self.h_eq)
-        print("%s \n %s"%(self.h_str,self.h_eq))
         
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:

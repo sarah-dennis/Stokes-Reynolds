@@ -59,15 +59,16 @@ def conveg(trials=10, N0=50, BC="fixed", RHS=0):
 # Parameter variation
 #------------------------------------------------------------------------------
 #square wave: period --> 0
-def shorten_steps(trials=8, n_steps_0=5):
+def vary_n_steps(trials=8, n_steps_0=5):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps_k = n_steps_0
+    r = 0.1
 
     v = np.zeros(trials)
     x = np.zeros(trials)
     
     for k in range(trials):
-        height_k, pressure_k = eg.squareWave(ry.domain, n_steps_k)
+        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r)
         err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
         #v[k] = np.abs(ps_k[1]-ps_k[0])
@@ -86,10 +87,37 @@ def shorten_steps(trials=8, n_steps_0=5):
     g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
 
 
+#square wave: period --> 0
+def vary_r(trials=12, r_0=0.1):
+    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
+    n_steps = 5
+    r_k = r_0
+
+    v = np.zeros(trials)
+    x = np.zeros(trials)
+    
+    for k in range(trials):
+        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps, r_k)
+        err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
+        
+        #v[k] = np.abs(ps_k[1]-ps_k[0])
+        #title = "Pressure Drop as steps width decreases"
+        #y_axis = "$|p_1-p_0|$"
+        
+        v[k] = np.max(ps_k)
+        title = "Max Pressure as step radius decreases"
+        y_axis = "$p_{max}$"
+        
+
+        x[k] = r_k
+                
+        r_k /= 2
+        
+    g.plot_2D(v, x, title, y_axis, "height radius")
 
 
 
-
+vary_r()
 
 
 

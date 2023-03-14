@@ -28,15 +28,20 @@ eta = 1     # flouid viscosity
 
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 
+
 #------------------------------------------------------------------------------
 # Height & Pressure
 #------------------------------------------------------------------------------
-#height, pressure = eg.corrugated(domain)
-#height, pressure = eg.wedge(domain)
-#height, pressursole = eg.step(domain)
-#height, pressure = eg.twoStep(domain)
-height, pressure = eg.squareWave(domain)
-#height, pressure = eg.dimple(domain)
+p0 = 0
+pN = 0
+
+#height, pressure = eg.corrugated(domain, p0, pN)
+#height, pressure = eg.wedge(domain, p0, pN)
+#height, pressursole = eg.step(domain, p0, pN)
+#height, pressure = eg.twoStep(domain, p0, pN)
+#height, pressure = eg.squareWave(domain, p0, pN)
+#height, pressure = eg.dimple(domain, p0, pN)
+height, pressure = eg.flat(domain, p0, pN)
 
 
 #------------------------------------------------------------------------------
@@ -139,4 +144,3 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         graph.plot_p_h(ps_numsol, height.hs, domain.xs, p_h_title)
 
     return inf_norm_err, ps_numsol
-solve()
