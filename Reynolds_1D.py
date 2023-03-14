@@ -23,7 +23,7 @@ Nx = 8000   # Number of grid points
 BC = "fixed"      
 #BC = "periodic"
 
-U = 10      # lower surface velocity
+U = 1      # lower surface velocity
 eta = 1     # flouid viscosity
 
 domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
@@ -33,9 +33,9 @@ domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 #------------------------------------------------------------------------------
 #height, pressure = eg.corrugated(domain)
 #height, pressure = eg.wedge(domain)
-#height, pressure = eg.step(domain)
+#height, pressursole = eg.step(domain)
 #height, pressure = eg.twoStep(domain)
-height, pressure = eg.squareWave(domain)
+height, pressure = eg.dimple(domain)
 
 
 #------------------------------------------------------------------------------
@@ -45,6 +45,7 @@ def reynolds_rhs(domain, height):
     fs = np.zeros(domain.Nx) #f[x]
     for i in range(domain.Nx):
         fs[i] = 6 * domain.eta * domain.U * height.hxs[i]
+        #TODO ^^ express using Re
     return fs
 
 def manf_rhs(domain, height, pressure):
@@ -57,7 +58,7 @@ def manf_rhs(domain, height, pressure):
 # Numerical solution
 #------------------------------------------------------------------------------
 # RHS = [0: reynolds, 1: exact]
-def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
+def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=2):
 
     # Reynolds RHS = 6 eta U hx
     if RHS == 0: 
@@ -127,13 +128,14 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
     #  unknown exact pressure: ps = [0, ..., 0]
         
     if FIG == 1: 
-        
         p_h_title = "Numerical Reynolds and Exact Pressure for %s"%height.h_str
-        graph.plot_p_h(pressure.ps, ps_numsol, height.hs, domain.xs, p_h_title)
+        graph.plot_pN_pE_h(pressure.ps, ps_numsol, height.hs, domain.xs, p_h_title)
 
         err_title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)
         graph.plot_2D(pressure.ps-ps_numsol, domain.xs, err_title, "error", "dx")
-        
+    elif FIG == 2:
+        p_h_title = "Numerical Reynolds for %s"%height.h_str
+        graph.plot_p_h(ps_numsol, height.hs, domain.xs, p_h_title)
+
     return inf_norm_err, ps_numsol
-
-
+solve()

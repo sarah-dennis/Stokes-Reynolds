@@ -78,3 +78,17 @@ def squareWave(domain, n_steps=25, r=0.1):
     pressure = exp.SquareWavePressure(domain, height, p0, pN)
     return height, pressure
 
+#------------------------------------------------------------------------------
+# V d. Dimple Height Example
+#------------------------------------------------------------------------------
+# Mar 6: converges 1st order 
+def dimple(domain):
+    h_min = 0.5
+    h_max = 1
+    len_ratio = 64
+    
+    height = hgt.DimpleHeight(domain, len_ratio, h_max, h_min)
+    p0 = 0
+    pN = 0
+    pressure = exp.UnknownPressure(domain, height, p0, pN)
+    return height, pressure

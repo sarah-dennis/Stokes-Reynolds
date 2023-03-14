@@ -57,7 +57,7 @@ def plot_2D(fs, xs, title, y_label, x_label):
     
     return fig
 
-def plot_p_h(ps, ps_num, hs, xs, title):
+def plot_pN_pE_h(ps, ps_num, hs, xs, title):
 
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
@@ -72,7 +72,6 @@ def plot_p_h(ps, ps_num, hs, xs, title):
     
     ax1.set_ylabel('Pressure $p(x)$', color = 'black')
     ax1.tick_params(axis ='y', labelcolor = 'black')
-    #ax1.set_ylim(0, 0.5)
     
     fig.legend()
      
@@ -83,7 +82,7 @@ def plot_p_h(ps, ps_num, hs, xs, title):
     ax2.set_ylabel('Height $h(x)$', color = color)
     ax2.plot(xs,hs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
-    ax2.set_ylim(0, 3.5)
+    ax2.set_ylim(0)
      
     # Adding title
     pp.title(title, fontweight ="bold")
@@ -91,7 +90,39 @@ def plot_p_h(ps, ps_num, hs, xs, title):
     # Show plot
     pp.show()
     
+def plot_p_h(ps, hs, xs, title):
+
+    # Creating plot with dataset_1
+    fig, ax1 = pp.subplots()
     
+    ax1.set_xlabel('$x$')
+    
+    #color = 'tab:red'
+    #ax1.plot(xs, ps, color = color, label="exact")
+    
+    color ='tab:red'
+    ax1.plot(xs, ps, color = color, label="Reynolds")
+    
+    ax1.set_ylabel('Pressure $p(x)$', color = color)
+    ax1.tick_params(axis ='y', labelcolor = color)
+    
+    #fig.legend()
+     
+    # Adding Twin Axes to plot dataset_2
+    ax2 = ax1.twinx()
+     
+    color = 'tab:blue'
+    ax2.set_ylabel('Height $h(x)$', color = color)
+    ax2.plot(xs,hs, color = color)
+    ax2.tick_params(axis ='y', labelcolor = color)
+    ax2.set_ylim(0)
+     
+    # Adding title
+    pp.title(title, fontweight ="bold")
+     
+    # Show plot
+    pp.show()
+        
     
     
     

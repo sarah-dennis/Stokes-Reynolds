@@ -104,7 +104,7 @@ class StepHeight(Height):
         self.l_right = domain.xf - self.x1
         
         self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
-        self.h_str = "Step Height"
+        self.h_str = "Raleigh Step"
         
         super().__init__(domain, self.h, self.h_str, self.h_eq)
 
@@ -125,7 +125,7 @@ class TwoStepHeight(Height):
         self.l1 = self.x1 - domain.x0
         self.l2 = self.x2 - self.x1
         self.l3 = domain.xf - self.x2
-        self.h_str = "Two Step Height"
+        self.h_str = "Raleigh Two Step"
         self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) 
         
         super().__init__(domain, self.h, self.h_str, self.h_eq)
@@ -140,6 +140,7 @@ class TwoStepHeight(Height):
 
 
 class SquareWaveHeight(Height):
+    
     def __init__(self, domain, h_avg, r, n_steps):
         
         self.r = r
@@ -152,10 +153,11 @@ class SquareWaveHeight(Height):
             x = domain.x0 + self.step_width * (i + 0.5)
             self.h_steps[i] = self.h(x)
         
-        self.h_str = "Square Wave Height"
+        self.h_str = "Square Wave"
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
-
+ 
         super().__init__(domain, self.h, self.h_str, self.h_eq)
+        print("%s \n %s"%(self.h_str,self.h_eq))
         
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:
@@ -163,6 +165,37 @@ class SquareWaveHeight(Height):
         else:
            return self.h_avg - self.r
 
+
+class DimpleHeight(Height):
+    #lambda := dimple length/total length
+    def __init__(self, domain, ratio, h_max, h_min):
+        self.ratio = ratio # length/depth
+        
+        self.h_max = h_max
+        self.h_min = h_min
+        
+        self.dimple_dep = h_max - h_min
+        self.cell_len = domain.xf-domain.x0
+
+        self.dimple_len_true = self.dimple_dep*ratio
+        self.dimple_len_adj = self.cell_len/2
+        
+        self.h_str = "Dimple"
+        self.h_eq = "h(x) = %0.1f, %0.1f"%(h_min, h_max)
+        
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
+        print("%s \n %s \n length/depth ratio: %.2f "%(self.h_str,self.h_eq, self.ratio))
+
+    def h(self, x):
+        entry_len = self.cell_len/4
+        if (x <= entry_len):
+            return self.h_min
+        elif (x <= entry_len + self.dimple_len_adj):
+            return self.h_max
+        else:
+            return self.h_min
+            
+        
     
         
 
