@@ -59,7 +59,7 @@ def conveg(trials=10, N0=50, BC="fixed", RHS=0):
 # Parameter variation
 #------------------------------------------------------------------------------
 #square wave: period --> 0
-def shorten_steps(trials=8, n_steps_0=20):
+def shorten_steps(trials=8, n_steps_0=5):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps_k = n_steps_0
 
@@ -67,7 +67,7 @@ def shorten_steps(trials=8, n_steps_0=20):
     x = np.zeros(trials)
     
     for k in range(trials):
-        height_k, pressure_k = eg.squareWave(ry.domain, n_steps)
+        height_k, pressure_k = eg.squareWave(ry.domain, n_steps_k)
         err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
         #v[k] = np.abs(ps_k[1]-ps_k[0])

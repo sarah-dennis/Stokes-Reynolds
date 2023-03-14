@@ -82,7 +82,7 @@ def plot_pN_pE_h(ps, ps_num, hs, xs, title):
     ax2.set_ylabel('Height $h(x)$', color = color)
     ax2.plot(xs,hs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
-    ax2.set_ylim(0)
+    ax2.set_ylim(0, 1.2*max(hs))
      
     # Adding title
     pp.title(title, fontweight ="bold")
@@ -115,7 +115,7 @@ def plot_p_h(ps, hs, xs, title):
     ax2.set_ylabel('Height $h(x)$', color = color)
     ax2.plot(xs,hs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
-    ax2.set_ylim(0)
+    ax2.set_ylim(0, 1.2*max(hs))
      
     # Adding title
     pp.title(title, fontweight ="bold")

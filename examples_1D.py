@@ -67,7 +67,7 @@ def twoStep(domain):
 #------------------------------------------------------------------------------
 # Mar 6: converges 1st order 
 def squareWave(domain, n_steps=25, r=0.1):
-    h_avg = 1
+    h_avg = 0.2
     
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")

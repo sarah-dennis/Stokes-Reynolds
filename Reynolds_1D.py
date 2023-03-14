@@ -35,7 +35,8 @@ domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 #height, pressure = eg.wedge(domain)
 #height, pressursole = eg.step(domain)
 #height, pressure = eg.twoStep(domain)
-height, pressure = eg.dimple(domain)
+height, pressure = eg.squareWave(domain)
+#height, pressure = eg.dimple(domain)
 
 
 #------------------------------------------------------------------------------
@@ -58,7 +59,7 @@ def manf_rhs(domain, height, pressure):
 # Numerical solution
 #------------------------------------------------------------------------------
 # RHS = [0: reynolds, 1: exact]
-def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=2):
+def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
 
     # Reynolds RHS = 6 eta U hx
     if RHS == 0: 
