@@ -10,6 +10,8 @@ import domain as dfd
 import examples_1D as eg
 from matplotlib import pyplot as pp
 import _graphics as g
+import exactPressures as ps
+import heights as hg
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
@@ -76,10 +78,9 @@ def vary_n_steps(trials=8, n_steps_0=5):
         #y_axis = "$|p_1-p_0|$"
         
         v[k] = np.max(ps_k)
-        title = "Max Pressure as steps width decreases"
+        title = "Max Pressure as step width decreases"
         y_axis = "$p_{max}$"
         
-
         x[k] = n_steps_k
                 
         n_steps_k = n_steps_k * 2 + 1
@@ -87,7 +88,31 @@ def vary_n_steps(trials=8, n_steps_0=5):
     g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
 
 
-#square wave: period --> 0
+def vary_n_steps_condNum(trials=12, n_steps_0=5):
+    n_steps_k = n_steps_0
+    r = 0.1
+    h_avg = 0.2
+         
+    v = np.zeros(trials)
+    x = np.zeros(trials)
+    
+    for k in range(trials):
+        sqr_height_k = hg.SquareWaveHeight(ry.domain, h_avg, r, n_steps_k)
+        sqr_pressure_k = ps.SquareWavePressure(ry.domain, sqr_height_k, ry.p0, ry.pN)
+        v[k] = np.linalg.cond(sqr_pressure_k.M)
+        x[k] = n_steps_k
+        
+        title = "Condition Number as step width decreases"
+        y_axis = "Condition Number"
+        
+        x[k] = n_steps_k
+                
+        n_steps_k = n_steps_k * 2 + 1
+        
+    g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+
+
+#square wave: radous --> 0
 def vary_r(trials=12, r_0=0.1):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps = 5
@@ -108,20 +133,11 @@ def vary_r(trials=12, r_0=0.1):
         title = "Max Pressure as step radius decreases"
         y_axis = "$p_{max}$"
         
-
         x[k] = r_k
                 
         r_k /= 2
         
     g.plot_2D(v, x, title, y_axis, "height radius")
-
-
-
-vary_r()
-
-
-
-
 
 
 

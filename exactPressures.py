@@ -22,7 +22,7 @@ class Pressure:
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Exact Pressure (%s)"%self.p_str, "p" )
         
-    def plot_all(self, domain):
+    def plot_diffs(self, domain):
         graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Exact Pressure (%s)"%self.p_str, ["p", "px", "pxx"])
 
 class UnknownPressure(Pressure):
@@ -170,7 +170,7 @@ class SquareWavePressure(Pressure):
 
         #---------------
         M, rhs = self.build_Matrix(domain, height, p0, pN)
-        
+        self.M = M
         #print("M: \n", M)
         #print("condition number:", np.linalg.cond(M))
         #print("rhs: ", rhs)

@@ -61,8 +61,7 @@ def center_second_diff(fs, domain):
     D = D/(domain.dx**2)
         
     fs_dxx = D@fs 
- 
-    #graph.plot_2D_multi([fs_dxx[1:-1], fs[1:-1]], xs[1:-1], "discretized", ["f_xx", "f"])
+    
     return fs_dxx
    
     
