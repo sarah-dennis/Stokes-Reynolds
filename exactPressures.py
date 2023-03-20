@@ -8,6 +8,7 @@ Created on Wed Jan 25 18:24:34 2023
 import domain as dfd
 import _graphics as graph
 import numpy as np
+import time
 
 class Pressure:
     
@@ -176,7 +177,22 @@ class SquareWavePressure(Pressure):
         #print("rhs: ", rhs)
         
         #---------------
+        
+        t0 = time.perf_counter()
         sol = np.linalg.solve(M, rhs)
+        t1 = time.perf_counter()
+        
+        
+        M_inv = dfd.schurComp_inv(M, height.n_steps+1, height.n_steps)
+        
+        t2 = time.perf_counter()
+        sol = np.matmul(M_inv, rhs)
+        
+        t3 = time.perf_counter()
+        
+        print("np.linalg solve time: %.4f"%(t1-t0))
+        print("schurComp_inv build time: %.4f"%(t2-t1))
+        print("schurComp_inv solve time: %.4f"%(t3-t2))
         
         p_slopes = sol[0:height.n_steps+1]
         p_extrema =  sol[height.n_steps+1:2*height.n_steps+1]
