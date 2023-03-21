@@ -172,6 +172,7 @@ class SquareWavePressure(Pressure):
         #---------------
         M, rhs = self.build_Matrix(domain, height, p0, pN)
         self.M = M
+        
         #print("M: \n", M)
         #print("condition number:", np.linalg.cond(M))
         #print("rhs: ", rhs)
@@ -184,15 +185,13 @@ class SquareWavePressure(Pressure):
         
         
         M_inv = dfd.schurComp_inv(M, height.n_steps+1, height.n_steps)
-        
-        t2 = time.perf_counter()
+
         sol = np.matmul(M_inv, rhs)
-        
-        t3 = time.perf_counter()
+        t2 = time.perf_counter()
         
         print("np.linalg solve time: %.4f"%(t1-t0))
-        print("schurComp_inv build time: %.4f"%(t2-t1))
-        print("schurComp_inv solve time: %.4f"%(t3-t2))
+        print("schurComp_inv solve time: %.4f"%(t2-t1))
+
         
         p_slopes = sol[0:height.n_steps+1]
         p_extrema =  sol[height.n_steps+1:2*height.n_steps+1]

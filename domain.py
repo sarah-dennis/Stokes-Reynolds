@@ -95,15 +95,17 @@ def schurComp_inv(M, n, m):
     C = M[n:n+m, n:n+m]
 
 
-    S = -(C + np.matmul(np.matmul(B2, A_inv), B1))
+    B2_Ainv = np.matmul(B2, A_inv)
+        
+    S = -(C + np.matmul(B2_Ainv, B1))
     
     S_inv = np.linalg.inv(S)
     
     M_inv = np.zeros((n+m, n+m))
 
-    M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, np.matmul(B2, A_inv))))
+    M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, B2_Ainv)))
     M_inv[0:n, n:n+m] =  -np.matmul(A_inv, np.matmul(B1, S_inv))
-    M_inv[n:n+m, 0:n] = -np.matmul(S_inv, np.matmul(B2, A_inv))
+    M_inv[n:n+m, 0:n] = -np.matmul(S_inv, B2_Ainv)
     
     M_inv[n:n+m, n:n+m] = S_inv
     
