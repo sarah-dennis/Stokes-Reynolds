@@ -19,7 +19,7 @@ import heights as hg
 #RHS = [0: reynolds, 1: manufactured]
 
 # dx -> 0
-def conveg(trials=6, N0=50, BC="fixed", RHS=0):
+def conveg(trials=10, N0=50, BC="fixed", RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -61,7 +61,7 @@ def conveg(trials=6, N0=50, BC="fixed", RHS=0):
 # Parameter variation
 #------------------------------------------------------------------------------
 #square wave: period --> 0
-def vary_n_steps(trials=8, n_steps_0=5):
+def vary_n_steps(trials=20, n_steps_0=5):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps_k = n_steps_0
     r = 0.1
@@ -71,13 +71,21 @@ def vary_n_steps(trials=8, n_steps_0=5):
     
     for k in range(trials):
         height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r)
-        err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
+        
+        
+        
+        #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
         #v[k] = np.abs(ps_k[1]-ps_k[0])
         #title = "Pressure Drop as steps width decreases"
         #y_axis = "$|p_1-p_0|$"
         
-        v[k] = np.max(ps_k)
+        #v[k] = np.max(ps_k)
+        
+        
+        v[k] = np.max(pressure_k.ps)-ry.p0
+        
+        
         title = "Max Pressure as step width decreases"
         y_axis = "$p_{max}$"
         
@@ -85,10 +93,11 @@ def vary_n_steps(trials=8, n_steps_0=5):
                 
         n_steps_k = n_steps_k * 2 + 1
         
-    g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+    #g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+    pp.loglog( v, x, color='b', label='$\mathcal{O}(dx)$')
 
 
-def vary_n_steps_condNum(trials=12, n_steps_0=5):
+def vary_n_steps_condNum(trials=4, n_steps_0=5):
     n_steps_k = n_steps_0
     r = 0.1
     h_avg = 0.2
@@ -113,7 +122,7 @@ def vary_n_steps_condNum(trials=12, n_steps_0=5):
 
 
 #square wave: radous --> 0
-def vary_r(trials=12, r_0=0.1):
+def vary_r(trials=15, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps = 5
     r_k = r_0

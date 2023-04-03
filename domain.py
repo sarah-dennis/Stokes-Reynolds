@@ -111,6 +111,21 @@ def schurComp_inv(M, n, m):
     
     return M_inv
     
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

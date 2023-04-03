@@ -18,7 +18,7 @@ import examples_1D as eg
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-Nx = 1000  # Number of grid points
+Nx = 3000  # Number of grid points
 
 BC = "fixed"      
 #BC = "periodic"
@@ -138,6 +138,7 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
 
         err_title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)
         graph.plot_2D(pressure.ps-ps_numsol, domain.xs, err_title, "error", "dx")
+    
     elif FIG == 2:
         p_h_title = "Numerical Reynolds for %s"%height.h_str
         graph.plot_p_h(ps_numsol, height.hs, domain.xs, p_h_title)
