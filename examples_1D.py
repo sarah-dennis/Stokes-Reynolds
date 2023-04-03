@@ -54,7 +54,8 @@ def twoStep(domain, p0, pN):
 #------------------------------------------------------------------------------
 # IV c. N-Step Height Example
 #------------------------------------------------------------------------------
-def squareWave(domain, p0, pN, n_steps=25, r=0.1, h_avg=0.2):
+
+def squareWave(domain, p0, pN, n_steps=11, r=0.1, h_avg=0.2):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
     

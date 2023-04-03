@@ -18,7 +18,7 @@ import examples_1D as eg
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-Nx = 8000   # Number of grid points
+Nx = 1000  # Number of grid points
 
 BC = "fixed"      
 #BC = "periodic"
@@ -39,9 +39,9 @@ pN = 0
 #height, pressure = eg.wedge(domain, p0, pN)
 #height, pressursole = eg.step(domain, p0, pN)
 #height, pressure = eg.twoStep(domain, p0, pN)
-#height, pressure = eg.squareWave(domain, p0, pN)
+height, pressure = eg.squareWave(domain, p0, pN)
 #height, pressure = eg.dimple(domain, p0, pN)
-height, pressure = eg.flat(domain, p0, pN)
+#height, pressure = eg.flat(domain, p0, pN)
 
 
 #------------------------------------------------------------------------------
@@ -124,7 +124,6 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         D[domain.Nx-1,domain.Nx-1] = 1
         D[domain.Nx-1,domain.Nx-2] = 0
         fs[domain.Nx-1] = pressure.pf
-
     # solve for p
     ps_numsol = np.linalg.solve(D, fs)
     

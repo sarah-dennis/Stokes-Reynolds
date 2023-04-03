@@ -19,7 +19,7 @@ import heights as hg
 #RHS = [0: reynolds, 1: manufactured]
 
 # dx -> 0
-def conveg(trials=10, N0=50, BC="fixed", RHS=0):
+def conveg(trials=6, N0=50, BC="fixed", RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -35,7 +35,7 @@ def conveg(trials=10, N0=50, BC="fixed", RHS=0):
         #height_k, pressure_k = eg.corrugated(domain_k)
         #height_k, pressure_k = eg.step(domain_k)
         #height_k, pressure_k = eg.twoStep(domain_k)
-        height_k, pressure_k = eg.squareWave(domain_k)
+        height_k, pressure_k = eg.squareWave(domain_k, ry.p0, ry.pN)
         #-------------------------------------------------------
         err_k, ps_k = ry.solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
         infNorms[k] = err_k
@@ -138,10 +138,6 @@ def vary_r(trials=12, r_0=0.1):
         r_k /= 2
         
     g.plot_2D(v, x, title, y_axis, "height radius")
-
-
-
-
 
 
 
