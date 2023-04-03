@@ -32,8 +32,10 @@ def make_S_inv(n, hs):
             sij = S_inv_ij(As, Bs, Cs, thetas, phis, i, j, n)
             
             S_inv[i-1,j-1] = sij
+            
             if i != j:
                 S_inv[j-1, i-1] = sij
+                
     return S_inv
  
 def next_theta(k, n, thetas, As, Bs, Cs):
