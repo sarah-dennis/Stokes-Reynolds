@@ -5,7 +5,7 @@ Created on Wed Feb 22 10:01:42 2023
 @author: sarah
 """
 import heights as hgt
-import exactPressures as pres
+import pressures as pres
 import numpy as np
 
 #------------------------------------------------------------------------------
@@ -58,9 +58,10 @@ def twoStep(domain, p0, pN):
 def squareWave(domain, p0, pN, n_steps=35, r=0.1, h_avg=0.2):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
-    
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = pres.SquareWavePressure(domain, height, p0, pN)
+    
+    print("Loaded %d-step Square Wave"%(n_steps))
     return height, pressure
 
 #------------------------------------------------------------------------------

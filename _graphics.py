@@ -125,8 +125,36 @@ def plot_p_h(ps, hs, xs, title):
         
     
     
+def plot_log(fs, xs, title, x_label, y_label):
+    fig = pp.figure()
+    pp.loglog(fs, xs, color='b', label=y_label)   
+
+    pp.title(title)
     
+    pp.xlabel(x_label)
     
+    pp.ylabel(y_label)
     
+    return fig
+
+    
+def plot_log_multi(fs, xs, title, f_labels, x_axis):
+    
+    fig = pp.figure()
+    ax = fig.add_subplot()
+    colors = ['r', 'b', 'g', 'o', 'p']
+    for i in range(len(fs)):
+        
+        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
+    
+    #ax.set_xlim([0, 1])
+    #ax.set_ylim([0, 1])
+
+    ax.set_xlabel(x_axis)
+    #ax.set_ylabel()
+    pp.title(title,  fontweight ="bold")
+    fig.legend(loc='lower right')
+    return fig
+
     
     

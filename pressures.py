@@ -9,6 +9,7 @@ import domain as dfd
 import _graphics as graph
 import numpy as np
 import time
+import schur
 
 class Pressure:
     
@@ -32,7 +33,7 @@ class UnknownPressure(Pressure):
         ps = np.zeros(domain.Nx)
         super().__init__(domain, ps, p0, pN,  p_str)
 
-class CorrugatedPressure(Pressure):
+class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
         p_str = "Corrugated"
         ps = np.zeros(domain.Nx)
@@ -130,6 +131,7 @@ class TwoStepPressure(Pressure):
 
 class SquareWavePressure(Pressure):
     
+    #Regular matrix for square wave
     def build_Matrix(self, domain, height, p0, pN):
         n = height.n_steps
         hs = height.h_steps 
@@ -179,20 +181,23 @@ class SquareWavePressure(Pressure):
         
         #---------------
         
-        t0 = time.perf_counter()
-        sol = np.linalg.solve(M, rhs)
+        #t0 = time.perf_counter()
+        
+        #Regular solve (Build M and solve)
+        #sol = np.linalg.solve(M, rhs)
         t1 = time.perf_counter()
+        #print("np.linalg solve time: %.4f"%(t1-t0))
         
-        
-        M_inv = dfd.schurComp_inv(M, height.n_steps+1, height.n_steps)
-
+        #Schur Complement solve (build M^-1 using schur comp and solve)
+        M_inv = schur.schurComp_inv(M, height.n_steps+1, height.n_steps)
         sol = np.matmul(M_inv, rhs)
         t2 = time.perf_counter()
-        
-        print("np.linalg solve time: %.4f"%(t1-t0))
         print("schurComp_inv solve time: %.4f"%(t2-t1))
 
+        #Schur Complement no-solve (intuit applying M^-1)..
+
         
+
         p_slopes = sol[0:height.n_steps+1]
         p_extrema =  sol[height.n_steps+1:2*height.n_steps+1]
         #print("slopes: ", p_slopes)

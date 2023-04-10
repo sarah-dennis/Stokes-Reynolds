@@ -70,3 +70,53 @@ def S_inv_ij(As, Bs, Cs, thetas, phis, i, j, n):
     else:
         return (-1)**(i+j) * np.prod(As[j:i]) * thetas[j-1]*phis[i+1]/thetas[n]
             
+    
+    
+    
+    
+    
+ 
+#computes  S = -(C + B2 A^-1 B1^T)
+
+def schurComp(M, n, m):
+    A = M[0:n, 0:n]
+    A_inv = np.linalg.inv(A)
+    
+    B1 = M[0:n, n:n+m]
+
+    B2 = M[n:n+m, 0:n]
+    
+    C = M[n:n+m, n:n+m]
+
+
+    return -(C + np.matmul(np.matmul(B2, A_inv), B1))
+    
+    
+    
+def schurComp_inv(M, n, m):
+    
+    A = M[0:n, 0:n]
+    A_inv = np.linalg.inv(A)
+    
+    B1 = M[0:n, n:n+m]
+
+    B2 = M[n:n+m, 0:n]
+    
+    C = M[n:n+m, n:n+m]
+
+
+    B2_Ainv = np.matmul(B2, A_inv)
+        
+    S = -(C + np.matmul(B2_Ainv, B1))
+    
+    S_inv = np.linalg.inv(S)
+    
+    M_inv = np.zeros((n+m, n+m))
+
+    M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, B2_Ainv)))
+    M_inv[0:n, n:n+m] =  -np.matmul(A_inv, np.matmul(B1, S_inv))
+    M_inv[n:n+m, 0:n] = -np.matmul(S_inv, B2_Ainv)
+    
+    M_inv[n:n+m, n:n+m] = S_inv
+    
+    return M_inv   

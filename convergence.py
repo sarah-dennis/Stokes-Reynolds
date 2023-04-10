@@ -8,10 +8,8 @@ import numpy as np
 import Reynolds_1D as ry
 import domain as dfd
 import examples_1D as eg
-from matplotlib import pyplot as pp
 import _graphics as g
-import exactPressures as ps
-import heights as hg
+
 #------------------------------------------------------------------------------
 # Convergence
 #------------------------------------------------------------------------------   
@@ -19,7 +17,7 @@ import heights as hg
 #RHS = [0: reynolds, 1: manufactured]
 
 # dx -> 0
-def conveg(trials=10, N0=50, BC="fixed", RHS=0):
+def conveg(trials=7, N0=50, BC="fixed", RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -45,23 +43,19 @@ def conveg(trials=10, N0=50, BC="fixed", RHS=0):
         
         Nx_k *= 2
     
-    pp.figure(trials+1)
-
-    pp.loglog(dxs, dxs, color='b', label='$\mathcal{O}(dx)$')
-    pp.loglog(dxs, dxs_sqr, color='g', label='$\mathcal{O}(dx^2)$')
-    pp.loglog(dxs, infNorms, color='r', label='$L_{\infty}$ Norm Error')
     
-    pp.xlabel('Grid spacing $dx$')
-
-    pp.legend(loc='lower right')
-    pp.title("Convergence for %s"%(height_k.h_str), fontweight ="bold")
+    labels = ['$\mathcal{O}(dx)$', '$\mathcal{O}(dx^2)$', '$L_{\infty}$ Norm Error']
+    fs = [dxs, dxs_sqr, infNorms]
+    x_axis = '$dx$'
+    title = "Convergence for %s"%(height_k.h_str)
+    g.plot_log_multi(fs, dxs, title, labels, x_axis)
 
 
 #------------------------------------------------------------------------------
-# Parameter variation
+# Parameter variation for square wave
 #------------------------------------------------------------------------------
-#square wave: period --> 0
-def vary_n_steps(trials=20, n_steps_0=5):
+
+def vary_nSteps_pMax(trials=7, n_steps_0=5):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps_k = n_steps_0
     r = 0.1
@@ -72,32 +66,20 @@ def vary_n_steps(trials=20, n_steps_0=5):
     for k in range(trials):
         height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r)
         
-        
-        
-        #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
-        
-        #v[k] = np.abs(ps_k[1]-ps_k[0])
-        #title = "Pressure Drop as steps width decreases"
-        #y_axis = "$|p_1-p_0|$"
-        
-        #v[k] = np.max(ps_k)
-        
+        #err_k, pressure_num_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
         v[k] = np.max(pressure_k.ps)-ry.p0
-        
-        
-        title = "Max Pressure as step width decreases"
-        y_axis = "$p_{max}$"
-        
+
         x[k] = n_steps_k
                 
         n_steps_k = n_steps_k * 2 + 1
-        
-    #g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
-    pp.loglog( v, x, color='b', label='$\mathcal{O}(dx)$')
+    title = "Max Pressure as step width decreases"
+    y_axis = "$p_{max}$"
+    x_axis = "$dx$"  
+    g.plot_log(v, x, title,  x_axis, y_axis)
 
 
-def vary_n_steps_condNum(trials=4, n_steps_0=5):
+def vary_nSteps_condNum(trials=4, n_steps_0=5):
     n_steps_k = n_steps_0
     r = 0.1
     h_avg = 0.2
@@ -106,23 +88,23 @@ def vary_n_steps_condNum(trials=4, n_steps_0=5):
     x = np.zeros(trials)
     
     for k in range(trials):
-        sqr_height_k = hg.SquareWaveHeight(ry.domain, h_avg, r, n_steps_k)
-        sqr_pressure_k = ps.SquareWavePressure(ry.domain, sqr_height_k, ry.p0, ry.pN)
+        
+        sqr_height_k,sqr_pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r, h_avg)
+        
         v[k] = np.linalg.cond(sqr_pressure_k.M)
         x[k] = n_steps_k
-        
-        title = "Condition Number as step width decreases"
-        y_axis = "Condition Number"
-        
+    
         x[k] = n_steps_k
                 
         n_steps_k = n_steps_k * 2 + 1
         
+    title = "Condition Number as step width decreases"
+    y_axis = "Condition Number"  
     g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
 
 
 #square wave: radous --> 0
-def vary_r(trials=15, r_0=0.05):
+def vary_r_pMax(trials=15, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps = 5
     r_k = r_0
@@ -132,20 +114,16 @@ def vary_r(trials=15, r_0=0.05):
     
     for k in range(trials):
         height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps, r_k)
-        err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
+        #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
-        #v[k] = np.abs(ps_k[1]-ps_k[0])
-        #title = "Pressure Drop as steps width decreases"
-        #y_axis = "$|p_1-p_0|$"
-        
-        v[k] = np.max(ps_k)
-        title = "Max Pressure as step radius decreases"
-        y_axis = "$p_{max}$"
-        
+        v[k] = np.max(pressure_k) - ry.p0
+
         x[k] = r_k
                 
         r_k /= 2
         
+    title = "Max Pressure as step radius decreases"
+    y_axis = "$p_{max}$"
     g.plot_2D(v, x, title, y_axis, "height radius")
 
 
