@@ -8,8 +8,20 @@ import heights as hgt
 import pressures as pres
 import numpy as np
 
+
 #------------------------------------------------------------------------------
-# I. Corrugated Height example
+# 0. Constant Height 
+#------------------------------------------------------------------------------
+def flat(domain, p0, pN):
+    h0 = 0.5
+    #height = hgt.constHeight(domain, h0)
+    height = hgt.SquareWaveHeight(domain, h0, r=0, n_steps=1)
+    #pressure = exp.UnknownPressure(domain, height, p0, pN)
+    pressure = pres.SquareWavePressure(domain, height, p0, pN)
+    return height, pressure
+
+#------------------------------------------------------------------------------
+# I. Corrugated Sinusoidal Height 
 #------------------------------------------------------------------------------
 def corrugated(domain, p0, pN):
     h_mid = 1 
@@ -20,7 +32,7 @@ def corrugated(domain, p0, pN):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# II. Wedge Height example
+# II. Wedge Height 
 #------------------------------------------------------------------------------
 def wedge(domain, p0, pN):
     h_min = 0.1
@@ -52,7 +64,7 @@ def twoStep(domain, p0, pN):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# IV c. N-Step Height Example
+# III c. N-Step Height Example
 #------------------------------------------------------------------------------
 
 def squareWave(domain, p0, pN, n_steps=35, r=0.1, h_avg=0.2):
@@ -65,18 +77,8 @@ def squareWave(domain, p0, pN, n_steps=35, r=0.1, h_avg=0.2):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# VI e. Const Height Example
-#------------------------------------------------------------------------------
-def flat(domain, p0, pN):
-    h0 = 0.5
-    #height = hgt.constHeight(domain, h0)
-    height = hgt.SquareWaveHeight(domain, h0, r=0, n_steps=1)
-    #pressure = exp.UnknownPressure(domain, height, p0, pN)
-    pressure = pres.SquareWavePressure(domain, height, p0, pN)
-    return height, pressure
-
-#------------------------------------------------------------------------------
-# V d. Dimple Height Example
+# III d. Dimple Height Example
+# TODO: add a simulation of the dimple example from that reference
 #------------------------------------------------------------------------------
 def dimple(domain, p0, pN):
     h_min = 0.5

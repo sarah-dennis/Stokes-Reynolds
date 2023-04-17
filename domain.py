@@ -64,23 +64,6 @@ def center_second_diff(fs, domain):
     
     return fs_dxx
    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

@@ -103,7 +103,7 @@ def vary_nSteps_condNum(trials=4, n_steps_0=5):
     g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
 
 
-#square wave: radous --> 0
+#square wave: radius --> 0
 def vary_r_pMax(trials=15, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps = 5

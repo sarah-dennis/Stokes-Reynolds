@@ -35,6 +35,7 @@ domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 p0 = 0
 pN = 0
 
+# Load example Height and Pressure
 #height, pressure = eg.corrugated(domain, p0, pN)
 #height, pressure = eg.wedge(domain, p0, pN)
 #height, pressursole = eg.step(domain, p0, pN)
@@ -64,6 +65,7 @@ def manf_rhs(domain, height, pressure):
 # Numerical solution
 #------------------------------------------------------------------------------
 # RHS = [0: reynolds, 1: exact]
+# FIG = [0: two plots (Numerical and analytic pressure, and Error), 1: one plot only Reynolds pressure]
 def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
 
     # Reynolds RHS = 6 eta U hx
@@ -130,10 +132,10 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
     # Plotting and error 
     inf_norm_err = np.max(np.abs(pressure.ps-ps_numsol))
     print ("Solved Nx=%d with error %0.5f"%(domain.Nx, inf_norm_err))
-    #  unknown exact pressure: ps = [0, ..., 0]
+    #  note: unknown exact pressure uses ps = 0
         
     if FIG == 1: 
-        p_h_title = "Numerical Reynolds and Exact Pressure for %s"%height.h_str
+        p_h_title = "Numerical Reynolds and Analytic Pressure for %s"%height.h_str
         graph.plot_pN_pE_h(pressure.ps, ps_numsol, height.hs, domain.xs, p_h_title)
 
         err_title = "Error: %s | $N_x=%d$, $dx = %.3f$"%(height.h_str, domain.Nx, domain.dx)

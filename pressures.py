@@ -131,8 +131,8 @@ class TwoStepPressure(Pressure):
 
 class SquareWavePressure(Pressure):
     
-    #Regular matrix for square wave
-    def build_Matrix(self, domain, height, p0, pN):
+    def build_sqrWave_Matrix(self, domain, height, p0, pN):
+
         n = height.n_steps
         hs = height.h_steps 
         #---------------
@@ -172,7 +172,7 @@ class SquareWavePressure(Pressure):
         p_str = "%d-Step Square Wave"%height.n_steps
 
         #---------------
-        M, rhs = self.build_Matrix(domain, height, p0, pN)
+        M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
         self.M = M
         
         #print("M: \n", M)
@@ -189,7 +189,8 @@ class SquareWavePressure(Pressure):
         #print("np.linalg solve time: %.4f"%(t1-t0))
         
         #Schur Complement solve (build M^-1 using schur comp and solve)
-        M_inv = schur.schurComp_inv(M, height.n_steps+1, height.n_steps)
+        M_inv = schur.build_schurComp_inv(M, height.n_steps+1, height.n_steps)
+
         sol = np.matmul(M_inv, rhs)
         t2 = time.perf_counter()
         print("schurComp_inv solve time: %.4f"%(t2-t1))
@@ -232,7 +233,7 @@ class SquareWavePressure(Pressure):
         super().__init__(domain, ps, p0, pN, p_str)
         
         
-        
+ #TODO: Dimple pressure
         
         
         
