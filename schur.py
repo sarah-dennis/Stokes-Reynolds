@@ -8,26 +8,26 @@ import numpy as np
 # index in the notes is array indexing
 # assumes as = cs
 
-h1 = 1
-h2 = 0.5
-h3 = 1
-h4 = 0.5
-hs = [0, h1, h2, h3, h4]
-n = 3
+# h1 = 1
+# h2 = 0.5
+# h3 = 1
+# h4 = 0.5
+# hs = [0, h1, h2, h3, h4]
+# n = 3
 
 #------------------------------------------------------------------------------
-def schurComp(M, n, m):
-    A = M[0:n, 0:n]
-    A_inv = np.linalg.inv(A)
+# def schurComp(M, n, m):
+#     A = M[0:n, 0:n]
+#     A_inv = np.linalg.inv(A)
     
-    B1 = M[0:n, n:n+m]
+#     B1 = M[0:n, n:n+m]
 
-    B2 = M[n:n+m, 0:n]
+#     B2 = M[n:n+m, 0:n]
     
-    C = M[n:n+m, n:n+m]
+#     C = M[n:n+m, n:n+m]
 
 
-    return -(C + np.matmul(np.matmul(B2, A_inv), B1))
+#     return -(C + np.matmul(np.matmul(B2, A_inv), B1))
 
 
 #------------------------------------------------------------------------------
@@ -35,49 +35,61 @@ def schurComp(M, n, m):
 # M = [[A, B1], [B2, C]]
 # M is size (n+m, n+m) 
 
-def build_schurComp_Minv(M, n, m):
+# def build_schurComp_Minv(M, n, m):
     
-    A = M[0:n, 0:n]
-    A_inv = np.linalg.inv(A)
+#     A = M[0:n, 0:n]
+#     A_inv = np.linalg.inv(A)
     
-    B1 = M[0:n, n:n+m]
+#     B1 = M[0:n, n:n+m]
 
-    B2 = M[n:n+m, 0:n]
+#     B2 = M[n:n+m, 0:n]
     
-    C = M[n:n+m, n:n+m]
+#     C = M[n:n+m, n:n+m]
 
-    B2_Ainv = np.matmul(B2, A_inv)
+#     B2_Ainv = np.matmul(B2, A_inv)
     
-    K = -(C + np.matmul(B2_Ainv, B1))
+#     K = -(C + np.matmul(B2_Ainv, B1))
         
-    S = np.linalg.inv(K)
+#     S = np.linalg.inv(K)
     
-    M_inv = np.zeros((n+m, n+m))
+#     M_inv = np.zeros((n+m, n+m))
 
-    M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, B2_Ainv)))
-    M_inv[0:n, n:n+m] =  -np.matmul(A_inv, np.matmul(B1, S))
-    M_inv[n:n+m, 0:n] = -np.matmul(S, B2_Ainv)
-    M_inv[n:n+m, n:n+m] = S
+#     M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, B2_Ainv)))
+#     M_inv[0:n, n:n+m] =  -np.matmul(A_inv, np.matmul(B1, S))
+#     M_inv[n:n+m, 0:n] = -np.matmul(S, B2_Ainv)
+#     M_inv[n:n+m, n:n+m] = S
     
-    return M_inv
-    
+#     return M_inv
 
 #build inverse of Schur Complement using recursion
-def make_S(n, hs):
+def make_S(height):
+    n = height.n_steps
+    hs = height.h_steps
 
-    #all should have length n+2 
-    As = [0, -h2**3,       -h3**3,         1,             1]
-    Bs = [0, h1**3 + h2**3, h2**3 + h3**3, h3**3 + h4**3, 1]
-    Cs = [0, -h2**3,       -h3**3,         1,             1]
+    # make schur complement K (symmetric tri-diagonal)
+    center_diag = np.zeros(n+2)
+    off_diag = np.zeros(n+2)
     
-    thetas = next_theta(0, n, [], As, Bs, Cs)
-    phis = next_phi(n+1, n, [], As, Bs, Cs)
+    for i in range (1, n+2):
+        if i < n:
+            center_diag[i] = hs[i-1]**3 + hs[i]**3
+            off_diag[i] = -hs[i]**3
+        elif i == n:
+            off_diag[i] = 1
+            center_diag[i] = hs[i-1]**3 + hs[i]**3
+        elif i == n+1:
+            off_diag[i] = 1
+            center_diag[i] = 1
+        
     
+    thetas = next_theta(0, n, [], off_diag, center_diag, off_diag)
+    phis = next_phi(n+1, n, [], off_diag, center_diag, off_diag)
+
     S = np.zeros((n,n))
     for i in range(1, n+1):
         for j in range(i, n+1):
             
-            sij = S_ij(As, Bs, Cs, thetas, phis, i, j, n)
+            sij = S_ij(off_diag, center_diag, off_diag, thetas, phis, i, j, n)
             
             S[i-1,j-1] = sij
             
@@ -111,9 +123,9 @@ def next_phi(k, n, phis, As, Bs, Cs):
     
 def S_ij(As, Bs, Cs, thetas, phis, i, j, n):
     if i==j:
-        return thetas[i-1]*phis[j+1]/thetas[n]
+        return thetas[i-1]*phis[j+1] / thetas[n]
     elif i < j:
-        return (-1)**(i+j) * np.prod(Cs[i:j]) * thetas[i-1]*phis[j+1]/thetas[n]
+        return (-1)**(i+j) * np.prod(Cs[i:j]) * thetas[i-1]*phis[j+1] / thetas[n]
     else:
-        return (-1)**(i+j) * np.prod(As[j:i]) * thetas[j-1]*phis[i+1]/thetas[n]
+        return (-1)**(i+j) * np.prod(As[j:i]) * thetas[j-1]*phis[i+1] / thetas[n]
 

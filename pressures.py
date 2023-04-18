@@ -22,10 +22,10 @@ class Pressure:
         self.pf = pN
             
     def plot(self, domain):
-        graph.plot_2D(self.ps, domain.xs, "Exact Pressure (%s)"%self.p_str, "p" )
+        graph.plot_2D(self.ps, domain.xs, "Analytic Pressure (%s)"%self.p_str, "p", "x")
         
     def plot_diffs(self, domain):
-        graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Exact Pressure (%s)"%self.p_str, ["p", "px", "pxx"])
+        graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Analytic Pressure Derivatives (%s)"%self.p_str, ["p", "px", "pxx"])
 
 class UnknownPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -131,106 +131,115 @@ class TwoStepPressure(Pressure):
 
 class SquareWavePressure(Pressure):
     
-    def build_sqrWave_Matrix(self, domain, height, p0, pN):
+    # def build_sqrWave_Matrix(self, domain, height, p0, pN):
+
+    #     n = height.n_steps
+    #     hs = height.h_steps 
+    #     #---------------
+    #     M = np.zeros((2*n + 1, 2*n + 1))
+
+    #     #B:= top left corner of M, 1/dx diagonal
+    #     B = np.zeros((n+1, n))
+    #     B_diag_neg = [-1/height.step_width]*n
+    #     B_diag_pos = [1/height.step_width]*n
+    #     B[0:n , 0:n] += np.diagflat(B_diag_neg)
+    #     B[1:n+1, 0:n] += np.diagflat(B_diag_pos)  
+        
+    #     #C:= bottom right corner of M, hj-hi diagonal
+    #     C = np.zeros((n, n+1))
+    #     C_diag_neg = [-h**3 for h in hs[0:n]] 
+    #     C_diag_pos = [h**3 for h in hs[1:n+1]]
+    #     C[0:n, 0:n] += np.diagflat(C_diag_neg)
+    #     C[0:n, 1:n+1] += np.diagflat(C_diag_pos)
+
+    #     #...
+    #     M[0:n+1, 0:n+1] = np.identity(n+1)
+    #     M[0:n+1, n+1:2*n+1] = B
+    #     M[n+1:2*n+1, 0:n+1] = C
+        
+    #     #---------------
+    #     rhs = np.zeros(2*n + 1)
+        
+    #     rhs[0] = -p0/height.step_width
+    #     rhs[n] = pN/height.step_width
+        
+    #     for k in range(n):
+    #         rhs[n+1 + k] = (hs[k+1] - hs[k]) * 6*domain.eta*domain.U
+        
+    #     return M, rhs
+
+    def __init__(self, domain, height, p0, pN):
 
         n = height.n_steps
-        hs = height.h_steps 
-        #---------------
-        M = np.zeros((2*n + 1, 2*n + 1))
+        hs = height.h_steps
+        p_str = "%d-Step Square Wave"%n
+        
+        #1. Build M and solve
+        #M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
+        #sol = np.linalg.solve(M, rhs)
+        
+        #2. Build M, build M^-1 using schur comp, and solve)
+        
+        #M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
+        #M_inv = schur.build_schurComp_Minv(M, height.n_steps+1, height.n_steps)
 
-        #B:= top left corner of M, 1/dx diagonal
-        B = np.zeros((n+1, n))
-        B_diag_neg = [-1/height.step_width]*n
-        B_diag_pos = [1/height.step_width]*n
-        B[0:n , 0:n] += np.diagflat(B_diag_neg)
-        B[1:n+1, 0:n] += np.diagflat(B_diag_pos)  
-        
-        #C:= bottom right corner of M, hj-hi diagonal
-        C = np.zeros((n, n+1))
-        C_diag_neg = [-h**3 for h in hs[0:n]] 
-        C_diag_pos = [h**3 for h in hs[1:n+1]]
-        C[0:n, 0:n] += np.diagflat(C_diag_neg)
-        C[0:n, 1:n+1] += np.diagflat(C_diag_pos)
+        #sol = np.matmul(M_inv, rhs)
 
-        #...
-        M[0:n+1, 0:n+1] = np.identity(n+1)
-        M[0:n+1, n+1:2*n+1] = B
-        M[n+1:2*n+1, 0:n+1] = C
-        
-        #---------------
-        rhs = np.zeros(2*n + 1)
-        
-        rhs[0] = -p0/height.step_width
-        rhs[n] = pN/height.step_width
-        
-        for k in range(n):
-            rhs[n+1 + k] = (hs[k+1] - hs[k]) * 6*domain.eta*domain.U
-        
-        return M, rhs
-    
-    def __init__(self, domain, height, p0, pN):
-        p_str = "%d-Step Square Wave"%height.n_steps
+        # extract slopes and extrema for 1. and 2. 
+        #p_slopes = sol[0:height.n_steps+1]
+        #p_extrema = sol[height.n_steps+1:2*height.n_steps+1]
 
-        #---------------
-        M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
-        self.M = M
-        
-        #print("M: \n", M)
-        #print("condition number:", np.linalg.cond(M))
-        #print("rhs: ", rhs)
-        
-        #---------------
-        
-        t0 = time.perf_counter()
-        
-        #Regular solve (Build M and solve)
-        sol = np.linalg.solve(M, rhs)
-        t1 = time.perf_counter()
-        print("np.linalg solve time: %.4f"%(t1-t0))
-        
-        #Schur Complement solve (build M^-1 using schur comp and solve)
-        M_inv = schur.build_schurComp_inv(M, height.n_steps+1, height.n_steps)
 
-        sol = np.matmul(M_inv, rhs)
-        t2 = time.perf_counter()
-        print("schurComp_inv solve time: %.4f"%(t2-t1))
-
-        #Schur Complement no-solve (intuit applying M^-1)..
-
+        #3. Build part of M^-1 using schur comp
+        S = schur.make_S(height)/height.step_width # S = K^-1 inverse of schur comp
+        S_B2_L = np.zeros(n)
+        S_B2_R = np.zeros(n)
+        v = np.zeros(n)
         
+        for i in range (n):
+            S_B2_L[i] = hs[0]**3 * (S[i, 0])
+            S_B2_R[i] = -hs[n]**3 * (S[i, n-1])
+            v[i] = (hs[i+1] - hs[i]) * 6*domain.eta*domain.U
+        
+        p_extrema = np.zeros(n)
+        for i in range(n):
+            p_extrema[i] = (-p0/height.step_width) * S_B2_L[i] + (pN/height.step_width) * S_B2_R[i] + np.dot(S[i], v)
+            
+        print(p_extrema)
+        
+        graph.plot_2D(p_extrema, range(n), p_str, "pressure", "step num")
 
-        p_slopes = sol[0:height.n_steps+1]
-        p_extrema =  sol[height.n_steps+1:2*height.n_steps+1]
+
         #print("slopes: ", p_slopes)
         #print("pressures: ", p_extrema)
         #---------------
                                                    
-        ps = np.zeros(domain.Nx)
+        # ps = np.zeros(domain.Nx)
         
-        k = 0
-        x_k = domain.x0
-        p_k = p0
-        slope_k = p_slopes[k]
+        # k = 0
+        # x_k = domain.x0
+        # p_k = p0
+        # slope_k = p_slopes[k]
 
-        for i in range(domain.Nx-1):
-            x = domain.xs[i]
+        # for i in range(domain.Nx-1):
+        #     x = domain.xs[i]
 
-            if x > domain.x0 + (k+1)*height.step_width:
+        #     if x > domain.x0 + (k+1)*height.step_width:
 
-                k += 1
+        #         k += 1
                 
-                #x_k += height.step_width
-                x_k = domain.x0 + k*height.step_width
+        #         #x_k += height.step_width
+        #         x_k = domain.x0 + k*height.step_width
                 
-                p_k = p_extrema[k-1] #p_extrema = [p1, ..., pN-1]
+        #         p_k = p_extrema[k-1] #p_extrema = [p1, ..., pN-1]
          
-                slope_k = p_slopes[k] #slopes = [s1, ..., sN-1, sN]
+        #         slope_k = p_slopes[k] #slopes = [s1, ..., sN-1, sN]
 
-            ps[i] = slope_k*(x-x_k) + p_k
+        #     ps[i] = slope_k*(x-x_k) + p_k
         
-        ps[-1] = pN
+        # ps[-1] = pN
   
-        super().__init__(domain, ps, p0, pN, p_str)
+        # super().__init__(domain, ps, p0, pN, p_str)
         
         
  #TODO: Dimple pressure

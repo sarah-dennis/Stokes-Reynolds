@@ -90,7 +90,7 @@ def vary_nSteps_condNum(trials=4, n_steps_0=5):
     for k in range(trials):
         
         sqr_height_k,sqr_pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r, h_avg)
-        
+        #TODO removed .M as matrix for sqr_pressure_k
         v[k] = np.linalg.cond(sqr_pressure_k.M)
         x[k] = n_steps_k
     
