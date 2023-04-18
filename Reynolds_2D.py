@@ -57,16 +57,16 @@ def unravel(A_flat, Nx, Nz):
 #    -> h(X) = h0 + delta * sin(k0 x) * cos(k1 z)
 #    -> any boundary conditions 
 #-----------------------------------------------------------------------------
-# h0, h_delta = [0.2, 0.15] # delta < h0 
-# h_alpha, h_beta = [1, 1]
+h0, h_delta = [0.2, 0.15] # delta < h0 
+h_alpha, h_beta = [1, 1]
 
-# h_str = "h(x,z) = %0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) 
+h_str = "h(x,z) = %0.2f + %0.2f \sin(%d x) \cos(%d z)"%(h0, h_delta, h_alpha, h_beta) 
 
-# def h(x, z):
-#     return h0 + h_delta * np.sin(h_alpha*x) * np.cos(h_beta*z)
+def h(x, z):
+    return h0 + h_delta * np.sin(h_alpha*x) * np.cos(h_beta*z)
 
-# def h_dX(x, z): # = [h_x, h_z]
-#     return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
+def h_dX(x, z): # = [h_x, h_z]
+    return [h_delta * h_alpha * np.cos(h_alpha*x)* np.cos(h_beta*z), -h_delta * h_beta * np.sin(h_alpha*x) * np.sin(h_beta*z)]
 
 #-----------------------------------------------------------------------------
 # option 2: wedge height (must use BC = 1 or 2)
@@ -74,16 +74,16 @@ def unravel(A_flat, Nx, Nz):
 #   -> only fixed pressure BCs
 #-----------------------------------------------------------------------------
 
-h0, hf = [0.1, 0.01] # h0 > hf > 0
-h_m = (2*hf - h0)/(xf - x0)
+# h0, hf = [0.1, 0.01] # h0 > hf > 0
+# h_m = (2*hf - h0)/(xf - x0)
 
-h_str = "h(x) = %0.2f + %0.2f x"%(h0, h_m)
+# h_str = "h(x) = %0.2f + %0.2f x"%(h0, h_m)
 
-def h(x, z):
-    return hf + h_m*(x-xf)
+# def h(x, z):
+#     return hf + h_m*(x-xf)
 
-def h_dX(x, z): # = [h_t, h_x, h_z]
-    return [h_m, 0]
+# def h_dX(x, z): # = [h_t, h_x, h_z]
+#     return [h_m, 0]
 
        
 def plot_height():

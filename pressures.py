@@ -181,12 +181,12 @@ class SquareWavePressure(Pressure):
         
         #---------------
         
-        #t0 = time.perf_counter()
+        t0 = time.perf_counter()
         
         #Regular solve (Build M and solve)
-        #sol = np.linalg.solve(M, rhs)
+        sol = np.linalg.solve(M, rhs)
         t1 = time.perf_counter()
-        #print("np.linalg solve time: %.4f"%(t1-t0))
+        print("np.linalg solve time: %.4f"%(t1-t0))
         
         #Schur Complement solve (build M^-1 using schur comp and solve)
         M_inv = schur.build_schurComp_inv(M, height.n_steps+1, height.n_steps)

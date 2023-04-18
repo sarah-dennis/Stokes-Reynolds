@@ -116,7 +116,7 @@ def vary_r_pMax(trials=15, r_0=0.05):
         height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps, r_k)
         #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
-        v[k] = np.max(pressure_k) - ry.p0
+        v[k] = np.max(pressure_k.ps) - ry.p0
 
         x[k] = r_k
                 

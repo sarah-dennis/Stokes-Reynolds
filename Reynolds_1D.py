@@ -35,8 +35,10 @@ domain = dfd.Domain(x0, xf, eta, U, Nx, BC)
 p0 = 0
 pN = 0
 
+
 # Load example Height and Pressure
 #height, pressure = eg.corrugated(domain, p0, pN)
+
 #height, pressure = eg.wedge(domain, p0, pN)
 #height, pressursole = eg.step(domain, p0, pN)
 #height, pressure = eg.twoStep(domain, p0, pN)

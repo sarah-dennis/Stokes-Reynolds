@@ -12,7 +12,7 @@ from matplotlib import pyplot as pp
 theta = 30
 phi = 30
 
-Nx=100
+Nx = 100
 Nz=100
 
 def plot_3D(f_2D, xs, zs, title):
