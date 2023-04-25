@@ -5,15 +5,6 @@ Created on Sat Apr  1 12:09:43 2023
 @author: sarah
 """
 import numpy as np
-# index in the notes is array indexing
-# assumes as = cs
-
-# h1 = 1
-# h2 = 0.5
-# h3 = 1
-# h4 = 0.5
-# hs = [0, h1, h2, h3, h4]
-# n = 3
 
 #------------------------------------------------------------------------------
 # def schurComp(M, n, m):
@@ -25,7 +16,6 @@ import numpy as np
 #     B2 = M[n:n+m, 0:n]
     
 #     C = M[n:n+m, n:n+m]
-
 
 #     return -(C + np.matmul(np.matmul(B2, A_inv), B1))
 
@@ -61,71 +51,90 @@ import numpy as np
     
 #     return M_inv
 
-#build inverse of Schur Complement using recursion
-def make_S(height):
+
+
+def makeSymTriDiag():
+    n = 3
+    off_diag = [1,2]
+    center_diag = [4,5,6]
+    return n, off_diag, center_diag
+
+
+# make schur complement K (symmetric tri-diagonal)
+def make_schurCompDiags(height):
     n = height.n_steps
     hs = height.h_steps
 
-    # make schur complement K (symmetric tri-diagonal)
-    center_diag = np.zeros(n+2)
-    off_diag = np.zeros(n+2)
+    center_diag = np.zeros(n)
+    off_diag = np.zeros(n-1)
     
-    for i in range (1, n+2):
-        if i < n:
-            center_diag[i] = hs[i-1]**3 + hs[i]**3
-            off_diag[i] = -hs[i]**3
-        elif i == n:
-            off_diag[i] = 1
-            center_diag[i] = hs[i-1]**3 + hs[i]**3
-        elif i == n+1:
-            off_diag[i] = 1
-            center_diag[i] = 1
-        
-    
-    thetas = next_theta(0, n, [], off_diag, center_diag, off_diag)
-    phis = next_phi(n+1, n, [], off_diag, center_diag, off_diag)
+    for i in range (n):
+        center_diag[i] = hs[i]**3 + hs[i+1]**3
+        if i < n-1:
+            off_diag[i] = -hs[i+1]**3
+       
+    return n, off_diag, center_diag
+ 
+#build inverse of Schur Complement using recursion
+def make_SymTriInv(n, off_diag, center_diag):
+   
+    thetas = next_theta(np.zeros(n), 0, n, center_diag, off_diag)
+
+    phis = next_phi(np.zeros(n), n-1, n, center_diag, off_diag)
+
 
     S = np.zeros((n,n))
-    for i in range(1, n+1):
-        for j in range(i, n+1):
+    for i in range(0, n):
+        for j in range(0, i+1): #j <= i
+            sij = S_ij(i, j, n, thetas, phis, center_diag, off_diag)
             
-            sij = S_ij(off_diag, center_diag, off_diag, thetas, phis, i, j, n)
-            
-            S[i-1,j-1] = sij
+            S[i,j] = sij
             
             if i != j:
-                S[j-1, i-1] = sij
+                S[j, i] = sij
                 
     return S
- 
-def next_theta(k, n, thetas, As, Bs, Cs):
-    if k < 1: #k=0, k=-1
-        thetas = np.zeros(n+2)
-        thetas[0] = 1
-        return next_theta(1, n, thetas, As, Bs, Cs)
-    elif k < n+1: 
-        thetas[k] = Bs[k]*thetas[k-1] - As[k]*Cs[k-1]*thetas[k-2]
-        return next_theta(k+1, n, thetas, As, Bs, Cs)
+
+
+def next_theta(thetas, k, n, center_diag, off_diag):
+    if k == 0:
+        thetas[k] = center_diag[k]
+        return next_theta(thetas, k+1, n, center_diag, off_diag)
+    elif k == 1:
+        thetas[k] = center_diag[k]*center_diag[k-1] - off_diag[k-1]*off_diag[k-1]
+        return next_theta(thetas, k+1, n, center_diag, off_diag)
+    elif k < n: 
+        thetas[k] = center_diag[k]*thetas[k-1] - off_diag[k-1]*off_diag[k-1]*thetas[k-2]
+        return next_theta(thetas, k+1, n, center_diag, off_diag)
     else: 
         return thetas
     
-def next_phi(k, n, phis, As, Bs, Cs):
-    if k > n:
-        phis = np.zeros(n+3)
-        phis[n+1] = 1
-        return next_phi(n, n, phis, As, Bs, Cs)
-    elif k > 0:
-        phis[k] = Bs[k]*phis[k+1] - Cs[k]*As[k+1]*phis[k+2]
-        return next_phi(k-1, n, phis, As, Bs, Cs)
+def next_phi(phis, k, n, center_diag, off_diag):
+    if k == n-1:
+        phis[k] = center_diag[k]
+        return next_phi(phis, k-1, n, center_diag, off_diag)
+    elif k == n-2:
+        phis[k] = center_diag[k]* center_diag[k+1] - off_diag[k]*off_diag[k]
+        return next_phi(phis, k-1, n, center_diag, off_diag)
+    elif k > -1:
+        phis[k] = center_diag[k]*phis[k+1] - off_diag[k]*off_diag[k]*phis[k+2]
+        return next_phi(phis, k-1, n, center_diag, off_diag)
     else:
         return phis
     
     
-def S_ij(As, Bs, Cs, thetas, phis, i, j, n):
-    if i==j:
-        return thetas[i-1]*phis[j+1] / thetas[n]
-    elif i < j:
-        return (-1)**(i+j) * np.prod(Cs[i:j]) * thetas[i-1]*phis[j+1] / thetas[n]
-    else:
-        return (-1)**(i+j) * np.prod(As[j:i]) * thetas[j-1]*phis[i+1] / thetas[n]
+def S_ij(i, j, n, thetas, phis, off_diag, center_diag):
 
+    if i==j:
+        if j == 0:
+            return phis[i+1] / thetas[n-1]
+        elif i == n-1:
+            return thetas[j-1] / thetas[n-1]
+        else:
+            return thetas[j-1]*phis[i+1] / thetas[n-1]
+    elif j < i:
+        if i == n-1:
+            return (-1)**(i+j) * np.prod(off_diag[j:i+1]) * thetas[j-1] / thetas[n-1]
+        else:
+            return (-1)**(i+j) * np.prod(off_diag[j:i+1]) * thetas[j-1]*phis[i+1] / thetas[n-1]
+        

@@ -15,8 +15,8 @@ class Pressure:
     
     def __init__(self, domain, ps, p0, pN, p_str):
         self.ps = ps
-        self.pxs = dfd.center_diff(ps, domain)
-        self.pxxs = dfd.center_second_diff(ps, domain)
+        #self.pxs = dfd.center_diff(ps, domain)
+        #self.pxxs = dfd.center_second_diff(ps, domain)
         self.p_str = p_str
         self.p0 = p0
         self.pf = pN
@@ -191,25 +191,11 @@ class SquareWavePressure(Pressure):
 
 
         #3. Build part of M^-1 using schur comp
-        S = schur.make_S(height)/height.step_width # S = K^-1 inverse of schur comp
-        S_B2_L = np.zeros(n)
-        S_B2_R = np.zeros(n)
-        v = np.zeros(n)
+        #S = schur.make_S(height)/height.step_width # S = K^-1 inverse of schur comp
         
-        for i in range (n):
-            S_B2_L[i] = hs[0]**3 * (S[i, 0])
-            S_B2_R[i] = -hs[n]**3 * (S[i, n-1])
-            v[i] = (hs[i+1] - hs[i]) * 6*domain.eta*domain.U
+        #print(S)
+        super().__init__(domain, hs, p0, pN, p_str)
         
-        p_extrema = np.zeros(n)
-        for i in range(n):
-            p_extrema[i] = (-p0/height.step_width) * S_B2_L[i] + (pN/height.step_width) * S_B2_R[i] + np.dot(S[i], v)
-            
-        print(p_extrema)
-        
-        graph.plot_2D(p_extrema, range(n), p_str, "pressure", "step num")
-
-
         #print("slopes: ", p_slopes)
         #print("pressures: ", p_extrema)
         #---------------
