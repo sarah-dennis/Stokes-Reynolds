@@ -167,6 +167,22 @@ class SquareWavePressure(Pressure):
     #         rhs[n+1 + k] = (hs[k+1] - hs[k]) * 6*domain.eta*domain.U
         
     #     return M, rhs
+    
+    # get diags of schur complement (symmetric tri-diagonal)
+    def make_schurCompDiags(self, height):
+        n = height.n_steps
+        hs = height.h_steps
+
+        center_diag = np.zeros(n)
+        off_diag = np.zeros(n-1)
+        
+        for i in range (n):
+            center_diag[i] = hs[i]**3 + hs[i+1]**3
+            if i < n-1:
+                off_diag[i] = -hs[i+1]**3
+        return off_diag, center_diag
+    
+    
 
     def __init__(self, domain, height, p0, pN):
 
@@ -191,9 +207,10 @@ class SquareWavePressure(Pressure):
 
 
         #3. Build part of M^-1 using schur comp
-        #S = schur.make_S(height)/height.step_width # S = K^-1 inverse of schur comp
+        K_off_diag, K_center_diag = self.make_schurCompDiags(height)
+        S = schur.make_symTriInv(n, K_off_diag, K_center_diag)/height.step_width
         
-        #print(S)
+        print(S)
         super().__init__(domain, hs, p0, pN, p_str)
         
         #print("slopes: ", p_slopes)
