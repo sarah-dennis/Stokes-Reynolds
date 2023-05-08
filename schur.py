@@ -7,52 +7,18 @@ Created on Sat Apr  1 12:09:43 2023
 import numpy as np
 
 #------------------------------------------------------------------------------
-# def schurComp(M, n, m):
-#     A = M[0:n, 0:n]
-#     A_inv = np.linalg.inv(A)
-    
-#     B1 = M[0:n, n:n+m]
+# Schur Complement K of (n x m block) M
+#   
+#  M = [ A   B1 ]
+#      [ B2  C  ]
 
-#     B2 = M[n:n+m, 0:n]
-    
-#     C = M[n:n+m, n:n+m]
+#  K = - (C + B2 A^-1 B1)
 
-#     return -(C + np.matmul(np.matmul(B2, A_inv), B1))
-
-
+#  M^-1 = ...
 #------------------------------------------------------------------------------
-#build M_inv from M using schur comp
-# M = [[A, B1], [B2, C]]
-# M is size (n+m, n+m) 
 
-# def build_schurComp_Minv(M, n, m):
-    
-#     A = M[0:n, 0:n]
-#     A_inv = np.linalg.inv(A)
-    
-#     B1 = M[0:n, n:n+m]
-
-#     B2 = M[n:n+m, 0:n]
-    
-#     C = M[n:n+m, n:n+m]
-
-#     B2_Ainv = np.matmul(B2, A_inv)
-    
-#     K = -(C + np.matmul(B2_Ainv, B1))
-        
-#     S = np.linalg.inv(K)
-    
-#     M_inv = np.zeros((n+m, n+m))
-
-#     M_inv[0:n, 0:n] = A_inv + np.matmul(A_inv, np.matmul(B1, np.matmul(S, B2_Ainv)))
-#     M_inv[0:n, n:n+m] =  -np.matmul(A_inv, np.matmul(B1, S))
-#     M_inv[n:n+m, 0:n] = -np.matmul(S, B2_Ainv)
-#     M_inv[n:n+m, n:n+m] = S
-    
-#     return M_inv
-
-
-#Example (Usmani '94)
+# Example (Usmani '94) 
+#    -> expect schur complement K of this form
 def make_symTriDiag():
     n = 5
     off_diag = [1, 2, 4, 3]
@@ -60,7 +26,7 @@ def make_symTriDiag():
     return n, off_diag, center_diag
 
 
-# build the inverse of (n, n) symmetric tri-diagonal using recursion
+# build the inverse of (n, n) symmetric tri-diagonal 
 def make_symTriInv(n, off_diag, center_diag):
    
     thetas = get_thetas(n, off_diag, center_diag)
@@ -80,7 +46,7 @@ def make_symTriInv(n, off_diag, center_diag):
 
     
 # get (ith, jth) element of the inverse of (n, n) symmetric tri-diagonal    
-# best when i > j
+#    -> excpect upper triangular i > j (or runs again with i <-> j)
 def symTriInv_ij(i, j, n, thetas, phis, off_diag, center_diag):
     if i==j:
         if j == 0:
@@ -101,6 +67,8 @@ def symTriInv_ij(i, j, n, thetas, phis, off_diag, center_diag):
     else: 
         return symTriInv_ij(j, i, n, thetas, phis, off_diag, center_diag)
 
+
+#
 def get_thetas(n, off_diag, center_diag):
     return next_theta(np.zeros(n), 0, n, off_diag,  center_diag)
 
@@ -116,7 +84,8 @@ def next_theta(thetas, k, n, off_diag, center_diag):
         return next_theta(thetas, k+1, n, off_diag, center_diag)
     else: 
         return thetas
-    
+
+# 
 def get_phis(n, off_diag, center_diag):
     return next_phi(np.zeros(n), n-1, n, off_diag, center_diag)
     

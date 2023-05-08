@@ -136,7 +136,7 @@ class SquareWavePressure(Pressure):
     #     #---------------
     #     M = np.zeros((2*n + 1, 2*n + 1))
 
-    #     #B:= top left corner of M, 1/dx diagonal
+    #     #B:= top left corner of M, 1/L diagonal
     #     B = np.zeros((n+1, n))
     #     B_diag_neg = [-1/height.step_width]*n
     #     B_diag_pos = [1/height.step_width]*n
@@ -188,29 +188,23 @@ class SquareWavePressure(Pressure):
 
         n = height.n_steps
         hs = height.h_steps
+        L = height.step_width
         p_str = "%d-Step Square Wave"%n
         
-        #1. Build M and solve
+        ##1. Build M and solve
         #M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
         #sol = np.linalg.solve(M, rhs)
         
-        #2. Build M, build M^-1 using schur comp, and solve)
-        
-        #M, rhs = self.build_sqrWave_Matrix(domain, height, p0, pN)
-        #M_inv = schur.build_schurComp_Minv(M, height.n_steps+1, height.n_steps)
-
-        #sol = np.matmul(M_inv, rhs)
-
-        # extract slopes and extrema for 1. and 2. 
         #p_slopes = sol[0:height.n_steps+1]
         #p_extrema = sol[height.n_steps+1:2*height.n_steps+1]
 
 
-        #3. Build part of M^-1 using schur comp
+        #2. Build part of M^-1 using schur comp
         K_off_diag, K_center_diag = self.make_schurCompDiags(height)
-        S = -schur.make_symTriInv(n, K_off_diag, K_center_diag)/height.step_width
+        S = (-1/L) * schur.make_symTriInv(n, K_off_diag, K_center_diag)
         
         print(S)
+        #fake load with ps=hs
         super().__init__(domain, hs, p0, pN, p_str)
         
         #print("slopes: ", p_slopes)

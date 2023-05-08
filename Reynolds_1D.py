@@ -47,6 +47,13 @@ height, pressure = eg.squareWave(domain, p0, pN)
 #height, pressure = eg.flat(domain, p0, pN)
 
 
+
+
+
+
+
+
+
 #------------------------------------------------------------------------------
 # RHS
 #------------------------------------------------------------------------------
@@ -128,6 +135,7 @@ def solve(domain=domain, height=height, pressure=pressure, RHS=0, FIG=1):
         D[domain.Nx-1,domain.Nx-1] = 1
         D[domain.Nx-1,domain.Nx-2] = 0
         fs[domain.Nx-1] = pressure.pf
+        
     # solve for p
     ps_numsol = np.linalg.solve(D, fs)
     
