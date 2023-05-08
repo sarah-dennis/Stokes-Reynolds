@@ -5,10 +5,8 @@ Created on Wed Jan 25 18:24:34 2023
 
 @author: sarahdennis
 """
-import domain as dfd
 import _graphics as graph
 import numpy as np
-import time
 import schur
 
 class Pressure:
@@ -180,6 +178,8 @@ class SquareWavePressure(Pressure):
             center_diag[i] = hs[i]**3 + hs[i+1]**3
             if i < n-1:
                 off_diag[i] = -hs[i+1]**3
+                
+        #add a factor of -1/L  when done
         return off_diag, center_diag
     
     
@@ -208,7 +208,7 @@ class SquareWavePressure(Pressure):
 
         #3. Build part of M^-1 using schur comp
         K_off_diag, K_center_diag = self.make_schurCompDiags(height)
-        S = schur.make_symTriInv(n, K_off_diag, K_center_diag)/height.step_width
+        S = -schur.make_symTriInv(n, K_off_diag, K_center_diag)/height.step_width
         
         print(S)
         super().__init__(domain, hs, p0, pN, p_str)
