@@ -18,7 +18,7 @@ import examples_1D as eg
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-Nx = 3000  # Number of grid points
+Nx = 2000  # Number of grid points
 
 BC = "fixed"      
 #BC = "periodic"
@@ -45,13 +45,6 @@ pN = 0
 height, pressure = eg.squareWave(domain, p0, pN)
 #height, pressure = eg.dimple(domain, p0, pN)
 #height, pressure = eg.flat(domain, p0, pN)
-
-
-
-
-
-
-
 
 
 #------------------------------------------------------------------------------

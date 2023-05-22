@@ -17,7 +17,7 @@ import _graphics as g
 #RHS = [0: reynolds, 1: manufactured]
 
 # dx -> 0
-def conveg(trials=7, N0=50, BC="fixed", RHS=0):
+def conveg(trials=10, N0=50, BC="fixed", RHS=0):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -36,6 +36,7 @@ def conveg(trials=7, N0=50, BC="fixed", RHS=0):
         height_k, pressure_k = eg.squareWave(domain_k, ry.p0, ry.pN)
         #-------------------------------------------------------
         err_k, ps_k = ry.solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
+        
         infNorms[k] = err_k
         
         dxs[k] = domain_k.dx
@@ -79,32 +80,33 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     g.plot_log(v, x, title,  x_axis, y_axis)
 
 
-def vary_nSteps_condNum(trials=4, n_steps_0=5):
+def vary_nSteps_condNum(trials=6, n_steps_0=5):
     n_steps_k = n_steps_0
     r = 0.1
     h_avg = 0.2
          
     v = np.zeros(trials)
+    u = np.zeros(trials)
     x = np.zeros(trials)
     
     for k in range(trials):
         
-        sqr_height_k,sqr_pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r, h_avg)
-        #TODO removed .M as matrix for sqr_pressure_k
-        v[k] = np.linalg.cond(sqr_pressure_k.M)
+        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r, h_avg)
+        
+        u[k] = np.linalg.cond(pressure_k.M)
+        v[k] = np.linalg.cond(pressure_k.M_inv)
         x[k] = n_steps_k
     
-        x[k] = n_steps_k
-                
         n_steps_k = n_steps_k * 2 + 1
         
-    title = "Condition Number as step width decreases"
-    y_axis = "Condition Number"  
-    g.plot_2D(v, x, title, y_axis, "number of steps over $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf))
+    title = "Condition Number vs Matrix Size"
+    y_axis = "Condition Number"
+    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf)
+    labels = ["M", "M_inv"]
+    g.plot_2D_multi([u,v], x, title, labels, [x_axis, y_axis] )
 
 
-#square wave: radius --> 0
-def vary_r_pMax(trials=15, r_0=0.05):
+def vary_r_pMax(trials=10, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps = 5
     r_k = r_0
@@ -114,6 +116,7 @@ def vary_r_pMax(trials=15, r_0=0.05):
     
     for k in range(trials):
         height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps, r_k)
+        
         #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
         v[k] = np.max(pressure_k.ps) - ry.p0

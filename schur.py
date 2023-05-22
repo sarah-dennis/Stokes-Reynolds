@@ -6,6 +6,7 @@ Created on Sat Apr  1 12:09:43 2023
 """
 import numpy as np
 
+import time
 #------------------------------------------------------------------------------
 # Schur Complement K of (n x m block) M
 #   
@@ -28,16 +29,20 @@ def make_symTriDiag():
 
 # build the inverse of (n, n) symmetric tri-diagonal 
 def make_symTriInv(n, off_diag, center_diag):
-   
+    t0 = time.time()
     thetas = get_thetas(n, off_diag, center_diag)
 
     phis = get_phis(n, off_diag, center_diag)
+    
+    off_diag_prod= get_triDiagProduct(off_diag)
 
+    t1 = time.time()
+    print("recursion time %.5f"%(t1 - t0))
+    
     S = np.zeros((n,n))
     for i in range(0, n):
         for j in range(0, i+1): #j <= i
-            sij = symTriInv_ij(i, j, n, thetas, phis, off_diag,  center_diag)
-            
+            sij = symTriInv_ij(i, j, n, thetas, phis, off_diag_prod)
             S[i,j] = sij
             
             if i != j:
@@ -46,8 +51,8 @@ def make_symTriInv(n, off_diag, center_diag):
 
     
 # get (ith, jth) element of the inverse of (n, n) symmetric tri-diagonal    
-#    -> excpect upper triangular i > j (or runs again with i <-> j)
-def symTriInv_ij(i, j, n, thetas, phis, off_diag, center_diag):
+#    -> excpect upper triangular i > j
+def symTriInv_ij(i, j, n, thetas, phis, off_diag_prod):
     if i==j:
         if j == 0:
             return phis[i+1] / thetas[n-1]
@@ -57,16 +62,13 @@ def symTriInv_ij(i, j, n, thetas, phis, off_diag, center_diag):
             return thetas[j-1]*phis[i+1] / thetas[n-1]
     elif j < i:
         if j == 0 and i == n-1:
-            return (-1)**(i+j) * np.prod(off_diag[j:i]) / thetas[n-1]
+            return (-1)**(i+j) * off_diag_prod[j,i-1] / thetas[n-1]
         elif j == 0:
-            return (-1)**(i+j) * np.prod(off_diag[j:i]) * phis[i+1] / thetas[n-1]
+            return (-1)**(i+j) * off_diag_prod[j,i-1] * phis[i+1] / thetas[n-1]
         elif i == n-1:
-            return (-1)**(i+j) * np.prod(off_diag[j:i]) * thetas[j-1] / thetas[n-1]
+            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] / thetas[n-1]
         else:
-            return (-1)**(i+j) * np.prod(off_diag[j:i]) * thetas[j-1]*phis[i+1] / thetas[n-1]
-    else: 
-        return symTriInv_ij(j, i, n, thetas, phis, off_diag, center_diag)
-
+            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1]*phis[i+1] / thetas[n-1]
 
 #
 def get_thetas(n, off_diag, center_diag):
@@ -101,4 +103,20 @@ def next_phi(phis, k, n, off_diag, center_diag):
         return next_phi(phis, k-1, n, off_diag, center_diag)
     else:
         
+
         return phis
+
+
+def get_triDiagProduct(xs):
+    U = np.diag(xs)
+    return rec_triDiagProduct(U, 0, 1, len(xs))
+    
+
+def rec_triDiagProduct(U, i, j, n):   
+    if i < n-1:
+        if j < n:
+            U[i,j] = U[i,j-1] * U[j, j]
+            return rec_triDiagProduct(U, i, j+1, n)
+        return rec_triDiagProduct(U, i+1, i+2, n)
+    else:
+        return U

@@ -27,7 +27,7 @@ def plot_3D(f_2D, xs, zs, title):
     pp.ylabel('z')
     ax.view_init(theta, phi)
 
-def plot_2D_multi(fs, xs, title, labels):
+def plot_2D_multi(fs, xs, title, labels, axis):
     fig = pp.figure()
     ax = fig.add_subplot()
     colors = ['r', 'b', 'g', 'o', 'p']
@@ -38,15 +38,15 @@ def plot_2D_multi(fs, xs, title, labels):
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
 
-    ax.set_xlabel('x')
-    #ax.set_ylabel()
+    ax.set_xlabel(axis[0])
+    ax.set_ylabel(axis[1])
     pp.title(title,  fontweight ="bold")
     fig.legend()
     return fig
     
 def plot_2D(fs, xs, title, y_label, x_label):
     fig = pp.figure()
-    pp.plot(xs, fs, label=y_label, color='g')
+    pp.plot(xs, fs, label=y_label, color='r')
 
     pp.title(title)
     
@@ -65,10 +65,10 @@ def plot_pN_pE_h(ps, ps_num, hs, xs, title):
     ax1.set_xlabel('$x$')
     
     color = 'tab:red'
-    ax1.plot(xs, ps, color = color, label="exact")
+    ax1.plot(xs, ps, color = color, label="analytic reynolds")
     
     color ='tab:purple'
-    ax1.plot(xs, ps_num, color = color, label="numerical")
+    ax1.plot(xs, ps_num, color = color, label="numerical reynolds")
     
     ax1.set_ylabel('Pressure $p(x)$', color = 'black')
     ax1.tick_params(axis ='y', labelcolor = 'black')
@@ -138,7 +138,7 @@ def plot_log(fs, xs, title, x_label, y_label):
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, x_axis):
+def plot_log_multi(fs, xs, title, f_labels, axis):
     
     fig = pp.figure()
     ax = fig.add_subplot()
@@ -150,8 +150,8 @@ def plot_log_multi(fs, xs, title, f_labels, x_axis):
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
 
-    ax.set_xlabel(x_axis)
-    #ax.set_ylabel()
+    ax.set_xlabel(axis[0])
+    ax.set_ylabel(axis[1])
     pp.title(title,  fontweight ="bold")
     fig.legend(loc='lower right')
     return fig
