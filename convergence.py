@@ -5,51 +5,53 @@ Created on Tue Mar  7 16:16:13 2023
 @author: sarah
 """
 import numpy as np
-import Reynolds_1D as ry
+
 import domain as dfd
+import Reynolds_1D as ry
 import examples_1D as eg
 import _graphics as g
+import groundControl as gc
+
 
 #------------------------------------------------------------------------------
-# Convergence
+# Convergence of Numerical Reynolds to Analytic
 #------------------------------------------------------------------------------   
 #BCs = [0: periodic, 1: fixed]
 #RHS = [0: reynolds, 1: manufactured]
 
-# dx -> 0
-def conveg(trials=10, N0=50, BC="fixed", RHS=0):
+# Nx -> large, dx -> 0
+def conveg(trials=6, N0 = 50):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
     dxs_sqr = np.zeros(trials)
-    fig=0
+
     for k in range(trials):
-        if k == trials-1: fig=1
         
-        domain_k = dfd.Domain(ry.x0, ry.xf, ry.eta, ry.U, Nx_k, ry.BC)
+        domain_k = dfd.Domain(gc.x0, gc.xf, gc.eta, gc.U, Nx_k, gc.BC)
         
         #---- EXAMPLES -----------------------------------------
         #height_k, pressure_k = eg.wedge(domain_k)
         #height_k, pressure_k = eg.corrugated(domain_k)
         #height_k, pressure_k = eg.step(domain_k)
         #height_k, pressure_k = eg.twoStep(domain_k)
-        height_k, pressure_k = eg.squareWave(domain_k, ry.p0, ry.pN)
+        height_k, pressure_k = eg.squareWave(domain_k, gc.p0, gc.pN)
         #-------------------------------------------------------
-        err_k, ps_k = ry.solve(domain_k, height_k, pressure_k, RHS, FIG=fig)
+        numPressure_k = ry.solve(domain_k, height_k, gc.p0, gc.pN)
         
-        infNorms[k] = err_k
+        infNorms[k] = np.max(np.abs(pressure_k.ps - numPressure_k))
         
         dxs[k] = domain_k.dx
         dxs_sqr[k] = dxs[k]**2
         
         Nx_k *= 2
     
-    
     labels = ['$\mathcal{O}(dx)$', '$\mathcal{O}(dx^2)$', '$L_{\infty}$ Norm Error']
     fs = [dxs, dxs_sqr, infNorms]
     x_axis = '$dx$'
+    y_axis = 'Error'
     title = "Convergence for %s"%(height_k.h_str)
-    g.plot_log_multi(fs, dxs, title, labels, x_axis)
+    g.plot_log_multi(fs, dxs, title, labels, [x_axis, y_axis])
 
 
 #------------------------------------------------------------------------------
@@ -60,16 +62,17 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
     n_steps_k = n_steps_0
     r = 0.1
+    h_avg = 0.2
 
     v = np.zeros(trials)
     x = np.zeros(trials)
     
     for k in range(trials):
-        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r)
+        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
         #err_k, pressure_num_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
-        v[k] = np.max(pressure_k.ps)-ry.p0
+        v[k] = np.max(pressure_k.ps)-gc.p0
 
         x[k] = n_steps_k
                 
@@ -91,7 +94,7 @@ def vary_nSteps_condNum(trials=6, n_steps_0=5):
     
     for k in range(trials):
         
-        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps_k, r, h_avg)
+        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
         u[k] = np.linalg.cond(pressure_k.M)
         v[k] = np.linalg.cond(pressure_k.M_inv)
@@ -101,9 +104,35 @@ def vary_nSteps_condNum(trials=6, n_steps_0=5):
         
     title = "Condition Number vs Matrix Size"
     y_axis = "Condition Number"
-    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(ry.x0, ry.xf)
+    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
     labels = ["M", "M_inv"]
-    g.plot_2D_multi([u,v], x, title, labels, [x_axis, y_axis] )
+    g.plot_2D_multi([u,v], x, title, labels, [x_axis, y_axis])
+    
+    
+
+def vary_nSteps_time(trials=8, n_steps_0=3):
+    n_steps_k = n_steps_0
+    r = 0.1
+    h_avg = 0.2
+
+    u = np.zeros(trials)
+    x = np.zeros(trials)
+    
+    for k in range(trials):
+        
+        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        
+        u[k] = pressure_k.time
+        x[k] = n_steps_k
+    
+        n_steps_k = int(n_steps_k * 2+1)
+        
+    title = "Solve Time vs Matrix Size"
+    y_axis = "Time"
+    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
+    g.plot_2D(u, x, title, y_axis, x_axis)
+    g.plot_log(u, x, title, y_axis, x_axis)
+    
 
 
 def vary_r_pMax(trials=10, r_0=0.05):

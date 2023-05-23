@@ -29,15 +29,13 @@ def make_symTriDiag():
 
 # build the inverse of (n, n) symmetric tri-diagonal 
 def make_symTriInv(n, off_diag, center_diag):
-    t0 = time.time()
+
     thetas = get_thetas(n, off_diag, center_diag)
 
     phis = get_phis(n, off_diag, center_diag)
     
     off_diag_prod= get_triDiagProduct(off_diag)
 
-    t1 = time.time()
-    print("recursion time %.5f"%(t1 - t0))
     
     S = np.zeros((n,n))
     for i in range(0, n):
@@ -102,7 +100,6 @@ def next_phi(phis, k, n, off_diag, center_diag):
         phis[k] = center_diag[k]*phis[k+1] - off_diag[k]*off_diag[k]*phis[k+2]
         return next_phi(phis, k-1, n, off_diag, center_diag)
     else:
-        
 
         return phis
 
@@ -117,6 +114,15 @@ def rec_triDiagProduct(U, i, j, n):
         if j < n:
             U[i,j] = U[i,j-1] * U[j, j]
             return rec_triDiagProduct(U, i, j+1, n)
-        return rec_triDiagProduct(U, i+1, i+2, n)
+        else:
+            return rec_triDiagProduct(U, i+1, i+2, n)
+    
     else:
         return U
+    
+    
+    
+    
+    
+    
+    

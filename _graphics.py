@@ -57,63 +57,24 @@ def plot_2D(fs, xs, title, y_label, x_label):
     
     return fig
 
-def plot_pN_pE_h(ps, ps_num, hs, xs, title):
+def plot_2D_twin(ps, hs, xs, title):
 
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
     
     ax1.set_xlabel('$x$')
-    
+
     color = 'tab:red'
     ax1.plot(xs, ps, color = color, label="analytic reynolds")
-    
-    color ='tab:purple'
-    ax1.plot(xs, ps_num, color = color, label="numerical reynolds")
-    
-    ax1.set_ylabel('Pressure $p(x)$', color = 'black')
-    ax1.tick_params(axis ='y', labelcolor = 'black')
-    
-    fig.legend()
-     
-    # Adding Twin Axes to plot dataset_2
-    ax2 = ax1.twinx()
-     
-    color = 'tab:blue'
-    ax2.set_ylabel('Height $h(x)$', color = color)
-    ax2.plot(xs,hs, color = color)
-    ax2.tick_params(axis ='y', labelcolor = color)
-    ax2.set_ylim(0, 1.2*max(hs))
-     
-    # Adding title
-    pp.title(title, fontweight ="bold")
-     
-    # Show plot
-    pp.show()
-    
-def plot_p_h(ps, hs, xs, title):
-
-    # Creating plot with dataset_1
-    fig, ax1 = pp.subplots()
-    
-    ax1.set_xlabel('$x$')
-    
-    #color = 'tab:red'
-    #ax1.plot(xs, ps, color = color, label="exact")
-    
-    color ='tab:red'
-    ax1.plot(xs, ps, color = color, label="Reynolds")
-    
     ax1.set_ylabel('Pressure $p(x)$', color = color)
     ax1.tick_params(axis ='y', labelcolor = color)
-    
-    #fig.legend()
-     
+
     # Adding Twin Axes to plot dataset_2
     ax2 = ax1.twinx()
      
     color = 'tab:blue'
     ax2.set_ylabel('Height $h(x)$', color = color)
-    ax2.plot(xs,hs, color = color)
+    ax2.plot(xs, hs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
     ax2.set_ylim(0, 1.2*max(hs))
      
@@ -122,12 +83,11 @@ def plot_p_h(ps, hs, xs, title):
      
     # Show plot
     pp.show()
-        
     
-    
-def plot_log(fs, xs, title, x_label, y_label):
+
+def plot_log(fs, xs, title, y_label, x_label):
     fig = pp.figure()
-    pp.loglog(fs, xs, color='b', label=y_label)   
+    pp.loglog(xs, fs, color='b')   
 
     pp.title(title)
     

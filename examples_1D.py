@@ -67,23 +67,12 @@ def twoStep(domain, p0, pN):
 # III c. N-Step Height Example
 #------------------------------------------------------------------------------
 
-def squareWave(domain, p0, pN, n_steps=50, r=0.1, h_avg=0.2):
+def squareWave(domain, p0, pN, n_steps=11, r=0.1, h_avg=0.2):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
+        
+    print("Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = pres.SquareWavePressure(domain, height, p0, pN)
-    
-    print("Loaded %d-step Square Wave"%(n_steps))
-    return height, pressure
 
-#------------------------------------------------------------------------------
-# III d. Dimple Height Example
-# TODO: add a simulation of the dimple example from that reference
-#------------------------------------------------------------------------------
-def dimple(domain, p0, pN):
-    h_min = 0.5
-    h_max = 1
-    len_ratio = 64
-    height = hgt.DimpleHeight(domain, len_ratio, h_max, h_min)
-    pressure = pres.UnknownPressure(domain, height, p0, pN)
     return height, pressure

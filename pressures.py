@@ -5,6 +5,7 @@ Created on Wed Jan 25 18:24:34 2023
 
 @author: sarahdennis
 """
+import Reynolds_1D as ry
 import _graphics as graph
 import numpy as np
 import schur
@@ -12,25 +13,25 @@ import time
 
 class Pressure:
     
-    def __init__(self, domain, ps, p0, pN, p_str):
+    def __init__(self, domain, ps, p0, pN, p_str, time=0):
         self.ps = ps
         #self.pxs = dfd.center_diff(ps, domain)
         #self.pxxs = dfd.center_second_diff(ps, domain)
         self.p_str = p_str
         self.p0 = p0
         self.pf = pN
+        self.time = time
             
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Analytic Pressure (%s)"%self.p_str, "p", "x")
         
-    def plot_diffs(self, domain):
-        graph.plot_2D_multi([self.ps, self.pxs, self.pxxs], domain.xs, "Analytic Pressure Derivatives (%s)"%self.p_str, ["p", "px", "pxx"])
-
-class UnknownPressure(Pressure):
+        
+class ReynoldsPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
-        p_str = "Exact Pressure Unknown"
-        ps = np.zeros(domain.Nx)
-        super().__init__(domain, ps, p0, pN,  p_str)
+        p_str = "Reynolds"
+        ps = ry.solve(domain, height, p0, pN)
+        super().__init__(domain, ps, p0, pN, p_str)
+        
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
@@ -142,6 +143,8 @@ class SquareWavePressure(Pressure):
             
         return rhs
     
+    
+    
     def make_M(self, domain, height, p0, pN):
 
         n = height.n_steps
@@ -172,6 +175,7 @@ class SquareWavePressure(Pressure):
         M[n+1:2*n+1, 0:n+1] = C
             
         return M
+
     
     def make_Minv_schurComp(self, height, S):
         
@@ -187,13 +191,13 @@ class SquareWavePressure(Pressure):
         for i in range(0, n+1):
             for j in range(0, n+1):
                 
-                A[i,j] = self.Id_B1schurCompInvB2_ij(height, S, i, j)
+                A[i,j] = self.Id_B1_schurCompInv_B2_ij(height, S, i, j)
                 
                 if i < n:
-                    C[i, j] = self.schurCompInvB2_ij(height, S, i, j)
+                    C[i, j] = self.neg_schurCompInv_B2_ij(height, S, i, j)
                 
                 if j < n:
-                    B[i,j] = self.B1schurCompInv_ij(height, S, i, j)
+                    B[i,j] = self.neg_B1_schurCompInv_ij(height, S, i, j)
                     
         M_inv[0:n+1, 0:n+1] = A
         M_inv[0:n+1, n+1:2*n+1] = B
@@ -218,28 +222,8 @@ class SquareWavePressure(Pressure):
         return (-1/height.step_width) * off_diag, (-1/height.step_width) * center_diag
     
     
-    def schurCompInvB2_ij(self, height, S, i, j):
-        n = height.n_steps
-        if j == 0:
-            return -height.h_steps[j]**3 * S[i,j]
-        elif j < n:
-            return height.h_steps[j]**3 * (S[i, j-1] - S[i,j])
-        else:
-            return height.h_steps[j]**3 * S[i, j-1]
-        
-    #M_inv top 
-    def B1schurCompInv_ij(self, height, S, i, j):
-        L = height.step_width
-        n = height.n_steps
-        if i == 0:
-            return (-1/L) * (-S[i,j])
-        elif i < n:
-            return (-1/L) * (S[i-1,j] - S[i,j])
-        else:
-            return (-1/L) * S[i-1,j]
-           
-    #M_inv top right    
-    def Id_B1schurCompInvB2_ij(self, height, S, i, j):
+    #M_inv top left    
+    def Id_B1_schurCompInv_B2_ij(self, height, S, i, j):
         L = height.step_width
         n = height.n_steps
         hj = height.h_steps[j]
@@ -271,6 +255,53 @@ class SquareWavePressure(Pressure):
         else:
             return (i==j) + (1/L) * height.h_steps[j]**3 * (S[i-1,j-1] - S[i-1,j] - S[i, j-1] + S[i,j])    
     
+    
+    #M_inv bottom left
+    def neg_schurCompInv_B2_ij(self, height, S, i, j):
+        n = height.n_steps
+        if j == 0:
+            return height.h_steps[j]**3 * S[i,j]
+        elif j < n:
+            return -height.h_steps[j]**3 * (S[i, j-1] - S[i,j])
+        else:
+            return -height.h_steps[j]**3 * S[i, j-1]
+        
+    #M_inv top right
+    def neg_B1_schurCompInv_ij(self, height, S, i, j):
+        L = height.step_width
+        n = height.n_steps
+        if i == 0:
+            return (-1/L) * (-S[i,j])
+        elif i < n:
+            return (-1/L) * (S[i-1,j] - S[i,j])
+        else:
+            return (-1/L) * S[i-1,j]
+           
+
+
+    def lhs_i(self, i, rhs, height, S):
+        n = height.n_steps
+        
+        if i < n+1:       # solving for M_i
+
+            leftBlock_0 = self.Id_B1_schurCompInv_B2_ij(height, S, i, 0) * rhs[0]
+            leftBlock_n = self.Id_B1_schurCompInv_B2_ij(height, S, i, n) * rhs[n]
+            
+            rightBlock_dotProd = 0
+            for j in range(n):
+                rightBlock_dotProd += self.neg_B1_schurCompInv_ij(height, S, i, j) * rhs[n+1+j]
+            
+        else: #n < i < 2*n+1  #solving for P_i  
+
+            leftBlock_0 = self.neg_schurCompInv_B2_ij(height, S, i - (n+1), 0) * rhs[0]
+            leftBlock_n = self.neg_schurCompInv_B2_ij(height, S, i - (n+1), n) * rhs[n]
+            
+            rightBlock_dotProd = 0
+            for j in range(n):
+                rightBlock_dotProd += S[i - (n+1), j] * rhs[n+1 + j]
+            
+        return leftBlock_0 + leftBlock_n + rightBlock_dotProd
+
 
     def __init__(self, domain, height, p0, pN):
 
@@ -279,52 +310,44 @@ class SquareWavePressure(Pressure):
         p_str = "%d-Step Square Wave"%n
         
         rhs = self.make_RHS(domain, height, p0, pN)
+    
         
-        #1. Build M and solve
-        t0 = time.time()
-        M = self.make_M(domain, height, p0, pN)
-        t1 = time.time()
+    # # 1. Build M and solve (python finds M^-1)
+    #     t0 = time.time()
+    #     M = self.make_M(domain, height, p0, pN)
+    #     t1 = time.time()
+    #     # self.M = M     # condition num
+    #     sol = np.linalg.solve(M, rhs)
+    #     t2 = time.time()
         
-        #self.M = M
-        t2 = time.time()
-        sol = np.linalg.solve(M, rhs)
-        t3 = time.time()
-        
-        print("Building M: %.5f "%(t1-t0))
-        print("Solving Mx=b : %.5f "%(t3-t2))
-        print("Total time with M: %.5f  \n"%(t3-t0))
-        
-        #2. Build M^-1 using schur comp
+    #     print("Building M: %.5f "%(t1-t0))
+    #     print("Solving Mx=b : %.5f "%(t2-t1))
+    #     print("Total time with M: %.5f  \n"%(t2-t0))
+
+    # 2. Evaluate M^-1 * rhs = lhs 
         t4 = time.time()
         K_off_diag, K_center_diag = self.make_schurCompDiags(height)
-        t4_a = time.time()
         S = schur.make_symTriInv(n, K_off_diag, K_center_diag)
-        t4_b = time.time()
-        M_inv = self.make_Minv_schurComp(height, S)
-        t5 = time.time()
-       
 
-        #self.M_inv = M_inv
-        t6 = time.time()
-        sol = M_inv @ rhs
-        t7 = time.time()
-    
-        print("Building diags of K: %.5f"%(t4_a-t4))
-        print("Building S : %.5f"%(t4_b-t4_a))
-        print("Building M_inv: %.5f"%(t5-t4_b))
-        print("Solving M^-1 b = x:  %.5f "%(t7-t6))
-        print("Total time with M_inv: %.5f \n"%(t7-t4))
+        lhs = np.zeros(2*n+1)
         
-
-
-        #---------------
-        p_slopes = sol[0:n+1]
-        p_extrema = sol[n+1:2*n+1]
+        for i in range(2*n+1):
+            lhs[i] = self.lhs_i(i, rhs, height, S)
+ 
+        t9 = time.time()
+        
+        print("Solved with SchurCompInverse in %.5f \n"%(t9 - t4))
+        
+        p_slopes = lhs[0:n+1]
+        p_extrema = lhs[n+1:2*n+1]
 
         ps = self.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
-        super().__init__(domain, ps, p0, pN, p_str)
+        #---------------
+        eval_time = t9 - t4
+        super().__init__(domain, ps, p0, pN, p_str, eval_time)
  
+    #Construct piecewise linear pressure on Nx grid
     def make_ps(self, domain, height, p0, pN, slopes, extrema):
         ps = np.zeros(domain.Nx)
         L = height.step_width
