@@ -278,7 +278,7 @@ class SquareWavePressure(Pressure):
             return (-1/L) * S[i-1,j]
            
 
-
+    # Solve M_inv @ rhs = lhs
     def lhs_i(self, i, rhs, height, S):
         n = height.n_steps
         
@@ -312,39 +312,47 @@ class SquareWavePressure(Pressure):
         rhs = self.make_RHS(domain, height, p0, pN)
     
         
-    # # 1. Build M and solve (python finds M^-1)
-    #     t0 = time.time()
-    #     M = self.make_M(domain, height, p0, pN)
-    #     t1 = time.time()
-    #     # self.M = M     # condition num
-    #     sol = np.linalg.solve(M, rhs)
-    #     t2 = time.time()
-        
-    #     print("Building M: %.5f "%(t1-t0))
-    #     print("Solving Mx=b : %.5f "%(t2-t1))
-    #     print("Total time with M: %.5f  \n"%(t2-t0))
+    # 1. Build M, python-solve M @ sol = rhs
+        t0 = time.time()
+        M = self.make_M(domain, height, p0, pN)
+        # self.M = M     
 
-    # 2. Evaluate M^-1 * rhs = lhs 
+        t1 = time.time()
+        sol_1 = np.linalg.solve(M, rhs)
+        t2 = time.time()
+        
+        print("Time building M: %.5f "%(t1-t0))
+        print("Time solving M x = b : %.5f "%(t2-t1))
+        print("Total time with M: %.5f  \n"%(t2-t0))
+
+    # 2. Build S, evaluate M_inv(S) @ rhs = sol 
         t4 = time.time()
         K_off_diag, K_center_diag = self.make_schurCompDiags(height)
         S = schur.make_symTriInv(n, K_off_diag, K_center_diag)
-
-        lhs = np.zeros(2*n+1)
+        t5 = time.time()
+        
+        # --- Building M_inv -------------------------
+        # M_inv = self.make_Minv_schurComp(height, S)
+        # self.M_inv = M_inv
+        # --------------------------------------------
+        sol_2 = np.zeros(2*n+1)
         
         for i in range(2*n+1):
-            lhs[i] = self.lhs_i(i, rhs, height, S)
+            sol_2[i] = self.lhs_i(i, rhs, height, S)
  
         t9 = time.time()
+        print("Time building S: %.5f"%(t5 - t4))
+        print("Time evaluating M^-1 @ b = x: %.5f"%(t9 - t5))
+        print("Total time with M^-1: %.5f \n"%(t9 - t4))
         
-        print("Solved with SchurCompInverse in %.5f \n"%(t9 - t4))
-        
-        p_slopes = lhs[0:n+1]
-        p_extrema = lhs[n+1:2*n+1]
+        #---------------
+        p_slopes = sol_1[0:n+1]
+        p_extrema = sol_1[n+1:2*n+1]
 
         ps = self.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
-        #---------------
-        eval_time = t9 - t4
+        
+        eval_time = t9-t4
         super().__init__(domain, ps, p0, pN, p_str, eval_time)
  
     #Construct piecewise linear pressure on Nx grid

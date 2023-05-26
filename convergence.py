@@ -110,19 +110,21 @@ def vary_nSteps_condNum(trials=6, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=8, n_steps_0=3):
+def vary_nSteps_time(trials=8, n_steps_0=7):
     n_steps_k = n_steps_0
     r = 0.1
     h_avg = 0.2
 
     u = np.zeros(trials)
     x = np.zeros(trials)
+    v = np.zeros(trials)
     
     for k in range(trials):
         
         height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
         u[k] = pressure_k.time
+        v[k] = n_steps_k
         x[k] = n_steps_k
     
         n_steps_k = int(n_steps_k * 2+1)
@@ -131,7 +133,7 @@ def vary_nSteps_time(trials=8, n_steps_0=3):
     y_axis = "Time"
     x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
     g.plot_2D(u, x, title, y_axis, x_axis)
-    g.plot_log(u, x, title, y_axis, x_axis)
+    g.plot_log_multi([u,v], x, title, ["runtime", "$\mathcal{O}(n)$"], [x_axis, y_axis])
     
 
 

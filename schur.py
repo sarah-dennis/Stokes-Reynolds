@@ -5,8 +5,6 @@ Created on Sat Apr  1 12:09:43 2023
 @author: sarah
 """
 import numpy as np
-
-import time
 #------------------------------------------------------------------------------
 # Schur Complement K of (n x m block) M
 #   
@@ -18,15 +16,6 @@ import time
 #  M^-1 = ...
 #------------------------------------------------------------------------------
 
-# Example (Usmani '94) 
-#    -> expect schur complement K of this form
-def make_symTriDiag():
-    n = 5
-    off_diag = [1, 2, 4, 3]
-    center_diag = [5, 4, 3, 2, 1]
-    return n, off_diag, center_diag
-
-
 # build the inverse of (n, n) symmetric tri-diagonal 
 def make_symTriInv(n, off_diag, center_diag):
 
@@ -34,8 +23,8 @@ def make_symTriInv(n, off_diag, center_diag):
 
     phis = get_phis(n, off_diag, center_diag)
     
-    off_diag_prod= get_triDiagProduct(off_diag)
-
+    # off_diag_prod= get_triDiagProduct(off_diag)
+    off_diag_prod= triDiagProd(off_diag)
     
     S = np.zeros((n,n))
     for i in range(0, n):
@@ -102,27 +91,29 @@ def next_phi(phis, k, n, off_diag, center_diag):
     else:
 
         return phis
-
-
-def get_triDiagProduct(xs):
+    
+def triDiagProd(xs):
     U = np.diag(xs)
-    return rec_triDiagProduct(U, 0, 1, len(xs))
-    
-
-def rec_triDiagProduct(U, i, j, n):   
-    if i < n-1:
-        if j < n:
-            U[i,j] = U[i,j-1] * U[j, j]
-            return rec_triDiagProduct(U, i, j+1, n)
-        else:
-            return rec_triDiagProduct(U, i+1, i+2, n)
-    
-    else:
-        return U
-    
-    
-    
-    
-    
-    
+    n = len(xs)
+    for i in range(n-1):
+        for j in range(i+1, n):
+            U[i,j] = U[i, j-1] * U[j, j]
+         
+    return U
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     

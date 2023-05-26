@@ -77,7 +77,7 @@ def solve(domain, height, p0, pN):
     ps_numsol = np.linalg.solve(D, fs)
     tf = time.time()
     
-    print ("Solved Numerically for Nx=%d in %.5f \n"%(domain.Nx, tf-t0))
+    print("Solved Numerically for Nx=%d in %.5f \n"%(domain.Nx, tf-t0))
     return ps_numsol
 
 
