@@ -46,13 +46,14 @@ def plot_2D_multi(fs, xs, title, labels, axis):
     
 def plot_2D(fs, xs, title, y_label, x_label):
     fig = pp.figure()
-    pp.plot(xs, fs, label=y_label, color='r')
+    pp.plot(xs, fs, label=y_label, color='b')
 
     pp.title(title)
     
     pp.xlabel(x_label)
     
     pp.ylabel(y_label)
+    pp.ylim(0, 1.1*max(fs))
     #fig.legend()
     
     return fig

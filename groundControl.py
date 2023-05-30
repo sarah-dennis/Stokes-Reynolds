@@ -54,4 +54,4 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title)
 # max_err = np.max(np.abs(num_pressure.ps - pressure.ps))
 
 # print("Analytic to Numerical Error: %.3f"%max_err)
-
+height.plot(domain)

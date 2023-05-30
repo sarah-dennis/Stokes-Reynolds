@@ -8,6 +8,7 @@ Created on Sun Jan 29 08:18:07 2023
 import _graphics as graph
 import numpy as np
 import domain as dfd
+from matplotlib import pyplot as pp
 
 class Height:
     
@@ -35,7 +36,19 @@ class Height:
             self.hxxs = [hxx(x) for x in domain.xs]
          
     def plot(self, domain):
-        graph.plot_2D(self.hs, domain.xs, "Height: %s"%self.h_str, "h" )
+        fig = pp.figure()
+        pp.plot(domain.xs, self.hs, color='b')
+
+        pp.title(self.h_str)
+        
+        pp.xlabel("$x$")
+        pp.ylabel("Height $h(x)$")
+        
+        pp.ylim(0, 1.2*max(self.hs))
+        pp.xticks(np.arange(domain.xs[0], domain.xs[-1]+0.001, self.step_width))
+     
+        return fig
+        
 
 
     def plot_derivs(self, domain):
@@ -158,50 +171,30 @@ class SquareWaveHeight(Height):
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
         
         self.h_steps = np.zeros(n_steps+1)
+       
         for i in range(n_steps+1):
             x = domain.x0 + self.step_width * (i + 0.5)
             self.h_steps[i] = self.h(x)
         
-        self.h_str = "Square Wave"
+        self.h_str = "%d-step Square Wave"%n_steps
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
         super().__init__(domain, self.h, self.h_str, self.h_eq)
         
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:
-           return self.h_avg + self.r
+            return self.h_avg + self.r
         else:
-           return self.h_avg - self.r
-
-
-class DimpleHeight(Height):
-    #lambda := dimple length/total length
-    def __init__(self, domain, ratio, h_max, h_min):
-        self.ratio = ratio # length/depth
+            return self.h_avg - self.r
         
-        self.h_max = h_max
-        self.h_min = h_min
-        
-        self.dimple_dep = h_max - h_min
-        self.cell_len = domain.xf-domain.x0
+    # def h(self, x):
+    #     if np.sin(np.pi * x/self.step_width) == 0:
+    #         return self.h_avg
+    #     elif np.sin(np.pi * x/self.step_width) > 0:
+    #        return self.h_avg + self.r
+    #     else:
+    #        return self.h_avg - self.r
 
-        self.dimple_len_true = self.dimple_dep*ratio
-        self.dimple_len_adj = self.cell_len/2
-        
-        self.h_str = "Dimple"
-        self.h_eq = "h(x) = %0.1f, %0.1f"%(h_min, h_max)
-        
-        super().__init__(domain, self.h, self.h_str, self.h_eq)
-        print("%s \n %s \n length/depth ratio: %.2f "%(self.h_str,self.h_eq, self.ratio))
-
-    def h(self, x):
-        entry_len = self.cell_len/4
-        if (x <= entry_len):
-            return self.h_min
-        elif (x <= entry_len + self.dimple_len_adj):
-            return self.h_max
-        else:
-            return self.h_min
             
         
     
