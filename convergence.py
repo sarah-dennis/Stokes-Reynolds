@@ -124,7 +124,7 @@ def vary_nSteps_time(trials=8, n_steps_0=7):
         height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
         u[k] = pressure_k.time
-        v[k] = n_steps_k
+        v[k] = n_steps_k**2
         x[k] = n_steps_k
     
         n_steps_k = int(n_steps_k * 2+1)

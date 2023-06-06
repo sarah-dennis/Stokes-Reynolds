@@ -10,6 +10,7 @@ import _graphics as graph
 import numpy as np
 import schur
 import time
+import squareWave as sw
 
 class Pressure:
     
@@ -130,194 +131,17 @@ class TwoStepPressure(Pressure):
 
 
 class SquareWavePressure(Pressure):
-        
-    def make_RHS(self, domain, height, p0, pN):
-        n = height.n_steps
-        rhs = np.zeros(2*n + 1)
-        
-        rhs[0] = -p0/height.step_width
-        rhs[n] = pN/height.step_width
-        
-        for k in range(n):
-            rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
-            
-        return rhs
-    
-    
-    
-    def make_M(self, domain, height, p0, pN):
-
-        n = height.n_steps
-        hs = height.h_steps 
-        #---------------
-        #M = [[I, B], [C, 0]]
-        M = np.zeros((2*n + 1, 2*n + 1))
-    
-    
-        #B:= top right corner of M, 1/L diagonal
-        B = np.zeros((n+1, n))
-        B_diag_neg = [-1/height.step_width]*n
-        B_diag_pos = [1/height.step_width]*n
-        B[0:n , 0:n] += np.diagflat(B_diag_neg)
-        B[1:n+1, 0:n] += np.diagflat(B_diag_pos)  
-        M[0:n+1, n+1:2*n+1] = B
-        
-        #C:= bottom left corner of M, hj-hi diagonal
-        C = np.zeros((n, n+1))
-        C_diag_neg = [-h**3 for h in hs[0:n]] 
-        C_diag_pos = [h**3 for h in hs[1:n+1]]
-        C[0:n, 0:n] += np.diagflat(C_diag_neg)
-        C[0:n, 1:n+1] += np.diagflat(C_diag_pos)
-        
-        #---------------
-        M[0:n+1, 0:n+1] = np.identity(n+1)
-        M[0:n+1, n+1:2*n+1] = B
-        M[n+1:2*n+1, 0:n+1] = C
-            
-        return M
-
-    
-    def make_Minv_schurComp(self, height, S):
-        
-        n = height.n_steps
-        
-        #Minv = [[A, B],[C, S]]
-        M_inv = np.zeros((2*n + 1, 2*n + 1))
-        
-        A = np.zeros((n+1, n+1))
-        B = np.zeros((n+1, n))
-        C = np.zeros((n, n+1))
-        
-        for i in range(0, n+1):
-            for j in range(0, n+1):
-                
-                A[i,j] = self.Id_B1_schurCompInv_B2_ij(height, S, i, j)
-                
-                if i < n:
-                    C[i, j] = self.neg_schurCompInv_B2_ij(height, S, i, j)
-                
-                if j < n:
-                    B[i,j] = self.neg_B1_schurCompInv_ij(height, S, i, j)
-                    
-        M_inv[0:n+1, 0:n+1] = A
-        M_inv[0:n+1, n+1:2*n+1] = B
-        M_inv[n+1:2*n+1, 0:n+1] = C
-        M_inv[n+1:2*n+1, n+1:2*n+1] = S
-                
-        return M_inv
-    
-    
-    # get diags of schur complement K (symmetric tri-diagonal)
-    def make_schurCompDiags(self, height):
-        n = height.n_steps
-        hs = height.h_steps
-
-        center_diag = np.zeros(n)
-        off_diag = np.zeros(n-1)
-        
-        for i in range (n):
-            center_diag[i] = hs[i]**3 + hs[i+1]**3
-            if i < n-1:
-                off_diag[i] = -hs[i+1]**3
-        return (-1/height.step_width) * off_diag, (-1/height.step_width) * center_diag
-    
-    
-    #M_inv top left    
-    def Id_B1_schurCompInv_B2_ij(self, height, S, i, j):
-        L = height.step_width
-        n = height.n_steps
-        hj = height.h_steps[j]
-        
-        if i == 0 and j == 0:
-            return 1 + (1/L) * hj**3 * S[i,j]
-        
-        elif i == 0 and j < n :
-            return (-1/L) * hj**3 * (S[i,j-1] - S[i,j])
-        
-        elif i == 0 and j == n: 
-            return (-1/L) * hj**3 * (S[i,j-1])
-        
-        elif i == n and j == 0:
-            return (-1/L) * hj**3 * (S[i-1,j])
-        
-        elif i == n and j < n:
-             return (1/L) * hj**3 * (S[i-1,j-1] - S[i-1,j])
-        
-        elif i == n and j == n:
-            return 1 + (1/L) * hj**3 * S[i-1,j-1]
-        
-        elif i < n and j == 0:
-            return (-1/L) * hj**3 * (S[i-1,j] - S[i,j])
-
-        elif i < n and j == n:
-            return (1/L) * hj**3 * (S[i-1,j-1] - S[i,j-1])
-        
-        else:
-            return (i==j) + (1/L) * height.h_steps[j]**3 * (S[i-1,j-1] - S[i-1,j] - S[i, j-1] + S[i,j])    
-    
-    
-    #M_inv bottom left
-    def neg_schurCompInv_B2_ij(self, height, S, i, j):
-        n = height.n_steps
-        if j == 0:
-            return height.h_steps[j]**3 * S[i,j]
-        elif j < n:
-            return -height.h_steps[j]**3 * (S[i, j-1] - S[i,j])
-        else:
-            return -height.h_steps[j]**3 * S[i, j-1]
-        
-    #M_inv top right
-    def neg_B1_schurCompInv_ij(self, height, S, i, j):
-        L = height.step_width
-        n = height.n_steps
-        if i == 0:
-            return (-1/L) * (-S[i,j])
-        elif i < n:
-            return (-1/L) * (S[i-1,j] - S[i,j])
-        else:
-            return (-1/L) * S[i-1,j]
-           
-
-    # Solve M_inv @ rhs = lhs
-    def lhs_i(self, i, rhs, height, S):
-        n = height.n_steps
-        
-        if i < n+1:       # solving for M_i
-
-            leftBlock_0 = self.Id_B1_schurCompInv_B2_ij(height, S, i, 0) * rhs[0]
-            leftBlock_n = self.Id_B1_schurCompInv_B2_ij(height, S, i, n) * rhs[n]
-            
-            rightBlock_dotProd = 0
-            for j in range(n):
-                rightBlock_dotProd += self.neg_B1_schurCompInv_ij(height, S, i, j) * rhs[n+1+j]
-            
-        else: #n < i < 2*n+1  #solving for P_i  
-
-            leftBlock_0 = self.neg_schurCompInv_B2_ij(height, S, i - (n+1), 0) * rhs[0]
-            leftBlock_n = self.neg_schurCompInv_B2_ij(height, S, i - (n+1), n) * rhs[n]
-            
-            rightBlock_dotProd = 0
-            for j in range(n):
-                rightBlock_dotProd += S[i - (n+1), j] * rhs[n+1 + j]
-            
-        return leftBlock_0 + leftBlock_n + rightBlock_dotProd
-
 
     def __init__(self, domain, height, p0, pN):
-
         n = height.n_steps
-
         p_str = "%d-Step Square Wave"%n
-        
-        rhs = self.make_RHS(domain, height, p0, pN)
-    
+        rhs = sw.make_RHS(domain, height, p0, pN)
         
     # 1. Build M, python-solve M @ sol = rhs
         t0 = time.time()
-        M = self.make_M(domain, height, p0, pN)
-        # self.M = M     
-
+        M = sw.make_M(domain, height, p0, pN)     
         t1 = time.time()
+        
         sol_1 = np.linalg.solve(M, rhs)
         t2 = time.time()
         
@@ -327,30 +151,26 @@ class SquareWavePressure(Pressure):
 
     # 2. Build S, evaluate M_inv(S) @ rhs = sol 
         t4 = time.time()
-        K_off_diag, K_center_diag = self.make_schurCompDiags(height)
-        S = schur.make_symTriInv(n, K_off_diag, K_center_diag)
+        K_off_diag, K_center_diag = sw.make_schurCompDiags(height)
+        phis = schur.get_phis(n, K_off_diag, K_center_diag)
+        thetas = schur.get_thetas(n, K_off_diag, K_center_diag)
+        K_off_diag_prod = schur.triDiagProd(K_off_diag)
         t5 = time.time()
         
-        # --- Building M_inv -------------------------
-        # M_inv = self.make_Minv_schurComp(height, S)
-        # self.M_inv = M_inv
-        # --------------------------------------------
         sol_2 = np.zeros(2*n+1)
-        
         for i in range(2*n+1):
-            sol_2[i] = self.lhs_i(i, rhs, height, S)
- 
+            sol_2[i] = sw.lhs_i(rhs, height, thetas, phis, K_off_diag_prod, i)
         t9 = time.time()
-        print("Time building S: %.5f"%(t5 - t4))
+        
+        print("Time building K, phis, thetas: %.5f"%(t5 - t4))
         print("Time evaluating M^-1 @ b = x: %.5f"%(t9 - t5))
         print("Total time with M^-1: %.5f \n"%(t9 - t4))
         
         #---------------
-        p_slopes = sol_1[0:n+1]
-        p_extrema = sol_1[n+1:2*n+1]
+        p_slopes = sol_2[0:n+1]
+        p_extrema = sol_2[n+1:2*n+1]
 
         ps = self.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
-        
         
         eval_time = t9-t4
         super().__init__(domain, ps, p0, pN, p_str, eval_time)
