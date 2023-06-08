@@ -187,14 +187,6 @@ class SquareWaveHeight(Height):
         else:
             return self.h_avg - self.r
         
-    # def h(self, x):
-    #     if np.sin(np.pi * x/self.step_width) == 0:
-    #         return self.h_avg
-    #     elif np.sin(np.pi * x/self.step_width) > 0:
-    #        return self.h_avg + self.r
-    #     else:
-    #        return self.h_avg - self.r
-
             
         
     

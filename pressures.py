@@ -24,15 +24,8 @@ class Pressure:
         self.time = time
             
     def plot(self, domain):
-        graph.plot_2D(self.ps, domain.xs, "Analytic Pressure (%s)"%self.p_str, "p", "x")
-        
-        
-class ReynoldsPressure(Pressure):
-    def __init__(self, domain, height, p0, pN):
-        p_str = "Reynolds"
-        ps = ry.solve(domain, height, p0, pN)
-        super().__init__(domain, ps, p0, pN, p_str)
-        
+        graph.plot_2D(self.ps, domain.xs, "Analytic Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
+
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
@@ -51,19 +44,19 @@ class WedgePressure(Pressure):
         ps = np.zeros(domain.Nx)
         a = height.h_max/height.h_min
         L = domain.xf - domain.x0
-        
         for i in range(domain.Nx):
             X = domain.xs[i]/L
             Pi = a/(1-a**2)*(1/self.H(X, a)**2 - 1/a**2) - 1/(1-a)*(1/self.H(X, a)-1/a)
             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
         super().__init__(domain, ps, p0, pN, p_str)
+        
     def H(self, X, a):
         return a + (1-a)*X
 
 class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Step"
+        p_str = "Rayleigh Step"
 
         ps = np.zeros(domain.Nx)
         
@@ -130,75 +123,88 @@ class TwoStepPressure(Pressure):
 
 
 
-class SquareWavePressure(Pressure):
+class SquareWavePressure_pySolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "%d-Step Square Wave"%n
         rhs = sw.make_RHS(domain, height, p0, pN)
         
-    # 1. Build M, python-solve M @ sol = rhs
         t0 = time.time()
-        M = sw.make_M(domain, height, p0, pN)     
+        M = sw.make_M(domain, height, p0, pN)  
+        # self.M = M
         t1 = time.time()
         
-        sol_1 = np.linalg.solve(M, rhs)
+        sol = np.linalg.solve(M, rhs)
         t2 = time.time()
-        
+        print("Python Inverse Solve \n")
         print("Time building M: %.5f "%(t1-t0))
         print("Time solving M x = b : %.5f "%(t2-t1))
         print("Total time with M: %.5f  \n"%(t2-t0))
+        
+        p_slopes = sol[0:n+1]
+        p_extrema = sol[n+1:2*n+1]
 
-    # 2. Build S, evaluate M_inv(S) @ rhs = sol 
-        t4 = time.time()
+        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        
+        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+
+class SquareWavePressure(Pressure):
+
+    def __init__(self, domain, height, p0, pN):
+        n = height.n_steps
+        p_str = "%d-Step Square Wave"%n
+        rhs = sw.make_RHS(domain, height, p0, pN)
+
+       # Build S, evaluate M_inv(S) @ rhs = sol 
+        t0 = time.time()
         K_off_diag, K_center_diag = sw.make_schurCompDiags(height)
-        phis = schur.get_phis(n, K_off_diag, K_center_diag)
         thetas = schur.get_thetas(n, K_off_diag, K_center_diag)
+        phis = schur.get_phis(n, K_off_diag, K_center_diag)
         K_off_diag_prod = schur.triDiagProd(K_off_diag)
-        t5 = time.time()
+        t1 = time.time()
         
-        sol_2 = np.zeros(2*n+1)
+        sol = np.zeros(2*n+1)
         for i in range(2*n+1):
-            sol_2[i] = sw.lhs_i(rhs, height, thetas, phis, K_off_diag_prod, i)
-        t9 = time.time()
+            sol[i] = sw.lhs_i(rhs, height, thetas, phis, K_off_diag_prod, i)
+        t2 = time.time()
         
-        print("Time building K, phis, thetas: %.5f"%(t5 - t4))
-        print("Time evaluating M^-1 @ b = x: %.5f"%(t9 - t5))
-        print("Total time with M^-1: %.5f \n"%(t9 - t4))
+        print("Schur Comp. Solve \n")
+        print("Time building K, phis, thetas: %.5f"%(t1 - t0))
+        print("Time evaluating M^-1 @ b = x: %.5f"%(t2 - t1))
+        print("Total time with M^-1: %.5f \n"%(t2 - t0))
         
-        #---------------
-        p_slopes = sol_2[0:n+1]
-        p_extrema = sol_2[n+1:2*n+1]
+        p_slopes = sol[0:n+1]
+        p_extrema = sol[n+1:2*n+1]
 
-        ps = self.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
-        eval_time = t9-t4
-        super().__init__(domain, ps, p0, pN, p_str, eval_time)
+        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
  
-    #Construct piecewise linear pressure on Nx grid
-    def make_ps(self, domain, height, p0, pN, slopes, extrema):
-        ps = np.zeros(domain.Nx)
-        L = height.step_width
-        
-        k = 0
-        x_k = domain.x0
-        p_k = p0
-        slope_k = slopes[k]
+#Construct piecewise linear pressure on Nx grid from list of extrema
+def make_ps(domain, height, p0, pN, slopes, extrema):
+    ps = np.zeros(domain.Nx)
+    L = height.step_width
+    
+    k = 0
+    x_k = domain.x0
+    p_k = p0
+    slope_k = slopes[k]
 
-        for i in range(domain.Nx-1):
-            x = domain.xs[i]
-            
-            #if x is in a new step
-            if x > domain.x0 + (k+1)*L:
-                k += 1
-                x_k = domain.x0 + k*L
-                p_k = extrema[k-1]
-                slope_k = slopes[k]
-
-            ps[i] = slope_k*(x-x_k) + p_k
+    for i in range(domain.Nx-1):
+        x = domain.xs[i]
         
-        ps[-1] = pN
-        return ps
+        #if x is in a new step
+        if x > domain.x0 + (k+1)*L:
+            k += 1
+            x_k = domain.x0 + k*L
+            p_k = extrema[k-1]
+            slope_k = slopes[k]
+
+        ps[i] = slope_k*(x-x_k) + p_k
+    
+    ps[-1] = pN
+    return ps
 
     
         

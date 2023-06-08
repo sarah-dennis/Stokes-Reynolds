@@ -8,6 +8,7 @@ import heights as hgt
 import pressures as prs
 import numpy as np
 
+# Analytic pressure solutions to given height functions
 #------------------------------------------------------------------------------
 # 0. Constant Height 
 #------------------------------------------------------------------------------
@@ -73,5 +74,15 @@ def squareWave(domain, p0, pN, n_steps=205, r=0.05, h_avg=0.1):
     print("Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = prs.SquareWavePressure(domain, height, p0, pN)
+
+    return height, pressure
+
+def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.05, h_avg=0.1):
+    if domain.Nx < n_steps * 3:
+        print("Warning: Nx < nsteps * 3")
+        
+    print("Loading %d-step Square Wave \n"%(n_steps))
+    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
+    pressure = prs.SquareWavePressure_pySolve(domain, height, p0, pN)
 
     return height, pressure

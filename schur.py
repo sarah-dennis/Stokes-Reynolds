@@ -68,11 +68,8 @@ def get_thetas(n, off_diag, center_diag):
     #k=1
     thetas[1] = center_diag[1]*center_diag[0] - off_diag[0]*off_diag[0]
     for k in range(2, n):
-        
-        alph = center_diag[k]*thetas[k-1]
-        beta = off_diag[k-1]*off_diag[k-1]*thetas[k-2]
-        thetas[k] = alph - beta
-        # thetas[k] = center_diag[k]*thetas[k-1] - off_diag[k-1]*off_diag[k-1]*thetas[k-2]
+        thetas[k] = center_diag[k]*thetas[k-1] - off_diag[k-1]*off_diag[k-1]*thetas[k-2]
+        #print("theta[%d] = %.2f"%(k, thetas[k]))
     return thetas
 
 #
@@ -81,9 +78,10 @@ def get_phis(n, off_diag, center_diag):
     # k = n-1
     phis[n-1] = center_diag[n-1]
     # k = n-2
-    phis[n-2] = center_diag[n-2]* center_diag[n-1] - off_diag[n-2]*off_diag[n-2]
+    phis[n-2] = center_diag[n-2]*center_diag[n-1] - off_diag[n-2]*off_diag[n-2]
     for k in range(n-3, -1, -1):
-        phis[k] = center_diag[k]*phis[k+1] - off_diag[k]*off_diag[k]*phis[k+2]
+        phis[k] = center_diag[k]*phis[k+1] - off_diag[k]**2*phis[k+2]
+        # print("phi[%d] = %.2f"%(k, phis[k]))
     return phis
 
 

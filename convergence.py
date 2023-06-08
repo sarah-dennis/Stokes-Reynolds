@@ -20,7 +20,7 @@ import groundControl as gc
 #RHS = [0: reynolds, 1: manufactured]
 
 # Nx -> large, dx -> 0
-def conveg(trials=6, N0 = 50):
+def vary_Nx_numErr(trials=6, N0 = 50):
     Nx_k = N0
     infNorms = np.zeros(trials)
     dxs = np.zeros(trials)
@@ -81,32 +81,6 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     y_axis = "$p_{max}$"
     x_axis = "$dx$"  
     g.plot_log(v, x, title,  x_axis, y_axis)
-
-
-def vary_nSteps_condNum(trials=6, n_steps_0=5):
-    n_steps_k = n_steps_0
-    r = 0.1
-    h_avg = 0.2
-         
-    v = np.zeros(trials)
-    u = np.zeros(trials)
-    x = np.zeros(trials)
-    
-    for k in range(trials):
-        
-        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
-        
-        u[k] = np.linalg.cond(pressure_k.M)
-        v[k] = np.linalg.cond(pressure_k.M_inv)
-        x[k] = n_steps_k
-    
-        n_steps_k = n_steps_k * 2 + 1
-        
-    title = "Condition Number vs Matrix Size"
-    y_axis = "Condition Number"
-    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
-    labels = ["M", "M_inv"]
-    g.plot_2D_multi([u,v], x, title, labels, [x_axis, y_axis])
     
     
 
@@ -121,7 +95,7 @@ def vary_nSteps_time(trials=8, n_steps_0=7):
     
     for k in range(trials):
         
-        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        height_k, pressure_k = eg.squareWave_pySolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
         u[k] = pressure_k.time
         v[k] = n_steps_k**2
