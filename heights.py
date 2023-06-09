@@ -170,6 +170,11 @@ class SquareWaveHeight(Height):
         self.n_steps = n_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
         
+        if 0.01 * (h_avg + r) < r:
+            # (Li & Chen, 2007) : roughness height < 0.01 * total height 
+            print("Warning: r > 0.01 * (h + r)")
+            print("%.5f > %.5f"%(r, 0.01 * (h_avg + r)))
+        
         self.h_steps = np.zeros(n_steps+1)
        
         for i in range(n_steps+1):
