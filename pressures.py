@@ -189,15 +189,21 @@ class SquareWavePressure_schurLUSolve(Pressure):
         p_str = "%d-Step Square Wave"%n
         
         rhs = sw.make_RHS(domain, height, p0, pN)
-        
+
+        # Make L and U (needs bi-diags B1 B2, and sym-tri-diag Schur comp)
         t0 = time.time()
-        #TODO : implement 
-        # Make L and U (needs bi-diags B1 B2, dense Schur comp)
+        schur_offDiag, schur_centerDiag = sw.make_schurCompDiags(height)
         
+        B1_centerDiag = [-1/height.step_width]*n
+        B1_lowerDiag = [1/height.step_width]*n
+        
+        B2_centerDiag = [-h**3 for h in height.hs[0:n]]
+        B2_upperDiag = [h**3 for h in height.hs[1:n+1]]
         t1 = time.time()
+    
+        # solve LU @ lhs = rhs
         sol = np.zeros(2*n+1)
         #TODO : implement
-        # solve LU @ lhs = rhs
         t2 = time.time()
         
         p_slopes = sol[0:n+1]
