@@ -39,6 +39,7 @@ def make_S(n, off_diag, center_diag):
 # get (ith, jth) element of the inverse of (n, n) symmetric tri-diagonal    
 #    -> excpect upper triangular i > j
 def S_ij(n, thetas, phis, off_diag_prod, i, j):
+    #TODO: overflow errors in thetas and phis for large n_steps
     if j > i:
         j, i = i, j
         

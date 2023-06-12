@@ -46,7 +46,7 @@ n_steps = 3001
 #height, pressure = step(domain, p0, pN)
 #height, pressure = twoStep(domain, p0, pN)
 
-# height, pressure = egs.squareWave(domain, p0, pN, n_steps)
+# height, pressure = egs.squareWave_schurInvSolv(domain, p0, pN, n_steps)
 height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # anyl_err = np.max(np.abs(pressure.ps - pressure_py.ps))
