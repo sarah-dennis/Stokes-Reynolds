@@ -149,7 +149,7 @@ class SquareWavePressure_pySolve(Pressure):
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)
 
-class SquareWavePressure(Pressure):
+class SquareWavePressure_schurInvSolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
@@ -166,6 +166,8 @@ class SquareWavePressure(Pressure):
         
         sol = np.zeros(2*n+1)
         for i in range(2*n+1):
+            #TODO: phis, thetas have overflow error for large n_steps (see schur.S_ij(-))
+        
             sol[i] = sw.lhs_i(rhs, height, thetas, phis, K_off_diag_prod, i)
         t2 = time.time()
         
@@ -177,6 +179,30 @@ class SquareWavePressure(Pressure):
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
 
+        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        
+        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+        
+class SquareWavePressure_schurLUSolve(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        n = height.n_steps
+        p_str = "%d-Step Square Wave"%n
+        
+        rhs = sw.make_RHS(domain, height, p0, pN)
+        
+        t0 = time.time()
+        #TODO : implement 
+        # Make L and U (needs bi-diags B1 B2, dense Schur comp)
+        
+        t1 = time.time()
+        sol = np.zeros(2*n+1)
+        #TODO : implement
+        # solve LU @ lhs = rhs
+        t2 = time.time()
+        
+        p_slopes = sol[0:n+1]
+        p_extrema = sol[n+1:2*n+1]
+        
         ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)

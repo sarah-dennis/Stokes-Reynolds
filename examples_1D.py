@@ -67,16 +67,16 @@ def twoStep(domain, p0, pN):
 # III c. N-Step Height Example
 #------------------------------------------------------------------------------
 
-def squareWave(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
+def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")   
     print("Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure(domain, height, p0, pN)
+    pressure = prs.SquareWavePressure_schurInvSolve(domain, height, p0, pN)
 
     return height, pressure
 
-def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.05, h_avg=0.1):
+def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=1):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
         

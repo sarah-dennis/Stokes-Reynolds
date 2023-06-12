@@ -42,7 +42,7 @@ def S_ij(n, thetas, phis, off_diag_prod, i, j):
     if j > i:
         j, i = i, j
         
-    if i==j:
+    if i == j:
         if j == 0:
             return phis[i+1] / thetas[n-1]
         elif i == n-1:
@@ -59,7 +59,9 @@ def S_ij(n, thetas, phis, off_diag_prod, i, j):
         elif i == n-1:
             return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] / thetas[n-1]
         else:
-            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1]*phis[i+1] / thetas[n-1]
+            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] * phis[i+1] / thetas[n-1]
+
+
 
 def get_thetas(n, off_diag, center_diag):
     thetas = np.zeros(n)
