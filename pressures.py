@@ -194,15 +194,24 @@ class SquareWavePressure_schurLUSolve(Pressure):
         t0 = time.time()
         schur_offDiag, schur_centerDiag = sw.make_schurCompDiags(height)
         
-        B1_centerDiag = [-1/height.step_width]*n
-        B1_lowerDiag = [1/height.step_width]*n
+        B1_centerDiag = [-1/height.step_width for i in range(n)]
+        B1_lowerDiag = [1/height.step_width for i in range(n)]
         
         B2_centerDiag = [-h**3 for h in height.hs[0:n]]
         B2_upperDiag = [h**3 for h in height.hs[1:n+1]]
         t1 = time.time()
     
         # solve LU @ lhs = rhs
+        
+        # forward sub: L @ x = rhs
+        
+        
+        
+        # back sub: U @ lhs = x
         sol = np.zeros(2*n+1)
+        
+        
+        
         #TODO : implement
         t2 = time.time()
         
@@ -238,8 +247,14 @@ def make_ps(domain, height, p0, pN, slopes, extrema):
     ps[-1] = pN
     return ps
 
+def lu_fwdsub(L, rhs):
     
-        
+    return x
+
+    
+ def lu_bksub(U, x):
+     
+     return lhs
         
         
         
