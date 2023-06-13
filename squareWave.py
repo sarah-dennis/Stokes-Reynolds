@@ -40,6 +40,61 @@ def make_schurCompDiags(height):
     return (-1/height.step_width) * off_diag, (-1/height.step_width) * center_diag
 
 
+#------------------------------------------------------------------------------
+        # schur_offDiag, schur_centerDiag = sw.make_schurCompDiags(height)
+        
+        # B1_centerDiag = [-1/height.step_width for i in range(n)]
+        # B1_lowerDiag = [1/height.step_width for i in range(n)]
+        
+        # B2_centerDiag = [-h**3 for h in height.hs[0:n]]
+        # B2_upperDiag = [h**3 for h in height.hs[1:n+1]]
+
+def L_ij(B2_center, B2_upper, S_center, S_off, n, i, j):
+    # L = |Id 0|    i = 0, ..., n = range(0, n+1)
+    #     |B2 S|    i = n+1, ..., 2n = range(n+1, 2n+1)
+    
+    if i < n+1: # i -> range(0, n+1)
+
+        return i == j
+
+    
+    else: # i -> range(n+1, 2n+1)
+        
+        if j < n+1:
+            if i == j:
+                return B2_center[i]
+            elif i == j-1:
+                return B2_upper[i]
+        
+        else:
+           if i == j:
+               return S_center[i]
+           elif i == j+1 or i == j-1:
+               return S_off[i]
+    
+def U_ij(B1_center, B1_lower, n, i, j):
+    # U = |Id B1|    i = 0, ..., n = range(0, n+1)
+    #     |0  Id|    i = n+1, ..., 2n = range(n+1, 2n+1)
+    
+    if i < n+1: # i -> range(0, n+1)
+ 
+        if j < n+1:
+           return i == j
+        
+        else:
+           if i == j:
+               return B1_center[i]
+           elif i == j+1:
+               return B1_lower[i]
+
+    else: # i -> range(n+1, 2n+1)
+       return i == j
+        
+
+
+        
+#------------------------------------------------------------------------------
+# Helpers for pressures.schur_InvSolve ()
 #M_inv top left    
 def Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, j):
     L = height.step_width
@@ -103,7 +158,7 @@ def lhs_i(rhs, height, thetas, phis, off_diag_prod, i):
     
     if i < n+1:       # solving for M_i
 
-        leftBlock_0 = Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, 0) * rhs[0]
+        leftBlock_o = Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, 0) * rhs[0]
         leftBlock_n = Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, n) * rhs[n]
         
         rightBlock_dotProd = 0
@@ -112,14 +167,14 @@ def lhs_i(rhs, height, thetas, phis, off_diag_prod, i):
         
     else: #n < i < 2*n+1  #solving for P_i  
 
-        leftBlock_0 = neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i - (n+1), 0) * rhs[0]
+        leftBlock_o = neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i - (n+1), 0) * rhs[0]
         leftBlock_n = neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i - (n+1), n) * rhs[n]
         
         rightBlock_dotProd = 0
         for j in range(n):
             rightBlock_dotProd += schur.S_ij(n, thetas, phis, off_diag_prod, i - (n+1), j) * rhs[n+1 + j]
         
-    return leftBlock_0 + leftBlock_n + rightBlock_dotProd
+    return leftBlock_o + leftBlock_n + rightBlock_dotProd
 
 
 
