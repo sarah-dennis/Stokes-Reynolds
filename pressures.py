@@ -208,18 +208,37 @@ class SquareWavePressure_schurLUSolve(Pressure):
         # solve LU @ lhs = rhs
         
         # forward sub: L @ y = rhs
+        ys = np.zeros(2*n+1)
+        ys[0] = rhs[0]
+        sum_back = 0
         
+        for i in range(1, 2*n+1):
+
+            alph_ij = sw.L_ij(B2_center, B2_upper, S_center, S_off, n, i, i-1)
+            sum_back +=  alph_ij * ys[i-1]
+            
+            alph_ii = sw.L_ij(B2_center, B2_upper, S_center, S_off, n, i, i)
+            
+            ys[i] = (rhs[i] - sum_back)/alph_ii
         
         
         # back sub: U @ lhs = y
         
+        xs = np.zeros(2*n+1)
+        xs[2*n] = ys[2*n]
+        sum_fwd = 0
+        
+        for i in reversed(range(0, 2*n)):
+            beta_ij = sw.U_ij(B1_center, B1_lower, n, i, i+1)
+            sum_fwd += beta_ij * xs[i+1]
+            
+            beta_ii = sw.U_ij(B1_center, B1_lower, n, i, i)
+            xs[i] = (ys[i] - sum_fwd)/beta_ii
         
         
         
         
-        
-        
-        sol = np.zeros(2*n+1)
+        sol = xs
         
         
         

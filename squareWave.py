@@ -57,7 +57,6 @@ def L_ij(B2_center, B2_upper, S_center, S_off, n, i, j):
 
         return i == j
 
-    
     else: # i -> range(n+1, 2n+1)
         
         if j < n+1:
@@ -65,12 +64,16 @@ def L_ij(B2_center, B2_upper, S_center, S_off, n, i, j):
                 return B2_center[i]
             elif i == j-1:
                 return B2_upper[i]
+            else:
+                return 0
         
         else:
            if i == j:
-               return S_center[i]
+               return S_center[n+1-i]
            elif i == j+1 or i == j-1:
-               return S_off[i]
+               return S_off[n+1-i]
+           else:
+               return 0
     
 def U_ij(B1_center, B1_lower, n, i, j):
     # U = |Id B1|    i = 0, ..., n = range(0, n+1)
@@ -83,9 +86,11 @@ def U_ij(B1_center, B1_lower, n, i, j):
         
         else:
            if i == j:
-               return B1_center[i]
+               return B1_center[n+1-i]
            elif i == j+1:
-               return B1_lower[i]
+               return B1_lower[n+1-i]
+           else:
+               return 0
 
     else: # i -> range(n+1, 2n+1)
        return i == j
