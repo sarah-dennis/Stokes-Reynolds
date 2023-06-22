@@ -58,26 +58,26 @@ def plot_2D(fs, xs, title, y_label, x_label):
     
     return fig
 
-def plot_2D_twin(ps, hs, xs, title):
+def plot_2D_twin(fs, gs, xs, title, labels):
 
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
     
-    ax1.set_xlabel('$x$')
+    ax1.set_xlabel(labels[2])
 
     color = 'tab:red'
-    ax1.plot(xs, ps, color = color, label="analytic reynolds")
-    ax1.set_ylabel('Pressure $p(x)$', color = color)
+    ax1.plot(xs, fs, color = color)
+    ax1.set_ylabel(labels[0], color = color)
     ax1.tick_params(axis ='y', labelcolor = color)
 
     # Adding Twin Axes to plot dataset_2
     ax2 = ax1.twinx()
      
     color = 'tab:blue'
-    ax2.set_ylabel('Height $h(x)$', color = color)
-    ax2.plot(xs, hs, color = color)
+    ax2.set_ylabel(labels[1], color = color)
+    ax2.plot(xs, gs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
-    ax2.set_ylim(0, 1.2*max(hs))
+    # ax2.set_ylim(0, 1.2*max(hs))
      
     # Adding title
     pp.title(title, fontweight ="bold")

@@ -137,10 +137,11 @@ class SquareWavePressure_pySolve(Pressure):
         
         sol = np.linalg.solve(M, rhs)
         t2 = time.time()
-        print("Python Inverse Solve \n")
-        print("Time building M: %.5f "%(t1-t0))
-        print("Time solving M x = b : %.5f "%(t2-t1))
-        print("Total time with M: %.5f  \n"%(t2-t0))
+        
+        print("Python Inverse Solve")
+        print("Prep time: %.5f "%(t1-t0))
+        print("Sovle time: %.5f "%(t2-t1))
+        print("Total time: %.5f "%(t2-t0))
         
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
@@ -150,7 +151,6 @@ class SquareWavePressure_pySolve(Pressure):
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)
 
 class SquareWavePressure_schurInvSolve(Pressure):
-
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "%d-Step Square Wave"%n
@@ -166,15 +166,14 @@ class SquareWavePressure_schurInvSolve(Pressure):
         
         sol = np.zeros(2*n+1)
         for i in range(2*n+1):
-            #TODO: phis, thetas have overflow error for large n_steps (see schur.S_ij(-))
-        
-            sol[i] = sw.lhs_i(rhs, height, thetas, phis, K_off_diag_prod, i)
+            #TODO: phis, thetas have overflow error  (see schur.S_ij(-))
+            sol[i] = sw.schurInvSol_i(rhs, height, thetas, phis, K_off_diag_prod, i)
         t2 = time.time()
         
-        print("Schur Comp. Solve \n")
-        print("Time building K, phis, thetas: %.5f"%(t1 - t0))
-        print("Time evaluating M^-1 @ b = x: %.5f"%(t2 - t1))
-        print("Total time with M^-1: %.5f \n"%(t2 - t0))
+        print("Schur Inv. Solve")
+        print("Prep time: %.5f"%(t1 - t0))
+        print("Solve time: %.5f"%(t2 - t1))
+        print("Total time: %.5f "%(t2 - t0))
         
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
@@ -182,75 +181,58 @@ class SquareWavePressure_schurInvSolve(Pressure):
         ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+ 
         
+ 
 class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
+        L = height.step_width
         p_str = "%d-Step Square Wave"%n
         
-        rhs = sw.make_RHS(domain, height, p0, pN)
-
-        # Make L and U (needs bi-diags B1 B2, and sym-tri-diag Schur comp)
+        
         t0 = time.time()
-        S_off, S_center = sw.make_schurCompDiags(height)
+        rhs = sw.make_RHS(domain, height, p0, pN)
         
-        B1_center = [-1/height.step_width for i in range(n)]
-        B1_lower = [1/height.step_width for i in range(n)]
-        
-        B2_center = [-h**3 for h in height.hs[0:n]]
-        B2_upper = [h**3 for h in height.hs[1:n+1]]
-        
-        # U_ij(B1_center, B1_lower, n, i, j)
-        # L_ij(B2_center, B2_upper, S_center, S_off, n, i, j)
+        K_off, K_center = sw.make_schurCompDiags(height)
+        thetas = schur.get_thetas(n, K_off, K_center)
+        phis = schur.get_phis(n, K_off, K_center)
+        off_diag_prod = schur.triDiagProd(K_off)
         
         t1 = time.time()
-    
-        # solve LU @ lhs = rhs
+        # L block -  fwd sub
+        # | I  0 | |v| = |f|
+        # | B2 K | |w|   |g|
+        # {v = f, w = S ( g - B2 f)}
         
-        # forward sub: L @ y = rhs
-        ys = np.zeros(2*n+1)
-        ys[0] = rhs[0]
-        sum_back = 0
-        
-        for i in range(1, 2*n+1):
+        w = np.zeros(n)
+        for i in range(n):
+            w_i = 0
+            for j in range(n):
+                s_ij = schur.S_ij(n, thetas, phis, off_diag_prod, i, j)
+                w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
+            w[i] = w_i
 
-            alph_ij = sw.L_ij(B2_center, B2_upper, S_center, S_off, n, i, i-1)
-            sum_back +=  alph_ij * ys[i-1]
-            
-            alph_ii = sw.L_ij(B2_center, B2_upper, S_center, S_off, n, i, i)
-            
-            ys[i] = (rhs[i] - sum_back)/alph_ii
+        # U block  - back sub
+        # | I  B1 | |x| = |v|
+        # | 0  I  | |y|   |w|
+        # {x = v - B1 w, y = w}
         
+        x = np.zeros(n+1)
+        x[0] = 1/L * (w[0] - p0)
+        for i in range(1, n):
+            x[i] = 1/L * (w[i] - w[i-1])
+        x[n] = 1/L * (pN - w[n-1])
         
-        # back sub: U @ lhs = y
-        
-        xs = np.zeros(2*n+1)
-        xs[2*n] = ys[2*n]
-        sum_fwd = 0
-        
-        for i in reversed(range(0, 2*n)):
-            beta_ij = sw.U_ij(B1_center, B1_lower, n, i, i+1)
-            sum_fwd += beta_ij * xs[i+1]
-            
-            beta_ii = sw.U_ij(B1_center, B1_lower, n, i, i)
-            xs[i] = (ys[i] - sum_fwd)/beta_ii
-        
-        
-        
-        
-        sol = xs
-        
-        
-        
-        #TODO : implement
         t2 = time.time()
+
+        print("Schur LU Solve")
+        print("Prep time: %.5f"%(t1 - t0))
+        print("Solve time: %.5f"%(t2-t1))
+        print("Total time: %.5f"%(t2-t0))
         
-        p_slopes = sol[0:n+1]
-        p_extrema = sol[n+1:2*n+1]
-        
-        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
-        
-        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+        ps = make_ps(domain, height, p0, pN, x, w)
+        super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
 #Construct piecewise linear pressure on Nx grid from list of extrema
 def make_ps(domain, height, p0, pN, slopes, extrema):

@@ -69,7 +69,7 @@ def twoStep(domain, p0, pN):
 def squareWave_schurLUSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")   
-    print("Loading %d-step Square Wave \n"%(n_steps))
+    print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
 
@@ -78,17 +78,17 @@ def squareWave_schurLUSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
 def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")   
-    print("Loading %d-step Square Wave \n"%(n_steps))
+    print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = prs.SquareWavePressure_schurInvSolve(domain, height, p0, pN)
 
     return height, pressure
 
-def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=1):
+def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     if domain.Nx < n_steps * 3:
         print("Warning: Nx < nsteps * 3")
         
-    print("Loading %d-step Square Wave \n"%(n_steps))
+    print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = prs.SquareWavePressure_pySolve(domain, height, p0, pN)
 

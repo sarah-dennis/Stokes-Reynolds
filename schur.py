@@ -12,8 +12,7 @@ import numpy as np
 #      [ B2  C  ]
 
 #  K = - (C + B2 A^-1 B1)
-
-#  M^-1 = ...
+#  S = K^-1
 #------------------------------------------------------------------------------
 
 # build the inverse of (n, n) symmetric tri-diagonal 
@@ -36,8 +35,8 @@ def make_S(n, off_diag, center_diag):
     return S
 
     
-# get (ith, jth) element of the inverse of (n, n) symmetric tri-diagonal    
-#    -> excpect upper triangular i > j
+# get (i, j) element of inverse of (n, n) symmetric tri-diagonal    
+# make and store phis, thetas, off_diag_product once before using
 def S_ij(n, thetas, phis, off_diag_prod, i, j):
     #TODO: overflow errors in thetas and phis for large n_steps
     if j > i:
@@ -61,7 +60,6 @@ def S_ij(n, thetas, phis, off_diag_prod, i, j):
             return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] / thetas[n-1]
         else:
             return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] * phis[i+1] / thetas[n-1]
-
 
 
 def get_thetas(n, off_diag, center_diag):
@@ -95,20 +93,4 @@ def triDiagProd(xs):
         for j in range(i+1, n):
             U[i,j] = U[i, j-1] * U[j, j]
     return U
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
+  
