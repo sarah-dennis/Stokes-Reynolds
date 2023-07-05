@@ -84,20 +84,23 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=8, n_steps_0=7):
+def vary_nSteps_time(trials=9, n_steps_0=101):
     n_steps_k = n_steps_0
-    r = 0.1
-    h_avg = 0.2
+    r = 0.001
+    h_avg = 0.1
 
     u = np.zeros(trials)
+    w = np.zeros(trials)
     x = np.zeros(trials)
     v = np.zeros(trials)
     
     for k in range(trials):
         
-        height_k, pressure_k = eg.squareWave_pySolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        height_k, pressure_py_k = eg.squareWave_pySolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        height_k, pressure_lu_k = eg.squareWave_schurLUSolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
         
-        u[k] = pressure_k.time
+        u[k] = pressure_lu_k.time
+        w[k] = pressure_py_k.time
         v[k] = n_steps_k**2
         x[k] = n_steps_k
     
@@ -106,8 +109,7 @@ def vary_nSteps_time(trials=8, n_steps_0=7):
     title = "Solve Time vs Matrix Size"
     y_axis = "Time"
     x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
-    g.plot_2D(u, x, title, y_axis, x_axis)
-    g.plot_log_multi([u,v], x, title, ["runtime", "$\mathcal{O}(n)$"], [x_axis, y_axis])
+    g.plot_log_multi([u,w, v], x, title, ["LU runtime", "python runtime", "$\mathcal{O}(n^2)$"], [x_axis, y_axis])
     
 
 

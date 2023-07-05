@@ -140,13 +140,13 @@ class SquareWavePressure_pySolve(Pressure):
         
         print("Python Inverse Solve")
         print("Prep time: %.5f "%(t1-t0))
-        print("Sovle time: %.5f "%(t2-t1))
+        print("Solve time: %.5f "%(t2-t1))
         print("Total time: %.5f "%(t2-t0))
         
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
 
-        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)
 
@@ -177,7 +177,7 @@ class SquareWavePressure_schurInvSolve(Pressure):
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
 
-        ps = make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t0)
  
@@ -189,19 +189,15 @@ class SquareWavePressure_schurLUSolve(Pressure):
         L = height.step_width
         p_str = "%d-Step Square Wave"%n
         
-        
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
-        
         center_diag, off_diag = sw.make_schurCompDiags(height)
         C = schur.get_Cs(n, center_diag, off_diag)
-
         C_prod = schur.triDiagProd(C)
-        
         D = schur.get_Ds(n, center_diag, off_diag, C)
-        
-        
+        # S = schur.get_S(n, C_prod, D)
         t1 = time.time()
+
         # L block -  fwd sub
         # | I  0 | |v| = |f|
         # | B2 K | |w|   |g|
@@ -233,33 +229,10 @@ class SquareWavePressure_schurLUSolve(Pressure):
         print("Solve time: %.5f"%(t2-t1))
         print("Total time: %.5f"%(t2-t0))
         
-        ps = make_ps(domain, height, p0, pN, x, w)
+        ps = sw.make_ps(domain, height, p0, pN, x, w)
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
-#Construct piecewise linear pressure on Nx grid from list of extrema
-def make_ps(domain, height, p0, pN, slopes, extrema):
-    ps = np.zeros(domain.Nx)
-    L = height.step_width
-    
-    k = 0
-    x_k = domain.x0
-    p_k = p0
-    slope_k = slopes[k]
 
-    for i in range(domain.Nx-1):
-        x = domain.xs[i]
-        
-        #if x is in a new step
-        if x > domain.x0 + (k+1)*L:
-            k += 1
-            x_k = domain.x0 + k*L
-            p_k = extrema[k-1]
-            slope_k = slopes[k]
-
-        ps[i] = slope_k*(x-x_k) + p_k
-    
-    ps[-1] = pN
-    return ps
 
         
         

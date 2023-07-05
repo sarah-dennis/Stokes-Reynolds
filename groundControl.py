@@ -22,7 +22,7 @@ U = 1       # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 15000   # Number of Grid points
+Nx = 20000   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
@@ -48,24 +48,24 @@ n_steps = 5001
 #height, pressure = step(domain, p0, pN)
 #height, pressure = twoStep(domain, p0, pN)
 
-height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
-height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN, n_steps)
-height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+# height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN, n_steps)
+# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 #---------------------------------------------------------------------------
 # Plotting 
 
-p_h_title = "Analytic Pressure for %s"%height.h_str
-p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+# p_h_title = "Analytic Pressure for %s"%height.h_str
+# p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+# graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
-p_p_title = "LU Solve vs Python Solve of Pressure for %s"%height.h_str
-p_p_labels = ["LU Pressure", "Python Pressure", "x"]
-graph.plot_2D_twin(pressure_lu.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
-
-# p_p_title = "SchurInv Solve vs PySolve of Pressure for %s"%height.h_str
+# p_p_title = "LU Solve vs Python Solve of Pressure for %s"%height.h_str
 # p_p_labels = ["LU Pressure", "Python Pressure", "x"]
-# graph.plot_2D_twin(pressure_inv.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
+# graph.plot_2D_twin(pressure_lu.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
+
+# # p_p_title = "SchurInv Solve vs PySolve of Pressure for %s"%height.h_str
+# # p_p_labels = ["LU Pressure", "Python Pressure", "x"]
+# # graph.plot_2D_twin(pressure_inv.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
 
 #---------------------------------------------------------------------------
 # Numerical Solution

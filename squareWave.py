@@ -68,7 +68,7 @@ def schurInvSol_i(rhs, height, C_prod, D, i):
 
 
 #M_inv top left    
-def Id_B1_schurCompInv_B2_ij(height, C_prod, D, i, j):
+def Id_B1_schurCompInv_B2_ij (height, C_prod, D, i, j):
     L = height.step_width
     n = height.n_steps
     hj = height.h_steps[j]
@@ -185,3 +185,27 @@ def make_Minv_schurComp(height, S):
     return M_inv
 
 # -----------------------------------------------------------------------------
+#Construct piecewise linear pressure on Nx grid from list of extrema
+def make_ps(domain, height, p0, pN, slopes, extrema):
+    ps = np.zeros(domain.Nx)
+    L = height.step_width
+    
+    k = 0
+    x_k = domain.x0
+    p_k = p0
+    slope_k = slopes[k]
+
+    for i in range(domain.Nx-1):
+        x = domain.xs[i]
+        
+        #if x is in a new step
+        if x > domain.x0 + (k+1)*L:
+            k += 1
+            x_k = domain.x0 + k*L
+            p_k = extrema[k-1]
+            slope_k = slopes[k]
+
+        ps[i] = slope_k*(x-x_k) + p_k
+    
+    ps[-1] = pN
+    return ps

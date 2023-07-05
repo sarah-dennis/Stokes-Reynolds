@@ -42,7 +42,7 @@ def triDiagProd(xs):
 #      [ -B1   A2  -B2 ]
 #      [  0   -B3   A3 ]
 
-# Compute {C_i}
+# Compute ratio elements {C_i}
 # C(N-1) = B(N-1) / A(N)
 # C(i) = B(i) / (A(i+1) - S(i+1) B(i+1))
 
@@ -56,6 +56,7 @@ def get_Cs(n, A, B):
     return C
 
 # Compute diagonal elements {D_i} = K^-1[i,i]
+
 def get_Ds(n, A, B, C):
     D = np.zeros(n)
     
@@ -68,36 +69,28 @@ def get_Ds(n, A, B, C):
 
     return D
     
-# K^-1 = S_ij
+# Get elementwise K^-1 = S_ij
 def S_ij(n, C_prod, D, i, j):
     if i == j:
         return D[i]
-
     # non-diagonals
     elif i < j:
         return (-1)**(i+j) * D[i] * C_prod[i, j-1]
-
     else:
         j, i = i, j
         return (-1)**(i+j) * D[i] * C_prod[i, j-1]
     
-    
-#----- for testing    
-    
-def make_S(n, center_diag, off_diag):
-
-    C = get_Cs(n, center_diag, off_diag)
-
-    C_prod = triDiagProd(C)
-
-    
-    D = get_Ds(n, center_diag, off_diag, C)
-    
-
+# Make symmetric K^-1 matrix
+def get_S(n, C_prod, D):
     S = np.zeros((n,n))
     for i in range(0, n):
-        for j in range(0, n): 
-            S[i, j] = S_ij(n, C_prod, D, i, j)
+        for j in range(0, i+1): 
+            s_ij = S_ij(n, C_prod, D, i, j)
+            if i == j:
+                S[i,j] = s_ij
+            else:
+                S[i,j] = s_ij
+                S[j,i] = s_ij
             
     return S
     
