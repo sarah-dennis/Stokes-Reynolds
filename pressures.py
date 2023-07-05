@@ -158,16 +158,15 @@ class SquareWavePressure_schurInvSolve(Pressure):
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
         t0 = time.time()
-        K_off_diag, K_center_diag = sw.make_schurCompDiags(height)
-        thetas = schur.get_thetas(n, K_off_diag, K_center_diag)
-        phis = schur.get_phis(n, K_off_diag, K_center_diag)
-        K_off_diag_prod = schur.triDiagProd(K_off_diag)
+        center_diag, off_diag = sw.make_schurCompDiags(height)
+        C = schur.get_Cs(n, center_diag, off_diag)
+        C_prod = schur.triDiagProd(C)
+        D = schur.get_Ds(n, center_diag, off_diag, C)
         t1 = time.time()
         
         sol = np.zeros(2*n+1)
         for i in range(2*n+1):
-            #TODO: phis, thetas have overflow error  (see schur.S_ij(-))
-            sol[i] = sw.schurInvSol_i(rhs, height, thetas, phis, K_off_diag_prod, i)
+            sol[i] = sw.schurInvSol_i(rhs, height, C_prod, D,  i)
         t2 = time.time()
         
         print("Schur Inv. Solve")
@@ -194,10 +193,13 @@ class SquareWavePressure_schurLUSolve(Pressure):
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
         
-        K_off, K_center = sw.make_schurCompDiags(height)
-        thetas = schur.get_thetas(n, K_off, K_center)
-        phis = schur.get_phis(n, K_off, K_center)
-        off_diag_prod = schur.triDiagProd(K_off)
+        center_diag, off_diag = sw.make_schurCompDiags(height)
+        C = schur.get_Cs(n, center_diag, off_diag)
+
+        C_prod = schur.triDiagProd(C)
+        
+        D = schur.get_Ds(n, center_diag, off_diag, C)
+        
         
         t1 = time.time()
         # L block -  fwd sub
@@ -209,7 +211,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         for i in range(n):
             w_i = 0
             for j in range(n):
-                s_ij = schur.S_ij(n, thetas, phis, off_diag_prod, i, j)
+                s_ij = schur.S_ij(n, C_prod, D, i, j)
                 w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
             w[i] = w_i
 

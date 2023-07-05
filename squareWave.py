@@ -37,90 +37,90 @@ def make_schurCompDiags(height):
         center_diag[i] = hs[i]**3 + hs[i+1]**3
         if i < n-1:
             off_diag[i] = -hs[i+1]**3
-    return (-1/height.step_width) * off_diag, (-1/height.step_width) * center_diag
+    return (-1/height.step_width) * center_diag, (-1/height.step_width) * off_diag
 
 #------------------------------------------------------------------------------
 # Helpers for pressures.schur_InvSolve()
 
 # Solve M_inv @ rhs = lhs
-def schurInvSol_i(rhs, height, thetas, phis, off_diag_prod, i):
+def schurInvSol_i(rhs, height, C_prod, D, i):
     n = height.n_steps
     
     if i < n+1:       # solving for M_i
 
-        leftBlock_o = Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, 0) * rhs[0]
-        leftBlock_n = Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, n) * rhs[n]
+        leftBlock_o = Id_B1_schurCompInv_B2_ij(height, C_prod, D,  i, 0) * rhs[0]
+        leftBlock_n = Id_B1_schurCompInv_B2_ij(height, C_prod, D,  i, n) * rhs[n]
         
         rightBlock_dotProd = 0
         for j in range(n):
-            rightBlock_dotProd += neg_B1_schurCompInv_ij(height, thetas, phis, off_diag_prod, i, j) * rhs[n+1+j]
+            rightBlock_dotProd += neg_B1_schurCompInv_ij(height, C_prod, D, i, j) * rhs[n+1+j]
         
     else: #n < i < 2*n+1  #solving for P_i  
 
-        leftBlock_o = neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i - (n+1), 0) * rhs[0]
-        leftBlock_n = neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i - (n+1), n) * rhs[n]
+        leftBlock_o = neg_schurCompInv_B2_ij(height, C_prod, D,  i - (n+1), 0) * rhs[0]
+        leftBlock_n = neg_schurCompInv_B2_ij(height, C_prod, D,  i - (n+1), n) * rhs[n]
         
         rightBlock_dotProd = 0
         for j in range(n):
-            rightBlock_dotProd += schur.S_ij(n, thetas, phis, off_diag_prod, i - (n+1), j) * rhs[n+1 + j]
+            rightBlock_dotProd += schur.S_ij(n, C_prod, D,  i - (n+1), j) * rhs[n+1 + j]
         
     return leftBlock_o + leftBlock_n + rightBlock_dotProd
 
 
 #M_inv top left    
-def Id_B1_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, j):
+def Id_B1_schurCompInv_B2_ij(height, C_prod, D, i, j):
     L = height.step_width
     n = height.n_steps
     hj = height.h_steps[j]
     
     if i == 0 and j == 0:
-        return 1 + (1/L) * hj**3 * schur.S_ij(n, thetas, phis, off_diag_prod, i, j)
+        return 1 + (1/L) * hj**3 * schur.S_ij(n, C_prod, D, i, j)
     
     elif i == 0 and j < n :
-        return (-1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i, j-1) - schur.S_ij(n, thetas, phis, off_diag_prod, i,j))
+        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i, j-1) - schur.S_ij(n, C_prod, D, i,j))
     
     elif i == 0 and j == n: 
-        return (-1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i, j-1))
+        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i, j-1))
     
     elif i == n and j == 0:
-        return (-1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1,j))
+        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1,j))
     
     elif i == n and j < n:
-         return (1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j-1) - schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j))
+         return (1/L) * hj**3 * (schur.S_ij(n, C_prod, D, i-1, j-1) - schur.S_ij(n, C_prod, D,  i-1, j))
     
     elif i == n and j == n:
-        return 1 + (1/L) * hj**3 * schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j-1)
+        return 1 + (1/L) * hj**3 * schur.S_ij(n, C_prod, D,  i-1, j-1)
     
     elif i < n and j == 0:
-        return (-1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j) - schur.S_ij(n, thetas, phis, off_diag_prod, i, j))
+        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D, i, j))
 
     elif i < n and j == n:
-        return (1/L) * hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j-1) - schur.S_ij(n, thetas, phis, off_diag_prod, i, j-1))
+        return (1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1, j-1) - schur.S_ij(n, C_prod, D,  i, j-1))
     
     else:
-        return (i==j) + (1/L) * height.h_steps[j]**3 * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1,j-1) - schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j) - schur.S_ij(n, thetas, phis, off_diag_prod, i, j-1) + schur.S_ij(n, thetas, phis, off_diag_prod, i, j))    
+        return (i==j) + (1/L) * hj**3 * (schur.S_ij(n, C_prod, D, i-1,j-1) - schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D, i, j-1) + schur.S_ij(n, C_prod, D, i, j))    
 
 #M_inv bottom left
-def neg_schurCompInv_B2_ij(height, thetas, phis, off_diag_prod, i, j):
+def neg_schurCompInv_B2_ij(height, C_prod, D,  i, j):
     n = height.n_steps
     hj = height.h_steps[j]
     if j == 0:
-        return hj**3 * schur.S_ij(n, thetas, phis, off_diag_prod, i,j)
+        return hj**3 * schur.S_ij(n, C_prod, D,  i,j)
     elif j < n:
-        return -hj**3 * (schur.S_ij(n, thetas, phis, off_diag_prod,i, j-1) - schur.S_ij(n, thetas, phis, off_diag_prod, i,j))
+        return -hj**3 * (schur.S_ij(n, C_prod, D, i, j-1) - schur.S_ij(n, C_prod, D,  i,j))
     else:
-        return -hj**3 * schur.S_ij(n, thetas, phis, off_diag_prod, i, j-1)
+        return -hj**3 * schur.S_ij(n, C_prod, D,  i, j-1)
     
 #M_inv top right
-def neg_B1_schurCompInv_ij(height, thetas, phis, off_diag_prod, i, j):
+def neg_B1_schurCompInv_ij(height, C_prod, D,  i, j):
     L = height.step_width
     n = height.n_steps
     if i == 0:
-        return (-1/L) * (-schur.S_ij(n, thetas, phis, off_diag_prod, i, j))
+        return (-1/L) * (-schur.S_ij(n,C_prod, D,  i, j))
     elif i < n:
-        return (-1/L) * (schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j) - schur.S_ij(n, thetas, phis, off_diag_prod, i, j))
+        return (-1/L) * (schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D,  i, j))
     else:
-        return (-1/L) * schur.S_ij(n, thetas, phis, off_diag_prod, i-1, j)
+        return (-1/L) * schur.S_ij(n, C_prod, D, i-1, j)
 
 #------- Matrix Builders ------------------------------------------------------
 

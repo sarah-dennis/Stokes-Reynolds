@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jun 28 10:38:12 2023
+
+@author: sarah
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Sat Apr  1 12:09:43 2023
 
 @author: sarah
@@ -12,79 +19,10 @@ import numpy as np
 #      [ B2  C  ]
 
 #  K = - (C + B2 A^-1 B1)
-#  S = K^-1
+
 #------------------------------------------------------------------------------
 
-# build the inverse of (n, n) symmetric tri-diagonal 
-def make_S(n, off_diag, center_diag):
-
-    thetas = get_thetas(n, off_diag, center_diag)
-
-    phis = get_phis(n, off_diag, center_diag)
-    
-    off_diag_prod = triDiagProd(off_diag)
-    
-    S = np.zeros((n,n))
-    for i in range(0, n):
-        for j in range(0, i+1): #j <= i
-            sij = S_ij(n, thetas, phis, off_diag_prod, i, j)
-            S[i,j] = sij
-            
-            if i != j:
-                S[j, i] = sij
-    return S
-
-    
-# get (i, j) element of inverse of (n, n) symmetric tri-diagonal    
-# make and store phis, thetas, off_diag_product once before using
-def S_ij(n, thetas, phis, off_diag_prod, i, j):
-    #TODO: overflow errors in thetas and phis for large n_steps
-    if j > i:
-        j, i = i, j
-        
-    if i == j:
-        if j == 0:
-            return phis[i+1] / thetas[n-1]
-        elif i == n-1:
-            return thetas[j-1] / thetas[n-1]
-        else:
-            return thetas[j-1]*phis[i+1] / thetas[n-1]
-    
-    else: #(j < i)
-
-        if j == 0 and i == n-1:
-            return (-1)**(i+j) * off_diag_prod[j,i-1] / thetas[n-1]
-        elif j == 0:
-            return (-1)**(i+j) * off_diag_prod[j,i-1] * phis[i+1] / thetas[n-1]
-        elif i == n-1:
-            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] / thetas[n-1]
-        else:
-            return (-1)**(i+j) * off_diag_prod[j,i-1] * thetas[j-1] * phis[i+1] / thetas[n-1]
-
-
-def get_thetas(n, off_diag, center_diag):
-    thetas = np.zeros(n)
-    #k=0
-    thetas[0] = center_diag[0]
-    #k=1
-    thetas[1] = center_diag[1]*center_diag[0] - off_diag[0]*off_diag[0]
-    for k in range(2, n):
-        thetas[k] = center_diag[k]*thetas[k-1] - off_diag[k-1]*off_diag[k-1]*thetas[k-2]
-        #print("theta[%d] = %.2f"%(k, thetas[k]))
-    return thetas
-
-#
-def get_phis(n, off_diag, center_diag):
-    phis = np.zeros(n)
-    # k = n-1
-    phis[n-1] = center_diag[n-1]
-    # k = n-2
-    phis[n-2] = center_diag[n-2]*center_diag[n-1] - off_diag[n-2]*off_diag[n-2]
-    for k in range(n-3, -1, -1):
-        phis[k] = center_diag[k]*phis[k+1] - off_diag[k]**2*phis[k+2]
-        # print("phi[%d] = %.2f"%(k, phis[k]))
-    return phis
-
+#U[i,j] = prod(xs) from i to j
 
 def triDiagProd(xs):
     U = np.diag(xs)
@@ -93,4 +31,78 @@ def triDiagProd(xs):
         for j in range(i+1, n):
             U[i,j] = U[i, j-1] * U[j, j]
     return U
-  
+
+# ---- RATIO METHOD -----------------------------------------------------------
+
+
+# Given schur complement K (symmetric tri-diagonal)... 
+
+# Ex. N=3
+#  M = [  A1  -B1   0  ]
+#      [ -B1   A2  -B2 ]
+#      [  0   -B3   A3 ]
+
+# Compute {C_i}
+# C(N-1) = B(N-1) / A(N)
+# C(i) = B(i) / (A(i+1) - S(i+1) B(i+1))
+
+def get_Cs(n, A, B):
+    C = np.zeros(n-1)
+    C[n-2] = B[n-2] / A[n-1]
+    
+    for i in reversed(range(n-2)):
+        C[i] = B[i] / (A[i+1] - C[i+1]*B[i+1])
+    
+    return C
+
+# Compute diagonal elements {D_i} = K^-1[i,i]
+def get_Ds(n, A, B, C):
+    D = np.zeros(n)
+    
+    D[0] = 1/(A[0] - B[0]*C[0])
+    
+    for i in range(1, n-1):
+        D[i] = (1 + B[i-1]*D[i-1]*C[i-1]) / (A[i] - B[i]*C[i])
+        
+    D[n-1] = (1 + B[n-2]*D[n-2]*C[n-2])/A[n-1]
+
+    return D
+    
+# K^-1 = S_ij
+def S_ij(n, C_prod, D, i, j):
+    if i == j:
+        return D[i]
+
+    # non-diagonals
+    elif i < j:
+        return (-1)**(i+j) * D[i] * C_prod[i, j-1]
+
+    else:
+        j, i = i, j
+        return (-1)**(i+j) * D[i] * C_prod[i, j-1]
+    
+    
+#----- for testing    
+    
+def make_S(n, center_diag, off_diag):
+
+    C = get_Cs(n, center_diag, off_diag)
+
+    C_prod = triDiagProd(C)
+
+    
+    D = get_Ds(n, center_diag, off_diag, C)
+    
+
+    S = np.zeros((n,n))
+    for i in range(0, n):
+        for j in range(0, n): 
+            S[i, j] = S_ij(n, C_prod, D, i, j)
+            
+    return S
+    
+    
+    
+    
+    
+    
