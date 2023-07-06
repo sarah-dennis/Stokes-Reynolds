@@ -103,7 +103,7 @@ def plot_log_multi(fs, xs, title, f_labels, axis):
     
     fig = pp.figure()
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'o', 'p']
+    colors = ['r', 'b', 'g', 'purple']
     for i in range(len(fs)):
         
         ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])

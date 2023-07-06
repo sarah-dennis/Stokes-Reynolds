@@ -138,7 +138,7 @@ class SquareWavePressure_pySolve(Pressure):
         sol = np.linalg.solve(M, rhs)
         t2 = time.time()
         
-        print("Python Inverse Solve")
+        print("\n Python Inverse Solve")
         print("Prep time: %.5f "%(t1-t0))
         print("Solve time: %.5f "%(t2-t1))
         print("Total time: %.5f "%(t2-t0))
@@ -169,7 +169,7 @@ class SquareWavePressure_schurInvSolve(Pressure):
             sol[i] = sw.schurInvSol_i(rhs, height, C_prod, D,  i)
         t2 = time.time()
         
-        print("Schur Inv. Solve")
+        print("\n Schur Inv. Solve")
         print("Prep time: %.5f"%(t1 - t0))
         print("Solve time: %.5f"%(t2 - t1))
         print("Total time: %.5f "%(t2 - t0))
@@ -224,7 +224,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         
         t2 = time.time()
 
-        print("Schur LU Solve")
+        print("\n Schur LU Solve")
         print("Prep time: %.5f"%(t1 - t0))
         print("Solve time: %.5f"%(t2-t1))
         print("Total time: %.5f"%(t2-t0))

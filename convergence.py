@@ -9,8 +9,10 @@ import numpy as np
 import domain as dfd
 import Reynolds_1D as ry
 import examples_1D as eg
+import heights as hgt
+import pressures as prs
 import _graphics as g
-import groundControl as gc
+import control as gc
 
 
 #------------------------------------------------------------------------------
@@ -89,27 +91,33 @@ def vary_nSteps_time(trials=9, n_steps_0=101):
     r = 0.001
     h_avg = 0.1
 
-    u = np.zeros(trials)
-    w = np.zeros(trials)
-    x = np.zeros(trials)
-    v = np.zeros(trials)
+    lu = np.zeros(trials)
+    inv = np.zeros(trials)
+    py = np.zeros(trials)
+    
+    n = np.zeros(trials)
+    nsqr = np.zeros(trials)
     
     for k in range(trials):
+        print("\n Trial %d of %d: N steps = %d"%(k+1, trials, n_steps_k))
+        height_k = hgt.SquareWaveHeight(gc.domain, h_avg, r, n_steps_k)
         
-        height_k, pressure_py_k = eg.squareWave_pySolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
-        height_k, pressure_lu_k = eg.squareWave_schurLUSolve(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        pressure_py_k = prs.SquareWavePressure_pySolve(gc.domain, height_k, gc.p0, gc.pN)
+        pressure_lu_k = prs.SquareWavePressure_schurLUSolve(gc.domain, height_k, gc.p0, gc.pN)
+        pressure_inv_k = prs.SquareWavePressure_schurInvSolve(gc.domain, height_k, gc.p0, gc.pN)
         
-        u[k] = pressure_lu_k.time
-        w[k] = pressure_py_k.time
-        v[k] = n_steps_k**2
-        x[k] = n_steps_k
+        lu[k] = pressure_lu_k.time
+        py[k] = pressure_py_k.time
+        inv[k] = pressure_inv_k.time
+        nsqr[k] = n_steps_k**2
+        n[k] = n_steps_k
     
         n_steps_k = int(n_steps_k * 2+1)
         
     title = "Solve Time vs Matrix Size"
     y_axis = "Time"
     x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
-    g.plot_log_multi([u,w, v], x, title, ["LU runtime", "python runtime", "$\mathcal{O}(n^2)$"], [x_axis, y_axis])
+    g.plot_log_multi([nsqr, lu, py, inv], n, title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
     
 
 
@@ -122,7 +130,7 @@ def vary_r_pMax(trials=10, r_0=0.05):
     x = np.zeros(trials)
     
     for k in range(trials):
-        height_k, pressure_k = eg.squareWave(ry.domain, ry.p0, ry.pN, n_steps, r_k)
+        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps, r_k)
         
         #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
