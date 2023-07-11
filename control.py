@@ -22,7 +22,7 @@ U = 1       # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 20000   # Number of Grid points
+Nx = 1000   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 

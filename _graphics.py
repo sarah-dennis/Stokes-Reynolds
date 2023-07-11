@@ -31,6 +31,7 @@ def plot_2D_multi(fs, xs, title, labels, axis):
     fig = pp.figure()
     ax = fig.add_subplot()
     colors = ['r', 'b', 'g', 'o', 'p']
+
     for i in range(len(fs)):
         
         ax.plot(xs, fs[i], label=labels[i], color=colors[i])
@@ -100,8 +101,11 @@ def plot_log(fs, xs, title, y_label, x_label):
 
     
 def plot_log_multi(fs, xs, title, f_labels, axis):
-    
+    pp.rcParams['figure.dpi'] = 300
+    # pp.rcParams["legend.loc"] = 'center right'
     fig = pp.figure()
+    
+    
     ax = fig.add_subplot()
     colors = ['r', 'b', 'g', 'purple']
     for i in range(len(fs)):
@@ -114,7 +118,7 @@ def plot_log_multi(fs, xs, title, f_labels, axis):
     ax.set_xlabel(axis[0])
     ax.set_ylabel(axis[1])
     pp.title(title,  fontweight ="bold")
-    fig.legend(loc='lower right')
+    fig.legend( bbox_to_anchor=(1.22, 0.5))
     return fig
 
     

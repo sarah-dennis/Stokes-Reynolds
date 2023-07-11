@@ -13,6 +13,7 @@ import heights as hgt
 import pressures as prs
 import _graphics as g
 import control as gc
+import csv
 
 
 #------------------------------------------------------------------------------
@@ -86,39 +87,65 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=9, n_steps_0=101):
+def vary_nSteps_time(trials=10, repeats=3, n_steps_0=101):
+    bigO_const = 10**-6
     n_steps_k = n_steps_0
     r = 0.001
     h_avg = 0.1
+    
+    for rep in range(repeats):
+        print("\n Round %d of %d"%(rep, repeats))
+        n_steps_k = n_steps_0
+        
+        lu = np.zeros(trials)
+        # inv = np.zeros(trials)
+        py = np.zeros(trials)
+        
+        n = np.zeros(trials)
+        nsqr = np.zeros(trials)
 
-    lu = np.zeros(trials)
-    inv = np.zeros(trials)
-    py = np.zeros(trials)
-    
-    n = np.zeros(trials)
-    nsqr = np.zeros(trials)
-    
-    for k in range(trials):
-        print("\n Trial %d of %d: N steps = %d"%(k+1, trials, n_steps_k))
-        height_k = hgt.SquareWaveHeight(gc.domain, h_avg, r, n_steps_k)
+        py_fail = False
+        lu_fail = False
         
-        pressure_py_k = prs.SquareWavePressure_pySolve(gc.domain, height_k, gc.p0, gc.pN)
-        pressure_lu_k = prs.SquareWavePressure_schurLUSolve(gc.domain, height_k, gc.p0, gc.pN)
-        pressure_inv_k = prs.SquareWavePressure_schurInvSolve(gc.domain, height_k, gc.p0, gc.pN)
+        for k in range(trials):
+            print("\n Trial %d of %d: N steps = %d"%(k+1, trials, n_steps_k))
+            height_k = hgt.SquareWaveHeight(gc.domain, h_avg, r, n_steps_k)
+            
+            # if not py_fail:
+            #     try:
+            #         pressure_py_k = prs.SquareWavePressure_pySolve(gc.domain, height_k, gc.p0, gc.pN)
+            #         py[k] = pressure_py_k.time
+            #     except MemoryError as error:
+            #         print("In Python solve: ", error)
+            #         py_fail = True
+                    
+            if not lu_fail:
+                try:
+                    pressure_lu_k = prs.SquareWavePressure_schurLUSolve(gc.domain, height_k, gc.p0, gc.pN)
+                    lu[k] = pressure_lu_k.time
+                except MemoryError as error:
+                    print("In LU solve: ", error)
+                    lu_fail = True
+            
+                
+            # pressure_inv_k = prs.SquareWavePressure_schurInvSolve(gc.domain, height_k, gc.p0, gc.pN)
+            # inv[k] = pressure_inv_k.time
+            
+            n[k] = n_steps_k
+            nsqr[k] = bigO_const * n_steps_k**2
+            n_steps_k = int(n_steps_k * 2+1)
         
-        lu[k] = pressure_lu_k.time
-        py[k] = pressure_py_k.time
-        inv[k] = pressure_inv_k.time
-        nsqr[k] = n_steps_k**2
-        n[k] = n_steps_k
-    
-        n_steps_k = int(n_steps_k * 2+1)
+        file_name = "sw_solveTimes_rep%s.csv"%rep
+        np.savetxt(file_name, np.array([n, lu]).T, delimiter =", ", fmt='%.5f')
         
-    title = "Solve Time vs Matrix Size"
+    plot_title = "Solve Time vs Matrix Size"
     y_axis = "Time"
-    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
-    g.plot_log_multi([nsqr, lu, py, inv], n, title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
-    
+    x_axis = "$N_{steps}$"
+    funs = [nsqr, lu, py]
+    fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
+    # g.plot_log_multi([nsqr, lu, py, inv], n, plot_title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
+    g.plot_log_multi(funs, n, plot_title, fun_labels, [x_axis, y_axis])
+
 
 
 def vary_r_pMax(trials=10, r_0=0.05):

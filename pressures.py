@@ -148,7 +148,7 @@ class SquareWavePressure_pySolve(Pressure):
 
         ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
-        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+        super().__init__(domain, ps, p0, pN, p_str, t2-t1)
 
 class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -179,7 +179,7 @@ class SquareWavePressure_schurInvSolve(Pressure):
 
         ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
-        super().__init__(domain, ps, p0, pN, p_str, t2-t0)
+        super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
         
  
