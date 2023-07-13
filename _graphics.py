@@ -8,6 +8,7 @@ Graphics helpers
 """
 import numpy as np
 from matplotlib import pyplot as pp
+import csv
     
 theta = 30
 phi = 30
@@ -117,5 +118,16 @@ def plot_log_multi(fs, xs, title, f_labels, axis):
     fig.legend(loc='lower right')
     return fig
 
-    
-    
+
+def read_csv(filename):
+    with open(filename, mode='rb') as file:
+        csv_file = csv.reader(file)
+        xs = np.zeros(len(csv_file))
+        ys = np.zeros(len(csv_file))
+        i = 0
+        for line in csv_file:
+            n, time = line.split(',')
+            xs[i] = int(n)
+            ys[i] = float(time)
+    return xs, ys
+
