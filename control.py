@@ -35,8 +35,6 @@ domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 p0 = 0
 pN = 0
 
-n_steps = 3
-
 # Overflow when finding (thetas, phis) around 1560 steps
 
 #---------------------------------------------------------------------------
@@ -45,20 +43,20 @@ n_steps = 3
 #height, pressure = egs.flat(domain, p0, pN)
 #height, pressure = egs.wedge(domain, p0, pN)
 #height, pressure = egs.corrugated(domain, p0, pN)
-height, pressure_step = egs.step(domain, p0, pN)
+# height, pressure_step = egs.step(domain, p0, pN)
 #height, pressure = egs.twoStep(domain, p0, pN)
 
-# height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
-# height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN, n_steps)
-# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+# height, pressure_py = egs.squareWave_pySolve(domain, p0, pN)
+# height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN)
+# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN)
 
 #---------------------------------------------------------------------------
 # Plotting 
 
-p_h_title = "Pressure and Height for %s"%height.h_str
-p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+# p_h_title = "Pressure and Height for %s"%height.h_str
+# p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
 # graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
-graph.plot_2D_twin(pressure_step.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+# graph.plot_2D_twin(pressure_step.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 # p_p_title = "LU Solve vs Python Solve of Pressure for %s"%height.h_str
 # p_p_labels = ["LU Pressure", "Python Pressure", "x"]

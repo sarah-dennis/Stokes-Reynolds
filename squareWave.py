@@ -189,7 +189,7 @@ def make_Minv_schurComp(height, S):
 def make_ps(domain, height, p0, pN, slopes, extrema):
     ps = np.zeros(domain.Nx)
     L = height.step_width
-    
+      
     k = 0
     x_k = domain.x0
     p_k = p0
