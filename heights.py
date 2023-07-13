@@ -126,7 +126,7 @@ class StepHeight(Height):
         self.l_right = domain.xf - self.x1
         
         self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
-        self.h_str = "Raleigh Step"
+        self.h_str = "Rayleigh Step"
         
         super().__init__(domain, self.h, self.h_str, self.h_eq)
 
@@ -147,7 +147,7 @@ class TwoStepHeight(Height):
         self.l1 = self.x1 - domain.x0
         self.l2 = self.x2 - self.x1
         self.l3 = domain.xf - self.x2
-        self.h_str = "Raleigh Two Step"
+        self.h_str = "Rayleigh Two Step"
         self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) 
         
         super().__init__(domain, self.h, self.h_str, self.h_eq)

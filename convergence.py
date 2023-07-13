@@ -87,17 +87,18 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=10, repeats=3, n_steps_0=101):
+def vary_nSteps_time(trials=1, repeats=1, n_steps_0=65001):
     bigO_const = 10**-6
     n_steps_k = n_steps_0
     r = 0.001
     h_avg = 0.1
     
     for rep in range(repeats):
-        print("\n Round %d of %d"%(rep, repeats))
+        print("\n Round %d of %d"%(rep+1, repeats))
         n_steps_k = n_steps_0
         
         lu = np.zeros(trials)
+        
         # inv = np.zeros(trials)
         py = np.zeros(trials)
         
@@ -134,18 +135,21 @@ def vary_nSteps_time(trials=10, repeats=3, n_steps_0=101):
             n[k] = n_steps_k
             nsqr[k] = bigO_const * n_steps_k**2
             n_steps_k = int(n_steps_k * 2+1)
-        
-        file_name = "sw_solveTimes_rep%s.csv"%rep
+    
+        file_name = "sw_solveTimes_%s.csv"%(rep+1)
         np.savetxt(file_name, np.array([n, lu]).T, delimiter =", ", fmt='%.5f')
         
-    plot_title = "Solve Time vs Matrix Size"
-    y_axis = "Time"
-    x_axis = "$N_{steps}$"
-    funs = [nsqr, lu, py]
-    fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
-    # g.plot_log_multi([nsqr, lu, py, inv], n, plot_title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
-    g.plot_log_multi(funs, n, plot_title, fun_labels, [x_axis, y_axis])
+        plot_title = "Solve Time vs Matrix Size (Trial %d)"%(rep + 1)
+        y_axis = "Time"
+        x_axis = "$N_{steps}$"
+        # funs = [nsqr, lu, py]
+        funs = [nsqr, lu]
+        # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
+        fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
+        # g.plot_log_multi([nsqr, lu, py, inv], n, plot_title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
+        g.plot_log_multi(funs, n, plot_title, fun_labels, [x_axis, y_axis])
 
+        
 
 
 def vary_r_pMax(trials=10, r_0=0.05):

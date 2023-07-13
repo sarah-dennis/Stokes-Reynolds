@@ -77,8 +77,18 @@ def S_ij(n, C_prod, D, i, j):
     elif i < j:
         return (-1)**(i+j) * D[i] * C_prod[i, j-1]
     else:
-        j, i = i, j
-        return (-1)**(i+j) * D[i] * C_prod[i, j-1]
+        # j, i = i, j
+        return (-1)**(i+j) * D[j] * C_prod[j, i-1]
+    
+def S_ij_flops(n, C, D, i, j):
+    if i == j:
+        return D[i]
+    # non-diagonals
+    elif i < j:
+        return (-1)**(i+j) * D[i] * np.prod(C[i:j])
+    else:
+        # j, i = i, j
+        return (-1)**(i+j) * D[j] * np.prod(C[j:i])
     
 # Make symmetric K^-1 matrix
 def get_S(n, C_prod, D):

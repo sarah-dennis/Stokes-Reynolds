@@ -193,7 +193,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)
         C = schur.get_Cs(n, center_diag, off_diag)
-        C_prod = schur.triDiagProd(C)
+        # C_prod = schur.triDiagProd(C)
         D = schur.get_Ds(n, center_diag, off_diag, C)
         # S = schur.get_S(n, C_prod, D)
         t1 = time.time()
@@ -207,7 +207,8 @@ class SquareWavePressure_schurLUSolve(Pressure):
         for i in range(n):
             w_i = 0
             for j in range(n):
-                s_ij = schur.S_ij(n, C_prod, D, i, j)
+                # s_ij = schur.S_ij(n, C_prod, D, i, j)
+                s_ij = schur.S_ij_flops(n, C, D, i, j)
                 w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
             w[i] = w_i
 

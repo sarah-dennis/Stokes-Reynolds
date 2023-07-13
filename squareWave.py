@@ -185,7 +185,7 @@ def make_Minv_schurComp(height, S):
     return M_inv
 
 # -----------------------------------------------------------------------------
-#Construct piecewise linear pressure on Nx grid from list of extrema
+# Construct piecewise linear pressure on Nx grid from list of extrema
 def make_ps(domain, height, p0, pN, slopes, extrema):
     ps = np.zeros(domain.Nx)
     L = height.step_width
