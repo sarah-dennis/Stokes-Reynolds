@@ -87,7 +87,7 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=1, repeats=3, n_steps_0=70001):
+def vary_nSteps_time(trials=1, repeats=1, n_steps_0=70001):
     bigO_const = 10**-6
     n_steps_k = n_steps_0
     r = 0.001
@@ -150,20 +150,20 @@ def vary_nSteps_time(trials=1, repeats=3, n_steps_0=70001):
         fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
         g.plot_log_multi(funs, n, plot_title, fun_labels, [x_axis, y_axis])
 
-# LU_steps = [101, 203, 407, 815, 1631, 3263, 6527, 13055, 26111, 52223, 65001]   
-# LU_sqr_steps = [10201,41209,165649,664225,2660161,10647169,42601729,170433025,681784321,2727241729,4225130001]
-# LU_avg_times = [0.008, 0.035, 0.142, 0.548, 2.196, 8.657, 35.884, 147.474, 603.201, 2524.064, 4048.463]
-
-# plot_title = "Solve Time vs Matrix Size"
-# y_axis = "Time (ms)"
-# x_axis = "$N_{steps}$"
-# # funs = [nsqr, lu, py]
-# funs = [LU_sqr_steps, LU_avg_times]
-# # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
+steps = [101, 203, 407, 815, 1631, 3263, 6527, 13055, 26111, 52223, 65001]   
+sqr_steps = [10201,41209,165649,664225,2660161,10647169,42601729,170433025,681784321,2727241729,4225130001]
+Csqr_steps = [10**(-5) * k for k in sqr_steps]
+LU_avg_times = [0.008, 0.035, 0.142, 0.548, 2.196, 8.657, 35.884, 147.474, 603.201, 2524.064, 4048.463]
+PY_avg_times = [0.04778333333,0.05691333333,0.09542333333,0.1494133333,0.29315,1.019843333,6.209783333,43.23826667, None, None, None]
+plot_title = "Solve Time vs Matrix Size"
+y_axis = "Time (ms)"
+x_axis = "$N_{steps}$"
+funs = [Csqr_steps, LU_avg_times, PY_avg_times]
+# funs = [Csqr_steps, LU_avg_times]
+fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
 # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
-# # g.plot_log_multi([nsqr, lu, py, inv], n, plot_title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
-# g.plot_log_multi(funs, LU_steps, plot_title, fun_labels, [x_axis, y_axis])
-
+g.plot_log_multi(funs, steps, plot_title, fun_labels , [x_axis, y_axis])
+# g.plot_log_multi(funs, steps, plot_title, fun_labels, [x_axis, y_axis])
 
 
 def vary_r_pMax(trials=10, r_0=0.05):
