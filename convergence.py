@@ -139,6 +139,10 @@ def vary_nSteps_time(trials=1, repeats=1, n_steps_0=70001):
         np.savetxt(file_name, np.array([n, lu]).T, delimiter =", ", fmt='%.5f')
         # np.savetxt(file_name, np.array([n, py]).T, delimiter =", ", fmt='%.5f')
         
+        
+        #read text
+        
+        
         plot_title = "Solve Time vs Matrix Size (Trial %d)"%(rep + 1)
         y_axis = "Time"
         x_axis = "$N_{steps}$"

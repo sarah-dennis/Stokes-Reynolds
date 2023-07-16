@@ -213,7 +213,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
                 if n < 2**16:
                     s_ij = schur.S_ij(n, C_prod, D, i, j)
                 else:
-                    
+                
                     s_ij = schur.S_ij_flops(n, C, D, i, j)
                 w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
             w[i] = w_i
