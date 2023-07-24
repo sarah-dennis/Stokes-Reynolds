@@ -56,7 +56,6 @@ def get_Cs(n, A, B):
     return C
 
 # Compute diagonal elements {D_i} = K^-1[i,i]
-
 def get_Ds(n, A, B, C):
     D = np.zeros(n)
     

@@ -49,22 +49,16 @@ pN = 0
 # height, pressure_py = egs.squareWave_pySolve(domain, p0, pN)
 # height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN)
 # height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN)
+height, pressure_gmres = egs.squareWave_gmresSolve(domain, p0, pN)
+
 
 #---------------------------------------------------------------------------
 # Plotting 
 
-# p_h_title = "Pressure and Height for %s"%height.h_str
-# p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-# graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
-# graph.plot_2D_twin(pressure_step.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+p_h_title = "Pressure and Height for %s"%height.h_str
+p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+graph.plot_2D_twin(pressure_gmres.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
-# p_p_title = "LU Solve vs Python Solve of Pressure for %s"%height.h_str
-# p_p_labels = ["LU Pressure", "Python Pressure", "x"]
-# graph.plot_2D_twin(pressure_lu.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
-
-# # p_p_title = "SchurInv Solve vs PySolve of Pressure for %s"%height.h_str
-# # p_p_labels = ["LU Pressure", "Python Pressure", "x"]
-# # graph.plot_2D_twin(pressure_inv.ps, pressure_py.ps, domain.xs, p_p_title, p_p_labels)
 
 #---------------------------------------------------------------------------
 # Numerical Solution

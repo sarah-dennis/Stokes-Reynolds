@@ -5,12 +5,14 @@ Created on Wed Jan 25 18:24:34 2023
 
 @author: sarahdennis
 """
-import Reynolds_1D as ry
+
 import _graphics as graph
 import numpy as np
 import schur
 import time
 import squareWave as sw
+
+from scipy.sparse.linalg import gmres
 
 class Pressure:
     
@@ -149,6 +151,36 @@ class SquareWavePressure_pySolve(Pressure):
         ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
+        
+class SquareWavePressure_gmresSolve(Pressure):
+
+    def __init__(self, domain, height, p0, pN):
+        n = height.n_steps
+        p_str = "%d-Step Square Wave"%n
+        rhs = sw.make_RHS(domain, height, p0, pN)
+        
+        t0 = time.time()
+        
+        M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
+        
+        t1 = time.time()
+        
+        sol, exit_code = gmres(M_linOp, rhs)
+        
+        
+        t2 = time.time()
+        
+        print("\n Scipy GMRes Solve")
+        print("Prep time: %.5f "%(t1-t0))
+        print("Solve time: %.5f "%(t2-t1))
+        print("Total time: %.5f "%(t2-t0))
+        print(exit_code)
+        p_slopes = sol[0:n+1]
+        p_extrema = sol[n+1:2*n+1]
+
+        ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
+        
+        super().__init__(domain, ps, p0, pN, p_str, t2-t1)
 
 class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -193,10 +225,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)
         C = schur.get_Cs(n, center_diag, off_diag)
-        if n < 2**16:
-            C_prod = schur.triDiagProd(C)
-        else:
-            print("N > 2^16 : Solving with S_ij flops")
+        C_prod = schur.triDiagProd(C)
         D = schur.get_Ds(n, center_diag, off_diag, C)
 
         t1 = time.time()
@@ -210,11 +239,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         for i in range(n):
             w_i = 0
             for j in range(n):
-                if n < 2**16:
-                    s_ij = schur.S_ij(n, C_prod, D, i, j)
-                else:
-                
-                    s_ij = schur.S_ij_flops(n, C, D, i, j)
+                s_ij = schur.S_ij(n, C_prod, D, i, j)
                 w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
             w[i] = w_i
 
@@ -241,9 +266,50 @@ class SquareWavePressure_schurLUSolve(Pressure):
  
 
 
+class SquareWavePressure_schurLUSolve_flops(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        n = height.n_steps
+        L = height.step_width
+        p_str = "%d-Step Square Wave"%n
         
+        t0 = time.time()
+        rhs = sw.make_RHS(domain, height, p0, pN)
+        center_diag, off_diag = sw.make_schurCompDiags(height)
+        C = schur.get_Cs(n, center_diag, off_diag)
+        D = schur.get_Ds(n, center_diag, off_diag, C)
+        t1 = time.time()
         
+        # L block -  fwd sub
+        # | I  0 | |v| = |f|
+        # | B2 K | |w|   |g|
+        # {v = f, w = S ( g - B2 f)}
         
+        w = np.zeros(n)
+        for i in range(n):
+            w_i = 0
+            for j in range(n):
+                s_ij = schur.S_ij_flops(n, C, D, i, j)
+                w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
+            w[i] = w_i
+
+        # U block  - back sub
+        # | I  B1 | |x| = |v|
+        # | 0  I  | |y|   |w|
+        # {x = v - B1 w, y = w}
         
+        x = np.zeros(n+1)
+        x[0] = 1/L * (w[0] - p0)
+        for i in range(1, n):
+            x[i] = 1/L * (w[i] - w[i-1])
+        x[n] = 1/L * (pN - w[n-1])
         
+        t2 = time.time()
+
+        print("\n Schur LU Solve")
+        print("Prep time: %.5f"%(t1 - t0))
+        print("Solve time: %.5f"%(t2-t1))
+        print("Total time: %.5f"%(t2-t0))
+        
+        ps = sw.make_ps(domain, height, p0, pN, x, w)
+        super().__init__(domain, ps, p0, pN, p_str, t2-t1)
 

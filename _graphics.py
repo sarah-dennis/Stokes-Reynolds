@@ -12,8 +12,6 @@ from matplotlib import pyplot as pp
 theta = 30
 phi = 30
 
-Nx = 100
-Nz=100
 
 def plot_3D(f_2D, xs, zs, title):
     
@@ -70,7 +68,6 @@ def plot_2D_twin(fs, gs, xs, title, labels):
     ax1.plot(xs, fs, color = color)
     ax1.set_ylabel(labels[0], color = color)
     ax1.tick_params(axis ='y', labelcolor = color)
-
 
     # Adding Twin Axes to plot dataset_2
     ax2 = ax1.twinx()
