@@ -5,7 +5,7 @@ Created on Thu Jun  1 14:11:49 2023
 @author: sarah
 """
 import numpy as np
-
+from scipy.sparse.linalg import LinearOperator
 import schur
 
 # M @ lhs = rhs
@@ -25,7 +25,34 @@ def make_RHS(domain, height, p0, pN):
         
     return rhs
 
-# Make diagonals of schur complement K
+# Takes (P_extrema, P_slopes) -> [p(x)] over domain Nx
+def make_ps(domain, height, p0, pN, slopes, extrema):
+    ps = np.zeros(domain.Nx)
+    L = height.step_width
+      
+    k = 0
+    x_k = domain.x0
+    p_k = p0
+    slope_k = slopes[k]
+
+    for i in range(domain.Nx-1):
+        x = domain.xs[i]
+        
+        #if x is in a new step
+        if x > domain.x0 + (k+1)*L:
+            k += 1
+            x_k = domain.x0 + k*L
+            p_k = extrema[k-1]
+            slope_k = slopes[k]
+
+        ps[i] = slope_k*(x-x_k) + p_k
+    
+    ps[-1] = pN
+    return ps
+#------------------------------------------------------------------------------
+
+# Schur Complement for square wave
+
 def make_schurCompDiags(height):
     n = height.n_steps
     hs = height.h_steps
@@ -40,9 +67,40 @@ def make_schurCompDiags(height):
     return (-1/height.step_width) * center_diag, (-1/height.step_width) * off_diag
 
 #------------------------------------------------------------------------------
-# Helpers for pressures.schur_InvSolve()
+# Helpers for pressures.squarewave_schurInvSolve()
+
+# (matrix builder only used for testing)
+def make_Minv_schurComp(height, S):
+    
+    n = height.n_steps
+    
+    #Minv = [[A, B],[C, S]]
+    M_inv = np.zeros((2*n + 1, 2*n + 1))
+    
+    A = np.zeros((n+1, n+1))
+    B = np.zeros((n+1, n))
+    C = np.zeros((n, n+1))
+    
+    for i in range(0, n+1):
+        for j in range(0, n+1):
+            
+            A[i,j] = Id_B1_schurCompInv_B2_ij(height, S, i, j)
+            
+            if i < n:
+                C[i, j] = neg_schurCompInv_B2_ij(height, S, i, j)
+            
+            if j < n:
+                B[i,j] = neg_B1_schurCompInv_ij(height, S, i, j)
+                
+    M_inv[0:n+1, 0:n+1] = A
+    M_inv[0:n+1, n+1:2*n+1] = B
+    M_inv[n+1:2*n+1, 0:n+1] = C
+    M_inv[n+1:2*n+1, n+1:2*n+1] = S
+            
+    return M_inv
 
 # Solve M_inv @ rhs = lhs
+# {C_prod, D} <- Ratio Algorithm
 def schurInvSol_i(rhs, height, C_prod, D, i):
     n = height.n_steps
     
@@ -122,8 +180,8 @@ def neg_B1_schurCompInv_ij(height, C_prod, D,  i, j):
     else:
         return (-1/L) * schur.S_ij(n, C_prod, D, i-1, j)
 
-#------- Matrix Builders ------------------------------------------------------
-
+#------- ------------------------------------------------------
+#Helper for pressure.squarewave_pySolve
 def make_M(domain, height, p0, pN):
 
     n = height.n_steps
@@ -155,57 +213,47 @@ def make_M(domain, height, p0, pN):
         
     return M
 
-def make_Minv_schurComp(height, S):
-    
-    n = height.n_steps
-    
-    #Minv = [[A, B],[C, S]]
-    M_inv = np.zeros((2*n + 1, 2*n + 1))
-    
-    A = np.zeros((n+1, n+1))
-    B = np.zeros((n+1, n))
-    C = np.zeros((n, n+1))
-    
-    for i in range(0, n+1):
-        for j in range(0, n+1):
-            
-            A[i,j] = Id_B1_schurCompInv_B2_ij(height, S, i, j)
-            
-            if i < n:
-                C[i, j] = neg_schurCompInv_B2_ij(height, S, i, j)
-            
-            if j < n:
-                B[i,j] = neg_B1_schurCompInv_ij(height, S, i, j)
-                
-    M_inv[0:n+1, 0:n+1] = A
-    M_inv[0:n+1, n+1:2*n+1] = B
-    M_inv[n+1:2*n+1, 0:n+1] = C
-    M_inv[n+1:2*n+1, n+1:2*n+1] = S
-            
-    return M_inv
-
-# -----------------------------------------------------------------------------
-#Construct piecewise linear pressure on Nx grid from list of extrema
-def make_ps(domain, height, p0, pN, slopes, extrema):
-    ps = np.zeros(domain.Nx)
-    L = height.step_width
-    
-    k = 0
-    x_k = domain.x0
-    p_k = p0
-    slope_k = slopes[k]
-
-    for i in range(domain.Nx-1):
-        x = domain.xs[i]
+#------- ------------------------------------------------------
+class swLinOp(LinearOperator):
+    #n:= number of steps 
+    #L:= length of each step
+    #hs:= height of each step (length n+1)
+    def __init__(self, n, L, hs):
         
-        #if x is in a new step
-        if x > domain.x0 + (k+1)*L:
-            k += 1
-            x_k = domain.x0 + k*L
-            p_k = extrema[k-1]
-            slope_k = slopes[k]
+        self.shape = (2*n + 1, 2*n+1)
+        self.L = L
+        self.n = n
+        self.hs = hs
+        self.dtype = np.dtype('f8')
 
-        ps[i] = slope_k*(x-x_k) + p_k
+        
+    #M = [[I, B],[C, 0]]
     
-    ps[-1] = pN
-    return ps
+    #[I, B][v1]
+    #[C, 0][v2]
+    #Mv = rhs
+
+    def _matvec(self, v):
+        mv = np.zeros(2*self.n+1)
+        
+        #----------------------
+        # Upper blocks: I v1 + B v2
+        
+        #i = 0
+        mv[0] = v[0] + (-1/self.L) * v[self.n+1]
+        
+        # 0 < i < n
+        for i in range(1, self.n):
+            mv[i] =  v[i] + (1/self.L)*v[i + self.n] + (-1/self.L)*v[i+self.n+1]
+        
+        #i = n
+        mv[self.n] = v[self.n] + (1/self.L)*v[2*self.n]
+        
+        #---------------------- 
+        #Lower blocks: C v1 + 0 v2
+        # n < i < 2*n+1 
+        for i in range(self.n+1, 2*self.n+1):
+            
+            mv[i] = -(self.hs[i - self.n-1]**3)*v[i - self.n-1] + (self.hs[i-self.n]**3)*v[i-self.n]
+
+        return mv

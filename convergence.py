@@ -13,6 +13,7 @@ import heights as hgt
 import pressures as prs
 import _graphics as g
 import control as gc
+import csv
 
 
 #------------------------------------------------------------------------------
@@ -86,40 +87,90 @@ def vary_nSteps_pMax(trials=7, n_steps_0=5):
     
     
 
-def vary_nSteps_time(trials=9, n_steps_0=101):
+def vary_nSteps_time(trials=3, repeats=1, n_steps_0=1005):
+    bigO_const = 10**-6
     n_steps_k = n_steps_0
     r = 0.001
     h_avg = 0.1
+    
+    for rep in range(repeats):
+        print("\n Round %d of %d"%(rep+1, repeats))
+        n_steps_k = n_steps_0
+        
+        lu = np.zeros(trials)
+        # inv = np.zeros(trials)
+        # py = np.zeros(trials)
+        
+        n = np.zeros(trials)
+        nsqr = np.zeros(trials)
 
-    lu = np.zeros(trials)
-    inv = np.zeros(trials)
-    py = np.zeros(trials)
-    
-    n = np.zeros(trials)
-    nsqr = np.zeros(trials)
-    
-    for k in range(trials):
-        print("\n Trial %d of %d: N steps = %d"%(k+1, trials, n_steps_k))
-        height_k = hgt.SquareWaveHeight(gc.domain, h_avg, r, n_steps_k)
+        py_fail = False
+        lu_fail = False
         
-        pressure_py_k = prs.SquareWavePressure_pySolve(gc.domain, height_k, gc.p0, gc.pN)
-        pressure_lu_k = prs.SquareWavePressure_schurLUSolve(gc.domain, height_k, gc.p0, gc.pN)
-        pressure_inv_k = prs.SquareWavePressure_schurInvSolve(gc.domain, height_k, gc.p0, gc.pN)
-        
-        lu[k] = pressure_lu_k.time
-        py[k] = pressure_py_k.time
-        inv[k] = pressure_inv_k.time
-        nsqr[k] = n_steps_k**2
-        n[k] = n_steps_k
+        for k in range(trials):
+            print("\n Trial %d of %d: N steps = %d"%(k+1, trials, n_steps_k))
+            height_k = hgt.SquareWaveHeight(gc.domain, h_avg, r, n_steps_k)
+            
+            # if not py_fail:
+            #     try:
+            #         pressure_py_k = prs.SquareWavePressure_pySolve(gc.domain, height_k, gc.p0, gc.pN)
+            #         py[k] = pressure_py_k.time
+            #     except MemoryError as error:
+            #         print("In Python solve: ", error)
+            #         py_fail = True
+                    
+            if not lu_fail:
+                try:
+                    pressure_lu_k = prs.SquareWavePressure_schurLUSolve(gc.domain, height_k, gc.p0, gc.pN)
+                    lu[k] = pressure_lu_k.time
+                except MemoryError as error:
+                    print("In LU solve: ", error)
+                    lu_fail = True
+            
+                
+            # pressure_inv_k = prs.SquareWavePressure_schurInvSolve(gc.domain, height_k, gc.p0, gc.pN)
+            # inv[k] = pressure_inv_k.time
+            
+            n[k] = n_steps_k
+            nsqr[k] = bigO_const * n_steps_k**2
+            n_steps_k = int(n_steps_k * 2+1)
     
-        n_steps_k = int(n_steps_k * 2+1)
+        file_name = "sw_solveTimes_%s.csv"%(rep+1)
+        np.savetxt(file_name, np.array([n, lu]).T, delimiter =", ", fmt='%.5f')
+        # np.savetxt(file_name, np.array([n, py]).T, delimiter =", ", fmt='%.5f')
         
-    title = "Solve Time vs Matrix Size"
-    y_axis = "Time"
-    x_axis = "n steps for $x\in[%.1f, %.1f]$"%(gc.x0, gc.xf)
-    g.plot_log_multi([nsqr, lu, py, inv], n, title, ["$\mathcal{O}(n^2)$","LU runtime", "python runtime", "SchurInv runtime",], [x_axis, y_axis])
-    
+        
+        #read text
+        
+        
+        plot_title = "Solve Time vs Matrix Size (Trial %d)"%(rep + 1)
+        y_axis = "Time"
+        x_axis = "$N_{steps}$"
+        # funs = [nsqr, lu, py]
+        funs = [nsqr, lu]
+        # funs = [nsqr, py]
+        # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
+        # fun_labels = ["$\mathcal{O}(n^2)$", "numpy solve time"]
+        fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
+        g.plot_log_multi(funs, n, plot_title, fun_labels, [x_axis, y_axis])
 
+# LU_avg_times = [0.008, 0.035, 0.142, 0.548, 2.196, 8.657, 35.884, 147.474, 603.201, 2524.064, 4048.463]
+# PY_avg_times = [0.04778333333,0.05691333333,0.09542333333,0.1494133333,0.29315,1.019843333,6.209783333,43.23826667, None, None, None]
+
+def plotTimes(filename):
+    bigO_const = 10**-6
+
+    n_steps, times = np.loadtxt(filename, dtype = "float", delimiter=",").T
+
+    n_sqr_steps = [bigO_const*n**2 for n in n_steps]
+    plot_title = "Solve Time vs Matrix Size"
+    y_axis = "Time (ms)"
+    x_axis = "$N_{steps}$"
+    funs = [n_sqr_steps, times]
+    # funs = [Csqr_steps, LU_avg_times]
+    # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
+    fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
+    g.plot_log_multi(funs, n_steps, plot_title, fun_labels , [x_axis, y_axis])
 
 def vary_r_pMax(trials=10, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)

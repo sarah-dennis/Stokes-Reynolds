@@ -46,8 +46,8 @@ def wedge(domain, p0, pN):
 # III a. Step Height Example
 #------------------------------------------------------------------------------
 def step(domain, p0, pN):
-    h_left = 0.3
-    h_right = 0.1
+    h_left = 0.1+0.001
+    h_right = 0.1-0.001
     height = hgt.StepHeight(domain, h_left, h_right)
     pressure = prs.StepPressure(domain, height, p0, pN)
     return height, pressure
@@ -66,7 +66,7 @@ def twoStep(domain, p0, pN):
 #------------------------------------------------------------------------------
 # III c. N-Step Height Example
 #------------------------------------------------------------------------------
-def squareWave_schurLUSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
+def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
 
     print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
@@ -82,9 +82,15 @@ def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
 
     return height, pressure
 
-def squareWave_pySolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
+def squareWave_pySolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
     print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
     pressure = prs.SquareWavePressure_pySolve(domain, height, p0, pN)
 
+    return height, pressure
+
+def squareWave_gmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
+    print("\n Loading %d-step Square Wave \n"%(n_steps))
+    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
+    pressure = prs.SquareWavePressure_gmresSolve(domain, height, p0, pN)
     return height, pressure
