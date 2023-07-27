@@ -22,12 +22,13 @@ U = 1       # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 1000   # Number of Grid points
+Nx = 5000   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
+n_steps = 101
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -46,10 +47,10 @@ pN = 0
 # height, pressure_step = egs.step(domain, p0, pN)
 #height, pressure = egs.twoStep(domain, p0, pN)
 
-# height, pressure_py = egs.squareWave_pySolve(domain, p0, pN)
-# height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN)
-# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN)
-height, pressure_gmres = egs.squareWave_gmresSolve(domain, p0, pN)
+# height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN, n_steps)
+# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+height, pressure_gmres = egs.squareWave_gmresSolve(domain, p0, pN, n_steps)
 
 
 #---------------------------------------------------------------------------

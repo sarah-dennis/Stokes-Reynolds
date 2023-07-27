@@ -166,8 +166,7 @@ class SquareWavePressure_gmresSolve(Pressure):
         t1 = time.time()
         
         sol, exit_code = gmres(M_linOp, rhs)
-        
-        
+    
         t2 = time.time()
         
         print("\n Scipy GMRes Solve")
