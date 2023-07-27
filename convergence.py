@@ -159,16 +159,12 @@ def vary_nSteps_time(trials=3, repeats=1, n_steps_0=1005):
 
 def plotTimes(filename):
     bigO_const = 10**-6
-
     n_steps, times = np.loadtxt(filename, dtype = "float", delimiter=",").T
-
     n_sqr_steps = [bigO_const*n**2 for n in n_steps]
     plot_title = "Solve Time vs Matrix Size"
     y_axis = "Time (ms)"
     x_axis = "$N_{steps}$"
     funs = [n_sqr_steps, times]
-    # funs = [Csqr_steps, LU_avg_times]
-    # fun_labels = ["$\mathcal{O}(n^2)$","LU solve time", "numpy solve time"]
     fun_labels = ["$\mathcal{O}(n^2)$","LU solve time"]
     g.plot_log_multi(funs, n_steps, plot_title, fun_labels , [x_axis, y_axis])
 
