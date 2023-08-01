@@ -26,12 +26,12 @@ class Pressure:
         self.time = time
             
     def plot(self, domain):
-        graph.plot_2D(self.ps, domain.xs, "Analytic Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
+        graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
 
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
-        p_str = "Corrugated"
+        p_str = "Exact"
         ps = np.zeros(domain.Nx)
         for i in range(domain.Nx):
             h = height.hs[i]
@@ -42,7 +42,7 @@ class CorrugatedPressure(Pressure): #sinusoidal
         
 class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
-        p_str = "Wedge"
+        p_str = "Exact"
         ps = np.zeros(domain.Nx)
         a = height.h_max/height.h_min
         L = domain.xf - domain.x0
@@ -58,7 +58,7 @@ class WedgePressure(Pressure):
 class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Rayleigh Step"
+        p_str = "Exact"
 
         ps = np.zeros(domain.Nx)
         
@@ -84,7 +84,7 @@ class StepPressure(Pressure):
 class TwoStepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Two Step"
+        p_str = "Exact"
 
         ps = np.zeros(domain.Nx)
         
@@ -129,7 +129,7 @@ class SquareWavePressure_pySolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "%d-Step Square Wave"%n
+        p_str = "numpy solve"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
@@ -156,7 +156,7 @@ class SquareWavePressure_gmresSolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "%d-Step Square Wave"%n
+        p_str = "gmres solve"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
@@ -165,7 +165,9 @@ class SquareWavePressure_gmresSolve(Pressure):
         
         t1 = time.time()
         
-        sol, exit_code = gmres(M_linOp, rhs)
+        tol = 1e-12
+        
+        sol, exit_code = gmres(M_linOp, rhs, tol=tol)
     
         t2 = time.time()
         
@@ -184,7 +186,7 @@ class SquareWavePressure_gmresSolve(Pressure):
 class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "%d-Step Square Wave"%n
+        p_str = "schur inverse solve"
         rhs = sw.make_RHS(domain, height, p0, pN)
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
@@ -218,7 +220,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         L = height.step_width
-        p_str = "%d-Step Square Wave"%n
+        p_str = "LU solve"
         
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
@@ -269,7 +271,7 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         L = height.step_width
-        p_str = "%d-Step Square Wave"%n
+        p_str = "LU flops solve"
         
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)

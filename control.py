@@ -28,15 +28,13 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 101
+n_steps = 70001
 
 #------------------------------------------------------------------------------
 # Height & Pressure
 #------------------------------ ------------------------------------------------
 p0 = 0
 pN = 0
-
-# Overflow when finding (thetas, phis) around 1560 steps
 
 #---------------------------------------------------------------------------
 # Initialize Height and Pressure
@@ -49,18 +47,20 @@ pN = 0
 
 # height, pressure_py = egs.squareWave_pySolve(domain, p0, pN, n_steps)
 # height, pressure_inv = egs.squareWave_schurInvSolve(domain, p0, pN, n_steps)
-# height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
-height, pressure_gmres = egs.squareWave_gmresSolve(domain, p0, pN, n_steps)
+height, pressure_lu = egs.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+# height, pressure_gmres = egs.squareWave_gmresSolve(domain, p0, pN, n_steps)
 
 
 #---------------------------------------------------------------------------
 # Plotting 
 
-p_h_title = "Pressure and Height for %s"%height.h_str
+p_h_title = "Pressure (%s) and Height for %s"%(pressure_gmres.p_str, height.h_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure_gmres.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
+# graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
+# graph.plot_2D_twin(pressure_lu.ps - pressure_gmres.ps, height.hs, domain.xs, "LU - Gmres Pressure", p_h_labels)
 #---------------------------------------------------------------------------
 # Numerical Solution
 
