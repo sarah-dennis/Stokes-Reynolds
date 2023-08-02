@@ -127,10 +127,8 @@ def vary_nSteps_time(trials=5, repeats=2, n_steps_0=101):
             nsqr[k] = bigO_const * n_steps_k**2
             n_steps_k = int(n_steps_k * 2+1)
     
-        file_name = "sw_solveTimes_gmres_%s.csv"%(rep+1)
-        np.savetxt(file_name, np.array([n, times]).T, delimiter =", ", fmt='%.5f')
-        
-        #read text
+        file_name = "solveTimes_%s_%s_%s.csv"%(height_k.h_str, pressure_k.p_str,  rep+1)
+        np.savetxt(file_name, np.array([n, nsqr, times]).T, delimiter =", ", fmt='%.5f')
 
 def plotTimes(filename, plotTitle):
     bigO_const = 10**-6

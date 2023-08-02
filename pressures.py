@@ -129,12 +129,12 @@ class SquareWavePressure_pySolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "numpy solve"
+        p_str = "numpy-linalg"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
         M = sw.make_M(domain, height, p0, pN)  
-        # self.M = M
+
         t1 = time.time()
         
         sol = np.linalg.solve(M, rhs)
@@ -144,6 +144,9 @@ class SquareWavePressure_pySolve(Pressure):
         print("Prep time: %.5f "%(t1-t0))
         print("Solve time: %.5f "%(t2-t1))
         print("Total time: %.5f "%(t2-t0))
+        
+        condNum = np.linalg.cond(M)
+        print("condNum: %.5f"%condNum)
         
         p_slopes = sol[0:n+1]
         p_extrema = sol[n+1:2*n+1]
@@ -156,7 +159,7 @@ class SquareWavePressure_gmresSolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "gmres solve"
+        p_str = "gmres"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
@@ -166,6 +169,7 @@ class SquareWavePressure_gmresSolve(Pressure):
         t1 = time.time()
         
         tol = 1e-12
+        # max_iter = 200
         
         sol, exit_code = gmres(M_linOp, rhs, tol=tol)
     
@@ -186,7 +190,7 @@ class SquareWavePressure_gmresSolve(Pressure):
 class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "schur inverse solve"
+        p_str = "schur-inv"
         rhs = sw.make_RHS(domain, height, p0, pN)
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
@@ -220,7 +224,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         L = height.step_width
-        p_str = "LU solve"
+        p_str = "LU"
         
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
@@ -271,7 +275,7 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         L = height.step_width
-        p_str = "LU flops solve"
+        p_str = "LU-flops"
         
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
@@ -306,7 +310,7 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
         
         t2 = time.time()
 
-        print("\n Schur LU Solve")
+        print("\n Schur LU-flops Solve")
         print("Prep time: %.5f"%(t1 - t0))
         print("Solve time: %.5f"%(t2-t1))
         print("Total time: %.5f"%(t2-t0))
