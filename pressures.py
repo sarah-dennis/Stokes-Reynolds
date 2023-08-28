@@ -11,6 +11,7 @@ import numpy as np
 import schur
 import time
 import squareWave as sw
+import domain as dfd
 
 from scipy.sparse.linalg import gmres
 
@@ -18,8 +19,7 @@ class Pressure:
     
     def __init__(self, domain, ps, p0, pN, p_str, time=0):
         self.ps = ps
-        #self.pxs = dfd.center_diff(ps, domain)
-        #self.pxxs = dfd.center_second_diff(ps, domain)
+
         self.p_str = p_str
         self.p0 = p0
         self.pf = pN
@@ -27,6 +27,18 @@ class Pressure:
             
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
+        
+    def getFluidVelocity(self, domain, height, y):
+
+        pxs = dfd.center_diff(self.ps, domain)
+        
+        vel = np.zeros(domain.Nx)
+        
+        for i in range(domain.Nx):
+            vel[i] = 1/(2*domain.eta) * pxs[i] * (y**2 - y*height.h_max) + y*domain.U/height.h_max
+        
+        return vel
+        
 
 
 class CorrugatedPressure(Pressure): #sinusoidal

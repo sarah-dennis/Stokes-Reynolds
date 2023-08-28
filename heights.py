@@ -23,6 +23,7 @@ class Height:
         self.h_eq = h_eq
         
         self.hs = [h(x) for x in domain.xs]
+        self.h_max = np.max(self.hs)
         
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)

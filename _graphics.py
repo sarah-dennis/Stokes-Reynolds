@@ -29,7 +29,7 @@ def plot_3D(f_2D, xs, zs, title):
 def plot_2D_multi(fs, xs, title, labels, axis):
     fig = pp.figure()
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'o', 'p']
+    colors = ['r', 'b', 'g', 'orange', 'purple']
 
     for i in range(len(fs)):
         
