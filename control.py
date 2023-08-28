@@ -30,7 +30,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 1001
+n_steps = 201
 
 #------------------------------------------------------------------------------
 # Height & Pressure
