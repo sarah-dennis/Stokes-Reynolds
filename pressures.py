@@ -19,7 +19,7 @@ class Pressure:
     
     def __init__(self, domain, ps, p0, pN, p_str, time=0):
         self.ps = ps
-
+        self.pxs = dfd.center_diff(self.ps, domain)
         self.p_str = p_str
         self.p0 = p0
         self.pf = pN
@@ -28,16 +28,18 @@ class Pressure:
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
         
-    def getFluidVelocity(self, domain, height, y):
+    def getFluidVelocity(self, domain, height, ys):
 
-        pxs = dfd.center_diff(self.ps, domain)
-        
-        vel = np.zeros(domain.Nx)
+        v_x = np.zeros(domain.Nx)
+        v_y = np.zeros(domain.Nx) 
+    
         
         for i in range(domain.Nx):
-            vel[i] = 1/(2*domain.eta) * pxs[i] * (y**2 - y*height.h_max) + y*domain.U/height.h_max
-        
-        return vel
+            y = ys[i]
+            v_x[i] = 1/(2*domain.eta) * self.pxs[i] * (y**2 - y*height.h_max) + y*domain.U/height.h_max
+            v_y[i] = domain.U * height.hxs[i]
+
+        return v_x, v_y
         
 
 
@@ -48,7 +50,6 @@ class CorrugatedPressure(Pressure): #sinusoidal
         for i in range(domain.Nx):
             h = height.hs[i]
             hx = height.hxs[i]
-            #TODO how is this derived?
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
         super().__init__(domain, ps, p0, pN,  p_str)
         

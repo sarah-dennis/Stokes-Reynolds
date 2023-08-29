@@ -7,6 +7,7 @@ Created on Mon May 22 15:05:40 2023
 """
 
 from numpy import linalg as la
+import numpy as np
 
 import domain as dm
 import Reynolds_1D as ry
@@ -20,7 +21,7 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 x0 = 0      # left boundary 
 xf = 1      # right boundary
-U = 2     # surface velocity
+U = 10     # surface velocity
 eta = 1     # viscosity
 
 
@@ -30,7 +31,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 11
+n_steps = 105
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -44,28 +45,25 @@ pN = 0
 # Analytic Solution
 
 #height, pressure = ex.flat(domain, p0, pN)
-#height, pressure = ex.wedge(domain, p0, pN)
-#height, pressure = ex.corrugated(domain, p0, pN)
+# height, pressure = ex.wedge(domain, p0, pN)
+# height, pressure = ex.corrugated(domain, p0, pN)
 #height, pressure = ex.step(domain, p0, pN)
-#height, pressure = ex.twoStep(domain, p0, pN)
+# height, pressure = ex.twoStep(domain, p0, pN)
 
 
-# height, pressure_schurinv = e.squareWave_schurInvSolve(domain, p0, pN, n_steps)
-height, pressure_lu = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+# height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps)
+height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 #-------------------------
 # fluid velocity
 
-v_upper = pressure_lu.getFluidVelocity(domain, height, height.h_max)
-v_a = pressure_lu.getFluidVelocity(domain, height, 3*height.h_max/4)
-v_b = pressure_lu.getFluidVelocity(domain, height, height.h_max/2)
-v_c = pressure_lu.getFluidVelocity(domain, height, height.h_max/4)
-v_lower = pressure_lu.getFluidVelocity(domain, height, 0)
-
+ys = np.linspace(0, height.h_max, domain.Nx)
+v_x, v_y = pressure.getFluidVelocity(domain, height, ys)
 vel_title = "fluid velocities"
-vel_labels = ['$y=h$', '$y= 0.75 h$', '$y=0.5h$', '$y=0.25h$', '$y=0$']
+vel_labels = ['$y=0.25h$', '$y=0$']
 ax_labels =  ['x', 'V(x)']
-graph.plot_2D_multi([v_upper, v_a, v_b, v_c, v_lower], domain.xs, vel_title, vel_labels, ax_labels)
+
+graph.plot_stream(v_x, v_y, domain.xs, ys)
     
     
 #---------------------------------------------------------------------------
@@ -93,9 +91,9 @@ graph.plot_2D_multi([v_upper, v_a, v_b, v_c, v_lower], domain.xs, vel_title, vel
 #---------------------------------------------------------------------------
 # Plotting 
 
-p_h_title = "Pressure (%s) and Height for %s"%(pressure_lu.p_str, height.h_str)
+p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 # graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 

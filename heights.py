@@ -23,8 +23,7 @@ class Height:
         self.h_eq = h_eq
         
         self.hs = [h(x) for x in domain.xs]
-        self.h_max = np.max(self.hs)
-        
+        self.h_max = max(self.hs)
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
         else:
@@ -99,7 +98,6 @@ class WedgeHeight(Height):
         self.h_min = h_min
         self.m = m
         self.xf = domain.xf
-        self.h_max = m * (domain.x0 - domain.xf) + h_min
         
         self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
         self.h_str = "Slider Bearing"

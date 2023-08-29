@@ -8,6 +8,7 @@ Graphics helpers
 """
 import numpy as np
 from matplotlib import pyplot as pp
+import matplotlib.gridspec as gridspec
 import csv
     
 theta = 30
@@ -83,6 +84,17 @@ def plot_2D_twin(fs, gs, xs, title, labels):
     pp.title(title, fontweight ="bold")
      
     # Show plot
+    pp.show()
+    
+    
+def plot_stream(v_x, v_y, xs, ys):   
+    X, Y = np.meshgrid(xs, ys)
+    fig = pp.figure()
+    
+    Vx, Vy = np.meshgrid(v_x, v_y)
+
+    
+    pp.streamplot(X, Y, Vx, Vy, density=1)
     pp.show()
     
 
