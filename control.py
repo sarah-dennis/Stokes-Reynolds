@@ -25,13 +25,13 @@ U = 10     # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 1000   # Number of Grid points
+Nx = 100   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 105
+n_steps = 3
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -63,7 +63,7 @@ vel_title = "fluid velocities"
 vel_labels = ['$y=0.25h$', '$y=0$']
 ax_labels =  ['x', 'V(x)']
 
-graph.plot_stream(v_x, v_y, domain.xs, ys)
+graph.plot_stream(v_x, v_y, pressure.ps, domain.xs, ys)
     
     
 #---------------------------------------------------------------------------

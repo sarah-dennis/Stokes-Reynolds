@@ -87,14 +87,21 @@ def plot_2D_twin(fs, gs, xs, title, labels):
     pp.show()
     
     
-def plot_stream(v_x, v_y, xs, ys):   
-    X, Y = np.meshgrid(xs, ys)
+def plot_stream(v_x, v_y, ps, xs, ys):   
+    
     fig = pp.figure()
     
-    Vx, Vy = np.meshgrid(v_x, v_y)
-
+    X, Y = np.meshgrid(xs, ys)
+    P = [ps for y in ys]
     
-    pp.streamplot(X, Y, Vx, Vy, density=1)
+    Vx, Vy = np.meshgrid(v_x, v_y)
+    
+    pp.streamplot(X, Y, Vx, Vy, density=1, color='black')
+    L = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
+    
+    pp.ylim(0, max(ys))
+    
+    fig.colorbar(L, label="pressure")
     pp.show()
     
 
