@@ -28,18 +28,7 @@ class Pressure:
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
         
-    def getFluidVelocity(self, domain, height, ys):
 
-        v_x = np.zeros(domain.Nx)
-        v_y = np.zeros(domain.Nx) 
-    
-        
-        for i in range(domain.Nx):
-            y = ys[i]
-            v_x[i] = 1/(2*domain.eta) * self.pxs[i] * (y**2 - y*height.h_max) + y*domain.U/height.h_max
-            v_y[i] = domain.U * height.hxs[i]
-
-        return v_x, v_y
         
 
 

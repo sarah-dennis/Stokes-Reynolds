@@ -21,11 +21,11 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 x0 = 0      # left boundary 
 xf = 1      # right boundary
-U = 10     # surface velocity
+U = 2     # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 100   # Number of Grid points
+Nx = 1000   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
@@ -44,10 +44,10 @@ pN = 0
 #---------------------------------------------------------------------------
 # Analytic Solution
 
-#height, pressure = ex.flat(domain, p0, pN)
+# height, pressure = ex.flat(domain, p0, pN)
 # height, pressure = ex.wedge(domain, p0, pN)
 # height, pressure = ex.corrugated(domain, p0, pN)
-#height, pressure = ex.step(domain, p0, pN)
+# height, pressure = ex.step(domain, p0, pN)
 # height, pressure = ex.twoStep(domain, p0, pN)
 
 
@@ -58,10 +58,12 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 # fluid velocity
 
 ys = np.linspace(0, height.h_max, domain.Nx)
-v_x, v_y = pressure.getFluidVelocity(domain, height, ys)
+
+v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + ys*domain.U/height.h_max
+v_y = domain.U * height.hxs
+
 vel_title = "fluid velocities"
-vel_labels = ['$y=0.25h$', '$y=0$']
-ax_labels =  ['x', 'V(x)']
+ax_labels =  ['x', 'y']
 
 graph.plot_stream(v_x, v_y, pressure.ps, domain.xs, ys)
     

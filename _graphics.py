@@ -100,8 +100,8 @@ def plot_stream(v_x, v_y, ps, xs, ys):
     L = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
     
     pp.ylim(0, max(ys))
-    
     fig.colorbar(L, label="pressure")
+    
     pp.show()
     
 
