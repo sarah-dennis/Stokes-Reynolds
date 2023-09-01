@@ -8,6 +8,8 @@ Created on Mon May 22 15:05:40 2023
 
 import numpy as np
 
+import cProfile as cpr
+
 import domain as dm
 import Reynolds_1D as ry
 import examples_1D as ex
@@ -29,7 +31,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 3
+n_steps = 1011
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -42,7 +44,7 @@ pN = 0
 
 # height, pressure = ex.flat(domain, p0, pN)
 # height, pressure = ex.wedge(domain, p0, pN)
-height, pressure = ex.corrugated(domain, p0, pN)
+# height, pressure = ex.corrugated(domain, p0, pN)
 # height, pressure = ex.step(domain, p0, pN)
 # height, pressure = ex.twoStep(domain, p0, pN)
 
@@ -50,22 +52,14 @@ height, pressure = ex.corrugated(domain, p0, pN)
 # height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 
-ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
-
-v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + ys*domain.U/height.h_max
-v_y = domain.U * height.hxs
-
-phv_title = "Pressure and Velocity for %s"%height.h_str
-phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-phv_ax_labels =  ['x', 'y']
-
-graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
-    
 #---------------------------------------------------------------------------
 # Numerical Solution
+cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
-# height, pressure_gmres = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
+# height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
+
+
+
 # height, pressure_py = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # pressure_ry = ry.solve(domain, height, p0, pN)
@@ -87,6 +81,18 @@ graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_f
 # fluid velocity
 
 
+# ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
+
+# v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + ys*domain.U/height.h_max
+# v_y = domain.U * height.hxs
+
+# phv_title = "Pressure and Velocity for %s"%height.h_str
+# phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+# phv_ax_labels =  ['x', 'y']
+
+# graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
+
+    
 
 #---------------------------------------------------------------------------
 # Plotting 
