@@ -14,10 +14,8 @@ import numpy as np
 #------------------------------------------------------------------------------
 def flat(domain, p0, pN):
     h0 = 0.5
-    #height = hgt.constHeight(domain, h0)
-    height = hgt.SquareWaveHeight(domain, h0, r=0, n_steps=1)
-    #pressure = exp.UnknownPressure(domain, height, p0, pN)
-    pressure = prs.SquareWavePressure(domain, height, p0, pN)
+    height = hgt.ConstantHeight(domain, h0)
+    pressure = prs.ConstantPressure(domain, height, p0, pN)
     return height, pressure
 
 #------------------------------------------------------------------------------
@@ -36,7 +34,7 @@ def corrugated(domain, p0, pN):
 #------------------------------------------------------------------------------
 def wedge(domain, p0, pN):
     h_min = 0.1
-    m = -2
+    m = -5
     height = hgt.WedgeHeight(domain, h_min, m)
     pressure = prs.WedgePressure(domain, height, p0, pN)
 
@@ -66,7 +64,8 @@ def twoStep(domain, p0, pN):
 #------------------------------------------------------------------------------
 # III c. N-Step Height Example
 #------------------------------------------------------------------------------
-def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
+
+def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.05, h_avg=0.1):
 
     print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)

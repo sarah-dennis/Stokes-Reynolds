@@ -6,12 +6,11 @@ Created on Mon May 22 15:05:40 2023
 @author: sarahdennis
 """
 
-from numpy import linalg as la
 import numpy as np
 
 import domain as dm
 import Reynolds_1D as ry
-
+import velocity as vel
 import examples_1D as ex
 import _graphics as graph
 
@@ -25,7 +24,7 @@ U = 2     # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 1000   # Number of Grid points
+Nx = 5000   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
@@ -39,8 +38,6 @@ n_steps = 3
 p0 = 0
 pN = 0
 
-
-
 #---------------------------------------------------------------------------
 # Analytic Solution
 
@@ -50,23 +47,21 @@ pN = 0
 # height, pressure = ex.step(domain, p0, pN)
 # height, pressure = ex.twoStep(domain, p0, pN)
 
-
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps)
 height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
-#-------------------------
-# fluid velocity
 
 ys = np.linspace(0, height.h_max, domain.Nx)
 
 v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + ys*domain.U/height.h_max
 v_y = domain.U * height.hxs
 
-vel_title = "fluid velocities"
-ax_labels =  ['x', 'y']
+phv_title = "Pressure, Velocity and Height for %s"%height.h_str
+phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+phv_ax_labels =  ['x', 'y']
 
-graph.plot_stream(v_x, v_y, pressure.ps, domain.xs, ys)
-    
+graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
+
     
 #---------------------------------------------------------------------------
 # Numerical Solution
@@ -89,9 +84,14 @@ graph.plot_stream(v_x, v_y, pressure.ps, domain.xs, ys)
 # err = la.norm(pressure_lu.ps - pressure_gmres.ps)
 # print("analytic to numerical error %.5f"%(err))
 
+#-------------------------
+# fluid velocity
+
+
 
 #---------------------------------------------------------------------------
 # Plotting 
+
 
 p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]

@@ -61,31 +61,6 @@ def vary_Nx_numErr(trials=6, N0 = 50):
 # Parameter variation for square wave
 #------------------------------------------------------------------------------
 
-def vary_nSteps_pMax(trials=7, n_steps_0=5):
-    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
-    n_steps_k = n_steps_0
-    r = 0.1
-    h_avg = 0.2
-
-    v = np.zeros(trials)
-    x = np.zeros(trials)
-    
-    for k in range(trials):
-        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
-        
-        #err_k, pressure_num_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
-        
-        v[k] = np.max(pressure_k.ps)-gc.p0
-
-        x[k] = n_steps_k
-                
-        n_steps_k = n_steps_k * 2 + 1
-    title = "Max Pressure as step width decreases"
-    y_axis = "$p_{max}$"
-    x_axis = "$dx$"  
-    g.plot_log(v, x, title,  x_axis, y_axis)
-    
-    
 
 def vary_nSteps_time(trials=5, repeats=2, n_steps_0=101):
     bigO_const = 10**-6
@@ -140,6 +115,10 @@ def plotTimes(filename, plotTitle):
     funs = [n_sqr_steps, times]
     fun_labels = ["$\mathcal{O}(n^2)$",plotTitle]
     g.plot_log_multi(funs, n_steps, plot_title, fun_labels , [x_axis, y_axis])
+    
+    
+    
+    
 
 def vary_r_pMax(trials=10, r_0=0.05):
     # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
@@ -165,6 +144,31 @@ def vary_r_pMax(trials=10, r_0=0.05):
     g.plot_2D(v, x, title, y_axis, "height radius")
 
 
+def vary_nSteps_pMax(trials=7, n_steps_0=5):
+    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
+    n_steps_k = n_steps_0
+    r = 0.1
+    h_avg = 0.2
+
+    v = np.zeros(trials)
+    x = np.zeros(trials)
+    
+    for k in range(trials):
+        height_k, pressure_k = eg.squareWave(gc.domain, gc.p0, gc.pN, n_steps_k, r, h_avg)
+        
+        #err_k, pressure_num_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
+        
+        v[k] = np.max(pressure_k.ps)-gc.p0
+
+        x[k] = n_steps_k
+                
+        n_steps_k = n_steps_k * 2 + 1
+    title = "Max Pressure as step width decreases"
+    y_axis = "$p_{max}$"
+    x_axis = "$dx$"  
+    g.plot_log(v, x, title,  [x_axis, y_axis])
+    
+    
 
 
 

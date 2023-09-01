@@ -23,6 +23,10 @@ class Domain:
             self.dx = (xf - x0)/(Nx-1)
         
         self.xs = [x0 + i*self.dx for i in range(Nx)]
+    
+    def set_ys(h_max, Ny):
+        self.Ny = Ny
+        self.ys = np.linspace(0, height.h_max, Ny)
   
     
 def center_diff(fs, domain):

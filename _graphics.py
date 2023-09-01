@@ -83,57 +83,73 @@ def plot_2D_twin(fs, gs, xs, title, labels):
      
     # Show plot
     pp.show()
-    
-    
-def plot_stream(v_x, v_y, ps, xs, ys):   
-    
+
+
+def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):   
+   
     fig = pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    P = [ps for y in ys]
-    
     Vx, Vy = np.meshgrid(v_x, v_y)
+    P = [ps for y in ys]
+
+    # mask y > h(x)
+    mask = np.zeros((len(xs), len(ys)), dtype=bool)
+    for i in range(len(ys)):
+        for j in range(len(xs)):
+            mask[i,j] = ys[i] > hs[j]
     
-    pp.streamplot(X, Y, Vx, Vy, density=1, color='black')
-    L = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
+    Vx = np.ma.array(Vx, mask=mask)
+    P = np.ma.array(P, mask=mask)
     
-    pp.ylim(0, max(ys))
-    fig.colorbar(L, label="pressure")
     
-    pp.show()
+    pres_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
+    fig.colorbar(pres_plot, label="pressure")
+    
+    
+    pp.streamplot(X, Y, Vx, Vy, density=1, broken_streamlines=False, color='black')
+    
+    pp.plot(xs, hs, label='height')
+    
+    pp.legend()
+    pp.title(title)
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
     
 
-def plot_log(fs, xs, title, y_label, x_label):
+    pp.show()
+    
+    
+    
+
+def plot_log(fs, xs, title, ax_labels):
     fig = pp.figure()
     pp.loglog(xs, fs, color='b')   
 
     pp.title(title)
     
-    pp.xlabel(x_label)
-    
-    pp.ylabel(y_label)
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
     
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, axis):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     pp.rcParams['figure.dpi'] = 300
-    # pp.rcParams["legend.loc"] = 'center right'
     fig = pp.figure()
     
     
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'purple']
-    for i in range(len(fs)):
-        
-        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
+    colors = ['r', 'b', 'g', 'orange', 'purple']
     
-    #ax.set_xlim([0, 1])
-    #ax.set_ylim([0, 1])
-
-    ax.set_xlabel(axis[0])
-    ax.set_ylabel(axis[1])
+    for i in range(len(fs)):
+        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
+        
+    ax.set_xlabel(ax_labels[0])
+    ax.set_ylabel(ax_labels[1])
+    
     pp.title(title,  fontweight ="bold")
-    fig.legend( bbox_to_anchor=(1.22, 0.5))
+    fig.legend(bbox_to_anchor=(1.22, 0.5))
+    
     return fig
 

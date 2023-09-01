@@ -28,13 +28,16 @@ class Pressure:
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
         
-
+class ConstantPressure(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Analytic"
+        ps = [p0 for i in range(domain.Nx)]
+        super().__init__(domain, ps, p0, pN,  p_str)
         
-
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
-        p_str = "Exact"
+        p_str = "Analytic"
         ps = np.zeros(domain.Nx)
         for i in range(domain.Nx):
             h = height.hs[i]
@@ -44,7 +47,7 @@ class CorrugatedPressure(Pressure): #sinusoidal
         
 class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
-        p_str = "Exact"
+        p_str = "Analytic"
         ps = np.zeros(domain.Nx)
         a = height.h_max/height.h_min
         L = domain.xf - domain.x0
@@ -60,7 +63,7 @@ class WedgePressure(Pressure):
 class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Exact"
+        p_str = "Analytic"
 
         ps = np.zeros(domain.Nx)
         
@@ -86,7 +89,7 @@ class StepPressure(Pressure):
 class TwoStepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Exact"
+        p_str = "Analytic"
 
         ps = np.zeros(domain.Nx)
         

@@ -23,7 +23,10 @@ class Height:
         self.h_eq = h_eq
         
         self.hs = [h(x) for x in domain.xs]
+        
         self.h_max = max(self.hs)
+        self.ys = np.linspace(0, 1.1* self.h_max, domain.Nx)
+        
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
             
@@ -62,7 +65,7 @@ class Height:
 #------------------------------------------------------------------------------
 # All example heights must have a height function h(self, x) 
 # First and second derivative height functions hx(self, x) and hxx(self, x) can be specified
-class constHeight(Height):
+class ConstantHeight(Height):
     def __init__(self, domain, h0):
         self.h0 = h0
         self.h_str = "Constant Height"
@@ -102,7 +105,7 @@ class WedgeHeight(Height):
         self.xf = domain.xf
         
         self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
-        self.h_str = "Slider Bearing"
+        self.h_str = "Wedge Slider"
         
         super().__init__(domain, self.h, self.h_str,self.h_eq, self.hx)
 
