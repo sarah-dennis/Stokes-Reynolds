@@ -83,7 +83,7 @@ class CorrugatedHeight(Height):
         self.k = k
         
         self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) 
-        self.h_str = "Sinuosoidal Height"
+        self.h_str = "Sinusoidal Height"
 
         super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx)
 

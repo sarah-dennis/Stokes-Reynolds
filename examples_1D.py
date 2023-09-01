@@ -24,7 +24,7 @@ def flat(domain, p0, pN):
 def corrugated(domain, p0, pN):
     h_mid = 1 
     r = 0.5
-    k = 2*np.pi
+    k = 5*2*np.pi
     height = hgt.CorrugatedHeight(domain, h_mid, r, k)
     pressure = prs.CorrugatedPressure(domain, height, p0, pN)
     return height, pressure
@@ -65,7 +65,7 @@ def twoStep(domain, p0, pN):
 # III c. N-Step Height Example
 #------------------------------------------------------------------------------
 
-def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.05, h_avg=0.1):
+def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.03, h_avg=0.1):
 
     print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)

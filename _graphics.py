@@ -88,7 +88,7 @@ def plot_2D_twin(fs, gs, xs, title, labels):
 def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):   
    
     fig = pp.figure()
-    
+
     X, Y = np.meshgrid(xs, ys)
     Vx, Vy = np.meshgrid(v_x, v_y)
     P = [ps for y in ys]
@@ -105,13 +105,13 @@ def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):
     
     pres_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
     fig.colorbar(pres_plot, label="pressure")
+    # broken_streamlines=False,
     
+    pp.streamplot(X, Y, Vx, Vy, density=1,  color='black')
     
-    pp.streamplot(X, Y, Vx, Vy, density=1, broken_streamlines=False, color='black')
+    # pp.plot(xs, hs, label='height', color='white')
     
-    pp.plot(xs, hs, label='height')
-    
-    pp.legend()
+    # pp.legend()
     pp.title(title)
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
