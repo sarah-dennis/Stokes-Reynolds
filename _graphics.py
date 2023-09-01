@@ -8,8 +8,6 @@ Graphics helpers
 """
 import numpy as np
 from matplotlib import pyplot as pp
-import matplotlib.gridspec as gridspec
-import csv
     
 theta = 30
 phi = 30
