@@ -31,7 +31,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 1011
+n_steps = 3
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -49,12 +49,12 @@ pN = 0
 # height, pressure = ex.twoStep(domain, p0, pN)
 
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps)
-# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
+height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 
 #---------------------------------------------------------------------------
 # Numerical Solution
-cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
+# cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
 # height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 
@@ -81,16 +81,19 @@ cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 # fluid velocity
 
 
-# ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
+ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
 
-# v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + ys*domain.U/height.h_max
+v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + domain.U * (1- ys/height.h_max)
+
 # v_y = domain.U * height.hxs
 
-# phv_title = "Pressure and Velocity for %s"%height.h_str
-# phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-# phv_ax_labels =  ['x', 'y']
+v_y = -1/(2*domain.eta) * pressure.pxxs * (1/3 * ys**3 - 1/2 * height.h_max* ys**2)
 
-# graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
+phv_title = "Pressure and Velocity for %s"%height.h_str
+phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+phv_ax_labels =  ['x', 'y']
+
+graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
     
 

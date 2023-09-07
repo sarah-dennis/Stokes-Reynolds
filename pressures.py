@@ -20,6 +20,7 @@ class Pressure:
     def __init__(self, domain, ps, p0, pN, p_str, time=0):
         self.ps = ps
         self.pxs = dfd.center_diff(self.ps, domain)
+        self.pxxs = dfd.center_second_diff(self.ps, domain)
         self.p_str = p_str
         self.p0 = p0
         self.pf = pN
