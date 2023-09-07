@@ -31,7 +31,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 3
+n_steps = 101
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -54,21 +54,31 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 #---------------------------------------------------------------------------
 # Numerical Solution
+
+
 # cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
+# ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+# ---------- N = 101 ----------------
+# 8441    0.716    0.000    0.721    0.000 squareWave.py:236(_matvec) <--  class-scope
+# 8441    0.644    0.000    0.648    0.000 squareWave.py:280(_matvec) <--  fun-scope 
+# ---------- N = 501 ----------------
+# 177542   77.865    0.000   77.945    0.000 squareWave.py:236(_matvec) <--  class-scope
+# 177542   69.212    0.000   69.293    0.000 squareWave.py:280(_matvec) <--  fun-scope
+
+
+
+
 # height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
-
-
-
-# height, pressure_py = ex.squareWave_pySolve(domain, p0, pN, n_steps)
-
-# pressure_ry = ry.solve(domain, height, p0, pN)
+# height, pressure = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+# TODO: make a wrapper for fd solve
+# pressure_fd = ry.solve(domain, height, p0, pN)
 
 # num_err = np.max(np.abs(num_pressure - pressure.ps))
 # print("Analytic to Numerical Error: %.3f"%num_err)
 
 # nump_h_title = "Reynolds Numerical Pressure for %s"%height.h_str
-# graph.plot_2D_twin(num_pressure.ps, height.hs, domain.xs, nump_h_title)
+# graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, nump_h_title)
 
 
 #------------------------------------------------------------------------------
@@ -77,8 +87,10 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 # err = la.norm(pressure_lu.ps - pressure_gmres.ps)
 # print("analytic to numerical error %.5f"%(err))
 
+
+
 #-------------------------
-# fluid velocity
+# Velocity
 
 
 ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
@@ -87,7 +99,7 @@ v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + domain.U * (
 
 # v_y = domain.U * height.hxs
 
-v_y = -1/(2*domain.eta) * pressure.pxxs * (1/3 * ys**3 - 1/2 * height.h_max* ys**2)
+v_y = -1/(2*domain.eta) * pressure.pxxs * (1/3 * ys**3 - 1/2 * height.h_max * ys**2)
 
 phv_title = "Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
@@ -105,9 +117,9 @@ p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
 graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
-# graph.plot_2D_twin(pressure_lu.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+# graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
-# graph.plot_2D_twin(pressure_lu.ps - pressure_gmres.ps, height.hs, domain.xs, "LU - Gmres Pressure", p_h_labels)
+# graph.plot_2D_twin(pressure.ps - pressure_gmres.ps, height.hs, domain.xs, "LU - Gmres Pressure", p_h_labels)
 
 
 

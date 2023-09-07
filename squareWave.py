@@ -257,3 +257,51 @@ class swLinOp(LinearOperator):
             mv[i] = -(self.hs[i - self.n-1]**3)*v[i - self.n-1] + (self.hs[i-self.n]**3)*v[i-self.n]
 
         return mv
+
+class swLinOp_deClass(LinearOperator):
+    #n:= number of steps 
+    #L:= length of each step
+    #hs:= height of each step (length n+1)
+    def __init__(self, n, L, hs):
+        
+        self.shape = (2*n + 1, 2*n+1)
+        self.L = L
+        self.n = n
+        self.hs = hs
+        self.dtype = np.dtype('f8')
+
+        
+    #M = [[I, B],[C, 0]]
+    
+    #[I, B][v1]
+    #[C, 0][v2]
+    #Mv = rhs
+
+    def _matvec(self, v):
+        n = self.n
+        L = self.L
+        hs = self.hs
+        
+        mv = np.zeros(2*n+1)
+        
+        #----------------------
+        # Upper blocks: I v1 + B v2
+        
+        #i = 0
+        mv[0] = v[0] + (-1/L) * v[n+1]
+        
+        # 0 < i < n
+        for i in range(1, n):
+            mv[i] =  v[i] + (1/L)*v[i+n] + (-1/L)*v[i+n+1]
+        
+        #i = n
+        mv[n] = v[n] + (1/L)*v[2*n]
+        
+        #---------------------- 
+        #Lower blocks: C v1 + 0 v2
+        # n < i < 2*n+1 
+        for i in range(n+1, 2*n+1):
+            
+            mv[i] = -(hs[i - n-1]**3)*v[i-n-1] + (hs[i-n]**3)*v[i-n]
+
+        return mv

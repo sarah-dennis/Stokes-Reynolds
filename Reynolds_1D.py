@@ -12,7 +12,7 @@ import time
 # Numerical solution
 #------------------------------------------------------------------------------
 # RHS = [0: reynolds, 1: exact]
-# FIG = [0: two plots (Numerical and analytic pressure, and Error), 1: one plot only Reynolds pressure]
+# FIG = [0: two plots (Numerical and analytic pressure, and Error), 1: one plot only finDiff pressure]
 
 def solve(domain, height, p0, pN):
     t0 = time.time()

@@ -163,6 +163,7 @@ class SquareWavePressure_pySolve(Pressure):
         
 class SquareWavePressure_gmresSolve(Pressure):
 
+# TODO: look in to preconditioners
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "gmres"
@@ -170,7 +171,9 @@ class SquareWavePressure_gmresSolve(Pressure):
         
         t0 = time.time()
         
-        M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
+        # M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
+        
+        M_linOp = sw.swLinOp_deClass(n, height.step_width, height.h_steps)
         
         t1 = time.time()
         
