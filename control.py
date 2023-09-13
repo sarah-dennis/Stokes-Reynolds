@@ -21,17 +21,17 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 x0 = 0      # left boundary 
 xf = 1      # right boundary
-U = 2     # surface velocity
+U = 5     # surface velocity
 eta = 1     # viscosity
 
 
-Nx = 1000   # Number of Grid points
+Nx = 500   # Number of Grid points
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 101
+n_steps = 11
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -54,7 +54,6 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 #---------------------------------------------------------------------------
 # Numerical Solution
-
 
 # cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
@@ -95,11 +94,10 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
 
-v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.h_max) + domain.U * (1- ys/height.h_max)
+v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.hs) + domain.U * (1- ys/height.hs)
 
-# v_y = domain.U * height.hxs
+v_y = -1/(2*domain.eta) * ( pressure.pxxs * (1/3 * ys**3 - 1/2 * height.hs * ys**2) - 1/2 * domain.U * height.hxs * pressure.pxs * ys**2 - domain.U**2 * domain.eta / height.hs**2 * ys**2 * height.hxs)
 
-v_y = -1/(2*domain.eta) * pressure.pxxs * (1/3 * ys**3 - 1/2 * height.h_max * ys**2)
 
 phv_title = "Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']

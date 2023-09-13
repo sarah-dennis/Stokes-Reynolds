@@ -22,7 +22,7 @@ class Height:
         self.h_str = h_str
         self.h_eq = h_eq
         
-        self.hs = [h(x) for x in domain.xs]
+        self.hs = np.asarray([h(x) for x in domain.xs])
         
         self.h_max = max(self.hs)
         self.ys = np.linspace(0, 1.1* self.h_max, domain.Nx)
@@ -36,9 +36,10 @@ class Height:
 
         if hxx == None:
             self.hxxs = dfd.center_second_diff(self.hs, domain)
-    
         else:
             self.hxxs = np.asarray([hxx(x) for x in domain.xs])
+         
+            
          
     def plot(self, domain):
         fig = pp.figure()

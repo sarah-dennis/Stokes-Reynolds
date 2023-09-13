@@ -22,7 +22,7 @@ class Domain:
         elif BC == "fixed": #fixed
             self.dx = (xf - x0)/(Nx-1)
         
-        self.xs = [x0 + i*self.dx for i in range(Nx)]
+        self.xs = np.asarray([x0 + i*self.dx for i in range(Nx)])
 
   
     
@@ -42,7 +42,7 @@ def center_diff(fs, domain):
         
     fs_dx = D@fs 
  
-    return fs_dx
+    return np.asarray(fs_dx)
       
 def center_second_diff(fs, domain):
     D_lower = np.ones(domain.Nx-1)
@@ -50,11 +50,11 @@ def center_second_diff(fs, domain):
     D_center = -2*np.ones(domain.Nx)
     D = np.diagflat(D_lower, -1) +  np.diagflat(D_center, 0)+ np.diagflat(D_upper, 1)
     
-    if domain.BC == 0: #periodic 
+    if domain.BC == "periodic": #periodic 
         D[0][domain.Nx-1] = 1
         D[domain.Nx-1][0] = 1
         
-    elif domain.BC == 1: #prescribed 
+    elif domain.BC == "fixed": #prescribed 
         #None # boundary heights are not used
         D[0][domain.Nx-1] = 0
         D[domain.Nx-1][0] = 0
@@ -63,7 +63,7 @@ def center_second_diff(fs, domain):
         
     fs_dxx = D@fs 
     
-    return fs_dxx
+    return np.asarray(fs_dxx)
    
     
     
