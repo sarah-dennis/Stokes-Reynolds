@@ -29,9 +29,7 @@ class Height:
         
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
-            
         else:
-            
             self.hxs = np.asarray([hx(x) for x in domain.xs])
 
         if hxx == None:
