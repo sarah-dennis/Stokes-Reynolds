@@ -43,17 +43,16 @@ def plot_2D_multi(fs, xs, title, labels, axis):
     fig.legend()
     return fig
     
-def plot_2D(fs, xs, title, y_label, x_label):
+def plot_2D(fs, xs, title, axis):
     fig = pp.figure()
-    pp.plot(xs, fs, label=y_label, color='b')
+    pp.plot(xs, fs, color='b')
 
     pp.title(title)
     
-    pp.xlabel(x_label)
+    pp.xlabel(axis[0])
     
-    pp.ylabel(y_label)
+    pp.ylabel(axis[1])
     pp.ylim(0, 1.1*max(fs))
-    #fig.legend()
     
     return fig
 
@@ -85,12 +84,12 @@ def plot_2D_twin(fs, gs, xs, title, labels):
     pp.show()
 
 
-def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):   
+def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):   
    
     fig = pp.figure()
 
     X, Y = np.meshgrid(xs, ys)
-    Vx, Vy = np.meshgrid(v_x, v_y)
+    # Vx, Vy = np.meshgrid(v_x, v_y)
     P = [ps for y in ys]
 
     # mask y > h(x)
@@ -99,7 +98,7 @@ def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):
         for j in range(len(xs)):
             mask[i,j] = ys[i] > hs[j]
     
-    Vx = np.ma.array(Vx, mask=mask)
+    vx = np.ma.array(vx, mask=mask)
     P = np.ma.array(P, mask=mask)
     
     
@@ -107,7 +106,7 @@ def plot_phv(ps, hs, v_x, v_y, xs, ys, title, fun_labels, ax_labels):
     fig.colorbar(pres_plot, label="pressure")
     # broken_streamlines=False,
     
-    pp.streamplot(X, Y, Vx, Vy, density=1,  color='black')
+    pp.streamplot(X, Y, vx, vy, density=1,  color='black')
     
     # pp.plot(xs, hs, label='height', color='white')
     

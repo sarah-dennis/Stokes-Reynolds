@@ -25,7 +25,7 @@ class Height:
         self.hs = np.asarray([h(x) for x in domain.xs])
         
         self.h_max = max(self.hs)
-        self.ys = np.linspace(0, 1.1* self.h_max, domain.Nx)
+        # self.ys = np.linspace(0, 1.1* self.h_max, domain.Nx)
         
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
@@ -138,31 +138,6 @@ class StepHeight(Height):
             return self.h_left
         else:
             return self.h_right
-
-class TwoStepHeight(Height):
-    
-    def __init__(self, domain, h_left, h_center, h_right):
-        self.h1 = h_left
-        self.h2 = h_center
-        self.h3 = h_right
-        self.x1 = (domain.xf - domain.x0)/3
-        self.x2 = 2*(domain.xf - domain.x0)/3
-        self.l1 = self.x1 - domain.x0
-        self.l2 = self.x2 - self.x1
-        self.l3 = domain.xf - self.x2
-        self.h_str = "Rayleigh Two Step"
-        self.h_eq = "h(x) = {%0.1f, %0.1f, %0.1f}"%(h_left, h_center, h_right) 
-        
-        super().__init__(domain, self.h, self.h_str, self.h_eq)
-
-    def h(self, x):
-        if x <= self.x1:
-            return self.h1
-        elif x <= self.x2:
-            return self.h2
-        else:
-            return self.h3
-
 
 class SquareWaveHeight(Height):
     

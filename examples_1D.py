@@ -9,6 +9,7 @@ import pressures as prs
 import numpy as np
 
 # Analytic pressure solutions to given height functions
+
 #------------------------------------------------------------------------------
 # 0. Constant Height 
 #------------------------------------------------------------------------------
@@ -51,18 +52,7 @@ def step(domain, p0, pN):
     return height, pressure
 
 #------------------------------------------------------------------------------
-# III b. Two Step Height Example
-#------------------------------------------------------------------------------
-def twoStep(domain, p0, pN):
-    h_left = 2
-    h_center = 1
-    h_right = 2
-    height = hgt.TwoStepHeight(domain, h_left, h_center, h_right)
-    pressure = prs.TwoStepPressure(domain, height, p0, pN)
-    return height, pressure
-
-#------------------------------------------------------------------------------
-# III c. N-Step Height Example
+# III b. N-Step Height Example
 #------------------------------------------------------------------------------
 
 def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):

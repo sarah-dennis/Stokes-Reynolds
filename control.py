@@ -21,7 +21,7 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 x0 = 0      # left boundary 
 xf = 1      # right boundary
-U = 5     # surface velocity
+U = 1     # surface velocity
 eta = 1     # viscosity
 
 
@@ -31,7 +31,7 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 
-n_steps = 11
+n_steps = 101
 
 #------------------------------------------------------------------------------
 # Height & Pressure
@@ -46,7 +46,6 @@ pN = 0
 # height, pressure = ex.wedge(domain, p0, pN)
 # height, pressure = ex.corrugated(domain, p0, pN)
 # height, pressure = ex.step(domain, p0, pN)
-# height, pressure = ex.twoStep(domain, p0, pN)
 
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps)
 height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
@@ -67,45 +66,13 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps)
 
 
 
-
+# Square wave: numerical matrix solves
 # height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 # height, pressure = ex.squareWave_pySolve(domain, p0, pN, n_steps)
-# TODO: make a wrapper for fd solve
-# pressure_fd = ry.solve(domain, height, p0, pN)
 
-# num_err = np.max(np.abs(num_pressure - pressure.ps))
-# print("Analytic to Numerical Error: %.3f"%num_err)
+# Arbitrary height: finite difference sovle
+num_pressure = ry.solve(domain, height, p0, pN)
 
-# nump_h_title = "Reynolds Numerical Pressure for %s"%height.h_str
-# graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, nump_h_title)
-
-
-#------------------------------------------------------------------------------
-# Error
-
-# err = la.norm(pressure_lu.ps - pressure_gmres.ps)
-# print("analytic to numerical error %.5f"%(err))
-
-
-
-#-------------------------
-# Velocity
-
-
-ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
-
-v_x = 1/(2*domain.eta) * pressure.pxs * (ys**2 - ys*height.hs) + domain.U * (1- ys/height.hs)
-
-v_y = -1/(2*domain.eta) * ( pressure.pxxs * (1/3 * ys**3 - 1/2 * height.hs * ys**2) - 1/2 * domain.U * height.hxs * pressure.pxs * ys**2 - domain.U**2 * domain.eta / height.hs**2 * ys**2 * height.hxs)
-
-
-phv_title = "Pressure and Velocity for %s"%height.h_str
-phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-phv_ax_labels =  ['x', 'y']
-
-graph.plot_phv(pressure.ps, height.hs, v_x, v_y, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
-    
 
 #---------------------------------------------------------------------------
 # Plotting 
@@ -118,6 +85,43 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 # graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 # graph.plot_2D_twin(pressure.ps - pressure_gmres.ps, height.hs, domain.xs, "LU - Gmres Pressure", p_h_labels)
+
+
+#------------------------------------------------------------------------------
+# Error
+num_anl_title = "Numerical and Analytic Pressure for %s"%height.h_str
+num_anl_labels = [pressure.p_str, "finDiff"]
+num_anl_axis = ["$x$", "Error"]
+graph.plot_2D_multi([pressure.ps, num_pressure], domain.xs, num_anl_title, num_anl_labels, num_anl_axis)
+
+
+num_err = np.max(np.abs(num_pressure - pressure.ps))
+print("Analytic to Numerical Error: %.3f"%num_err)
+
+num_err_title = "Numerical Error for %s"%height.h_str
+num_err_axis = ["$x$", "Pressure $p$"]
+
+graph.plot_2D(pressure.ps - num_pressure, domain.xs, num_err_title, num_err_axis)
+
+#-------------------------
+# Velocity
+
+ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
+
+vx = np.zeros((domain.Nx, domain.Nx))
+vy = np.zeros((domain.Nx, domain.Nx))
+
+for j in range(domain.Nx):
+    for i in range(domain.Nx):
+        vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (ys[j]**2 - ys[j]*height.hs[i]) + domain.U * (1 - ys[j]/height.hs[i])
+
+phv_title = "Pressure and Velocity for %s"%height.h_str
+phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+phv_ax_labels =  ['x', 'y']
+
+graph.plot_phv(pressure.ps, height.hs, vx, vy, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
+
+    
 
 
 

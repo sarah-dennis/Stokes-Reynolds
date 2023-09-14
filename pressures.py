@@ -87,50 +87,6 @@ class StepPressure(Pressure):
         super().__init__(domain, ps, p0, pN, p_str)
         
 
-class TwoStepPressure(Pressure):
-
-    def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic"
-
-        ps = np.zeros(domain.Nx)
-        
-        h1 = height.h1
-        h2 = height.h2
-        h3 = height.h3
-        l1 = height.l1
-        l2 = height.l2
-        l3 = height.l3
-        
-        #p2 is pressure at end of second step
-        p2_a = (h1**3 * l2/l1 + h2**3) * (h3**3 * pN/l3 + 6*domain.U*domain.eta * (h2-h3))
-        p2_b = (h2**3 + h3**3 * l2/l3) * (h1**3 * p0/l1 - 6*domain.U*domain.eta * (h2-h1))
-        p2_c = h3**3/l3 * (h1**3 * l2/l1 + h2**3) * (p0 + h3**3/h1**3 * l1/l3 *pN - 6*domain.U*domain.eta * l1/h1**3 * (h3-h1))
-        p2_d = h1**3/l1 * (h2**3 + h3**3 * l2/l3) - h3**6/l3**2 * l1/h1**3 * (h1**3 * l2/l1 + h2**3)
-        p2 = (p2_a + p2_b - p2_c)/p2_d
-
-        #p1 is pressure at end of first step
-        p1 = p0 + h3**3 / h1**3 * l1/l3 * (pN-p2) - 6*domain.U*domain.eta * l1/h1**3 * (h3-h1)
-
-        #pressure slopes
-        m1 = (p1-p0)/l1
-        m2 = (p2-p1)/l2
-        m3 = (pN-p2)/l3 
-        
-        for i in range(domain.Nx):
-
-            if domain.xs[i] <= height.x1:
-                ps[i] = m1 * (domain.xs[i]-domain.x0) + p0
-                
-            elif domain.xs[i] <= height.x2:
-                ps[i] = m2 *(domain.xs[i]-height.x1) + p1
-                
-            else:
-                ps[i] = m3 *(domain.xs[i]-height.x2) + p2
-        
-        super().__init__(domain, ps, p0, pN, p_str)
-
-
-
 class SquareWavePressure_pySolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):

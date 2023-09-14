@@ -41,7 +41,7 @@ def center_diff(fs, domain):
     D = D/(2*domain.dx)
         
     fs_dx = D@fs 
- 
+    
     return np.asarray(fs_dx)
       
 def center_second_diff(fs, domain):
