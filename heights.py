@@ -18,10 +18,10 @@ class Height:
     # h'(xi) = Height.hx[i]
     # h''(xi) = Height.hxx[i]
 
-    def __init__(self, domain, h, h_str, h_eq, hx=None, hxx=None):
+    def __init__(self, domain, h, h_str, h_eq, vel_y, hx=None, hxx=None):
         self.h_str = h_str
         self.h_eq = h_eq
-        
+        self.vel_y = vel_y
         self.hs = np.asarray([h(x) for x in domain.xs])
         
         self.h_max = max(self.hs)
@@ -69,10 +69,15 @@ class ConstantHeight(Height):
         self.h0 = h0
         self.h_str = "Constant Height"
         self.h_eq = "h(x) = %.2f"%h0
-        super().__init__(domain, self.h, self.h_str, self.h_eq)
+        self.vel_y = self.get_vel_y(domain)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
         
     def h(self, x):
         return self.h0
+    
+    def get_vel_y(self, domain):
+        return np.zeros((domain.Nx, domain.Nx))
+    
     
 class CorrugatedHeight(Height):
     #h(x) = h_min + r(1 + cos(kx))
@@ -84,7 +89,7 @@ class CorrugatedHeight(Height):
         self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) 
         self.h_str = "Sinusoidal Height"
 
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx)
 
     def h(self, x):
         return self.h_mid * (1 + self.r * np.cos(self.k*x))    
@@ -106,7 +111,8 @@ class WedgeHeight(Height):
         self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
         self.h_str = "Wedge Slider"
         
-        super().__init__(domain, self.h, self.h_str,self.h_eq, self.hx)
+        self.vel_y = self.get_vel_y(domain)
+        super().__init__(domain, self.h, self.h_str,self.h_eq, self.vel_y, self.hx)
 
 
     def h(self, x):
@@ -117,6 +123,9 @@ class WedgeHeight(Height):
 
     def hxx(self, x):
         return 0
+    
+    def get_vel_y(self, domain):
+        return (domain.U + self.m)*np.ones((domain.Nx, domain.Nx))
 
 class StepHeight(Height):
     
@@ -131,13 +140,17 @@ class StepHeight(Height):
         self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
         self.h_str = "Rayleigh Step"
         
-        super().__init__(domain, self.h, self.h_str, self.h_eq)
+        self.vel_y = self.get_vel_y(domain)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
 
     def h(self, x):
         if x <= self.x1:
             return self.h_left
         else:
             return self.h_right
+        
+    def get_vel_y(self, domain):
+        return np.zeros((domain.Nx, domain.Nx))
 
 class SquareWaveHeight(Height):
     
@@ -147,6 +160,7 @@ class SquareWaveHeight(Height):
         self.h_avg = h_avg
         self.n_steps = n_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
+        self.vel_y = self.get_vel_y(domain)
         
         if 0.01 * (h_avg + r) < r:
             # (Li & Chen, 2007) : roughness height < 0.01 * total height 
@@ -162,7 +176,7 @@ class SquareWaveHeight(Height):
         self.h_str = "%d-step Square Wave"%n_steps
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
-        super().__init__(domain, self.h, self.h_str, self.h_eq)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
         
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:
@@ -171,6 +185,8 @@ class SquareWaveHeight(Height):
             return self.h_avg - self.r
         
             
+    def get_vel_y(self, domain):
+        return np.zeros((domain.Nx, domain.Nx))
         
     
         
