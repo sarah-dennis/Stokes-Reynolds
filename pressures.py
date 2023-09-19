@@ -8,10 +8,13 @@ Created on Wed Jan 25 18:24:34 2023
 
 import _graphics as graph
 import numpy as np
-import schur
 import time
-import squareWave as sw
+
 import domain as dfd
+
+import schur
+import squareWave as sw
+import finDiff_1D as fd
 
 from scipy.sparse.linalg import gmres
 
@@ -28,6 +31,12 @@ class Pressure:
             
     def plot(self, domain):
         graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
+
+class gridFinDiffPressure(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Finite Difference ($N_x = %d$)"%domain.Nx
+        ps = fd.solve(domain, height, p0, pN)
+        super().__init__(domain, ps, p0, pN,  p_str)
         
 class ConstantPressure(Pressure):
     def __init__(self, domain, height, p0, pN):

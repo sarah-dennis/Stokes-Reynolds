@@ -104,9 +104,9 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     
     pres_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
     fig.colorbar(pres_plot, label="pressure")
-    # broken_streamlines=False,
+   
     
-    pp.streamplot(X, Y, vx, vy, density=1,  color='black')
+    pp.streamplot(X, Y, vx, vy, density=1, color='black')
     
     # pp.plot(xs, hs, label='height', color='white')
     

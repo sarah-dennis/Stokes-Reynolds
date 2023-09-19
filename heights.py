@@ -54,7 +54,6 @@ class Height:
         return fig
         
 
-
     def plot_derivs(self, domain):
         graph.plot_2D_multi([self.hs, self.hxs, self.hxxs], domain.xs, "Height %s"%self.h_str, ["h", "hx", "hxx"])
         #graph.plot_2D_multi([self.hs, self.hxs], domain.xs, "Height %s"%self.h_str, ["h", "hx"])
@@ -69,15 +68,22 @@ class ConstantHeight(Height):
         self.h0 = h0
         self.h_str = "Constant Height"
         self.h_eq = "h(x) = %.2f"%h0
+
         self.vel_y = self.get_vel_y(domain)
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
-        
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx, self.hxx)
+
     def h(self, x):
         return self.h0
+
     
+    def hx(self, x):
+        return 0
+    
+    def hxx(self, x):
+        return 0
+
     def get_vel_y(self, domain):
         return np.zeros((domain.Nx, domain.Nx))
-    
     
 class CorrugatedHeight(Height):
     #h(x) = h_min + r(1 + cos(kx))
@@ -85,11 +91,11 @@ class CorrugatedHeight(Height):
         self.h_mid = h_mid
         self.r = r 
         self.k = k
-        
+        self.vel_y = self.get_vel_y(domain)
         self.h_eq = "h(x) = %0.1f + %0.1f(1 + \cos(%d x))"%(self.h(domain.x0), r, k) 
         self.h_str = "Sinusoidal Height"
 
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx,self.hxx)
 
     def h(self, x):
         return self.h_mid * (1 + self.r * np.cos(self.k*x))    
@@ -99,6 +105,9 @@ class CorrugatedHeight(Height):
     
     def hxx(self, x):
         return -self.h_mid * self.r * self.k**2 * np.cos(self.k*x)
+    
+    def get_vel_y(self, domain):
+        return np.zeros((domain.Nx, domain.Nx))
 
 
 class WedgeHeight(Height):
@@ -111,8 +120,9 @@ class WedgeHeight(Height):
         self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
         self.h_str = "Wedge Slider"
         
+
         self.vel_y = self.get_vel_y(domain)
-        super().__init__(domain, self.h, self.h_str,self.h_eq, self.vel_y, self.hx)
+        super().__init__(domain, self.h, self.h_str,self.h_eq, self.vel_y, self.hx, self.hxx)
 
 
     def h(self, x):
@@ -140,14 +150,22 @@ class StepHeight(Height):
         self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
         self.h_str = "Rayleigh Step"
         
+
         self.vel_y = self.get_vel_y(domain)
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx, self.hxx)
+
 
     def h(self, x):
         if x <= self.x1:
             return self.h_left
         else:
             return self.h_right
+
+    def hx(self, x):
+        return 0
+    
+    def hxx(self, x):
+        return 0
         
     def get_vel_y(self, domain):
         return np.zeros((domain.Nx, domain.Nx))
@@ -167,8 +185,8 @@ class SquareWaveHeight(Height):
             print("Warning: r > 0.01 * (h + r)")
             print("%.5f > %.5f"%(r, 0.01 * (h_avg + r)))
         
+        # For matrix solves LU, Schur, etc.
         self.h_steps = np.zeros(n_steps+1)
-       
         for i in range(n_steps+1):
             x = domain.x0 + self.step_width * (i + 0.5)
             self.h_steps[i] = self.h(x)
@@ -176,22 +194,37 @@ class SquareWaveHeight(Height):
         self.h_str = "%d-step Square Wave"%n_steps
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y)
-        
+        super().__init__(domain, self.h, self.h_str, self.h_eq, self.vel_y, self.hx, self.hxx)
+
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:
             return self.h_avg + self.r
         else:
             return self.h_avg - self.r
-        
+
+    def hx(self, x):
+        return 0
+    
+    def hxx(self, x):
+        return 0
             
     def get_vel_y(self, domain):
         return np.zeros((domain.Nx, domain.Nx))
-        
     
+    
+class RandHeight(Height):
+    
+    def __init__(self, domain, h_max, h_min):
+        self.h_max = h_max
+        self.h_min = h_min
         
+        self.h_str = "Random Height"
+        self.h_eq = "h(x) \in [%.1f,%.1f]"%(h_min, h_max)
+    
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
 
-    
+    def h(self, x):
+        return (self.h_max - self.h_min) * np.random.random() + self.h_min
     
     
     

@@ -8,8 +8,17 @@ import heights as hgt
 import pressures as prs
 import numpy as np
 
-# Analytic pressure solutions to given height functions
 
+# pressure solutions to reynolds equation for the given height functions
+#------------------------------------------------------------------------------
+# 0. Arbitrary Height 
+#------------------------------------------------------------------------------
+def randGrid(domain, p0, pN):
+    h_max = 1
+    h_min = 0.001
+    height = hgt.RandHeight(domain, h_max, h_min)
+    pressure = prs.gridFinDiffPressure(domain, height, p0, pN)
+    return height, pressure
 #------------------------------------------------------------------------------
 # 0. Constant Height 
 #------------------------------------------------------------------------------
