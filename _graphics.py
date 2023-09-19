@@ -52,7 +52,7 @@ def plot_2D(fs, xs, title, axis):
     pp.xlabel(axis[0])
     
     pp.ylabel(axis[1])
-    pp.ylim(0, 1.1*max(fs))
+    pp.ylim(-0.3, 1.1*max(fs))
     
     return fig
 

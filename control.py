@@ -109,6 +109,7 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
 
 vx = np.zeros((domain.Nx, domain.Nx))
+vy = np.zeros((domain.Nx, domain.Nx))
 
 for j in range(domain.Nx):
     for i in range(domain.Nx):
@@ -118,10 +119,11 @@ phv_title = "Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['x', 'y']
 
-graph.plot_phv(pressure.ps, height.hs, vx, vy, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
+# graph.plot_phv(pressure.ps, height.hs, vx, vy, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
     
-
-
+x_slice = 100
+vx_slice = [row[x_slice] for row in vx]
+graph.plot_2D(vx_slice, domain.xs, "$V_x(%.2f, y)$"%domain.xs[x_slice], ["y", "$V_x(x_0,y)$"])
 
 
