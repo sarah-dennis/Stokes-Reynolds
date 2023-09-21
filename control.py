@@ -22,12 +22,13 @@ import _graphics as graph
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-U = 5     # surface velocity
+U = 1     # surface velocity V_x(x,0) = U
 
 eta = 1     # viscosity
 
 
-Nx = 1000   # Number of Grid points
+Nx = 1000 # Number of Grid points
+
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
@@ -39,21 +40,21 @@ domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 p0 = 0
 pN = 0
 
-n_steps = 3
-r=0.028
+n_steps = 5
+r=0.002
 h_avg=0.1
 
 #---------------------------------------------------------------------------
 # Analytic Solution
 
-# height, pressure = ex.flat(domain, p0, pN)
-height, pressure = ex.wedge(domain, p0, pN)
-# height, pressure = ex.corrugated(domain, p0, pN)
-# height, pressure = ex.step(domain, p0, pN)
+# height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
+height, pressure, velocity = ex.wedge(domain, p0, pN)
+# height, pressure, velocity = ex.corrugated(domain, p0, pN)
+# height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
 
 
-# height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 
 
@@ -73,11 +74,11 @@ height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 
 # Square wave: numerical matrix solves
-# height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
-# height, pressure = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
+# height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # Random height: finite difference sovle
-# height, pressure = ex.randGrid(domain, p0, pN)
+# height, pressure, velocity = ex.randGrid(domain, p0, pN)
 
 
 #---------------------------------------------------------------------------
@@ -105,25 +106,11 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 #-------------------------
 # Velocity
-
-ys = np.linspace(0, 1.2*height.h_max, domain.Nx)
-
-vx = np.zeros((domain.Nx, domain.Nx))
-vy = np.zeros((domain.Nx, domain.Nx))
-
-for j in range(domain.Nx):
-    for i in range(domain.Nx):
-        vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (ys[j]**2 - height.hs[i]*ys[j]) + domain.U * (1 - ys[j]/height.hs[i])
-
+        
 phv_title = "Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-phv_ax_labels =  ['x', 'y']
+phv_ax_labels =  ['$x$', '$y$']
 
-# graph.plot_phv(pressure.ps, height.hs, vx, vy, domain.xs, ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
-    
-x_slice = 100
-vx_slice = [row[x_slice] for row in vx]
-graph.plot_2D(vx_slice, domain.xs, "$V_x(%.2f, y)$"%domain.xs[x_slice], ["y", "$V_x(x_0,y)$"])
+graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
 

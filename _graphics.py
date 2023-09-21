@@ -52,7 +52,7 @@ def plot_2D(fs, xs, title, axis):
     pp.xlabel(axis[0])
     
     pp.ylabel(axis[1])
-    pp.ylim(-0.3, 1.1*max(fs))
+    # pp.ylim(-0.3, 1.1*max(fs))
     
     return fig
 
@@ -87,26 +87,43 @@ def plot_2D_twin(fs, gs, xs, title, labels):
 def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):   
    
     fig = pp.figure()
-
     X, Y = np.meshgrid(xs, ys)
-    # Vx, Vy = np.meshgrid(v_x, v_y)
-    P = [ps for y in ys]
-
+    
     # mask y > h(x)
     mask = np.zeros((len(xs), len(ys)), dtype=bool)
     for i in range(len(ys)):
         for j in range(len(xs)):
             mask[i,j] = ys[i] > hs[j]
     
-    vx = np.ma.array(vx, mask=mask)
+    #Spectral pressure plot 
+    P = [ps for y in ys]
     P = np.ma.array(P, mask=mask)
+        
+    press_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
+    fig.colorbar(press_plot, label="pressure")
+
+    #Velocity vector plot
+    skip = 40
     
+    thin_xs = xs[::skip]
+    thin_ys = ys[::skip]
     
-    pres_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
-    fig.colorbar(pres_plot, label="pressure")
-   
+    thin_X, thin_Y = np.meshgrid(thin_xs, thin_ys)
+
+    thin_vx = np.zeros((len(thin_xs), len(thin_ys)))
+    thin_vy = np.zeros((len(thin_xs), len(thin_ys)))
+    thin_mask = np.zeros((len(thin_xs), len(thin_ys)))
+    j = 0
+    for i in range(0, len(vx), skip):
+        thin_vx[j] = vx[i][::skip]
+        thin_vy[j] = vy[i][::skip]
+        thin_mask[j] = mask[i][::skip]
+        j+=1
     
-    pp.streamplot(X, Y, vx, vy, density=1, color='black')
+    thin_vx = np.ma.array(thin_vx, mask=thin_mask)
+    thin_vy = np.ma.array(thin_vy, mask=thin_mask)
+    
+    vel_plot = pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.003)
     
     # pp.plot(xs, hs, label='height', color='white')
     

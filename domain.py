@@ -24,6 +24,13 @@ class Domain:
         
         self.xs = np.asarray([x0 + i*self.dx for i in range(Nx)])
 
+    def set_ys(self, height, Ny):
+        #always fixed BC in y
+        self.Ny = Ny
+        yf = 1.1*height.h_max
+        y0 = 0
+        self.dy = (yf - y0)/(Ny-1)
+        self.ys = np.asarray([y0 + i*self.dy for i in range(Ny)])
   
     
 def center_diff(fs, domain):
