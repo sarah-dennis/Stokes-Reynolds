@@ -41,22 +41,22 @@ p0 = 0
 pN = 0
 
 n_steps = 5
-r=0.002
+r=0.015
 h_avg=0.1
 
 #---------------------------------------------------------------------------
 # Analytic Solution
 
 # height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
-height, pressure, velocity = ex.wedge(domain, p0, pN)
+# height, pressure, velocity = ex.wedge(domain, p0, pN)
 # height, pressure, velocity = ex.corrugated(domain, p0, pN)
 # height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
-
+# height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #---------------------------------------------------------------------------
 # Numerical Solution
@@ -71,8 +71,7 @@ height, pressure, velocity = ex.wedge(domain, p0, pN)
 # 177542   77.865    0.000   77.945    0.000 squareWave.py:236(_matvec) <--  class-scope
 # 177542   69.212    0.000   69.293    0.000 squareWave.py:280(_matvec) <--  fun-scope
 
-
-
+ 
 # Square wave: numerical matrix solves
 # height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 # height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)

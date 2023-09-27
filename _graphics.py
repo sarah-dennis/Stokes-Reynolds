@@ -128,7 +128,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     # pp.plot(xs, hs, label='height', color='white')
     
     # pp.legend()
-    pp.title(title)
+    pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
     

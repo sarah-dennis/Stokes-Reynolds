@@ -81,6 +81,15 @@ def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
     return height, pressure, velocity
 
 
+def randRectWave_schurLUSolve(domain, p0, pN, n_steps=25, r_max = 0.08, h_avg=0.1):
+    print("\n Loading %d-step Square Wave \n"%(n_steps))
+    height = hgt.randRectWaveHeight(domain, h_avg, r_max, n_steps)
+    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
+    velocity = vel.SquareWaveVelocity(domain, height, pressure)
+    pressure.ps[-1] = pressure.ps[-2]
+    return height, pressure, velocity
+
+
 def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     print("\n Loading %d-step Square Wave \n"%(n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)

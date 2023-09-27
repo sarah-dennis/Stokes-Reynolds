@@ -209,8 +209,25 @@ class RandHeight(Height):
     def h(self, x):
         return (self.h_max - self.h_min) * np.random.random() + self.h_min
     
+
+class randRectWaveHeight(Height):
     
+    def __init__(self, domain, h_avg, r_max, n_steps):
+        
+        self.r_max = r_max
+        self.h_avg = h_avg
+        self.x0 = domain.x0
+        self.n_steps = n_steps
+        self.step_width = (domain.xf - domain.x0)/n_steps
+        self.h_steps = np.random.uniform(low=h_avg-r_max, high=h_avg+r_max, size=n_steps+1)
+        
+        self.h_str = "%d-step Rectangle Wave"%n_steps
+        self.h_eq = "h(x) \in [%.1f,%.1f]"%(h_avg-r_max, h_avg + r_max)
     
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
     
-    
-    
+    def h(self, x):
+        step_k = int((x - self.x0)//self.step_width)
+        return self.h_steps[step_k]
+        
+        return 
