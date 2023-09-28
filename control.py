@@ -22,7 +22,7 @@ import _graphics as graph
 x0 = 0      # left boundary 
 xf = 1      # right boundary
 
-U = 1     # surface velocity V_x(x,0) = U
+U = 0     # surface velocity V_x(x,0) = U
 
 eta = 1     # viscosity
 
@@ -37,11 +37,13 @@ domain = dm.Domain(x0, xf, eta, U, Nx, BC)
 #------------------------------------------------------------------------------
 # Height & Pressure
 #-------------------------------------------------------------------------------
-p0 = 0
-pN = 0
+p0 = 2
+pN = 1
 
 n_steps = 5
-r=0.015
+
+r=0.02
+
 h_avg=0.1
 
 #---------------------------------------------------------------------------
@@ -50,7 +52,7 @@ h_avg=0.1
 # height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
 # height, pressure, velocity = ex.wedge(domain, p0, pN)
 # height, pressure, velocity = ex.corrugated(domain, p0, pN)
-# height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
+height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)

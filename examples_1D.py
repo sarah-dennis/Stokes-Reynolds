@@ -50,7 +50,7 @@ def corrugated(domain, p0, pN):
 #------------------------------------------------------------------------------
 def wedge(domain, p0, pN):
     h_min = 0.1
-    m = -1
+    m = -2
     height = hgt.WedgeHeight(domain, h_min, m)
     pressure = prs.WedgePressure(domain, height, p0, pN)
     velocity = vel.WedgeVelocity(domain, height, pressure)

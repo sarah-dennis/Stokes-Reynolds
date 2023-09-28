@@ -43,7 +43,9 @@ def center_diff(fs, domain):
         D[domain.Nx-1][0] = 1
         
     elif domain.BC == "fixed": #prescribed 
-        None # boundary heights are not used
+        D[0][domain.Nx-1] = 0
+        D[domain.Nx-1][0] = 0
+        # None # boundary heights are not used
         
     D = D/(2*domain.dx)
         
@@ -65,6 +67,8 @@ def center_second_diff(fs, domain):
         #None # boundary heights are not used
         D[0][domain.Nx-1] = 0
         D[domain.Nx-1][0] = 0
+        
+        
         
     D = D/(domain.dx**2)
         

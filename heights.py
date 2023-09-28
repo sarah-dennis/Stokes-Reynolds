@@ -129,8 +129,8 @@ class WedgeHeight(Height):
 class StepHeight(Height):
     
     def __init__(self, domain, h_left, h_right):
-        self.h_left = h_left
-        self.h_right = h_right
+        self.h_left = h_right
+        self.h_right = h_left
         self.x1 = (domain.xf - domain.x0)/2
         
         self.l_left = self.x1-domain.x0

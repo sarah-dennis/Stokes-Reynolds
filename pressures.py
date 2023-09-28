@@ -193,7 +193,7 @@ class SquareWavePressure_schurInvSolve(Pressure):
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
         
- 
+# Current best method ... 
 class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps

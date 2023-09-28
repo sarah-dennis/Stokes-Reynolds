@@ -7,7 +7,7 @@ Created on Tue Mar  7 16:16:13 2023
 import numpy as np
 
 import domain as dfd
-import Reynolds_1D as ry
+import finDiff_1D as fd
 import examples_1D as eg
 import heights as hgt
 import pressures as prs
@@ -40,7 +40,7 @@ def vary_Nx_numErr(trials=6, N0 = 50):
         #height_k, pressure_k = eg.twoStep(domain_k)
         height_k, pressure_k = eg.squareWave(domain_k, gc.p0, gc.pN)
         #-------------------------------------------------------
-        numPressure_k = ry.solve(domain_k, height_k, gc.p0, gc.pN)
+        numPressure_k = fd.solve(domain_k, height_k, gc.p0, gc.pN)
         
         infNorms[k] = np.max(np.abs(pressure_k.ps - numPressure_k))
         
@@ -133,7 +133,7 @@ def vary_r_pMax(trials=10, r_0=0.05):
         
         #err_k, ps_k = ry.solve(ry.domain, height_k, pressure_k, 0, 1)
         
-        v[k] = np.max(pressure_k.ps) - ry.p0
+        v[k] = np.max(pressure_k.ps) - pressure_k.p0
 
         x[k] = r_k
                 
