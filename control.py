@@ -19,10 +19,10 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 # Domain & Discretization
 #------------------------------------------------------------------------------
+
 # x boundary
 x0 = 0     
 xf = 1      
-
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
@@ -40,12 +40,13 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 #------------------------------------------------------------------------------
 # Height & Pressure
 #-------------------------------------------------------------------------------
-p0 = 2 #
+
+p0 = 0
 pN = 1
 
 n_steps = 5
 
-r=0.02
+r=0
 
 h_avg=0.1
 
@@ -55,7 +56,7 @@ h_avg=0.1
 # height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
 # height, pressure, velocity = ex.wedge(domain, p0, pN)
 # height, pressure, velocity = ex.corrugated(domain, p0, pN)
-height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
+# height, pressure, velocity = ex.step(domain, p0, pN, r, h_avg)
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)

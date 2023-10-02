@@ -127,19 +127,18 @@ class WedgeHeight(Height):
 
 class StepHeight(Height):
     
-    def __init__(self, domain, h_left, h_right):
-        self.h_left = h_right
-        self.h_right = h_left
+    def __init__(self, domain, h_avg,r):
+        self.h_left = h_avg - r
+        self.h_right = h_avg + r
         self.x1 = (domain.xf - domain.x0)/2
         
         self.l_left = self.x1-domain.x0
         self.l_right = domain.xf - self.x1
         
-        self.h_eq = "h(x) = {%0.1f, %0.1f}"%( h_left, h_right)
+        self.h_eq = "h(x) = {%0.1f, %0.1f}"%(self.h_left, self.h_right)
         self.h_str = "Rayleigh Step"
         
         super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx, self.hxx)
-
 
     def h(self, x):
         if x <= self.x1:

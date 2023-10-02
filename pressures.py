@@ -77,21 +77,20 @@ class StepPressure(Pressure):
 
         ps = np.zeros(domain.Nx)
         
+        hl = height.h_left
+        hr = height.h_right
+        ll = height.l_left
+        lr = height.l_right
+        
+        m_in = 6*domain.eta*domain.U * (hl - hr) / (hl**3 + hr**3 * ll/lr) 
+        p_max = p0 + ll * m_in
+        m_out = (pN - p_max)/lr
+        
         for i in range(domain.Nx):
-
-            hl = height.h_left
-            hr = height.h_right
-            ll = height.l_left
-            lr = height.l_right
-            
-            m_in = 6*domain.eta*domain.U* (hl - hr) / (hl**3 + hr**3 * ll/lr) 
-            m_out = (-ll / lr) * m_in
-            
-            
             if domain.xs[i] <= height.x1:
                 ps[i] = m_in * (domain.xs[i]-domain.xs[0]) + p0
             else:
-                ps[i] = m_out *(domain.xs[i]-domain.xs[-1]) + pN
+                ps[i] = m_out * (domain.xs[i]-height.x1) + p_max
         
         super().__init__(domain, ps, p0, pN, p_str)
         

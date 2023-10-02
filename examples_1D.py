@@ -58,9 +58,8 @@ def wedge(domain, p0, pN):
 # III a. Step Height Example
 #------------------------------------------------------------------------------
 def step(domain, p0, pN, r, h_avg):
-    h_left = h_avg+r
-    h_right = h_avg-r
-    height = hgt.StepHeight(domain, h_left, h_right)
+
+    height = hgt.StepHeight(domain, h_avg, r)
     pressure = prs.StepPressure(domain, height, p0, pN)
     velocity = vel.SquareWaveVelocity(domain, height, pressure)
     return height, pressure, velocity
