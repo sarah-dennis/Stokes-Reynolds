@@ -128,7 +128,7 @@ class SquareWavePressure_pySolve(Pressure):
         
 class SquareWavePressure_gmresSolve(Pressure):
 
-# TODO: look in to preconditioners
+# TODO: matvec overcalled, look in to preconditioners
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "gmres"
@@ -165,10 +165,11 @@ class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "schur-inv"
-        rhs = sw.make_RHS(domain, height, p0, pN)
+        
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
         t0 = time.time()
+        rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)
         C = schur.get_Cs(n, center_diag, off_diag)
         C_prod = schur.triDiagProd(C)
@@ -198,6 +199,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         L = height.step_width
+        hs = height.h_steps
         p_str = "LU"
         
         t0 = time.time()
@@ -219,7 +221,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
             w_i = 0
             for j in range(n):
                 s_ij = schur.S_ij(n, C_prod, D, i, j)
-                w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
+                w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * hs[j]**3)
             w[i] = w_i
 
         # U block  - back sub
@@ -253,7 +255,8 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
         
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
-        center_diag, off_diag = sw.make_schurCompDiags(height)
+        center_diag, off_diag = sw.make_schurCompDiags(height)\
+        # for flops... Store C & D (2N) instead of C_prod (N^2)
         C = schur.get_Cs(n, center_diag, off_diag)
         D = schur.get_Ds(n, center_diag, off_diag, C)
         t1 = time.time()

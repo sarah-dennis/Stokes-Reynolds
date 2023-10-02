@@ -36,8 +36,7 @@ class Height:
         else:
             self.hxxs = np.asarray([hxx(x) for x in domain.xs])
          
-            
-         
+        
     def plot(self, domain):
         fig = pp.figure()
         pp.plot(domain.xs, self.hs, color='b')
@@ -229,5 +228,3 @@ class randRectWaveHeight(Height):
     def h(self, x):
         step_k = int((x - self.x0)//self.step_width)
         return self.h_steps[step_k]
-        
-        return 

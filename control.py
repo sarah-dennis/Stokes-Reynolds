@@ -19,25 +19,28 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 # Domain & Discretization
 #------------------------------------------------------------------------------
-x0 = 0      # left boundary 
-xf = 1      # right boundary
-
-U = 0     # surface velocity V_x(x,0) = U
-
-eta = 1     # viscosity
-
-
-Nx = 1000 # Number of Grid points
-
+# x boundary
+x0 = 0     
+xf = 1      
 
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
-domain = dm.Domain(x0, xf, eta, U, Nx, BC)
+# surface velocity 
+U = 0     #V_x(x,0) = U
+    
+# viscosity
+visc = 1     
+
+# Grid size
+#TODO: Nx used in discretization & plotting. Using Ny = Nx.
+Nx = 1000 
+
+domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
 #------------------------------------------------------------------------------
 # Height & Pressure
 #-------------------------------------------------------------------------------
-p0 = 2
+p0 = 2 #
 pN = 1
 
 n_steps = 5
@@ -47,7 +50,7 @@ r=0.02
 h_avg=0.1
 
 #---------------------------------------------------------------------------
-# Analytic Solution
+# Analytic Solutions
 
 # height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
 # height, pressure, velocity = ex.wedge(domain, p0, pN)
@@ -63,24 +66,15 @@ height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps,
 #---------------------------------------------------------------------------
 # Numerical Solution
 
+
 # cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
-# ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-# ---------- N = 101 ----------------
-# 8441    0.716    0.000    0.721    0.000 squareWave.py:236(_matvec) <--  class-scope
-# 8441    0.644    0.000    0.648    0.000 squareWave.py:280(_matvec) <--  fun-scope 
-# ---------- N = 501 ----------------
-# 177542   77.865    0.000   77.945    0.000 squareWave.py:236(_matvec) <--  class-scope
-# 177542   69.212    0.000   69.293    0.000 squareWave.py:280(_matvec) <--  fun-scope
-
- 
-# Square wave: numerical matrix solves
+# Square wave: numerical solves
 # height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 # height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # Random height: finite difference sovle
 # height, pressure, velocity = ex.randGrid(domain, p0, pN)
-
 
 #---------------------------------------------------------------------------
 # Plotting 
@@ -91,9 +85,11 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 #------------------------------------------------------------------------------
 # Error
+
 # num_anl_title = "Numerical and Analytic Pressure for %s"%height.h_str
 # num_anl_labels = [pressure.p_str, "finDiff"]
 # num_anl_axis = ["$x$", "Error"]
+
 # graph.plot_2D_multi([pressure.ps, num_pressure], domain.xs, num_anl_title, num_anl_labels, num_anl_axis)
 
 
