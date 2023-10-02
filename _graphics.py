@@ -8,13 +8,12 @@ Graphics helpers
 """
 import numpy as np
 from matplotlib import pyplot as pp
-    
-theta = 30
-phi = 30
 
-
+#------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
-    
+            
+    theta = 30
+    phi = 30
     X, Z = np.meshgrid(xs, zs)
     
     pp.figure()
@@ -24,25 +23,8 @@ def plot_3D(f_2D, xs, zs, title):
     pp.xlabel('x')
     pp.ylabel('z')
     ax.view_init(theta, phi)
-
-def plot_2D_multi(fs, xs, title, labels, axis):
-    fig = pp.figure()
-    ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'orange', 'purple']
-
-    for i in range(len(fs)):
-        
-        ax.plot(xs, fs[i], label=labels[i], color=colors[i])
     
-    #ax.set_xlim([0, 1])
-    #ax.set_ylim([0, 1])
-
-    ax.set_xlabel(axis[0])
-    ax.set_ylabel(axis[1])
-    pp.title(title,  fontweight ="bold")
-    fig.legend()
-    return fig
-    
+#------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis):
     fig = pp.figure()
     pp.plot(xs, fs, color='b')
@@ -56,36 +38,52 @@ def plot_2D(fs, xs, title, axis):
     
     return fig
 
-def plot_2D_twin(fs, gs, xs, title, labels):
+def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
+    fig = pp.figure()
+    ax = fig.add_subplot()
+    colors = ['r', 'b', 'g', 'orange', 'purple']
+
+    for i in range(len(fs)):
+        
+        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i])
+    
+    #ax.set_xlim([0, 1])
+    #ax.set_ylim([0, 1])
+
+    ax.set_xlabel(ax_labels[0])
+    ax.set_ylabel(ax_labels[1])
+    pp.title(title,  fontweight ="bold")
+    fig.legend()
+    return fig
+
+#------------------------------------------------------------------------------
+def plot_2D_twin(fs, gs, xs, title, ax_labels):
     pp.rcParams['figure.dpi'] = 300
     # Creating plot with dataset_1
     fig, ax1 = pp.subplots()
     
-    ax1.set_xlabel(labels[2])
-
+    ax1.set_xlabel(ax_labels[2])
     color = 'tab:red'
     ax1.plot(xs, fs, color = color)
-    ax1.set_ylabel(labels[0], color = color)
+    ax1.set_ylabel(ax_labels[0], color = color)
     ax1.tick_params(axis ='y', labelcolor = color)
 
     # Adding Twin Axes to plot dataset_2
     ax2 = ax1.twinx()
-     
     color = 'tab:blue'
-    ax2.set_ylabel(labels[1], color = color)
+    ax2.set_ylabel(ax_labels[1], color = color)
     ax2.plot(xs, gs, color = color)
     ax2.tick_params(axis ='y', labelcolor = color)
     ax2.set_ylim(0, 1.2*max(gs))
      
-    # Adding title
     pp.title(title, fontweight ="bold")
      
-    # Show plot
     pp.show()
-
-
+    
+#------------------------------------------------------------------------------
 def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):   
-   
+    pp.rcParams['figure.dpi'] = 500
+    
     fig = pp.figure()
     X, Y = np.meshgrid(xs, ys)
     
@@ -135,8 +133,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
 
     pp.show()
     
-    
-    
+#------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
     fig = pp.figure()

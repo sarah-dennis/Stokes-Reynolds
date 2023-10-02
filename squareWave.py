@@ -20,43 +20,47 @@ def make_RHS(domain, height, p0, pN):
     rhs[0] = -p0/height.step_width
     rhs[n] = pN/height.step_width
     
+    hs = height.h_steps
+    c = 6*domain.eta*domain.U
+    
     for k in range(n):
-        rhs[n+1 + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*domain.eta*domain.U
-        
+        rhs[n+1 + k] = (hs[k+1] - hs[k]) * c
+    
     return rhs
 
 # Takes (P_extrema, P_slopes) -> [p(x)] over domain Nx
 def make_ps(domain, height, p0, pN, slopes, extrema):
     ps = np.zeros(domain.Nx)
+    x0 = domain.x0
     L = height.step_width
-      
+
     k = 0
     x_k = domain.x0
     p_k = p0
     slope_k = slopes[k]
 
-    for i in range(domain.Nx-1):
+    for i in range(domain.Nx):
         x = domain.xs[i]
         
         #if x is in a new step
-        if x > domain.x0 + (k+1)*L:
+        if x > x0 + (k+1)*L:
             k += 1
-            x_k = domain.x0 + k*L
+            x_k = x0 + k*L
             p_k = extrema[k-1]
             slope_k = slopes[k]
 
         ps[i] = slope_k*(x-x_k) + p_k
-    
-    ps[-1] = pN
+
     return ps
 #------------------------------------------------------------------------------
-
 # Schur Complement for square wave
+#------------------------------------------------------------------------------
 
 def make_schurCompDiags(height):
     n = height.n_steps
     hs = height.h_steps
-
+    L = height.step_width
+    
     center_diag = np.zeros(n)
     off_diag = np.zeros(n-1)
     
@@ -64,12 +68,13 @@ def make_schurCompDiags(height):
         center_diag[i] = hs[i]**3 + hs[i+1]**3
         if i < n-1:
             off_diag[i] = -hs[i+1]**3
-    return (-1/height.step_width) * center_diag, (-1/height.step_width) * off_diag
+    return (-1/L) * center_diag, (-1/L) * off_diag
 
 #------------------------------------------------------------------------------
 # Helpers for pressures.squarewave_schurInvSolve()
+#------------------------------------------------------------------------------
 
-# (matrix builder only used for testing)
+# (matrix builder only used for testing and finding cond num)
 def make_Minv_schurComp(height, S):
     
     n = height.n_steps
@@ -180,8 +185,9 @@ def neg_B1_schurCompInv_ij(height, C_prod, D,  i, j):
     else:
         return (-1/L) * schur.S_ij(n, C_prod, D, i-1, j)
 
-#------- ------------------------------------------------------
-#Helper for pressure.squarewave_pySolve
+#-------------------------------------------------------------
+# Helpers for pressure.squarewave_pySolve()
+#------------------------------------------------------------------------------
 def make_M(domain, height, p0, pN):
 
     n = height.n_steps
@@ -213,7 +219,9 @@ def make_M(domain, height, p0, pN):
         
     return M
 
-#------- ------------------------------------------------------
+#------------------------------------------------------------------------------
+# Helpers for pressures.squarewave_gmResSolve()
+#------------------------------------------------------------------------------
 class swLinOp(LinearOperator):
     #n:= number of steps 
     #L:= length of each step

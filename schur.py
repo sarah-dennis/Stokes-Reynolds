@@ -89,8 +89,8 @@ def S_ij_flops(n, C, D, i, j):
         # j, i = i, j
         return (-1)**(i+j) * D[j] * np.prod(C[j:i])
     
-# Make symmetric K^-1 matrix
-def get_S(n, C_prod, D):
+# (For testing only: Make S = K^-1 matrix)
+def make_S(n, C_prod, D):
     S = np.zeros((n,n))
     for i in range(0, n):
         for j in range(0, i+1): 

@@ -77,21 +77,26 @@ class StepPressure(Pressure):
 
         ps = np.zeros(domain.Nx)
         
-        hl = height.h_left
-        hr = height.h_right
-        ll = height.l_left
-        lr = height.l_right
+        h_in = height.hs[0]
+        h_out = height.hs[-1]
+
+        x0 = domain.x0
+        xm = height.x_step
+        xf = domain.xf
+        c = 6*domain.eta*domain.U
+
+        m_in_numer = (h_out/h_in)**3 * (p0 - pN)/(xm - xf) - c * (h_out - h_in)/h_in**3
+        m_in_denom = 1 - (h_out/h_in)**3 * (xm - x0)/(xm - xf)
+        m_in = m_in_numer/m_in_denom
         
-        m_in = 6*domain.eta*domain.U * (hl - hr) / (hl**3 + hr**3 * ll/lr) 
-        p_max = p0 + ll * m_in
-        m_out = (pN - p_max)/lr
-        
+        m_out = ((xm - x0)*m_in + (p0 - pN))/(xm - xf)
+
         for i in range(domain.Nx):
-            if domain.xs[i] <= height.x1:
-                ps[i] = m_in * (domain.xs[i]-domain.xs[0]) + p0
+            if domain.xs[i] <= height.x_step:
+                ps[i] = m_in * (domain.xs[i] - x0) + p0
             else:
-                ps[i] = m_out * (domain.xs[i]-height.x1) + p_max
-        
+                ps[i] = m_out * (domain.xs[i] - xf) + pN
+
         super().__init__(domain, ps, p0, pN, p_str)
         
 
@@ -189,7 +194,7 @@ class SquareWavePressure_schurInvSolve(Pressure):
         p_extrema = sol[n+1:2*n+1]
 
         ps = sw.make_ps(domain, height, p0, pN, p_slopes, p_extrema)
-        
+
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
         
@@ -197,15 +202,19 @@ class SquareWavePressure_schurInvSolve(Pressure):
 class SquareWavePressure_schurLUSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
+        
         L = height.step_width
         hs = height.h_steps
         p_str = "LU"
         
         t0 = time.time()
+        
         rhs = sw.make_RHS(domain, height, p0, pN)
+
         center_diag, off_diag = sw.make_schurCompDiags(height)
+        
         C = schur.get_Cs(n, center_diag, off_diag)
-        C_prod = schur.triDiagProd(C)
+        C_prod = schur.triDiagProd(C) # used in schur.S_ij
         D = schur.get_Ds(n, center_diag, off_diag, C)
 
         t1 = time.time()
@@ -213,27 +222,45 @@ class SquareWavePressure_schurLUSolve(Pressure):
         # L block -  fwd sub
         # | I  0 | |v| = |f|
         # | B2 K | |w|   |g|
-        # {v = f, w = S ( g - B2 f)}
+        # {v = f, w = S( g - B2 f)}
         
         w = np.zeros(n)
+        
         for i in range(n):
-            w_i = 0
-            for j in range(n):
-                s_ij = schur.S_ij(n, C_prod, D, i, j)
-                w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * hs[j]**3)
-            w[i] = w_i
 
+            w_ij = 0
+            
+            for j in range(n):
+                
+                s_ij = schur.S_ij(n, C_prod, D, i, j)
+
+                if j == 0:
+                    w_ij += s_ij * (rhs[n+1+j] - (1/L) * p0 * hs[j]**3)
+                    
+                elif j == n-1:
+                    w_ij += s_ij * (rhs[n+1+j] -  (1/L) * pN * hs[j+1]**3)
+
+                else: 
+                    w_ij += s_ij * rhs[n+1+j]
+                    
+            w[i] = w_ij
+            
+        
+        
+        
         # U block  - back sub
         # | I  B1 | |x| = |v|
         # | 0  I  | |y|   |w|
         # {x = v - B1 w, y = w}
         
         x = np.zeros(n+1)
+        
         x[0] = 1/L * (w[0] - p0)
         for i in range(1, n):
             x[i] = 1/L * (w[i] - w[i-1])
+            
         x[n] = 1/L * (pN - w[n-1])
-        
+
         t2 = time.time()
 
         print("\n Schur LU Solve")
@@ -242,6 +269,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         print("Total time: %.5f"%(t2-t0))
         
         ps = sw.make_ps(domain, height, p0, pN, x, w)
+        
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
  
 
@@ -255,7 +283,7 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)\
-        # for flops... Store C & D (2N) instead of C_prod (N^2)
+        # for flops... Store C & D (N+N) instead of C_prod & D (N^2 + N)
         C = schur.get_Cs(n, center_diag, off_diag)
         D = schur.get_Ds(n, center_diag, off_diag, C)
         t1 = time.time()

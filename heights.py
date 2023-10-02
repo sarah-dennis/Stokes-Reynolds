@@ -127,24 +127,25 @@ class WedgeHeight(Height):
 
 class StepHeight(Height):
     
-    def __init__(self, domain, h_avg,r):
-        self.h_left = h_avg - r
-        self.h_right = h_avg + r
-        self.x1 = (domain.xf - domain.x0)/2
+    def __init__(self, domain, x_step, h_avg, r):
+
+
+        self.x_step = x_step
+        self.h_avg = h_avg
+        self.r = r
+        self.l_left = x_step-domain.x0
+        self.l_right = domain.xf - x_step
         
-        self.l_left = self.x1-domain.x0
-        self.l_right = domain.xf - self.x1
-        
-        self.h_eq = "h(x) = {%0.1f, %0.1f}"%(self.h_left, self.h_right)
+        self.h_eq = "h(x) = {%0.1f, %0.1f}"%(h_avg + r, h_avg - r)
         self.h_str = "Rayleigh Step"
         
         super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx, self.hxx)
 
     def h(self, x):
-        if x <= self.x1:
-            return self.h_left
+        if x <= self.x_step:
+            return self.h_avg + self.r
         else:
-            return self.h_right
+            return self.h_avg - self.r
 
     def hx(self, x):
         return 0
@@ -216,14 +217,16 @@ class randRectWaveHeight(Height):
         self.h_avg = h_avg
         self.x0 = domain.x0
         self.n_steps = n_steps
-        self.step_width = (domain.xf - domain.x0)/n_steps
-        self.h_steps = np.random.uniform(low=h_avg-r_max, high=h_avg+r_max, size=n_steps+1)
+        self.step_width = (domain.xf - domain.x0)/(n_steps+1)
+
         
+        self.h_steps = np.random.uniform(low=h_avg-r_max, high=h_avg+r_max, size=n_steps+1)
         self.h_str = "%d-step Rectangle Wave"%n_steps
         self.h_eq = "h(x) \in [%.1f,%.1f]"%(h_avg-r_max, h_avg + r_max)
     
         super().__init__(domain, self.h, self.h_str, self.h_eq)
     
     def h(self, x):
-        step_k = int((x - self.x0)//self.step_width)
+        
+        step_k = min(self.n_steps, int((x - self.x0)//self.step_width))
         return self.h_steps[step_k]

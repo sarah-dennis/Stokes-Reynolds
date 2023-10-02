@@ -54,8 +54,11 @@ class SquareWaveVelocity(Velocity):
         domain.set_ys(height, domain.Nx)
         vx = np.zeros((domain.Ny, domain.Nx))
         vy = np.zeros((domain.Ny, domain.Nx))
+        
         for j in range(domain.Ny):
-            for i in range(domain.Nx):
+            for i in range(1, domain.Nx):
+                # TODO: boundary x=0 behaving odd because of boundary error in pxs
+                
                 # upper surface motion:
                 # vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (domain.ys[j]**2 - height.hs[i]*domain.ys[j]) + domain.U * domain.ys[j]/height.hs[i]
                 
@@ -63,4 +66,14 @@ class SquareWaveVelocity(Velocity):
                 vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (domain.ys[j]**2 - height.hs[i]*domain.ys[j]) + domain.U * (1-domain.ys[j]/height.hs[i])
                 
                 vy[j,i] = 0
+                
         super().__init__(vx, vy)
+        
+        
+        
+        
+        
+        
+        
+        
+        
