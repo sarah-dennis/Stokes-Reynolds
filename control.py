@@ -20,8 +20,8 @@ import _graphics as graph
 # Domain & Discretization
 #------------------------------------------------------------------------------
 # x boundary
-x0 = 1    
-xf = 10      
+x0 = 0
+xf = 1      
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
@@ -32,7 +32,7 @@ visc = 1
 
 # Grid size
 #TODO: Nx used in discretization & plotting. Using Ny = Nx.
-Nx = 1000
+Nx = 500
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -40,12 +40,12 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Height & Pressure
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 5
-pN = 1
+p0 = 1000
+pN = 0
 
 # Height params (see Examples for more)
-n_steps = 3
-r = 0.4
+n_steps = 5
+r = 0.1
 h_avg = 0.5
 x_step = 0.8
 
@@ -60,9 +60,9 @@ x_step = 0.8
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
-height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
