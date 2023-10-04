@@ -45,7 +45,7 @@ pN = 0
 
 # Height params (see Examples for more)
 n_steps = 3
-r = 0.04
+r = 0.02
 h_avg = 0.1
 x_step = 0.8
 
