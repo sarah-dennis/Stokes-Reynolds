@@ -8,7 +8,6 @@ Created on Sun Jan 29 08:18:07 2023
 import _graphics as graph
 import numpy as np
 import domain as dfd
-from matplotlib import pyplot as pp
 
 class Height:
     
@@ -24,7 +23,6 @@ class Height:
         self.hs = np.asarray([h(x) for x in domain.xs])
         
         self.h_max = max(self.hs)
-        # self.ys = np.linspace(0, 1.1* self.h_max, domain.Nx)
         
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
@@ -38,24 +36,10 @@ class Height:
          
         
     def plot(self, domain):
-        fig = pp.figure()
-        pp.plot(domain.xs, self.hs, color='b')
-
-        pp.title(self.h_str)
-        
-        pp.xlabel("$x$")
-        pp.ylabel("Height $h(x)$")
-        
-        pp.ylim(0, 1.2*max(self.hs))
-        pp.xticks(np.arange(domain.xs[0], domain.xs[-1]+0.001, self.step_width))
-     
-        return fig
-        
-
-    def plot_derivs(self, domain):
-        graph.plot_2D_multi([self.hs, self.hxs, self.hxxs], domain.xs, "Height %s"%self.h_str, ["h", "hx", "hxx"])
-        #graph.plot_2D_multi([self.hs, self.hxs], domain.xs, "Height %s"%self.h_str, ["h", "hx"])
-
+        h_title = "Height (%s)"%self.h_str
+        h_axis = ["Height $h(x)$", "$x$"]
+        graph.plot_2D(self.hs, domain.xs, h_title, h_axis)
+  
 #------------------------------------------------------------------------------
 # Example Height Functions
 #------------------------------------------------------------------------------
@@ -178,7 +162,7 @@ class SquareWaveHeight(Height):
         self.h_str = "%d-step Square Wave"%n_steps
         self.h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
-        super().__init__(domain, self.h, self.h_str, self.h_eq, self.hx, self.hxx)
+        super().__init__(domain, self.h, self.h_str, self.h_eq)
 
     def h(self, x):
         if np.sin(np.pi * x/self.step_width) >= 0:
@@ -186,11 +170,11 @@ class SquareWaveHeight(Height):
         else:
             return self.h_avg - self.r
 
-    def hx(self, x):
-        return 0
+    # def hx(self, x):
+    #     return 0
     
-    def hxx(self, x):
-        return 0
+    # def hxx(self, x):
+    #     return 0
             
 
     

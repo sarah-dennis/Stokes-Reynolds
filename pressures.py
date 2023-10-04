@@ -23,14 +23,17 @@ class Pressure:
     def __init__(self, domain, ps, p0, pN, p_str, time=0):
         self.ps = ps
         self.pxs = dfd.center_diff(self.ps, domain)
+        
         self.pxxs = dfd.center_second_diff(self.ps, domain)
         self.p_str = p_str
         self.p0 = p0
-        self.pf = pN
+        self.pN = pN
         self.time = time
             
     def plot(self, domain):
-        graph.plot_2D(self.ps, domain.xs, "Pressure (%s)"%self.p_str, "Pressure $p(x)$", "$x$")
+        p_title = "Pressure (%s)"%self.p_str
+        p_axis = ["Pressure $p(x)$", "$x$"]
+        graph.plot_2D(self.ps, domain.xs, p_title, p_axis )
 
 class gridFinDiffPressure(Pressure):
     def __init__(self, domain, height, p0, pN):

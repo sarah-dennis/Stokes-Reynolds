@@ -19,13 +19,14 @@ class Domain:
         
         if BC == "periodic": #periodic
             self.dx = (xf - x0)/(Nx)
-        elif BC == "fixed": #fixed
+        else: #fixed
             self.dx = (xf - x0)/(Nx-1)
         
         self.xs = np.asarray([x0 + i*self.dx for i in range(Nx)])
 
     def set_ys(self, height, Ny):
         # always fixed BC in y
+        # used by Velocity once height is made
         self.Ny = Ny
         yf = 1.1*height.h_max
         y0 = 0
@@ -42,14 +43,13 @@ def center_diff(fs, domain):
         D[0][domain.Nx-1] = -1
         D[domain.Nx-1][0] = 1
         
-    elif domain.BC == "fixed": #prescribed 
-        D[0][domain.Nx-1] = 0
-        D[domain.Nx-1][0] = 0
-        # None # boundary heights are not used
-        
     D = D/(2*domain.dx)
         
     fs_dx = D@fs 
+    
+    if  domain.BC == "fixed": #prescribed 
+        fs_dx[0] = fs_dx[1]
+        fs_dx[-1] = fs_dx[-2]
     
     return np.asarray(fs_dx)
       
@@ -64,7 +64,7 @@ def center_second_diff(fs, domain):
         D[domain.Nx-1][0] = 1
         
     elif domain.BC == "fixed": #prescribed 
-        #None # boundary heights are not used
+        #None # boundary not used
         D[0][domain.Nx-1] = 0
         D[domain.Nx-1][0] = 0
         

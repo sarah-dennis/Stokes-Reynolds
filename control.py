@@ -25,7 +25,7 @@ xf = 1
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = 0   #V_x(x,0) = U
+U = 5   #V_x(x,0) = U
     
 # viscosity
 visc = 1     
@@ -40,13 +40,13 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Height & Pressure
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 1000
+p0 = 100
 pN = 0
 
 # Height params (see Examples for more)
-n_steps = 5
-r = 0.1
-h_avg = 0.5
+n_steps = 3
+r = 0.04
+h_avg = 0.1
 x_step = 0.8
 
 #------------------------------------------------------------------------------
