@@ -233,6 +233,7 @@ class swLinOp(LinearOperator):
         self.n = n
         self.hs = hs
         self.dtype = np.dtype('f8')
+        self.mv = np.zeros(2*self.n+1)
 
         
     #M = [[I, B],[C, 0]]
@@ -242,29 +243,28 @@ class swLinOp(LinearOperator):
     #Mv = rhs
 
     def _matvec(self, v):
-        mv = np.zeros(2*self.n+1)
         
         #----------------------
         # Upper blocks: I v1 + B v2
         
         #i = 0
-        mv[0] = v[0] + (-1/self.L) * v[self.n+1]
+        self.mv[0] = v[0] + (-1/self.L) * v[self.n+1]
         
         # 0 < i < n
         for i in range(1, self.n):
-            mv[i] =  v[i] + (1/self.L)*v[i + self.n] + (-1/self.L)*v[i+self.n+1]
+            self.mv[i] =  v[i] + (1/self.L)*v[i + self.n] + (-1/self.L)*v[i+self.n+1]
         
         #i = n
-        mv[self.n] = v[self.n] + (1/self.L)*v[2*self.n]
+        self. mv[self.n] = v[self.n] + (1/self.L)*v[2*self.n]
         
         #---------------------- 
         #Lower blocks: C v1 + 0 v2
         # n < i < 2*n+1 
         for i in range(self.n+1, 2*self.n+1):
             
-            mv[i] = -(self.hs[i - self.n-1]**3)*v[i - self.n-1] + (self.hs[i-self.n]**3)*v[i-self.n]
+            self.mv[i] = -(self.hs[i - self.n-1]**3)*v[i - self.n-1] + (self.hs[i-self.n]**3)*v[i-self.n]
 
-        return mv
+        return self.mv
 
 class swLinOp_deClass(LinearOperator):
     #n:= number of steps 
@@ -277,6 +277,8 @@ class swLinOp_deClass(LinearOperator):
         self.n = n
         self.hs = hs
         self.dtype = np.dtype('f8')
+        self.mv = np.zeros(2*n+1)
+        self.hscube = hs**3
 
         
     #M = [[I, B],[C, 0]]
@@ -287,29 +289,31 @@ class swLinOp_deClass(LinearOperator):
 
     def _matvec(self, v):
         n = self.n
-        L = self.L
+        Linv = 1/self.L
         hs = self.hs
         
-        mv = np.zeros(2*n+1)
+
         
         #----------------------
         # Upper blocks: I v1 + B v2
         
         #i = 0
-        mv[0] = v[0] + (-1/L) * v[n+1]
+        self.mv[0] = v[0] + - v[n+1]*Linv;
         
-        # 0 < i < n
-        for i in range(1, n):
-            mv[i] =  v[i] + (1/L)*v[i+n] + (-1/L)*v[i+n+1]
+        # # 0 < i < n
+        # for i in range(1, n):
+        #     mv[i] =  v[i] + (1/L)*v[i+n] + (-1/L)*v[i+n+1]
+        self.mv[1:n-1]=v[1:n-1] + (v[n+1:2*n-1] - v[n+2:2*n])*Linv
         
         #i = n
-        mv[n] = v[n] + (1/L)*v[2*n]
+        self.mv[n] = v[n] + Linv*v[2*n]
         
         #---------------------- 
         #Lower blocks: C v1 + 0 v2
-        # n < i < 2*n+1 
-        for i in range(n+1, 2*n+1):
+        # # n < i < 2*n+1 
+        # for i in range(n+1, 2*n+1):
             
-            mv[i] = -(hs[i - n-1]**3)*v[i-n-1] + (hs[i-n]**3)*v[i-n]
+        #     mv[i] = -(hs[i - n-1]**3)*v[i-n-1] + (hs[i-n]**3)*v[i-n]
+        self.mv[n+1:2*n] = -self.hscube[0:n-1]*v[0:n-1] + self.hscube[1:n]*v[1:n]
 
-        return mv
+        return self.mv

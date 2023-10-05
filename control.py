@@ -32,7 +32,7 @@ visc = 1
 
 # Grid size
 #TODO: Nx used in discretization & plotting. Using Ny = Nx.
-Nx = 500
+Nx = 100
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -44,7 +44,7 @@ p0 = 100
 pN = 0
 
 # Height params (see Examples for more)
-n_steps = 3
+n_steps = 407
 r = 0.02
 h_avg = 0.1
 x_step = 0.8
@@ -60,17 +60,17 @@ x_step = 0.8
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
-# cpr.run('height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
+# cpr.run('height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
 
 # Square wave: numerical solves
-# height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
+height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 # height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # Random height: finite difference sovle
@@ -79,9 +79,9 @@ height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps,
 #------------------------------------------------------------------------------
 # Plotting 
 #------------------------------------------------------------------------------
-p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
-p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+# p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
+# p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+# graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
 #------------------------------------------------------------------------------
 # Error
@@ -101,10 +101,10 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 #------------------------------------------------------------------------------
 # Velocity
 #------------------------------------------------------------------------------
-phv_title = "Pressure and Velocity for %s"%height.h_str
-phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-phv_ax_labels =  ['$x$', '$y$']
+# phv_title = "Pressure and Velocity for %s"%height.h_str
+# phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+# phv_ax_labels =  ['$x$', '$y$']
 
-graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
+# graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
 
