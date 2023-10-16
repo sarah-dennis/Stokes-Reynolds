@@ -143,9 +143,7 @@ class SquareWavePressure_gmresSolve(Pressure):
         
         t0 = time.time()
         
-        # M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
-        
-        M_linOp = sw.swLinOp_deClass(n, height.step_width, height.h_steps)
+        M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
         
         t1 = time.time()
         

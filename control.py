@@ -8,8 +8,6 @@ Created on Mon May 22 15:05:40 2023
 
 import numpy as np
 
-import cProfile as cpr
-
 import domain as dm
 import finDiff_1D as fd
 import examples_1D as ex
@@ -21,18 +19,18 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 1      
+xf = 1     
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = 5   #V_x(x,0) = U
+U = 0   #V_x(x,0) = U
     
 # viscosity
 visc = 1     
 
 # Grid size
 #TODO: Nx used in discretization & plotting. Using Ny = Nx.
-Nx = 100
+Nx = 155
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -40,12 +38,12 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Height & Pressure
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 100
+p0 = 1000
 pN = 0
 
 # Height params (see Examples for more)
-n_steps = 407
-r = 0.02
+n_steps = 33
+r = 0.01
 h_avg = 0.1
 x_step = 0.8
 
@@ -60,28 +58,36 @@ x_step = 0.8
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
-# cpr.run('height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)')
-
 # Square wave: numerical solves
-height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
+# height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
 # height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # Random height: finite difference sovle
-# height, pressure, velocity = ex.randGrid(domain, p0, pN)
+# height, pressure, velocity = ex.randGrid(domain, p0, pN, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Plotting 
 #------------------------------------------------------------------------------
-# p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
-# p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-# graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
+p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+
+
+#------------------------------------------------------------------------------
+# Velocity
+#------------------------------------------------------------------------------
+phv_title = "Pressure and Velocity for %s"%height.h_str
+phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+phv_ax_labels =  ['$x$', '$y$']
+
+graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
 #------------------------------------------------------------------------------
 # Error
@@ -97,14 +103,3 @@ height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps)
 # num_err_title = "Numerical Error for %s"%height.h_str
 # num_err_axis = ["$x$", "Pressure $p$"]
 # graph.plot_2D(pressure.ps - num_pressure, domain.xs, num_err_title, num_err_axis)
-
-#------------------------------------------------------------------------------
-# Velocity
-#------------------------------------------------------------------------------
-# phv_title = "Pressure and Velocity for %s"%height.h_str
-# phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-# phv_ax_labels =  ['$x$', '$y$']
-
-# graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
-

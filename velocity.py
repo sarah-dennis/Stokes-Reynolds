@@ -72,7 +72,7 @@ class SquareWaveVelocity(Velocity):
         
         
         
-class solutionVelocity(Velocity):
+class SolutionVelocity(Velocity):
     def __init__(self, domain, height, pressure):
         U = domain.U
         eta = domain.eta
