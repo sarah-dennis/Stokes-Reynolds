@@ -34,7 +34,7 @@ def plot_2D(fs, xs, title, axis):
     pp.xlabel(axis[0])
     
     pp.ylabel(axis[1])
-    # pp.ylim(-0.3, 1.1*max(fs))
+    pp.ylim(0, 1.1*max(fs))
     
     return fig
 
@@ -121,7 +121,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     thin_vx = np.ma.array(thin_vx, mask=thin_mask)
     thin_vy = np.ma.array(thin_vy, mask=thin_mask)
     
-    vel_plot = pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.003)
+    pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.003)
     
     # pp.plot(xs, hs, label='height', color='white')
     

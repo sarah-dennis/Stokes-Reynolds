@@ -127,9 +127,9 @@ class StepHeight(Height):
 
     def h(self, x):
         if x <= self.x_step:
-            return self.h_avg + self.r
-        else:
             return self.h_avg - self.r
+        else:
+            return self.h_avg + self.r
 
     def hx(self, x):
         return 0

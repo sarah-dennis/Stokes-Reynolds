@@ -19,18 +19,18 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 1     
+xf = 5    
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
 U = 0   #V_x(x,0) = U
     
 # viscosity
-visc = 1     
+visc = 100   
 
 # Grid size
 #TODO: Nx used in discretization & plotting. Using Ny = Nx.
-Nx = 155
+Nx = 100
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -38,14 +38,14 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Height & Pressure
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 1000
+p0 = 100
 pN = 0
 
 # Height params (see Examples for more)
-n_steps = 33
-r = 0.01
-h_avg = 0.1
-x_step = 0.8
+n_steps = 1
+r = 0.25
+h_avg = 0.75
+x_step = 1
 
 #------------------------------------------------------------------------------
 # Analytic Solutions
@@ -54,11 +54,11 @@ x_step = 0.8
 # height, pressure, velocity = ex.wedge(domain, p0, pN)
 # height, pressure, velocity = ex.corrugated(domain, p0, pN)
 
-# height, pressure, velocity = ex.step(domain, p0, pN, x_step, r, h_avg)
+height, pressure, velocity = ex.step(domain, p0, pN, x_step, r, h_avg)
 
 
 # height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
@@ -88,6 +88,11 @@ phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
 
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
+velocity.plot_vx_x0(domain, 0)
+velocity.plot_vx_x0(domain, 25)
+velocity.plot_vx_x0(domain, 30)
+velocity.plot_vx_x0(domain, -1)
+
 
 #------------------------------------------------------------------------------
 # Error

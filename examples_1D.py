@@ -27,7 +27,7 @@ def randGrid(domain, p0, pN, r, h_avg):
 def flat(domain, p0, pN, h0):
     height = hgt.ConstantHeight(domain, h0)
     pressure = prs.ConstantPressure(domain, height, p0, pN)
-    velocity = vel.ConstantVelocity(domain, height, pressure)
+    velocity = vel.SolutionVelocity(domain, height, pressure)
     return height, pressure, velocity
 
 #------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ def corrugated(domain, p0, pN):
     k = 2*np.pi
     height = hgt.CorrugatedHeight(domain, h_mid, r, k)
     pressure = prs.CorrugatedPressure(domain, height, p0, pN)
-    velocity = vel.CorrugatedVelocity(domain, height, pressure)
+    velocity = vel.SolutionVelocity(domain, height, pressure)
     return height, pressure, velocity
     
 #------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ def wedge(domain, p0, pN):
     m = -2
     height = hgt.WedgeHeight(domain, h_min, m)
     pressure = prs.WedgePressure(domain, height, p0, pN)
-    velocity = vel.WedgeVelocity(domain, height, pressure)
+    velocity = vel.SolutionVelocity(domain, height, pressure)
     return height, pressure, velocity
 
 
@@ -61,7 +61,7 @@ def step(domain, p0, pN, x_step, r, h_avg):
 
     height = hgt.StepHeight(domain, x_step, h_avg, r)
     pressure = prs.StepPressure(domain, height, p0, pN)
-    velocity = vel.SquareWaveVelocity(domain, height, pressure)
+    velocity = vel.SolutionVelocity(domain, height, pressure)
     return height, pressure, velocity
 
 

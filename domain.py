@@ -28,10 +28,10 @@ class Domain:
         # always fixed BC in y
         # used by Velocity once height is made
         self.Ny = Ny
-        yf = 1.1*height.h_max
-        y0 = 0
-        self.dy = (yf - y0)/(Ny-1)
-        self.ys = np.asarray([y0 + i*self.dy for i in range(Ny)])
+        self.yf = 1.1*height.h_max
+        self.y0 = 0
+        self.dy = (self.yf - self.y0)/(Ny-1)
+        self.ys = np.asarray([self.y0 + i*self.dy for i in range(Ny)])
   
     
 def center_diff(fs, domain):

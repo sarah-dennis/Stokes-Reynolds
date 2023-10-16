@@ -14,64 +14,28 @@ class Velocity:
         self.vx = vx
         self.vy = vy
         
-class ConstantVelocity(Velocity):
-    def __init__(self, domain, height, pressure):
-        domain.set_ys(height, domain.Nx)
-        vx = np.zeros((domain.Ny, domain.Nx))
-        vy = np.zeros((domain.Ny, domain.Nx))
-        for j in range(domain.Ny):
-            for i in range(domain.Nx):
-                vx[j,i] = domain.U
-                vy[j,i] = 0
-        super().__init__(vx, vy)
- 
-# class CorrugatedVelocity(Velocity):
-#     def __init__(self, domain, height, pressure):
-
-class WedgeVelocity(Velocity):
-    def __init__(self, domain, height, pressure):
-        domain.set_ys(height, domain.Nx)
-        vx = np.zeros((domain.Ny, domain.Nx))
-        vy = np.zeros((domain.Ny, domain.Nx))
-        for j in range(domain.Ny):
-            for i in range(domain.Nx):
-                #    upper surface motion:
-                vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (domain.ys[j]**2 - height.hs[i]*domain.ys[j]) + domain.U * domain.ys[j]/height.hs[i]
+    def plot_vx_y0(self, domain, j):
+        vx_title = "Velocity $Vx$ at $y_0=%.2f$"%domain.ys[j]
+        vx_labels = ["$x$", "Velocity $Vx(x, y_0)$"]
+        graph.plot_2D(self.vx[j], domain.xs, vx_title, vx_labels)
+        
+    def plot_vx_x0(self, domain, i):
+        vx_title = "Velocity $Vx$ at $x_0=%.2f$"%domain.xs[i]
+        vx_labels = ["Velocity $Vx(x_0, y)$","$y$"]
+        graph.plot_2D(domain.ys, self.vx[:,i], vx_title, vx_labels)
+        
+    def plot_vy_y0(self, domain, j):
+        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.ys[j]
+        vy_labels = ["$x$", "Velocity $Vy(x, y_0)$"]
+        graph.plot_2D(self.vy[j], domain.xs, vy_title, vy_labels)
     
-                if i == 0 or i == domain.Nx-1:
-                    vy[j,i] = 0
-                else:
-                    vy[j,i] = -1/(2*domain.eta) * (pressure.pxxs[i]*(1/3*domain.ys[j]**3 - 1/2*height.hs[i]*domain.ys[j]**2) - 1/2*pressure.pxs[i]*height.hxs[i]*domain.ys[j]**2) + (1/2)*domain.U*height.hxs[i]*domain.ys[j]**2/height.hs[i]**2
-                
-                
-            
-        graph.plot_2D(vy[100], domain.ys,  "Vy[10]", ["y", "vy"])
-        super().__init__(vx, vy)
+    def plot_vy_x0(self, domain, i):
+        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.xs[i]
+        vy_labels = ["Velocity $Vy(x_0, y)$","$y$" ]
+        graph.plot_2D(domain.ys, self.vy[:,i], vy_title, vy_labels) 
 
 
-class SquareWaveVelocity(Velocity):
-    def __init__(self, domain, height, pressure):
-        domain.set_ys(height, domain.Nx)
-        vx = np.zeros((domain.Ny, domain.Nx))
-        vy = np.zeros((domain.Ny, domain.Nx))
 
-        
-        for j in range(domain.Ny):
-            for i in range(domain.Nx):
-                
-                
-                # upper surface motion:
-                # vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (domain.ys[j]**2 - height.hs[i]*domain.ys[j]) + domain.U * domain.ys[j]/height.hs[i]
-                
-                # lower surface motion:
-                vx[j,i] = 1/(2*domain.eta) * pressure.pxs[i] * (domain.ys[j]**2 - height.hs[i]*domain.ys[j]) + domain.U * (1-domain.ys[j]/height.hs[i])
-                
-                vy[j,i] = 0
-                
-        super().__init__(vx, vy)
-        
-        
-        
 class SolutionVelocity(Velocity):
     def __init__(self, domain, height, pressure):
         U = domain.U
@@ -96,6 +60,14 @@ class SolutionVelocity(Velocity):
                                 
                 vy[j,i] = -2*hx*(U/h**3 - 3*q/h**4) * y**2 * (h-y)
             
+            
+        mask = np.zeros((domain.Nx, domain.Ny), dtype=bool)
+        for i in range(domain.Ny):
+            for j in range(domain.Nx):
+                mask[i,j] = domain.ys[i] > height.hs[j]     
+        vx = np.ma.array(vx, mask=mask)
+        vy = np.ma.array(vy, mask=mask)        
+        
         super().__init__(vx, vy)
         
         
