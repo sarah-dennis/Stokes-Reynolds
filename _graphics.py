@@ -38,6 +38,20 @@ def plot_2D(fs, xs, title, axis):
     
     return fig
 
+def scatter_2D(fs, xs, title, axis):
+    fig = pp.figure()
+    pp.scatter(xs, fs, color='b')
+
+    pp.title(title)
+    
+    pp.xlabel(axis[0])
+    
+    pp.ylabel(axis[1])
+    pp.ylim(0, 1.1*max(fs))
+    
+    return fig
+
+
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
     ax = fig.add_subplot()

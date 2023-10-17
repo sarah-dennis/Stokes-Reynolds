@@ -17,6 +17,8 @@ class Domain:
         self.eta = eta
         self.U = U
         
+
+        
         if BC == "periodic": #periodic
             self.dx = (xf - x0)/(Nx)
         else: #fixed
@@ -24,6 +26,12 @@ class Domain:
         
         self.xs = np.asarray([x0 + i*self.dx for i in range(Nx)])
 
+
+ # #------------------------------------------------------------------------------
+    # # Reynolds number
+    # Re = U * height.h_avg / visc
+    # # print("Re = %.4f"%Re)
+    # #TODO: separate domain instances for X and Y
     def set_ys(self, height, Ny):
         # always fixed BC in y
         # used by Velocity once height is made
@@ -33,6 +41,8 @@ class Domain:
         self.dy = (self.yf - self.y0)/(Ny-1)
         self.ys = np.asarray([self.y0 + i*self.dy for i in range(Ny)])
   
+    def get_index(self, x):
+        return int((x-self.x0)//self.dx)
     
 def center_diff(fs, domain):
     D_lower = -1*np.ones(domain.Nx)

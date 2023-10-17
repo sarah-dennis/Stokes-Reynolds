@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May 22 15:05:40 2023
-
 @author: sarahdennis
 """
 
@@ -12,7 +11,6 @@ import domain as dm
 import finDiff_1D as fd
 import examples_1D as ex
 import _graphics as graph
-
 
 #------------------------------------------------------------------------------
 # Domain & Discretization
@@ -37,9 +35,8 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Pressure & Height 
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 10
+p0 = 100
 pN = 0
-
 
 # Height params (see Examples for more)
 n_steps = 1
@@ -57,30 +54,23 @@ x_step = 1
 
 height, pressure, velocity = ex.step(domain, p0, pN, x_step, r, h_avg)
 
-
-# height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-
-# height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Square wave: numerical solves
+
+# height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+
 # height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
 # height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
-# Random height: finite difference sovle
-# height, pressure, velocity = ex.randGrid(domain, p0, pN, r, h_avg)
+# Random height solves.... #TODO: 
+# height, pressure, velocity = ex.randGrid(domain, p0, pN, r, h_avg) ##<-- this is finDiff
+# height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #------------------------------------------------------------------------------
-# Reynolds number
-Re = U * height.h_avg / visc
-# print("Re = %.4f"%Re)
-#TODO: U = max{y}{U_x(0,y)} 
-
-#------------------------------------------------------------------------------
-# Plotting 
+# Pressure & Height plotting 
 #------------------------------------------------------------------------------
 p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
@@ -96,9 +86,21 @@ phv_ax_labels =  ['$x$', '$y$']
 
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
+# Inlet velocity
 velocity.plot_vx_x0(domain, 0)
+# velocity.plot_vy_x0(domain, 0)
 
+#Step profile 
+step_index = domain.get_index(x_step)
+
+index = step_index
+velocity.plot_vx_x0(domain, index)
+# velocity.plot_vy_x0(domain, index)
+
+# Outlet velocity
 velocity.plot_vx_x0(domain, -1)
+# velocity.plot_vy_x0(domain, -1)
+
 
 
 #------------------------------------------------------------------------------
