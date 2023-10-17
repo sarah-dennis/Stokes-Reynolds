@@ -24,27 +24,28 @@ BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
 U = 0   #V_x(x,0) = U
-    
-# viscosity
-visc = 100   
+
+# kinematic viscosity
+visc = 1   
 
 # Grid size
-#TODO: Nx used in discretization & plotting. Using Ny = Nx.
 Nx = 100
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
 #------------------------------------------------------------------------------
-# Height & Pressure
+# Pressure & Height 
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 100
+p0 = 10
 pN = 0
+
 
 # Height params (see Examples for more)
 n_steps = 1
 r = 0.25
 h_avg = 0.75
+
 x_step = 1
 
 #------------------------------------------------------------------------------
@@ -73,6 +74,12 @@ height, pressure, velocity = ex.step(domain, p0, pN, x_step, r, h_avg)
 # height, pressure, velocity = ex.randGrid(domain, p0, pN, r, h_avg)
 
 #------------------------------------------------------------------------------
+# Reynolds number
+Re = U * height.h_avg / visc
+# print("Re = %.4f"%Re)
+#TODO: U = max{y}{U_x(0,y)} 
+
+#------------------------------------------------------------------------------
 # Plotting 
 #------------------------------------------------------------------------------
 p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
@@ -88,9 +95,9 @@ phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
 
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
+
 velocity.plot_vx_x0(domain, 0)
-velocity.plot_vx_x0(domain, 25)
-velocity.plot_vx_x0(domain, 30)
+
 velocity.plot_vx_x0(domain, -1)
 
 

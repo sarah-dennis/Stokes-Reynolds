@@ -103,3 +103,4 @@ def squareWave_gmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
     pressure = prs.SquareWavePressure_gmresSolve(domain, height, p0, pN)
     velocity = vel.SolutionVelocity(domain, height, pressure)
     return height, pressure, velocity
+

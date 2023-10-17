@@ -23,6 +23,7 @@ class Height:
         self.hs = np.asarray([h(x) for x in domain.xs])
         
         self.h_max = max(self.hs)
+        self.h_avg = np.mean(self.hs)
         
         if hx == None:
             self.hxs = dfd.center_diff(self.hs, domain)
@@ -127,9 +128,9 @@ class StepHeight(Height):
 
     def h(self, x):
         if x <= self.x_step:
-            return self.h_avg - self.r
-        else:
             return self.h_avg + self.r
+        else:
+            return self.h_avg - self.r
 
     def hx(self, x):
         return 0

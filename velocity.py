@@ -5,6 +5,7 @@ Created on Wed Aug 30 12:20:23 2023
 @author: sarah
 """
 import numpy as np
+from numpy.polynomial import Polynomial as poly
 import _graphics as graph
 
 class Velocity:
@@ -18,11 +19,19 @@ class Velocity:
         vx_title = "Velocity $Vx$ at $y_0=%.2f$"%domain.ys[j]
         vx_labels = ["$x$", "Velocity $Vx(x, y_0)$"]
         graph.plot_2D(self.vx[j], domain.xs, vx_title, vx_labels)
+        c = poly.fit(domain.xs, self.vx[j], deg = 2)
+        print("Vx(x, %.1f): %s"%(domain.ys[j],c))
+        
         
     def plot_vx_x0(self, domain, i):
         vx_title = "Velocity $Vx$ at $x_0=%.2f$"%domain.xs[i]
         vx_labels = ["Velocity $Vx(x_0, y)$","$y$"]
         graph.plot_2D(domain.ys, self.vx[:,i], vx_title, vx_labels)
+
+        c = poly.fit(domain.ys, self.vx[:,i], deg = 2)
+        print("Vx(%.1f, y): %s"%(domain.xs[i],c))
+        
+        
         
     def plot_vy_y0(self, domain, j):
         vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.ys[j]
