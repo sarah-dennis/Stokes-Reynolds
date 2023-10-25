@@ -10,6 +10,7 @@ import numpy as np
 import domain as dm
 import finDiff_1D as fd
 import examples_1D as ex
+import velocity as vel
 import _graphics as graph
 
 #------------------------------------------------------------------------------
@@ -21,13 +22,13 @@ xf = 5
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = 0   #V_x(x,0) = U
+U = 2   #V_x(x,0) = U
 
 # kinematic viscosity
 visc = 1   
 
 # Grid size
-Nx = 100
+Nx = 2000
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -35,11 +36,11 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 # Pressure & Height 
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 100
+p0 = 0
 pN = 0
 
 # Height params (see Examples for more)
-n_steps = 1
+n_steps = 57
 r = 0.25
 h_avg = 0.75
 
@@ -48,26 +49,25 @@ x_step = 1
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
-# height, pressure, velocity = ex.flat(domain, p0, pN, h_avg)
-# height, pressure, velocity = ex.wedge(domain, p0, pN)
-# height, pressure, velocity = ex.corrugated(domain, p0, pN)
+# height, pressure = ex.flat(domain, p0, pN, h_avg)
+# height, pressure = ex.wedge(domain, p0, pN)
+# height, pressure = ex.corrugated(domain, p0, pN)
 
-height, pressure, velocity = ex.step(domain, p0, pN, x_step, r, h_avg)
+# height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Square wave: numerical solves
+# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
-# height, pressure, velocity = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
 
-# height, pressure, velocity = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure, velocity = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+h_steps = [2, 2, 1, 1]
+height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
 
-# Random height solves.... #TODO: 
-# height, pressure, velocity = ex.randGrid(domain, p0, pN, r, h_avg) ##<-- this is finDiff
-# height, pressure, velocity = ex.randRectWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 #------------------------------------------------------------------------------
 # Pressure & Height plotting 
@@ -80,6 +80,8 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 #------------------------------------------------------------------------------
 # Velocity
 #------------------------------------------------------------------------------
+velocity = vel.Velocity(domain, height, pressure)
+
 phv_title = "Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
@@ -91,9 +93,8 @@ velocity.plot_vx_x0(domain, 0)
 # velocity.plot_vy_x0(domain, 0)
 
 #Step profile 
-step_index = domain.get_index(x_step)
 
-index = step_index
+index = domain.get_index(x_step)
 velocity.plot_vx_x0(domain, index)
 # velocity.plot_vy_x0(domain, index)
 

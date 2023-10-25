@@ -10,43 +10,12 @@ import _graphics as graph
 
 class Velocity:
     
-    def __init__(self, vx, vy):
-        
-        self.vx = vx
-        self.vy = vy
-        
-    def plot_vx_y0(self, domain, j):
-        vx_title = "Velocity $Vx$ at $y_0=%.2f$"%domain.ys[j]
-        vx_labels = ["$x$", "Velocity $Vx(x, y_0)$"]
-        graph.scatter_2D(self.vx[j], domain.xs, vx_title, vx_labels)
-        c = poly.fit(domain.xs, self.vx[j], deg = 2)
-        print("Vx(x, %.1f): %s"%(domain.ys[j],c))
-        
-        
-    def plot_vx_x0(self, domain, i):
-        vx_title = "Velocity $Vx$ at $x_0=%.2f$"%domain.xs[i]
-        vx_labels = ["Velocity $Vx(x_0, y)$","$y$"]
-        graph.scatter_2D(domain.ys, self.vx[:,i], vx_title, vx_labels)
-
-        c = poly.fit(domain.ys, self.vx[:,i], deg = 2)
-        print("Vx(%.1f, y): %s"%(domain.xs[i],c))
-        
-        
-        
-    def plot_vy_y0(self, domain, j):
-        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.ys[j]
-        vy_labels = ["$x$", "Velocity $Vy(x, y_0)$"]
-        graph.scatter_2D(self.vy[j], domain.xs, vy_title, vy_labels)
-    
-    def plot_vy_x0(self, domain, i):
-        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.xs[i]
-        vy_labels = ["Velocity $Vy(x_0, y)$","$y$" ]
-        graph.scatter_2D(domain.ys, self.vy[:,i], vy_title, vy_labels) 
-
-
-
-class SolutionVelocity(Velocity):
     def __init__(self, domain, height, pressure):
+        
+        self.vx, self.vy = self.makeVelocityField(domain, height, pressure)
+    
+    
+    def makeVelocityField(self, domain, height, pressure):
         U = domain.U
         eta = domain.eta
         domain.set_ys(height, domain.Nx)
@@ -75,10 +44,37 @@ class SolutionVelocity(Velocity):
             for j in range(domain.Nx):
                 mask[i,j] = domain.ys[i] > height.hs[j]     
         vx = np.ma.array(vx, mask=mask)
-        vy = np.ma.array(vy, mask=mask)        
+        vy = np.ma.array(vy, mask=mask)
+        return vx, vy
         
-        super().__init__(vx, vy)
+    def plot_vx_y0(self, domain, j):
+        vx_title = "Velocity $Vx$ at $y_0=%.2f$"%domain.ys[j]
+        vx_labels = ["$x$", "Velocity $Vx(x, y_0)$"]
+        graph.scatter_2D(self.vx[j], domain.xs, vx_title, vx_labels)
+        c = poly.fit(domain.xs, self.vx[j], deg = 2)
+        print("Vx(x, %.1f): %s"%(domain.ys[j],c))
         
+        
+    def plot_vx_x0(self, domain, i):
+        vx_title = "Velocity $Vx$ at $x_0=%.2f$"%domain.xs[i]
+        vx_labels = ["Velocity $Vx(x_0, y)$","$y$"]
+        graph.scatter_2D(domain.ys, self.vx[:,i], vx_title, vx_labels)
+
+        c = poly.fit(domain.ys, self.vx[:,i], deg = 2)
+        print("Vx(%.1f, y): %s"%(domain.xs[i],c))
+        
+        
+    def plot_vy_y0(self, domain, j):
+        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.ys[j]
+        vy_labels = ["$x$", "Velocity $Vy(x, y_0)$"]
+        graph.scatter_2D(self.vy[j], domain.xs, vy_title, vy_labels)
+    
+    def plot_vy_x0(self, domain, i):
+        vy_title = "Velocity $Vy$ at $x_0=%.2f$"%domain.xs[i]
+        vy_labels = ["Velocity $Vy(x_0, y)$","$y$" ]
+        graph.scatter_2D(domain.ys, self.vy[:,i], vy_title, vy_labels) 
+
+
         
         
         

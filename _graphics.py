@@ -115,7 +115,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     fig.colorbar(press_plot, label="pressure")
 
     #Velocity vector plot
-    skip = 2
+    skip = 20
     
     thin_xs = xs[::skip]
     thin_ys = ys[::skip]
