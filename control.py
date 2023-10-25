@@ -28,7 +28,7 @@ U = 2   #V_x(x,0) = U
 visc = 1   
 
 # Grid size
-Nx = 2000
+Nx = 500
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -37,6 +37,7 @@ domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 #------------------------------------------------------------------------------
 # Pressure boundary
 p0 = 0
+
 pN = 0
 
 # Height params (see Examples for more)
@@ -65,6 +66,8 @@ x_step = 1
 
 # height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
 # height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+
+
 h_steps = [2, 2, 1, 1]
 height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
 
@@ -89,17 +92,17 @@ phv_ax_labels =  ['$x$', '$y$']
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
 # Inlet velocity
-velocity.plot_vx_x0(domain, 0)
+# velocity.plot_vx_x0(domain, 0)
 # velocity.plot_vy_x0(domain, 0)
 
 #Step profile 
 
-index = domain.get_index(x_step)
-velocity.plot_vx_x0(domain, index)
+# index = domain.get_index(x_step)
+# velocity.plot_vx_x0(domain, index)
 # velocity.plot_vy_x0(domain, index)
 
 # Outlet velocity
-velocity.plot_vx_x0(domain, -1)
+# velocity.plot_vx_x0(domain, -1)
 # velocity.plot_vy_x0(domain, -1)
 
 

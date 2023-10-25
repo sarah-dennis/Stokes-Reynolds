@@ -35,7 +35,7 @@ class Pressure:
         p_axis = ["Pressure $p(x)$", "$x$"]
         graph.plot_2D(self.ps, domain.xs, p_title, p_axis )
 
-class gridFinDiffPressure(Pressure):
+class FinDiffPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Finite Difference ($N_x = %d$)"%domain.Nx
         ps = fd.solve(domain, height, p0, pN)

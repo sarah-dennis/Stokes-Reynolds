@@ -148,7 +148,6 @@ class NStepHeight(Height): # N > 1, uniform step width
         return hs
         
 class SquareWaveHeight(NStepHeight): #h(x) = h_avg +/- r
-    
     def __init__(self, domain, h_avg, r, n_steps):
         
         h_steps = np.zeros(n_steps+1)
@@ -161,9 +160,7 @@ class SquareWaveHeight(NStepHeight): #h(x) = h_avg +/- r
  
         super().__init__(domain, n_steps, h_steps, h_str, h_eq)
 
-
 class randomWaveHeight(NStepHeight): #h(x) = h_avg +/- r_rand
-    
     def __init__(self, domain, h_avg, r_max, n_steps):
         
         h_steps = np.random.uniform(low=h_avg-r_max, high=h_avg+r_max, size=n_steps+1)
@@ -172,3 +169,42 @@ class randomWaveHeight(NStepHeight): #h(x) = h_avg +/- r_rand
     
         super().__init__(domain, n_steps, h_steps, h_str, h_eq)
         
+class OneStepSquareWaveHeight(NStepHeight):
+    def __init__(self, domain, x_step, h1, h2):
+        l1 = x_step - domain.x0
+        l2 = domain.xf - x_step
+        
+        step_width = np.gcd(l1, l2)
+        
+        k = int(l1/step_width)
+        n_steps = int((l1 + l2)/step_width - 1)
+        
+        h_steps = np.zeros(n_steps + 1)
+        for i in range(n_steps+1):
+            if i < k:
+                h_steps[i] = h1
+            else:
+                h_steps[i] = h2
+        
+        h_str = "%d-step Square Wave"%n_steps
+        h_eq = "h(x) = [%.2f, %.2f]"%(h1, h2)
+        super().__init__(domain,    n_steps, h_steps, h_str, h_eq)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
