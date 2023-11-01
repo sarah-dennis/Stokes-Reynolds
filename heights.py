@@ -60,7 +60,7 @@ class CorrugatedHeight(Height):
         self.h_str = "Sinusoidal Height"        
         self.hs = np.asarray([self.h(x) for x in domain.xs])
         self.hxs = np.asarray([self.hx(x) for x in domain.xs])
-        self.hxs = np.asarray([self.hxx(x) for x in domain.xs])
+        self.hxxs = np.asarray([self.hxx(x) for x in domain.xs])
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 
     def h(self, x):
