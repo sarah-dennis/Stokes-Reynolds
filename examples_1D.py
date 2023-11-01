@@ -56,6 +56,11 @@ def step(domain, p0, pN, x_step, r, h_avg):
 
     return height, pressure
 
+def oneStepSquareWave_schurLUSolve(domain, p0, pN, x_step, h1, h2):
+    height = hgt.OneStepSquareWaveHeight(domain, x_step, h1, h2)
+    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
+    return height, pressure
+
 # ------------------------------------------------------------------------------
 # III b. N-Step Height Example
 # ------------------------------------------------------------------------------
