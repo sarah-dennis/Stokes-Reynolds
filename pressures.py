@@ -90,8 +90,9 @@ class StepPressure(Pressure):
 
         m_in_numer = (h_out/h_in)**3 * (p0 - pN)/(xm - xf) - c * (h_out - h_in)/h_in**3
         m_in_denom = 1 - (h_out/h_in)**3 * (xm - x0)/(xm - xf)
-        m_in = m_in_numer/m_in_denom
         
+        m_in = m_in_numer/m_in_denom
+
         m_out = ((xm - x0)*m_in + (p0 - pN))/(xm - xf)
 
         for i in range(domain.Nx):
@@ -100,6 +101,8 @@ class StepPressure(Pressure):
             else:
                 ps[i] = m_out * (domain.xs[i] - xf) + pN
 
+        self.m_in = m_in
+        self.m_out = m_out
         super().__init__(domain, ps, p0, pN, p_str)
         
 

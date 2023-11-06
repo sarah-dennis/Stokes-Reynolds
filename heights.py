@@ -99,7 +99,6 @@ class StepHeight(Height):
     
     def __init__(self, domain, x_step, h_avg, r):
 
-
         self.x_step = x_step
         self.h_avg = h_avg
         self.r = r
@@ -108,7 +107,7 @@ class StepHeight(Height):
         
         self.h_eq = "h(x) = {%0.1f, %0.1f}"%(h_avg + r, h_avg - r)
         self.h_str = "Rayleigh Step"
-        self.hs = np.asarray([self.h(x) for x in domain.xs])
+        self.hs = np.asarray([self.h_bfs(x) for x in domain.xs])
         self.hxs = dfd.center_diff(self.hs, domain)
         self.hxxs = dfd.center_second_diff(self.hs, domain)
         
@@ -119,7 +118,13 @@ class StepHeight(Height):
             return self.h_avg + self.r
         else:
             return self.h_avg - self.r
-
+        
+    def h_bfs(self, x):
+        if x <= self.x_step:
+            return self.h_avg - self.r
+        else:
+            return self.h_avg + self.r
+        
 class NStepHeight(Height): # N > 1, uniform step width
 
     def __init__(self, domain, n_steps, h_steps, h_str, h_eq):
