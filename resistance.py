@@ -14,12 +14,12 @@ from pressures import StepPressure
 import numpy as np
 # x boundary
 x0 = 0
-xf = 3
+xf = 4
 BC = "fixed" 
 
 #pressure boundary
-p0 = 1
-pN = 0
+p0 = 20
+pN = 1
 
 #fluid properties
 visc = 1 # kinematic viscosity
@@ -34,7 +34,7 @@ Nx = 500
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
 #Height
-l1 = 1
+l1 = 0.5
 x_step = x0+l1
 l2 = xf-l1
 
@@ -68,10 +68,11 @@ Re = 2*h1*rho*Ub1/visc #reynolds number
 
 print("Reynolds num: %.3f\n"%Re)
 
-px1_stokes = -lam*rho*l1*(Ub1**2)/(2*h1*Re)   
+px1_stokes = -lam*rho*l1*(Ub1**2)/(2*h1*Re*l1)   
 p_max_stokes_in = px1_stokes*l1+p0
 
-px2_stokes = -lam*rho*l2*(Ub2**2)/(2*h2*Re)
+
+px2_stokes = -lam*rho*l2*(Ub2**2)/(2*h2*Re*l2)
 p_max_stokes_out = -px2_stokes*(l2) + pN
 
 
@@ -82,8 +83,8 @@ print("Biswas Stokes \n px1: %.3f, px2: %.3f "%(px1_stokes, px2_stokes))
 print(" p_max_1, p_max_2: %.3f, %.3f\n"%(p_max_stokes_in, p_max_stokes_out))
 print("px_correction: %.3f\n"%px_corr)
 
-print("hyd-res reyn: %.3f"%(-Q/(px1_reyn + px2_reyn)))
-print("hyd-res stokes: %.3f"%(-Q/(px1_stokes + px2_stokes - px_corr)))
+print("hyd-res reyn: %.5f"%(-Q/(px1_reyn + px2_reyn)))
+print("hyd-res stokes: %.5f"%(-Q/(px1_stokes + px2_stokes - px_corr)))
 
 def make_disc_ps(x0, l1, l2, m1, m2, Nx):
     ps = np.zeros(Nx)
@@ -106,7 +107,7 @@ ps = make_disc_ps(x0, l1, l2, px1_stokes, px2_stokes, domain.Nx) #p_reyn.ps
 # Pressure & Height plotting 
 #------------------------------------------------------------------------------
 p_h_title = "Reynolds Pressure and Height for BFS"
-p_h_title2 = "Stokes Pressure and Height for BFS"
+p_h_title2 = "Biswas Pressure and Height for BFS"
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
 graph.plot_2D_twin(p_reyn.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
