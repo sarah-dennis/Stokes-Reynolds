@@ -47,22 +47,22 @@ def wedge(domain, p0, pN):
 
 
 # ------------------------------------------------------------------------------
-# III a. Step Height Example
+# III a. Step Height Example (N = 1)
 # ------------------------------------------------------------------------------
-def step(domain, p0, pN, x_step, r, h_avg):
+def step(domain, p0, pN, x_step, h1, h2):
 
-    height = hgt.StepHeight(domain, x_step, h_avg, r)
+    height = hgt.StepHeight(domain, x_step, h1, h2)
     pressure = prs.StepPressure(domain, height, p0, pN)
 
     return height, pressure
 
-def oneStepSquareWave_schurLUSolve(domain, p0, pN, x_step, h1, h2):
+def step_schurLUSolve(domain, p0, pN, x_step, h1, h2):
     height = hgt.OneStepSquareWaveHeight(domain, x_step, h1, h2)
     pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
     return height, pressure
 
 # ------------------------------------------------------------------------------
-# III b. N-Step Height Example
+# III b. N-Step Height Example (N > 1)
 # ------------------------------------------------------------------------------
 
 
