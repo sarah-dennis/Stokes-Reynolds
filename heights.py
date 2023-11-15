@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jan 29 08:18:07 2023
@@ -39,6 +39,7 @@ class Height:
 #------------------------------------------------------------------------------
 # All example heights must have a height function h(self, x) 
 # First and second derivative height functions hx(self, x) and hxx(self, x) can be specified
+
 class ConstantHeight(Height):
     def __init__(self, domain, h0):
         self.h_str = "Constant Height"
@@ -48,7 +49,7 @@ class ConstantHeight(Height):
         self.hxxs = np.zeros(domain.Nx)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 
-class CorrugatedHeight(Height):
+class CorrugatedHeight(Height): #sinusoidal wave
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, domain, h_mid, r, k):
         self.h_mid = h_mid
@@ -74,7 +75,7 @@ class CorrugatedHeight(Height):
 
 
 
-class WedgeHeight(Height):
+class WedgeHeight(Height): #slider bearing
     
     def __init__(self, domain, h_min, m):
         self.h_min = h_min
@@ -94,38 +95,7 @@ class WedgeHeight(Height):
     def h(self, x):
         return self.h_min + self.m * (x - self.xf)
 
-
-class StepHeight(Height):
-    
-    def __init__(self, domain, x_step, h_avg, r):
-
-        self.x_step = x_step
-        self.h_avg = h_avg
-        self.r = r
-        self.l_left = x_step-domain.x0
-        self.l_right = domain.xf - x_step
-        
-        self.h_eq = "h(x) = {%0.1f, %0.1f}"%(h_avg + r, h_avg - r)
-        self.h_str = "Rayleigh Step"
-        self.hs = np.asarray([self.h_bfs(x) for x in domain.xs])
-        self.hxs = dfd.center_diff(self.hs, domain)
-        self.hxxs = dfd.center_second_diff(self.hs, domain)
-        
-        super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
-
-    def h(self, x):
-        if x <= self.x_step:
-            return self.h_avg + self.r
-        else:
-            return self.h_avg - self.r
-        
-    def h_bfs(self, x):
-        if x <= self.x_step:
-            return self.h_avg - self.r
-        else:
-            return self.h_avg + self.r
-        
-class NStepHeight(Height): # N > 1, uniform step width
+class NStepHeight(Height): # uniform width step function 
 
     def __init__(self, domain, n_steps, h_steps, h_str, h_eq):
         self.n_steps = n_steps
@@ -152,29 +122,38 @@ class NStepHeight(Height): # N > 1, uniform step width
  
         return hs
         
-class SquareWaveHeight(NStepHeight): #h(x) = h_avg +/- r
-    def __init__(self, domain, h_avg, r, n_steps):
-        
-        h_steps = np.zeros(n_steps+1)
-        
-        for i in range(n_steps+1):
-            h_steps[i] = h_avg + (-1)**i * r
-        
-        h_str = "%d-step Square Wave"%n_steps
-        h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
- 
-        super().__init__(domain, n_steps, h_steps, h_str, h_eq)
-
-class randomWaveHeight(NStepHeight): #h(x) = h_avg +/- r_rand
-    def __init__(self, domain, h_avg, r_max, n_steps):
-        
-        h_steps = np.random.uniform(low=h_avg-r_max, high=h_avg+r_max, size=n_steps+1)
-        h_str = "%d-step Random Wave"%n_steps
-        h_eq = "h(x) \in [%.1f,%.1f]"%(h_avg-r_max, h_avg + r_max)
+# class StepHeight(Height):
     
-        super().__init__(domain, n_steps, h_steps, h_str, h_eq)
+#     def __init__(self, domain, x_step, h_avg, r):
+
+#         self.x_step = x_step
+#         self.h_avg = h_avg
+#         self.r = r
+#         self.l_left = x_step-domain.x0
+#         self.l_right = domain.xf - x_step
         
-class OneStepSquareWaveHeight(NStepHeight):
+#         self.h_eq = "h(x) = {%0.1f, %0.1f}"%(h_avg + r, h_avg - r)
+#         self.h_str = "Rayleigh Step"
+#         self.hs = np.asarray([self.h_bfs(x) for x in domain.xs])
+#         self.hxs = dfd.center_diff(self.hs, domain)
+#         self.hxxs = dfd.center_second_diff(self.hs, domain)
+        
+#         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
+
+#     def h(self, x):
+#         if x <= self.x_step:
+#             return self.h_avg + self.r
+#         else:
+#             return self.h_avg - self.r
+        
+#     def h_bfs(self, x):
+#         if x <= self.x_step:
+#             return self.h_avg - self.r
+#         else:
+#             return self.h_avg + self.r
+        
+        
+class StepHeight(NStepHeight): #N = 1
     def __init__(self, domain, x_step, h1, h2):
         l1 = x_step - domain.x0
         l2 = domain.xf - x_step
@@ -193,8 +172,22 @@ class OneStepSquareWaveHeight(NStepHeight):
         
         h_str = "%d-step Square Wave"%n_steps
         h_eq = "h(x) = [%.2f, %.2f]"%(h1, h2)
-        super().__init__(domain,    n_steps, h_steps, h_str, h_eq)
+        super().__init__(domain, n_steps, h_steps, h_str, h_eq)
     
+
+class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r
+    def __init__(self, domain, h_avg, r, n_steps):
+        
+        h_steps = np.zeros(n_steps+1)
+        
+        for i in range(n_steps+1):
+            h_steps[i] = h_avg + (-1)**i * r
+        
+        h_str = "%d-step Square Wave"%n_steps
+        h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
+ 
+        super().__init__(domain, n_steps, h_steps, h_str, h_eq)
+
     
     
     
