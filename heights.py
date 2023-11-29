@@ -95,7 +95,7 @@ class WedgeHeight(Height): #slider bearing
     def h(self, x):
         return self.h_min + self.m * (x - self.xf)
 
-class NStepHeight(Height): # uniform width step function 
+class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
     def __init__(self, domain, n_steps, h_steps, h_str, h_eq):
         self.n_steps = n_steps
@@ -122,47 +122,17 @@ class NStepHeight(Height): # uniform width step function
  
         return hs
         
-# class StepHeight(Height):
-    
-#     def __init__(self, domain, x_step, h_avg, r):
-
-#         self.x_step = x_step
-#         self.h_avg = h_avg
-#         self.r = r
-#         self.l_left = x_step-domain.x0
-#         self.l_right = domain.xf - x_step
-        
-#         self.h_eq = "h(x) = {%0.1f, %0.1f}"%(h_avg + r, h_avg - r)
-#         self.h_str = "Rayleigh Step"
-#         self.hs = np.asarray([self.h_bfs(x) for x in domain.xs])
-#         self.hxs = dfd.center_diff(self.hs, domain)
-#         self.hxxs = dfd.center_second_diff(self.hs, domain)
-        
-#         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
-
-#     def h(self, x):
-#         if x <= self.x_step:
-#             return self.h_avg + self.r
-#         else:
-#             return self.h_avg - self.r
-        
-#     def h_bfs(self, x):
-#         if x <= self.x_step:
-#             return self.h_avg - self.r
-#         else:
-#             return self.h_avg + self.r
-        
-        
-class StepHeight(NStepHeight): #N = 1
+class StepHeight(NStepHeight): # N=1 (simulated with N>=1 for l1 \= l2)
     def __init__(self, domain, x_step, h1, h2):
+        self.x_step = x_step
         l1 = x_step - domain.x0
         l2 = domain.xf - x_step
-        
         step_width = np.gcd(l1, l2)
         
         k = int(l1/step_width)
-        n_steps = int((l1 + l2)/step_width - 1)
         
+        n_steps = int((l1 + l2)/step_width - 1)
+    
         h_steps = np.zeros(n_steps + 1)
         for i in range(n_steps+1):
             if i < k:
@@ -170,7 +140,7 @@ class StepHeight(NStepHeight): #N = 1
             else:
                 h_steps[i] = h2
         
-        h_str = "%d-step Square Wave"%n_steps
+        h_str = "Step Height"
         h_eq = "h(x) = [%.2f, %.2f]"%(h1, h2)
         super().__init__(domain, n_steps, h_steps, h_str, h_eq)
     

@@ -14,11 +14,11 @@ from pressures import StepPressure
 import numpy as np
 # x boundary
 x0 = 0
-xf = 4
+xf = 8
 BC = "fixed" 
 
 #pressure boundary
-p0 = 20
+p0 = 2
 pN = 1
 
 #fluid properties
@@ -34,12 +34,12 @@ Nx = 500
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
 #Height
-l1 = 0.5
+l1 = 3
 x_step = x0+l1
 l2 = xf-l1
 
 h1 = 1
-H_ratio = 1.9423 #expansion ratio 
+H_ratio = 1.5423 #expansion ratio 
 h2 = H_ratio * h1
 
 h_avg = (h1 + h2)/2
@@ -80,11 +80,10 @@ p_max_stokes_out = -px2_stokes*(l2) + pN
 px_corr = (1-h1**2/h2**2)*(rho*Ub1**2)/2
 
 print("Biswas Stokes \n px1: %.3f, px2: %.3f "%(px1_stokes, px2_stokes))
-print(" p_max_1, p_max_2: %.3f, %.3f\n"%(p_max_stokes_in, p_max_stokes_out))
-print("px_correction: %.3f\n"%px_corr)
+print(" px_correction: %.3f\n"%px_corr)
 
 print("hyd-res reyn: %.5f"%(-Q/(px1_reyn + px2_reyn)))
-print("hyd-res stokes: %.5f"%(-Q/(px1_stokes + px2_stokes - px_corr)))
+print("hyd-res biswas: %.5f"%(-Q/(px1_stokes + px2_stokes - px_corr)))
 
 def make_disc_ps(x0, l1, l2, m1, m2, Nx):
     ps = np.zeros(Nx)

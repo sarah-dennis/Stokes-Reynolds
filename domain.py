@@ -32,6 +32,7 @@ class Domain:
     # Re = U * height.h_avg / visc
     # # print("Re = %.4f"%Re)
     # #TODO: separate domain instances for X and Y
+    
     def set_ys(self, height, Ny):
         # always fixed BC in y
         # used by Velocity once height is made

@@ -56,9 +56,12 @@ def step(domain, p0, pN, x_step, h1, h2):
 
     return height, pressure
 
-def step_schurLUSolve(domain, p0, pN, x_step, h1, h2):
-    height = hgt.OneStepSquareWaveHeight(domain, x_step, h1, h2)
-    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
+def variableStepLen_schurLUSolve(domain, p0, pN, x_step, h1, h2):
+    height = hgt.StepHeight(domain, x_step, h1, h2)
+    if height.n_steps == 1:
+        pressure = prs.StepPressure(domain, height, p0, pN)
+    else: #N > 1
+        pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
     return height, pressure
 
 # ------------------------------------------------------------------------------
@@ -72,6 +75,15 @@ def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
     pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
     return height, pressure
 
+
+def mySteps_schurLUSolve(domain, p0, pN, h_steps):
+    n_steps = len(h_steps)-1
+    print("\n Loading %d-step  Wave \n" % (n_steps))
+    h_str = " %d-step Wave \n" % (n_steps)
+    h_eq =  "h(x) = [...]"
+    height = hgt.NStepHeight(domain, n_steps, h_steps, h_str, h_eq)
+    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
+    return height, pressure
 
 def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
     print("\n Loading %d-step Square Wave \n" % (n_steps))
@@ -93,11 +105,4 @@ def squareWave_gmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
     return height, pressure
 
 
-def mySteps_schurLUSolve(domain, p0, pN, h_steps):
-    n_steps = len(h_steps)-1
-    print("\n Loading %d-step  Wave \n" % (n_steps))
-    h_str = " %d-step Wave \n" % (n_steps)
-    h_eq =  "h(x) = [...]"
-    height = hgt.NStepHeight(domain, n_steps, h_steps, h_str, h_eq)
-    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
-    return height, pressure
+

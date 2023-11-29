@@ -115,7 +115,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     fig.colorbar(press_plot, label="pressure")
 
     #Velocity vector plot
-    skip = 20
+    skip = 1
     
     thin_xs = xs[::skip]
     thin_ys = ys[::skip]
@@ -135,7 +135,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     thin_vx = np.ma.array(thin_vx, mask=thin_mask)
     thin_vy = np.ma.array(thin_vy, mask=thin_mask)
     
-    pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.003)
+    pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.001)
     
     # pp.plot(xs, hs, label='height', color='white')
     
@@ -147,6 +147,30 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
 
     pp.show()
     
+    
+
+#------------------------------------------------------------------------------
+def plot_vel(vx, vy, xs, ys, title,ax_labels):   
+    pp.rcParams['figure.dpi'] = 500
+    
+    fig = pp.figure()
+    X, Y = np.meshgrid(xs, ys)
+    
+    
+    #Velocity vector plot
+    skip = 1
+
+    pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
+    
+    # pp.legend()
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+
+    pp.show()
+    
+#------------------------------------------------------------------------------   
+
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):

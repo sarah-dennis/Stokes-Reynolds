@@ -18,7 +18,7 @@ import _graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 5    
+xf = 2
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
@@ -44,7 +44,7 @@ pN = 0
 n_steps = 57
 r = 0.25
 h_avg = 0.75
-
+h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
 x_step = 1
 
 #------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ x_step = 1
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
 # height, pressure = ex.wedge(domain, p0, pN)
-height, pressure = ex.corrugated(domain, p0, pN)
+# height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
 
@@ -67,8 +67,10 @@ height, pressure = ex.corrugated(domain, p0, pN)
 # height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
 # height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
-h_steps = [2, 2, 1, 1]
-height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
+
+# height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
+
+height, pressure  = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_avg+r, h_avg-r)
 
 
 #------------------------------------------------------------------------------
