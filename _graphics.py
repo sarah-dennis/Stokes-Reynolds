@@ -150,7 +150,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     
 
 #------------------------------------------------------------------------------
-def plot_vel(vx, vy, xs, ys, title,ax_labels):   
+def plot_vel_quivers(vx, vy, xs, ys, title, ax_labels):   
     pp.rcParams['figure.dpi'] = 500
     
     fig = pp.figure()
