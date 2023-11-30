@@ -12,7 +12,7 @@ class Velocity:
     def __init__(self, domain, height, pressure):
         self.domain = domain
         self.vel_str = "Velocity for %s (%s)"%(height.h_str, pressure.p_str)
-        self.vx, self.vy = self.makeVelField(height, pressure)
+        self.vx, self.vy = self.makeField(height, pressure)
     
     
     def makeField(self, height, pressure):

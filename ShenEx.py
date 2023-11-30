@@ -51,9 +51,7 @@ phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
 
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
-# velocity.plot_vx_x0(domain, 0)
-# velocity.plot_vx_x0(domain, domain.get_index(x_step))
-# velocity.plot_vx_x0(domain, -1)
+
 
 print("max pressure: %.3f"%pressure.ps[domain.get_index(x_step)])
 # expect max pressure 54 kpa
