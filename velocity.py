@@ -50,5 +50,5 @@ class Velocity:
       
     def plot_quivers(self):
         ax_labels = ["x", "y"]
-        graph.plot_vel_quivers(self.vx, self.vy, self.domain.xs, self.domain.ys, self.vel_str, ax_labels)
+        graph.plot_quivers(self.vx, self.vy, self.domain.xs, self.domain.ys, self.vel_str, ax_labels)
         

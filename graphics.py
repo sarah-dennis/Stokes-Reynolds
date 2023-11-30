@@ -95,7 +95,7 @@ def plot_2D_twin(fs, gs, xs, title, ax_labels):
     pp.show()
     
 #------------------------------------------------------------------------------
-def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):   
+def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x), h(x) & quiver (vx,vy)
     pp.rcParams['figure.dpi'] = 500
     
     fig = pp.figure()
@@ -150,10 +150,10 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):
     
 
 #------------------------------------------------------------------------------
-def plot_vel_quivers(vx, vy, xs, ys, title, ax_labels):   
+def plot_quivers(vx, vy, xs, ys, title, ax_labels):   
     pp.rcParams['figure.dpi'] = 500
     
-    fig = pp.figure()
+    pp.figure()
     X, Y = np.meshgrid(xs, ys)
     
     
@@ -162,14 +162,31 @@ def plot_vel_quivers(vx, vy, xs, ys, title, ax_labels):
 
     pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
     
-    # pp.legend()
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
     pp.show()
     
+    
+def plot_stream(vx, vy, xs, ys,title, ax_labels):
+    
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    pp.streamplot(X, Y, vx, vy)
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+
+    pp.show()
+    
+    
 #------------------------------------------------------------------------------   
+
 
 #------------------------------------------------------------------------------   
 

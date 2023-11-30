@@ -17,8 +17,6 @@ class Domain:
         self.eta = eta
         self.U = U
         
-
-        
         if BC == "periodic": #periodic
             self.dx = (xf - x0)/(Nx)
         else: #fixed
