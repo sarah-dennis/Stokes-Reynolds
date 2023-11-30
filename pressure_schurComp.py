@@ -6,7 +6,99 @@ Created on Thu Jun  1 14:11:49 2023
 """
 import numpy as np
 from scipy.sparse.linalg import LinearOperator
-import schur
+
+#------------------------------------------------------------------------------
+# Schur Complement K of (n x m block) M
+#   
+#  M = [ A   B1 ]
+#      [ B2  C  ]
+
+#  K = - (C + B2 A^-1 B1)
+
+#------------------------------------------------------------------------------
+
+#U[i,j] = prod(xs) from i to j
+def triDiagProd(xs):
+    U = np.diag(xs)
+    n = len(xs)
+    for i in range(n-1):
+        for j in range(i+1, n):
+            U[i,j] = U[i, j-1] * U[j, j]
+    return U
+
+# ---- RATIO METHOD -----------------------------------------------------------
+
+# Given schur complement K (symmetric tri-diagonal)... 
+
+# Ex. N=3
+#  M = [  A1  -B1   0  ]
+#      [ -B1   A2  -B2 ]
+#      [  0   -B3   A3 ]
+
+# Compute ratio elements {C_i}
+# C(N-1) = B(N-1) / A(N)
+# C(i) = B(i) / (A(i+1) - S(i+1) B(i+1))
+
+def get_Cs(n, A, B):
+    C = np.zeros(n-1)
+    C[n-2] = B[n-2] / A[n-1]
+    
+    for i in reversed(range(n-2)):
+        C[i] = B[i] / (A[i+1] - C[i+1]*B[i+1])
+    
+    return C
+
+# Compute diagonal elements {D_i} = K^-1[i,i]
+def get_Ds(n, A, B, C):
+    D = np.zeros(n)
+    
+    D[0] = 1/(A[0] - B[0]*C[0])
+    
+    for i in range(1, n-1):
+        D[i] = (1 + B[i-1]*D[i-1]*C[i-1]) / (A[i] - B[i]*C[i])
+        
+    D[n-1] = (1 + B[n-2]*D[n-2]*C[n-2])/A[n-1]
+
+    return D
+    
+# Get elementwise K^-1 = S_ij
+def S_ij(n, C_prod, D, i, j):
+    if i == j:
+        return D[i]
+    # non-diagonals
+    elif i < j:
+        return (-1)**(i+j) * D[i] * C_prod[i, j-1]
+    else:
+        # j, i = i, j
+        return (-1)**(i+j) * D[j] * C_prod[j, i-1]
+    
+def S_ij_flops(n, C, D, i, j):
+    if i == j:
+        return D[i]
+    # non-diagonals
+    elif i < j:
+        return (-1)**(i+j) * D[i] * np.prod(C[i:j])
+    else:
+        # j, i = i, j
+        return (-1)**(i+j) * D[j] * np.prod(C[j:i])
+    
+# (For testing only: Make S = K^-1 matrix)
+def make_S(n, C_prod, D):
+    S = np.zeros((n,n))
+    for i in range(0, n):
+        for j in range(0, i+1): 
+            s_ij = S_ij(n, C_prod, D, i, j)
+            if i == j:
+                S[i,j] = s_ij
+            else:
+                S[i,j] = s_ij
+                S[j,i] = s_ij
+            
+    return S
+    
+    
+#------------------------------------------------------------------------------
+# Construct Reynolds matrix for Square Wave
 
 # M @ lhs = rhs
 
@@ -52,10 +144,10 @@ def make_ps(domain, height, p0, pN, slopes, extrema):
         ps[i] = slope_k*(x-x_k) + p_k
 
     return ps
+
 #------------------------------------------------------------------------------
 # Schur Complement for square wave
 #------------------------------------------------------------------------------
-
 def make_schurCompDiags(height):
     n = height.n_steps
     hs = height.h_steps
@@ -125,7 +217,7 @@ def schurInvSol_i(rhs, height, C_prod, D, i):
         
         rightBlock_dotProd = 0
         for j in range(n):
-            rightBlock_dotProd += schur.S_ij(n, C_prod, D,  i - (n+1), j) * rhs[n+1 + j]
+            rightBlock_dotProd += S_ij(n, C_prod, D,  i - (n+1), j) * rhs[n+1 + j]
         
     return leftBlock_o + leftBlock_n + rightBlock_dotProd
 
@@ -137,53 +229,53 @@ def Id_B1_schurCompInv_B2_ij (height, C_prod, D, i, j):
     hj = height.h_steps[j]
     
     if i == 0 and j == 0:
-        return 1 + (1/L) * hj**3 * schur.S_ij(n, C_prod, D, i, j)
+        return 1 + (1/L) * hj**3 * S_ij(n, C_prod, D, i, j)
     
     elif i == 0 and j < n :
-        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i, j-1) - schur.S_ij(n, C_prod, D, i,j))
+        return (-1/L) * hj**3 * (S_ij(n, C_prod, D,  i, j-1) - S_ij(n, C_prod, D, i,j))
     
     elif i == 0 and j == n: 
-        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i, j-1))
+        return (-1/L) * hj**3 * (S_ij(n, C_prod, D,  i, j-1))
     
     elif i == n and j == 0:
-        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1,j))
+        return (-1/L) * hj**3 * (S_ij(n, C_prod, D,  i-1,j))
     
     elif i == n and j < n:
-         return (1/L) * hj**3 * (schur.S_ij(n, C_prod, D, i-1, j-1) - schur.S_ij(n, C_prod, D,  i-1, j))
+         return (1/L) * hj**3 * (S_ij(n, C_prod, D, i-1, j-1) - S_ij(n, C_prod, D,  i-1, j))
     
     elif i == n and j == n:
-        return 1 + (1/L) * hj**3 * schur.S_ij(n, C_prod, D,  i-1, j-1)
+        return 1 + (1/L) * hj**3 * S_ij(n, C_prod, D,  i-1, j-1)
     
     elif i < n and j == 0:
-        return (-1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D, i, j))
+        return (-1/L) * hj**3 * (S_ij(n, C_prod, D,  i-1, j) - S_ij(n, C_prod, D, i, j))
 
     elif i < n and j == n:
-        return (1/L) * hj**3 * (schur.S_ij(n, C_prod, D,  i-1, j-1) - schur.S_ij(n, C_prod, D,  i, j-1))
+        return (1/L) * hj**3 * (S_ij(n, C_prod, D,  i-1, j-1) - S_ij(n, C_prod, D,  i, j-1))
     
     else:
-        return (i==j) + (1/L) * hj**3 * (schur.S_ij(n, C_prod, D, i-1,j-1) - schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D, i, j-1) + schur.S_ij(n, C_prod, D, i, j))    
+        return (i==j) + (1/L) * hj**3 * (S_ij(n, C_prod, D, i-1,j-1) - S_ij(n, C_prod, D,  i-1, j) - S_ij(n, C_prod, D, i, j-1) + S_ij(n, C_prod, D, i, j))    
 
 #M_inv bottom left
 def neg_schurCompInv_B2_ij(height, C_prod, D,  i, j):
     n = height.n_steps
     hj = height.h_steps[j]
     if j == 0:
-        return hj**3 * schur.S_ij(n, C_prod, D,  i,j)
+        return hj**3 * S_ij(n, C_prod, D,  i,j)
     elif j < n:
-        return -hj**3 * (schur.S_ij(n, C_prod, D, i, j-1) - schur.S_ij(n, C_prod, D,  i,j))
+        return -hj**3 * (S_ij(n, C_prod, D, i, j-1) - S_ij(n, C_prod, D,  i,j))
     else:
-        return -hj**3 * schur.S_ij(n, C_prod, D,  i, j-1)
+        return -hj**3 * S_ij(n, C_prod, D,  i, j-1)
     
 #M_inv top right
 def neg_B1_schurCompInv_ij(height, C_prod, D,  i, j):
     L = height.step_width
     n = height.n_steps
     if i == 0:
-        return (-1/L) * (-schur.S_ij(n,C_prod, D,  i, j))
+        return (-1/L) * (-S_ij(n,C_prod, D,  i, j))
     elif i < n:
-        return (-1/L) * (schur.S_ij(n, C_prod, D,  i-1, j) - schur.S_ij(n, C_prod, D,  i, j))
+        return (-1/L) * (S_ij(n, C_prod, D,  i-1, j) - S_ij(n, C_prod, D,  i, j))
     else:
-        return (-1/L) * schur.S_ij(n, C_prod, D, i-1, j)
+        return (-1/L) * S_ij(n, C_prod, D, i-1, j)
 
 #-------------------------------------------------------------
 # Helpers for pressure.squarewave_pySolve()

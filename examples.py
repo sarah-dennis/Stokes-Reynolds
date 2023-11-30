@@ -6,9 +6,7 @@ Created on Wed Feb 22 10:01:42 2023
 """
 import heights as hgt
 import pressures as prs
-import velocity as vel
 import numpy as np
-
 
 # pressure solutions to reynolds equation for the given height functions
 

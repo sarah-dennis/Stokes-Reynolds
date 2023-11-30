@@ -8,17 +8,17 @@ Created on Mon May 22 15:05:40 2023
 import numpy as np
 
 import domain as dm
-import finDiff_1D as fd
-import examples_1D as ex
+import pressure_finDiff as fd
+import examples as ex
 import velocity as vel
-import _graphics as graph
+import graphics as graph
 
 #------------------------------------------------------------------------------
 # Domain & Discretization
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 2
+xf = 5
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
@@ -91,21 +91,6 @@ phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
 
 graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
-# Inlet velocity
-# velocity.plot_vx_x0(domain, 0)
-# velocity.plot_vy_x0(domain, 0)
-
-#Step profile 
-
-# index = domain.get_index(x_step)
-# velocity.plot_vx_x0(domain, index)
-# velocity.plot_vy_x0(domain, index)
-
-# Outlet velocity
-# velocity.plot_vx_x0(domain, -1)
-# velocity.plot_vy_x0(domain, -1)
-
 
 
 #------------------------------------------------------------------------------

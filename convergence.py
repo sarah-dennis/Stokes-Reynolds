@@ -7,14 +7,13 @@ Created on Tue Mar  7 16:16:13 2023
 import numpy as np
 
 import domain as dfd
-import finDiff_1D as fd
-import examples_1D as eg
+import pressure_finDiff as fd
+import examples as eg
 import heights as hgt
 import pressures as prs
-import _graphics as g
+import graphics as g
 import control as gc
 import csv
-
 
 #------------------------------------------------------------------------------
 # Convergence of Numerical Reynolds to Analytic

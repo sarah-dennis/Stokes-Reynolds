@@ -7,9 +7,9 @@ Created on Mon Oct 23 13:40:16 2023
 @author: sarah
 """
 import domain as dm
-import examples_1D as ex
+import examples as ex
 import velocity as vel
-import _graphics as graph
+import graphics as graph
 #boundary velocity
 U = 1 # inlet 
 

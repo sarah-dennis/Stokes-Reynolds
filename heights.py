@@ -5,7 +5,7 @@ Created on Sun Jan 29 08:18:07 2023
 
 @author: sarahdennis
 """
-import _graphics as graph
+import graphics as graph
 import numpy as np
 import domain as dfd
 

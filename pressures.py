@@ -6,15 +6,14 @@ Created on Wed Jan 25 18:24:34 2023
 @author: sarahdennis
 """
 
-import _graphics as graph
+import graphics as graph
 import numpy as np
 import time
 
 import domain as dfd
 
-import schur
-import squareWave as sw
-import finDiff_1D as fd
+import pressure_schurComp as sw
+import pressure_finDiff as fd
 
 from scipy.sparse.linalg import gmres
 
@@ -179,9 +178,9 @@ class SquareWavePressure_schurInvSolve(Pressure):
         t0 = time.time()
         rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)
-        C = schur.get_Cs(n, center_diag, off_diag)
-        C_prod = schur.triDiagProd(C)
-        D = schur.get_Ds(n, center_diag, off_diag, C)
+        C = sw.get_Cs(n, center_diag, off_diag)
+        C_prod = sw.triDiagProd(C)
+        D = sw.get_Ds(n, center_diag, off_diag, C)
         t1 = time.time()
         
         sol = np.zeros(2*n+1)
@@ -217,9 +216,9 @@ class SquareWavePressure_schurLUSolve(Pressure):
 
         center_diag, off_diag = sw.make_schurCompDiags(height)
         
-        C = schur.get_Cs(n, center_diag, off_diag)
-        C_prod = schur.triDiagProd(C) # used in schur.S_ij
-        D = schur.get_Ds(n, center_diag, off_diag, C)
+        C = sw.get_Cs(n, center_diag, off_diag)
+        C_prod = sw.triDiagProd(C) # used in schur.S_ij
+        D = sw.get_Ds(n, center_diag, off_diag, C)
 
         t1 = time.time()
         
@@ -236,7 +235,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
             
             for j in range(n):
                 
-                s_ij = schur.S_ij(n, C_prod, D, i, j)
+                s_ij = sw.S_ij(n, C_prod, D, i, j)
 
                 if j == 0:
                     w_ij += s_ij * (rhs[n+1+j] - (1/L) * p0 * hs[j]**3)
@@ -288,8 +287,8 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
         rhs = sw.make_RHS(domain, height, p0, pN)
         center_diag, off_diag = sw.make_schurCompDiags(height)\
         # for flops... Store C & D (N+N) instead of C_prod & D (N^2 + N)
-        C = schur.get_Cs(n, center_diag, off_diag)
-        D = schur.get_Ds(n, center_diag, off_diag, C)
+        C = sw.get_Cs(n, center_diag, off_diag)
+        D = sw.get_Ds(n, center_diag, off_diag, C)
         t1 = time.time()
         
         # L block -  fwd sub
@@ -301,7 +300,7 @@ class SquareWavePressure_schurLUSolve_flops(Pressure):
         for i in range(n):
             w_i = 0
             for j in range(n):
-                s_ij = schur.S_ij_flops(n, C, D, i, j)
+                s_ij = sw.S_ij_flops(n, C, D, i, j)
                 w_i += s_ij * (rhs[n+1+j] - 1/L * rhs[j] * height.h_steps[j]**3)
             w[i] = w_i
 

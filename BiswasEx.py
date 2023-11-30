@@ -7,14 +7,14 @@ Stokes vs Reynolds comparison
 
 @author: sarah
 """
-import _graphics as graph
+import graphics as graph
 import domain as dm
 from heights import StepHeight
 from pressures import StepPressure
 import numpy as np
 # x boundary
 x0 = 0
-xf = 6
+xf = 4
 BC = "fixed" 
 
 #pressure boundary
@@ -34,17 +34,17 @@ Nx = 500
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
 #Height
-l1 = 2
+l1 = 1
 x_step = x0+l1
 l2 = xf-l1
 
 h1 = 1
-H_ratio = 1.9423 #expansion ratio 
+H_ratio = 1.9423 #expansion ratio H/h 
 h2 = H_ratio * h1
 
 h_avg = (h1 + h2)/2
 r = abs(h1 - h2)/2
-height = StepHeight(domain, x_step, h_avg, r)
+height = StepHeight(domain, x_step, h1, h2)
 
 #----------------------------------------------
 # Reynolds analytic solution
