@@ -169,7 +169,7 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
     
-def plot_stream(vx, vy, xs, ys,title, ax_labels):
+def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
