@@ -7,7 +7,7 @@ Created on Thu Nov 30 11:05:44 2023
 """
 import numpy as np
 import graphics as graph
-
+import cmath
 #------------------------------------------------------------------------------    
 # t : Upper half plane
 #             .
@@ -19,30 +19,41 @@ import graphics as graph
 
 # t = x + iy
 
-t_Nx = 20
-t_Ny = 20
+Nx = 1000
+Ny = 1000
 
-t_xMin = -10
-t_xMax = 10
+t_xMin = -100
+t_xMax =  100
 t_yMin = 0
-t_yMax = 10
+t_yMax = 1000
 
-t_dx = (t_xMax - t_xMin)/(t_Nx-1)
-t_dy = (t_yMax - t_yMin)/(t_Ny-1)
+t_dx = (t_xMax - t_xMin)/(Nx-1)
+t_dy = (t_yMax - t_yMin)/(Ny-1)
 
-t_xs = np.zeros(t_Nx)
-t_ys = np.zeros(t_Ny)
+t_xs = np.zeros(Nx)
+t_ys = np.zeros(Ny)
 
-for i in range (t_Nx):
-    t_xs[i] = t_xMin + i*t_dx
-for j in range (t_Ny):
-    t_ys[j] = t_yMin + j*t_dy
-
-# t_plane = np.zeros((t_Ny, t_Nx), dtype=complex)
-# for i in range(t_Nx):
-#     for j in range(t_Ny):
-#         t_plane[j][i] = complex(t_xs[i], t_ys[j])
-
+for i in range (Nx):
+    t_x = t_xMin + i*t_dx
+    if t_x == 0:
+        t_xs[i]= t_xMin + i*(t_dx/2)
+    else:     
+        t_xs[i] = t_x
+for j in range (Ny):
+    t_y = t_yMin + j*t_dy
+    if t_y == 0:
+        t_ys[j] = t_yMin + j*(t_dy/2)
+    else:  
+        t_ys[j] = t_y
+    
+ts = np.zeros(Nx * Ny, complex)
+for i in range (Nx):
+    for j in range (Ny):
+        ts[i*Ny+j] = complex(t_xs[i], t_ys[j])
+            
+ # ts[k] = complex(t_xs[k//t_Ny], t_ys[k%t_Ny]) 
+ 
+ 
 #------------------------------------------------------------------------------
 # Pentagon
 #------------------------------------------------------------------------------
@@ -53,11 +64,11 @@ for j in range (t_Ny):
 #           R ---- S -     
 #    |--l1--|--l2--|  
 
-# flow:  <--U-- 
+# flow:  <-#-U-- 
 U=0.5
 
-l1 = 2 # dist N -> P
-l2 = 5 # dist R -> S
+l1 = 4 # dist N -> P
+l2 = 6 # dist R -> S
 
 h1 = 1 #dist N -> M
 h2 = 2 #dist S -> L
@@ -66,74 +77,66 @@ h2 = 2 #dist S -> L
 #    h2 > h1, a = (H/h)**2
      
 #------------------------------------------------------------------------------   
-# # Schwarz-Christoffel Mapping z := f(t)   (z-plane)
+# # Schwarz-Christoffel Mapping z = f(t)
 #------------------------------------------------------------------------------       
 a = (h2/h1)**2
 b1 = h2/np.pi 
 b2 = h1/np.pi
-c = complex(0, -h2+h1)
 
-def f(t):
+
+S = (U*h2)/np.pi
+K = np.pi/(U*h2)
+
+def W(t): #W = phi + i psi
+    return S*cmath.log(t)
+
+def f(w):
+    psi_t = w.real
+    phi_t = w.imag
+
+    u1 = (2*np.exp(K*psi_t) * cmath.cos(K*phi_t) - (a+1)) /(a-1)
+    v1 = (2*np.exp(K*psi_t) * cmath.sin(K*phi_t)) /(a-1)
     
-    arg1 = (2*t-a-1)/(a-1)
+    alph1 = cmath.sqrt((1+u1)**2 + v1**2)
+    beta1 = cmath.sqrt((1-u1)**2 + v1**2)
+
+    acosh1_real = cmath.acosh(0.5*(alph1 + beta1))
+    acosh1_imag = cmath.acosh(0.5*(alph1 - beta1)) 
     
-    arg2 = ((a+1)*t - 2*a)/((a-1)*t)
+    u2 = (-2*a*np.exp(-K*psi_t) * cmath.cos(K*phi_t) + (a+1)) /(a-1)
+    v2 = (2*a*np.exp(-K*psi_t) * cmath.sin(K*phi_t)) /(a-1)
+
+    alph2 = cmath.sqrt((1+u2)**2 + v2**2)
+    beta2 = cmath.sqrt((1-u2)**2 + v2**2)
     
-    z = b1 * np.arccosh(arg1) - b2 * np.arccosh(arg2) + c
+    acosh2_real = cmath.acosh(0.5*(alph2 + beta2))
+    acosh2_imag = cmath.acosh(0.5*(alph2 - beta2))
+
+    f_real = b1 * acosh1_real - b2 * acosh2_real
+    f_imag = b1 * acosh1_imag - b2 * acosh2_imag - complex(0,(h2-h1))
     
-    return z
+    return complex(f_real.real, f_imag.imag)
 
-#---------------------------------------------------------------------------- 
-z_Nx = 20
-z_Ny = 20
 
-z_xs = np.zeros(z_Nx)
-z_ys = np.zeros(z_Ny)
+fs = np.zeros(Nx * Ny, complex)
+for k in range(Nx*Ny):
+    w = W(ts[k])
 
-z_xMin = -l1
-z_xMax = l2
-z_yMin = h1-h2
-z_yMax = h2
+    fs[k] = f(w)
 
-z_dx = np.abs(z_xMin - z_xMax)/(z_Nx-1)
-for i in range(z_Nx):
-    z_xs[i] = z_xMin + i*z_dx
-   
-z_dy = np.abs(z_yMin - z_yMax)/(z_Ny-1)
-for j in range(z_Ny):
-   z_ys[j] = z_yMin + j*z_dy
-   
-z_plane = np.zeros((z_Ny, z_Nx), dtype=complex)
-
-for i in range(z_Nx):
-    for j in range(z_Ny):
-        t = complex(t_xs[i], t_ys[j])
-        z = complex(z_xs[i], z_ys[j])
-        ft = f(t)
-        z_plane[j][i]= ft
-        print("z: (%.2f, %.2f), f(t): (%.2f, %.2f)" % (z.real, z.imag, ft.real, ft.imag))
-# print(z_plane)
-    
 #------------------------------------------------------------------------------
 # Stream Function Mapping   s := phi(z)
 #------------------------------------------------------------------------------
+def stream(z): #stream
+     return (S/2j)*cmath.log(z/z.conjugate())                                                                                                           
+ 
+stream_xs = np.zeros(Nx * Ny)
+stream_ys = np.zeros(Nx* Ny)
 
-d = complex(0, -U*h2/(2*np.pi))
-def stream(z):
-    return  d*np.log(z/z.conjugate())
-   
-s_x = np.zeros((z_Ny, z_Nx))
-s_y = np.zeros((z_Ny, z_Nx))
-
-# mask with height function...
-
-for i in range(z_Nx):
-    for j in range (z_Ny):
-        if z_xs[i] >= 0 or z_ys[j] >= 0:
-            s = stream(complex(z_xs[i], z_ys[j]))
-            s_x[j][i] = s.real
-            s_y[j][i] = s.imag
-
+for k in range(Nx * Ny):
+    stream_z = stream(fs[k])
+    stream_xs[k] = stream_z.real
+    stream_ys[k] = stream_z.imag
 
 #------------------------------------------------------------------------------
 # Plot stream
@@ -141,20 +144,11 @@ for i in range(z_Nx):
 title = "Stream Plot"
 ax_labels = ["x", "y"]
 
-graph.plot_stream(s_x, s_y, z_xs, z_ys, title, ax_labels)
+graph.plot_2D(stream_xs, fs.real, title, ["x", "$\phi_x(x,y)$"])
+graph.plot_2D(stream_xs, fs.imag, title, ["y", "$\phi_x(x,y)$"])
+graph.plot_2D(stream_ys, fs.real, title, ["x", "$\phi_y(x,y)$"])
+graph.plot_2D(stream_ys, fs.imag, title, ["y", "$\phi_y(x,y)$"])
 
-graph.plot_quivers(s_x, s_y, z_xs, z_ys, title, ax_labels)
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

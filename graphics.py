@@ -34,7 +34,7 @@ def plot_2D(fs, xs, title, axis):
     pp.xlabel(axis[0])
     
     pp.ylabel(axis[1])
-    pp.ylim(0, 1.1*max(fs))
+    # pp.ylim(0, 1.1*max(fs))
     
     return fig
 
@@ -152,12 +152,10 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x)
 #------------------------------------------------------------------------------
 def plot_quivers(vx, vy, xs, ys, title, ax_labels):   
     pp.rcParams['figure.dpi'] = 500
-    
+
     pp.figure()
     X, Y = np.meshgrid(xs, ys)
-    
-    
-    #Velocity vector plot
+
     skip = 1
 
     pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
@@ -167,8 +165,8 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
 
     pp.show()
-    
-    
+
+
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     pp.rcParams['figure.dpi'] = 500
@@ -184,6 +182,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
 
     pp.show()
     
+
     
 #------------------------------------------------------------------------------   
 
