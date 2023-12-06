@@ -6,7 +6,7 @@ Created on Thu Nov 30 11:05:44 2023
 @author: sarahdennis
 """
 import numpy as np
-import graphics as graph
+import graphics
 import cmath
 #------------------------------------------------------------------------------    
 # t : Upper half plane
@@ -19,13 +19,13 @@ import cmath
 
 # t = x + iy
 
-Nx = 13
-Ny = 20
+Nx = 300
+Ny = 100
 
-t_xMin = -20
-t_xMax =  20
+t_xMin = -500
+t_xMax = 500
 t_yMin = 0
-t_yMax = 10
+t_yMax = 100
 
 t_dx = (t_xMax - t_xMin)/(Nx-1)
 t_dy = (t_yMax - t_yMin)/(Ny-1)
@@ -118,18 +118,13 @@ def f(w):
     return complex(f_real.real, f_imag.imag)
 
 
-fs = np.zeros(Nx * Ny, complex)
+f_zs = np.zeros(Nx * Ny, complex)
+
 for k in range(Nx*Ny):
-    w = W(ts[k])
-
-    fs[k] = f(w)
-
-# print(fs)
-""
-f_xs = fs.real
-f_ys = fs.imag
-
-
+    f_zs[k] = f(W(ts[k]))
+    
+f_xs = f_zs.real
+f_ys= f_zs.imag
 
 #------------------------------------------------------------------------------
 # Stream Function Mapping   s := phi(z)
@@ -137,13 +132,14 @@ f_ys = fs.imag
 def stream(z): #stream
      return (S/2j)*cmath.log(z/z.conjugate())                                                                                                           
  
-stream_xs = np.zeros(Nx * Ny)
-stream_ys = np.zeros(Nx* Ny)
-
+stream_zs = np.zeros(Nx * Ny, complex)
 for k in range(Nx * Ny):
-    stream_z = stream(fs[k])
-    stream_xs[k] = stream_z.real
-    stream_ys[k] = stream_z.imag
+    stream_zs[k] = stream(f_zs[k])
+    
+stream_xs = stream_zs.real
+stream_ys = stream_zs.imag
+    
+
 
 #------------------------------------------------------------------------------
 # Plot stream
@@ -151,14 +147,15 @@ for k in range(Nx * Ny):
 title = "Stream Plot"
 ax_labels = ["x", "y"]
 
-graph.plot_2D(stream_xs, f_xs, title, ["x", "$\phi_x(x,y)$"])
-graph.plot_2D(stream_xs, f_ys, title, ["y", "$\phi_x(x,y)$"])
-graph.plot_2D(stream_ys, f_xs, title, ["x", "$\phi_y(x,y)$"])
-graph.plot_2D(stream_ys, f_ys, title, ["y", "$\phi_y(x,y)$"])
+# graph.plot_2D(stream_xs, f_xs, title, ["x", "$\phi_x(x,y)$"])
+# graph.plot_2D(stream_xs, f_ys, title, ["y", "$\phi_x(x,y)$"])
+# graph.plot_2D(stream_ys, f_xs, title, ["x", "$\phi_y(x,y)$"])
+# graph.plot_2D(stream_ys, f_ys, title, ["y", "$\phi_y(x,y)$"])
 
-    
-    
-    
-    
-    
-    
+zip_fxy = np.array(sorted(zip(f_xs, f_ys, stream_xs, stream_ys))).T  #sort in x
+f_xs = zip_fxy[0]
+f_ys = zip_fxy[1]
+stream_xs = zip_fxy[2]
+stream_ys = zip_fxy[3]
+
+graphics.plot_stream(stream_xs, stream_ys, f_xs, f_ys, title, ax_labels)
