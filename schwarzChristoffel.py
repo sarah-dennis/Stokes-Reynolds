@@ -19,13 +19,13 @@ import cmath
 
 # t = x + iy
 
-Nx = 1000
-Ny = 1000
+Nx = 13
+Ny = 20
 
-t_xMin = -100
-t_xMax =  100
+t_xMin = -20
+t_xMax =  20
 t_yMin = 0
-t_yMax = 1000
+t_yMax = 10
 
 t_dx = (t_xMax - t_xMin)/(Nx-1)
 t_dy = (t_yMax - t_yMin)/(Ny-1)
@@ -124,6 +124,13 @@ for k in range(Nx*Ny):
 
     fs[k] = f(w)
 
+# print(fs)
+""
+f_xs = fs.real
+f_ys = fs.imag
+
+
+
 #------------------------------------------------------------------------------
 # Stream Function Mapping   s := phi(z)
 #------------------------------------------------------------------------------
@@ -144,11 +151,13 @@ for k in range(Nx * Ny):
 title = "Stream Plot"
 ax_labels = ["x", "y"]
 
-graph.plot_2D(stream_xs, fs.real, title, ["x", "$\phi_x(x,y)$"])
-graph.plot_2D(stream_xs, fs.imag, title, ["y", "$\phi_x(x,y)$"])
-graph.plot_2D(stream_ys, fs.real, title, ["x", "$\phi_y(x,y)$"])
-graph.plot_2D(stream_ys, fs.imag, title, ["y", "$\phi_y(x,y)$"])
+graph.plot_2D(stream_xs, f_xs, title, ["x", "$\phi_x(x,y)$"])
+graph.plot_2D(stream_xs, f_ys, title, ["y", "$\phi_x(x,y)$"])
+graph.plot_2D(stream_ys, f_xs, title, ["x", "$\phi_y(x,y)$"])
+graph.plot_2D(stream_ys, f_ys, title, ["y", "$\phi_y(x,y)$"])
 
+    
+    
     
     
     
