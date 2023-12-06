@@ -8,6 +8,29 @@ Created on Thu Nov 30 11:05:44 2023
 import numpy as np
 import graphics
 import cmath
+
+ 
+#------------------------------------------------------------------------------
+# Pentagon
+#------------------------------------------------------------------------------
+# -  M ----------- L -
+# h1 |             | |
+# -  N ---- P      | h2
+#           |      | |
+#           R ---- S -     
+#    |--l1--|--l2--|  
+
+# flow:  <-#-U-- 
+U=-0.5
+
+l1 = 4 # dist N -> P
+l2 = 6 # dist R -> S
+
+h1 = 1 #dist N -> M
+h2 = 2 #dist S -> L
+
+# Step height : 
+#    h2 > h1, a = (H/h)**2
 #------------------------------------------------------------------------------    
 # t : Upper half plane
 #             .
@@ -19,11 +42,11 @@ import cmath
 
 # t = x + iy
 
-Nx = 300
-Ny = 100
+Nx = 2000
+Ny = 2000
 
-t_xMin = -500
-t_xMax = 500
+t_xMin = -10
+t_xMax = 10
 t_yMin = 0
 t_yMax = 100
 
@@ -53,28 +76,7 @@ for i in range (Nx):
             
  # ts[k] = complex(t_xs[k//t_Ny], t_ys[k%t_Ny]) 
  
- 
-#------------------------------------------------------------------------------
-# Pentagon
-#------------------------------------------------------------------------------
-# -  M ----------- L -
-# h1 |             | |
-# -  N ---- P      | h2
-#           |      | |
-#           R ---- S -     
-#    |--l1--|--l2--|  
 
-# flow:  <-#-U-- 
-U=0.5
-
-l1 = 4 # dist N -> P
-l2 = 6 # dist R -> S
-
-h1 = 1 #dist N -> M
-h2 = 2 #dist S -> L
-
-# Step height : 
-#    h2 > h1, a = (H/h)**2
      
 #------------------------------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(t)
@@ -124,7 +126,8 @@ for k in range(Nx*Ny):
     f_zs[k] = f(W(ts[k]))
     
 f_xs = f_zs.real
-f_ys= f_zs.imag
+print(min(f_xs))
+f_ys = f_zs.imag
 
 #------------------------------------------------------------------------------
 # Stream Function Mapping   s := phi(z)
@@ -138,8 +141,6 @@ for k in range(Nx * Ny):
     
 stream_xs = stream_zs.real
 stream_ys = stream_zs.imag
-    
-
 
 #------------------------------------------------------------------------------
 # Plot stream
@@ -147,15 +148,10 @@ stream_ys = stream_zs.imag
 title = "Stream Plot"
 ax_labels = ["x", "y"]
 
-# graph.plot_2D(stream_xs, f_xs, title, ["x", "$\phi_x(x,y)$"])
-# graph.plot_2D(stream_xs, f_ys, title, ["y", "$\phi_x(x,y)$"])
-# graph.plot_2D(stream_ys, f_xs, title, ["x", "$\phi_y(x,y)$"])
-# graph.plot_2D(stream_ys, f_ys, title, ["y", "$\phi_y(x,y)$"])
-
 zip_fxy = np.array(sorted(zip(f_xs, f_ys, stream_xs, stream_ys))).T  #sort in x
 f_xs = zip_fxy[0]
 f_ys = zip_fxy[1]
-stream_xs = zip_fxy[2]
+stream_zs = zip_fxy[2]
 stream_ys = zip_fxy[3]
 
-graphics.plot_stream(stream_xs, stream_ys, f_xs, f_ys, title, ax_labels)
+graphics.plot_quivers_flat(stream_xs, stream_ys, f_xs, f_ys, title, ax_labels)

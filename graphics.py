@@ -154,10 +154,22 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
     pp.rcParams['figure.dpi'] = 500
 
     pp.figure()
-    # X, Y = np.meshgrid(xs, ys)
+    X, Y = np.meshgrid(xs, ys)
 
     skip = 1
-    # pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
+    pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+
+    pp.show()
+    
+def plot_quivers_flat(vx, vy, xs, ys, title, ax_labels):   
+    pp.rcParams['figure.dpi'] = 500
+
+    pp.figure()
+    # X, Y = np.meshgrid(xs, ys)
     pp.quiver(xs, ys, vx, vy, width=0.001)
     
     pp.title(title, fontweight="bold")
@@ -166,6 +178,8 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
 
     pp.show()
 
+
+# def plot_contour(f_xys, xs, ys, title, ax_lables):
 
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
