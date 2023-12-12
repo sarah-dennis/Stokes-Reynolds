@@ -23,12 +23,12 @@ import cmath
 # flow:  <-#-U-- 
 U=1
 
-l1 = 4 
-l2 = 6 
+l1 = 2 
+l2 = 5 
 
 h1 = 1 
-h2 = 2 
-
+h2 = 2
+a = (h2/h1)**2
 # h2 > h1, a = (H/h)**2
 #------------------------------------------------------------------------------    
 # t : Upper half plane
@@ -41,36 +41,52 @@ h2 = 2
 
 # t = x + iy
 
-Nx = 100 # f(t_Nx) ~ z_Ny
-Ny = 300 # f(t_Ny) ~ z_Nx
-
-t_xMin = -100
-t_xMax = 100
-t_yMin = 0
-t_yMax = 200
-
-t_dx = (t_xMax - t_xMin)/(Nx-1)
-t_dy = (t_yMax - t_yMin)/(Ny-1)
+Nx = 1000 # f(t_Nx) ~ number of arcs
+Ny = 1000 # f(t_Ny) ~ points along each arc
 
 t_xs = np.zeros(Nx)
 t_ys = np.zeros(Ny)
 
-eps_x = 1/t_dx #avoid t=0
-eps_y = 1/t_dy
+# t_xMax = 1000
+# t_xMin = -t_xMax
+# t_yMax = t_xMax 
+# t_yMin = 0
 
-for i in range (Nx):
-    t_x = t_xMin + i*t_dx
-    if t_x == 0:
-        t_xs[i]= t_x+t_dx*eps_x
-    else:     
-        t_xs[i] = t_x
-for j in range (Ny):
-    t_y = t_yMin + j*t_dy
-    if t_y == 0:
-        t_ys[j] = t_y + t_dy*eps_y
-    else:  
-        t_ys[j] = t_y
-     
+# t_dx = (t_xMax - t_xMin)/(Nx-1)
+# t_dy = (t_yMax - t_yMin)/(Ny-1)
+# for i in range (Nx):
+#     t_x = t_xMin + i*t_dx
+#     if t_x == 0:
+#         t_xs[i]= t_x+t_dx/20
+#     else:     
+#         t_xs[i] = t_x
+# for j in range (Ny):
+#     t_y = t_yMin + j*t_dy
+#     if t_y == 0:
+#         t_ys[j] = t_y + t_dy/20
+#     else:  
+#         t_ys[j] = t_y
+  
+t_dx = 1/100
+tx = 0
+for i in range(Nx//2):
+    tx += t_dx
+    if tx > 2* a**2: 
+        t_dx *= 1.5
+        
+    t_xs[i] = tx
+    t_xs[-i] = -tx
+       
+t_dy = 1/100
+ty = 0
+for i in range(Ny):
+    ty += t_dy
+    if ty > 2* a**2: 
+        t_dy *= 1.5
+        
+    t_ys[i] = ty
+
+
 #------------------------------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(t)
 #------------------------------------------------------------------------------       
@@ -113,7 +129,9 @@ f_zs = np.zeros(Nx * Ny, complex)
 for i in range(Nx):
     for j in range(Ny):
         t = complex(t_xs[i], t_ys[j])
-        f_zs[i*Ny + j] = f(W(t))
+        f_w_t = f(W(t))
+        f_zs[i*Ny + j] = f_w_t
+        
 
 #------------------------------------------------------------------------------
 # Stream Function  s := phi(z)
@@ -139,8 +157,9 @@ print("Complete: starting plot")
 #------------------------------------------------------------------------------
 # Plotting
 #------------------------------------------------------------------------------
-stream_title = "Stream $t \in [%d, %d]x[0, %d]$"%(t_xMin, t_xMax, t_yMax)
-velpot_title = "Velocity Potential $t \in [%d, %d]x[0, %d]$"%(t_xMin, t_xMax, t_yMax)
+stream_title = "Stream Plot"
+velpot_title = "Velocity Potential"
+mapping_title = "$t \mapsto z$ mapping"
 ax_labels = ["x", "y"]
 
 f_xs = f_zs.real
@@ -157,6 +176,8 @@ stream_xs = zip_fxy[2]
 stream_ys = zip_fxy[3]
 velpot_xs = zip_fxy[4]
 velpot_ys = zip_fxy[5]
+
+# graphics.plot_quivers_flat(f_xs, f_ys, f_xs, f_ys, mapping_title, ax_labels)
 
 graphics.plot_quivers_flat(stream_xs, stream_ys, f_xs, f_ys, stream_title, ax_labels)
 

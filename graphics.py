@@ -169,7 +169,7 @@ def plot_quivers_flat(vx, vy, xs, ys, title, ax_labels):
     pp.rcParams['figure.dpi'] = 1000
 
     pp.figure()
-    pp.quiver(xs, ys, vx, vy, width=0.001)
+    pp.quiver(xs, ys, vx, vy, width=0.0001)
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
