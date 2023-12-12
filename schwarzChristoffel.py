@@ -21,16 +21,15 @@ import cmath
 #    |--l1--|--l2--|  
 
 # flow:  <-#-U-- 
-U=-0.5
+U=1
 
-l1 = 4 # dist N -> P
-l2 = 6 # dist R -> S
+l1 = 4 
+l2 = 6 
 
-h1 = 1 #dist N -> M
-h2 = 2 #dist S -> L
+h1 = 1 
+h2 = 2 
 
-# Step height : 
-#    h2 > h1, a = (H/h)**2
+# h2 > h1, a = (H/h)**2
 #------------------------------------------------------------------------------    
 # t : Upper half plane
 #             .
@@ -42,13 +41,13 @@ h2 = 2 #dist S -> L
 
 # t = x + iy
 
-Nx = 2000
-Ny = 2000
+Nx = 100 # f(t_Nx) ~ z_Ny
+Ny = 300 # f(t_Ny) ~ z_Nx
 
-t_xMin = -10
-t_xMax = 10
+t_xMin = -100
+t_xMax = 100
 t_yMin = 0
-t_yMax = 100
+t_yMax = 200
 
 t_dx = (t_xMax - t_xMin)/(Nx-1)
 t_dy = (t_yMax - t_yMin)/(Ny-1)
@@ -56,27 +55,21 @@ t_dy = (t_yMax - t_yMin)/(Ny-1)
 t_xs = np.zeros(Nx)
 t_ys = np.zeros(Ny)
 
+eps_x = 1/t_dx #avoid t=0
+eps_y = 1/t_dy
+
 for i in range (Nx):
     t_x = t_xMin + i*t_dx
     if t_x == 0:
-        t_xs[i]= t_xMin + i*(t_dx/2)
+        t_xs[i]= t_x+t_dx*eps_x
     else:     
         t_xs[i] = t_x
 for j in range (Ny):
     t_y = t_yMin + j*t_dy
     if t_y == 0:
-        t_ys[j] = t_yMin + j*(t_dy/2)
+        t_ys[j] = t_y + t_dy*eps_y
     else:  
         t_ys[j] = t_y
-    
-ts = np.zeros(Nx * Ny, complex)
-for i in range (Nx):
-    for j in range (Ny):
-        ts[i*Ny+j] = complex(t_xs[i], t_ys[j])
-            
- # ts[k] = complex(t_xs[k//t_Ny], t_ys[k%t_Ny]) 
- 
-
      
 #------------------------------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(t)
@@ -84,74 +77,87 @@ for i in range (Nx):
 a = (h2/h1)**2
 b1 = h2/np.pi 
 b2 = h1/np.pi
-
-
-S = (U*h2)/np.pi
 K = np.pi/(U*h2)
+S = (U*h2)/np.pi
 
 def W(t): #W = phi + i psi
     return S*cmath.log(t)
 
 def f(w):
-    psi_t = w.real
-    phi_t = w.imag
+    
+    eKw = np.exp(K*w.real)
+    sinKw = cmath.sin(K*w.imag)
+    cosKw = cmath.cos(K*w.imag)
 
-    u1 = (2*np.exp(K*psi_t) * cmath.cos(K*phi_t) - (a+1)) /(a-1)
-    v1 = (2*np.exp(K*psi_t) * cmath.sin(K*phi_t)) /(a-1)
+    u1 = ( 2 * eKw   * cosKw - a-1)/(a-1)
+    v1 = ( 2 * eKw   * sinKw      )/(a-1)
+    u2 = (-2 * a/eKw * cosKw + a+1)/(a-1)
+    v2 = ( 2 * a/eKw * sinKw      )/(a-1)
     
     alph1 = cmath.sqrt((1+u1)**2 + v1**2)
     beta1 = cmath.sqrt((1-u1)**2 + v1**2)
-
-    acosh1_real = cmath.acosh(0.5*(alph1 + beta1))
-    acosh1_imag = cmath.acosh(0.5*(alph1 - beta1)) 
-    
-    u2 = (-2*a*np.exp(-K*psi_t) * cmath.cos(K*phi_t) + (a+1)) /(a-1)
-    v2 = (2*a*np.exp(-K*psi_t) * cmath.sin(K*phi_t)) /(a-1)
-
     alph2 = cmath.sqrt((1+u2)**2 + v2**2)
     beta2 = cmath.sqrt((1-u2)**2 + v2**2)
-    
-    acosh2_real = cmath.acosh(0.5*(alph2 + beta2))
-    acosh2_imag = cmath.acosh(0.5*(alph2 - beta2))
+
+    acosh1_real = cmath.acosh((alph1 + beta1)/2)
+    acosh1_imag = cmath.acosh((alph1 - beta1)/2) 
+    acosh2_real = cmath.acosh((alph2 + beta2)/2)
+    acosh2_imag = cmath.acosh((alph2 - beta2)/2)
 
     f_real = b1 * acosh1_real - b2 * acosh2_real
     f_imag = b1 * acosh1_imag - b2 * acosh2_imag - complex(0,(h2-h1))
-    
-    return complex(f_real.real, f_imag.imag)
+    return f_real + f_imag
 
 
 f_zs = np.zeros(Nx * Ny, complex)
-
-for k in range(Nx*Ny):
-    f_zs[k] = f(W(ts[k]))
-    
-f_xs = f_zs.real
-print(min(f_xs))
-f_ys = f_zs.imag
+for i in range(Nx):
+    for j in range(Ny):
+        t = complex(t_xs[i], t_ys[j])
+        f_zs[i*Ny + j] = f(W(t))
 
 #------------------------------------------------------------------------------
-# Stream Function Mapping   s := phi(z)
+# Stream Function  s := phi(z)
 #------------------------------------------------------------------------------
-def stream(z): #stream
-     return (S/2j)*cmath.log(z/z.conjugate())                                                                                                           
+def phi(z): #stream
+    return (S/2j)*cmath.log(z/z.conjugate())  
  
 stream_zs = np.zeros(Nx * Ny, complex)
 for k in range(Nx * Ny):
-    stream_zs[k] = stream(f_zs[k])
+    stream_zs[k] = phi(f_zs[k])
     
-stream_xs = stream_zs.real
-stream_ys = stream_zs.imag
-
 #------------------------------------------------------------------------------
-# Plot stream
+# Velocity Potential Function p := psi(z)
+#------------------------------------------------------------------------------
+def psi(z):
+    return (S/2)*cmath.log(z*z.conjugate())
 
-title = "Stream Plot"
+velpot_zs = np.zeros(Nx * Ny, complex)
+for k in range(Nx * Ny):
+    velpot_zs[k] = psi(f_zs[k])
+
+print("Complete: starting plot")
+#------------------------------------------------------------------------------
+# Plotting
+#------------------------------------------------------------------------------
+stream_title = "Stream $t \in [%d, %d]x[0, %d]$"%(t_xMin, t_xMax, t_yMax)
+velpot_title = "Velocity Potential $t \in [%d, %d]x[0, %d]$"%(t_xMin, t_xMax, t_yMax)
 ax_labels = ["x", "y"]
 
-zip_fxy = np.array(sorted(zip(f_xs, f_ys, stream_xs, stream_ys))).T  #sort in x
+f_xs = f_zs.real
+f_ys = f_zs.imag
+stream_xs = stream_zs.real
+stream_ys = stream_zs.imag
+velpot_xs = velpot_zs.real
+velpot_ys = velpot_zs.imag 
+
+zip_fxy = np.array(sorted(zip(f_xs, f_ys, stream_xs, stream_ys, velpot_xs, velpot_ys))).T  #sort in x
 f_xs = zip_fxy[0]
 f_ys = zip_fxy[1]
-stream_zs = zip_fxy[2]
+stream_xs = zip_fxy[2]
 stream_ys = zip_fxy[3]
+velpot_xs = zip_fxy[4]
+velpot_ys = zip_fxy[5]
 
-graphics.plot_quivers_flat(stream_xs, stream_ys, f_xs, f_ys, title, ax_labels)
+graphics.plot_quivers_flat(stream_xs, stream_ys, f_xs, f_ys, stream_title, ax_labels)
+
+# graphics.plot_quivers_flat(velpot_xs, velpot_ys, f_xs, f_ys, velpot_title, ax_labels)
