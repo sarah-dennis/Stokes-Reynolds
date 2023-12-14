@@ -6,7 +6,6 @@ Created on Thu Nov 30 11:05:44 2023
 @author: sarahdennis
 """
 import numpy as np
-import graphics
 import cmath
 from matplotlib import pyplot as pp
 
@@ -21,18 +20,16 @@ from matplotlib import pyplot as pp
 #           R ---- S -     
 #    |--l1--|--l2--|  
 
-# flow:  <--U-- 
+# flow:  <--U-- (U>0)
 U=1/2
 
-l1 = 2 
-l2 = 5 
+l1 = 1
+l2 = 4
 
-h1 = 1 
+h1 = 1
 h2 = 2
-# h2 > h1
 
-
-#------------------------------------------------------------------------------   
+#-----------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(w) where w = psi + i phi
 #------------------------------------------------------------------------------       
 
@@ -67,13 +64,14 @@ def f(w):
 
 #------------------------------------------------------------------------------\
 #sample w from psi-phi grid    
-N_psi = 250
+N_psi = 100
 N_phi = 100
 
-# psi_min = 0.441271200305
-# psi_max = 0.4412712003055
+
+# psi_min = 0.441271 
+# psi_max = 0.4412715
 # phi_min = 0 
-# phi_max = 0.000000000001
+# phi_max = 0.0000005
 
 psi_min = -1
 psi_max = 2
@@ -100,21 +98,22 @@ print("Complete: starting plot")
 #------------------------------------------------------------------------------
 # Plotting
 #------------------------------------------------------------------------------
-title = "Potential $\psi$ (axi-perpendicular) & Stream $\phi$ (axi-parallel)"
-subtitle = "$\psi(z) \in [%.13f, %.13f]$ \n $\phi(z) \in [%.1f, %.12f]$"%(psi_min, psi_max, phi_min, phi_max)
+title = "Potential $\psi$ & Stream $\phi$ "
+subtitle = "$\psi(z) \in [%.3f, %.3f]$ \n $\phi(z) \in [%.1f, %.3f]$"%(psi_min, psi_max, phi_min, phi_max)
 ax =["x","y"]
 pp.figure()
 pp.xlabel(ax[0])
 pp.ylabel(ax[1])
 
 pp.title(title + '\n' + subtitle)
-for i in range(N_psi):
-    pp.plot(f_zs[i].real, f_zs[i].imag)
-    
+
 for j in range(N_phi):
-    pp.plot(f_zs[:,j].real, f_zs[:,j].imag)
+    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color='teal')
+    
+for i in range(N_psi):
+    psi_contr, = pp.plot(f_zs[i].real, f_zs[i].imag, color='coral')
 
-
+pp.legend( [phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
 
 
