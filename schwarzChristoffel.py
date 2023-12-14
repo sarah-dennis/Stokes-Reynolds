@@ -11,7 +11,7 @@ import cmath
 
  
 #------------------------------------------------------------------------------
-# Pentagon
+# Pentagon BFS
 #------------------------------------------------------------------------------
 # -  M ----------- L -
 # h1 |             | |
@@ -20,8 +20,8 @@ import cmath
 #           R ---- S -     
 #    |--l1--|--l2--|  
 
-# flow:  <-#-U-- 
-U=1
+# flow:  <--U-- 
+U=1/2
 
 l1 = 2 
 l2 = 5 
@@ -29,56 +29,40 @@ l2 = 5
 h1 = 1 
 h2 = 2
 a = (h2/h1)**2
-# h2 > h1, a = (H/h)**2
+# h2 > h1
+
+
+
 #------------------------------------------------------------------------------    
 # t : Upper half plane
 #             .
 #             |
 #             |
 #             |
-# -infty ---- 0 ---- 1 --- a ---- +infty
-#  <-- L --- N=M --- P --- R ---- S -->
+# -infty ---- 0 ---- 1 --- a^2 ---- +infty
+# <- L ----- N=M --- P ---- R ------- S ->
 
 # t = x + iy
 
-Nx = 1000 # f(t_Nx) ~ number of arcs
-Ny = 1000 # f(t_Ny) ~ points along each arc
+Nx_pos = 200
+Nx = 2*Nx_pos
+Ny = Nx_pos
 
 t_xs = np.zeros(Nx)
 t_ys = np.zeros(Ny)
-
-# t_xMax = 1000
-# t_xMin = -t_xMax
-# t_yMax = t_xMax 
-# t_yMin = 0
-
-# t_dx = (t_xMax - t_xMin)/(Nx-1)
-# t_dy = (t_yMax - t_yMin)/(Ny-1)
-# for i in range (Nx):
-#     t_x = t_xMin + i*t_dx
-#     if t_x == 0:
-#         t_xs[i]= t_x+t_dx/20
-#     else:     
-#         t_xs[i] = t_x
-# for j in range (Ny):
-#     t_y = t_yMin + j*t_dy
-#     if t_y == 0:
-#         t_ys[j] = t_y + t_dy/20
-#     else:  
-#         t_ys[j] = t_y
   
-t_dx = 1/100
 tx = 0
-for i in range(Nx//2):
+t_dx = 1/100
+for i in range(Nx_pos):
     tx += t_dx
-    if tx > 2* a**2: 
+    if tx > 2*a**2: 
         t_dx *= 1.5
         
     t_xs[i] = tx
     t_xs[-i] = -tx
-       
+    
+ty = 0 
 t_dy = 1/100
-ty = 0
 for i in range(Ny):
     ty += t_dy
     if ty > 2* a**2: 
@@ -88,7 +72,7 @@ for i in range(Ny):
 
 
 #------------------------------------------------------------------------------   
-# # Schwarz-Christoffel Mapping z = f(t)
+# # Schwarz-Christoffel Mapping z = f(w)
 #------------------------------------------------------------------------------       
 a = (h2/h1)**2
 b1 = h2/np.pi 
@@ -96,8 +80,25 @@ b2 = h1/np.pi
 K = np.pi/(U*h2)
 S = (U*h2)/np.pi
 
-def W(t): #W = phi + i psi
+
+def W(t): #W = psi + i phi
     return S*cmath.log(t)
+
+#------------------------------------------------------------------------------
+
+ws = np.zeros(Nx * Ny, complex)
+
+        
+#sample w from psi-phi grid        
+psi_zs = np.linspace(-1, 2, Nx)
+phi_zs = np.linspace(0, 1, Ny)
+
+for i in range(Nx):  
+    for j in range(Ny):
+        ws[i*Ny + j] = complex(psi_zs[i], phi_zs[j])
+        
+
+#------------------------------------------------------------------------------
 
 def f(w):
     
@@ -129,31 +130,33 @@ f_zs = np.zeros(Nx * Ny, complex)
 for i in range(Nx):
     for j in range(Ny):
         t = complex(t_xs[i], t_ys[j])
-        f_w_t = f(W(t))
-        f_zs[i*Ny + j] = f_w_t
+        w = W(t)
+        # w = complex(psi_zs[i], phi_zs[j])
+        f_zs[i*Ny + j] = f(w)
         
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Stream Function  s := phi(z)
-#------------------------------------------------------------------------------
-def phi(z): #stream
+# ------------------------------------------------------------------------------
+def stream(z): #stream
     return (S/2j)*cmath.log(z/z.conjugate())  
  
 stream_zs = np.zeros(Nx * Ny, complex)
 for k in range(Nx * Ny):
-    stream_zs[k] = phi(f_zs[k])
+    stream_zs[k] = stream(f_zs[k])
     
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Velocity Potential Function p := psi(z)
-#------------------------------------------------------------------------------
-def psi(z):
+# ------------------------------------------------------------------------------
+def potential(z):
     return (S/2)*cmath.log(z*z.conjugate())
-
 velpot_zs = np.zeros(Nx * Ny, complex)
 for k in range(Nx * Ny):
-    velpot_zs[k] = psi(f_zs[k])
+    velpot_zs[k] = potential(f_zs[k])
 
 print("Complete: starting plot")
+
+
 #------------------------------------------------------------------------------
 # Plotting
 #------------------------------------------------------------------------------
@@ -180,5 +183,5 @@ velpot_ys = zip_fxy[5]
 # graphics.plot_quivers_flat(f_xs, f_ys, f_xs, f_ys, mapping_title, ax_labels)
 
 graphics.plot_quivers_flat(stream_xs, stream_ys, f_xs, f_ys, stream_title, ax_labels)
+graphics.plot_quivers_flat(velpot_xs, velpot_ys, f_xs, f_ys, velpot_title, ax_labels)
 
-# graphics.plot_quivers_flat(velpot_xs, velpot_ys, f_xs, f_ys, velpot_title, ax_labels)

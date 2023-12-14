@@ -166,7 +166,7 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
 def plot_quivers_flat(vx, vy, xs, ys, title, ax_labels):   
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = 5000
 
     pp.figure()
     pp.quiver(xs, ys, vx, vy, width=0.0001)
@@ -185,7 +185,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
     
-    pp.streamplot(X, Y, vx, vy)
+    pp.streamplot(xs, ys, vx, vy)
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
