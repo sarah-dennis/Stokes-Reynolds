@@ -21,7 +21,7 @@ from matplotlib import pyplot as pp
 #    |--l1--|--l2--|  
 
 # flow:  <--U-- (U>0)
-U=1/2
+U= 1/2
 
 l1 = 1
 l2 = 4
@@ -64,8 +64,8 @@ def f(w):
 
 #------------------------------------------------------------------------------\
 #sample w from psi-phi grid    
-N_psi = 100
-N_phi = 100
+N_psi = 200
+N_phi = 200
 
 
 # psi_min = 0.441271 
@@ -75,11 +75,11 @@ N_phi = 100
 
 psi_min = -1
 psi_max = 2
-phi_min = 0 
+phi_min = 0
 phi_max = 1
 
-psis = np.linspace(psi_min, psi_max, N_psi) #[-1,2]
-phis = np.linspace(phi_min, phi_max, N_phi) #[0, 1]
+psis = np.linspace(psi_min, psi_max, N_psi)
+phis = np.linspace(phi_min, phi_max, N_phi)
 
 #------------------------------------------------------------------------------
 f_zs = np.zeros((N_psi, N_phi), complex)
@@ -108,10 +108,10 @@ pp.ylabel(ax[1])
 pp.title(title + '\n' + subtitle)
 
 for j in range(N_phi):
-    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color='teal')
+    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color="indigo")
     
 for i in range(N_psi):
-    psi_contr, = pp.plot(f_zs[i].real, f_zs[i].imag, color='coral')
+    psi_contr, = pp.plot(f_zs[i].real, f_zs[i].imag, color="coral")
 
 pp.legend( [phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
