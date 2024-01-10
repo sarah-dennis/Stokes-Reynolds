@@ -109,11 +109,11 @@ pp.ylabel(ax[1])
 pp.title(title + '\n' + subtitle)
 
 for j in range(N_phi):
-    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color="indigo")
+    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color="teal")
     
 for i in range(N_psi):
     psi_contr, = pp.plot(f_zs[i].real, f_zs[i].imag, color="coral")
-
+    
 pp.legend( [phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
 pp.show()
