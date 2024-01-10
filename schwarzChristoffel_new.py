@@ -5,6 +5,7 @@ Created on Thu Nov 30 11:05:44 2023
 
 @author: sarahdennis
 """
+
 import numpy as np
 import cmath
 from matplotlib import pyplot as pp
@@ -115,8 +116,7 @@ for i in range(N_psi):
 
 pp.legend( [phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
-
-
+pp.show()
 
 
 

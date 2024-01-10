@@ -96,7 +96,7 @@ def plot_2D_twin(fs, gs, xs, title, ax_labels):
     
 #------------------------------------------------------------------------------
 def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x), h(x) & quiver (vx,vy)
-    pp.rcParams['figure.dpi'] = 500
+    pp.rcParams['figure.dpi'] = 300
     
     fig = pp.figure()
     X, Y = np.meshgrid(xs, ys)
@@ -151,7 +151,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x)
 
 #------------------------------------------------------------------------------
 def plot_quivers(vx, vy, xs, ys, title, ax_labels):   
-    pp.rcParams['figure.dpi'] = 800
+    pp.rcParams['figure.dpi'] = 500
 
     pp.figure()
     X, Y = np.meshgrid(xs, ys)
@@ -166,7 +166,7 @@ def plot_quivers(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
 def plot_quivers_flat(vx, vy, xs, ys, title, ax_labels):   
-    pp.rcParams['figure.dpi'] = 5000
+    pp.rcParams['figure.dpi'] = 500
 
     pp.figure()
     pp.quiver(xs, ys, vx, vy, width=0.0001)
@@ -193,11 +193,6 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
 
     pp.show()
     
-
-    
-#------------------------------------------------------------------------------   
-def plot_contour(vx, vy, xs, ys, title, ax_labels):
-    return None
     
 
 #------------------------------------------------------------------------------   

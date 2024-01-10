@@ -4,9 +4,8 @@
 Created on Mon May 22 15:05:40 2023
 @author: sarahdennis
 """
-
 import numpy as np
-
+import matplotlib
 import domain as dm
 import pressure_finDiff as fd
 import examples as ex
