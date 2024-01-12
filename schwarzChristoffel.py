@@ -22,13 +22,10 @@ from matplotlib import pyplot as pp
 #    |--l1--|--l2--|  
 
 # flow:  <--U-- (U>0)
-U= 1/2
-
-l1 = 1
-l2 = 4
+U = -1
 
 h1 = 1
-h2 = 2
+h2 = 1.9
 
 #-----------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(w) where w = psi + i phi
@@ -65,21 +62,16 @@ def f(w):
 
 #------------------------------------------------------------------------------\
 #sample w from psi-phi grid    
-N_psi = 200
-N_phi = 200
+N_psi = 10
+N_phi = 10
 
-
-# psi_min = 0.441271 
-# psi_max = 0.4412715
-# phi_min = 0 
-# phi_max = 0.0000005
-
-psi_min = -1
+psi_min = -2 
 psi_max = 2
-phi_min = 0
-phi_max = 1
+phi_min = -2
+phi_max = 2
 
 psis = np.linspace(psi_min, psi_max, N_psi)
+
 phis = np.linspace(phi_min, phi_max, N_phi)
 
 #------------------------------------------------------------------------------
@@ -90,12 +82,10 @@ for i in range(N_psi):
         w = complex(psis[i], phis[j])
         f_zs[i, j] = f(w)
         
-#f_zs[i,:] = {z : psi(z) = psi[i]}
-#f_zs[:,j] = {z : phi(z) = phi[j]}
-# ------------------------------------------------------------------------------
+#f_zs[i,j] = {z : psi(z) = psi[i], phi(z) = phi[j]}
 
 print("Complete: starting plot")
-
+print(f_zs[0])
 #------------------------------------------------------------------------------
 # Plotting
 #------------------------------------------------------------------------------
@@ -108,15 +98,21 @@ pp.ylabel(ax[1])
 
 pp.title(title + '\n' + subtitle)
 
+greens = ["teal", "aqua"]
+reds = ["pink", "coral"]
+
 for j in range(N_phi):
-    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color="teal")
+    phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color=greens[j%2])
     
 for i in range(N_psi):
-    psi_contr, = pp.plot(f_zs[i].real, f_zs[i].imag, color="coral")
-    
-pp.legend( [phi_contr, psi_contr], ["$\phi$", "$\psi$"])
+    psi_contr, = pp.plot(f_zs[i,:].real, f_zs[i,:].imag, color=reds[i%2])
+
+   
+pp.legend([phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
 pp.show()
+
+
 
 
 

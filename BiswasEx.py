@@ -73,7 +73,7 @@ Re = 2*h1*rho*Ub1/visc
 print("Reynolds num: %.3f\n"%Re)
 
 #----------------------------------------------
-# BISWAS (stokes) solution
+# BISWAS (stokes-corrected) solution
 
 dp1_biswas = -lam*rho*l1*(Ub1**2)/(2*h1*Re)   
 dp2_biswas = -lam*rho*l2*(Ub2**2)/(2*h2*Re)
@@ -86,9 +86,9 @@ p_max_biswas = dp1_biswas+p0
 # pressure drop adjusted for expansion ratio
 px_corr = (1-h1**2/h2**2)*(rho*Ub1**2)/2
 
-print("Biswas Stokes \n px1: %.3f, px2: %.3f "%(px1_biswas, px2_biswas))
+print("Biswas \n px1: %.3f, px2: %.3f "%(px1_biswas, px2_biswas))
 
-print(" px_correction: %.3f\n"%px_corr)
+print("px_correction: %.3f\n"%px_corr)
 
 print("hyd-res reyn: %.5f"%(-Q/(px1_reyn + px2_reyn)))
 print("hyd-res biswas: %.5f"%(-Q/(px1_biswas + px2_biswas - px_corr)))
