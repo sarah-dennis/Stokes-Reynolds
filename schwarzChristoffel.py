@@ -27,7 +27,7 @@ U = -1
 h1 = 1
 h2 = 1.9
 
-#-----------------------------------------------------------   
+#------------------------------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(w) where w = psi + i phi
 #------------------------------------------------------------------------------       
 
@@ -61,20 +61,24 @@ def f(w):
     return f_real + f_imag
 
 #------------------------------------------------------------------------------\
-#sample w from psi-phi grid    
-N_psi = 10
-N_phi = 10
+# Make  psi and phi lists to sample   
+N_psi = 40
+N_phi = 40
 
-psi_min = -2 
-psi_max = 2
-phi_min = -2
-phi_max = 2
+psi_min = -h2*U
+psi_max = h2*U
+phi_min = 0
+phi_max = U*h2
 
 psis = np.linspace(psi_min, psi_max, N_psi)
 
 phis = np.linspace(phi_min, phi_max, N_phi)
 
 #------------------------------------------------------------------------------
+# Make z = (psi, phi) contour grid 
+
+#f_zs[i,j] = {z : psi(z) = psi[i], phi(z) = phi[j]}
+
 f_zs = np.zeros((N_psi, N_phi), complex)
 for i in range(N_psi):
     for j in range(N_phi):
@@ -82,10 +86,39 @@ for i in range(N_psi):
         w = complex(psis[i], phis[j])
         f_zs[i, j] = f(w)
         
-#f_zs[i,j] = {z : psi(z) = psi[i], phi(z) = phi[j]}
-
 print("Complete: starting plot")
-print(f_zs[0])
+
+#------------------------------------------------------------------------------
+# Make velocity grids 
+
+# vel_u[i,j] = - dphi/dy = - dpsi/dx
+
+# vel_v[i,j] = dphi/dx = - dpsi/dy
+
+vel_u = np.zeros((N_psi, N_phi))
+
+vel_v = np.zeros((N_psi, N_phi))
+
+
+for i in range(0,N_psi-1):
+    for j in range(1,N_phi-1):
+
+        z_N = f_zs[i,j+1]
+        z_S = f_zs[i, j-1]
+        z_E = f_zs[i+1, j]
+        z_W = f_zs[i-1, j]
+
+        vel_u[i,j] = -(phis[j+1] - phis[j-1])/(z_N.imag - z_S.imag)
+
+        vel_v[i,j] = (phis[j+1] - phis[j-1])/(z_E.real - z_W.real)
+        
+
+        
+print("u = -phi_y", vel_u)
+
+print("v = -psi_y", vel_v)
+
+        
 #------------------------------------------------------------------------------
 # Plotting
 #------------------------------------------------------------------------------
@@ -98,8 +131,8 @@ pp.ylabel(ax[1])
 
 pp.title(title + '\n' + subtitle)
 
-greens = ["teal", "aqua"]
-reds = ["pink", "coral"]
+greens = ["green", "lightgreen"]
+reds = ["purple", "violet"]
 
 for j in range(N_phi):
     phi_contr, = pp.plot(f_zs[:,j].real, f_zs[:,j].imag, color=greens[j%2])
