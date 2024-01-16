@@ -22,10 +22,10 @@ from matplotlib import pyplot as pp
 #    |--l1--|--l2--|  
 
 # flow:  <--U-- (U>0)
-U = -1
+U = 1
 
 h1 = 1
-h2 = 1.9
+h2 = 2
 
 #------------------------------------------------------------------------------   
 # # Schwarz-Christoffel Mapping z = f(w) where w = psi + i phi
@@ -60,13 +60,13 @@ def f(w):
     f_imag = b1 * acosh1_imag - b2 * acosh2_imag - complex(0,(h2-h1))
     return f_real + f_imag
 
-#------------------------------------------------------------------------------\
+#------------------------------------------------------------------------------
 # Make  psi and phi lists to sample   
-N_psi = 40
-N_phi = 40
+N_psi = 100
+N_phi = 100
 
-psi_min = -h2*U
-psi_max = h2*U
+psi_min = -2*h2*U
+psi_max = 2*h2*U
 phi_min = 0
 phi_max = U*h2
 
@@ -91,32 +91,28 @@ print("Complete: starting plot")
 #------------------------------------------------------------------------------
 # Make velocity grids 
 
-# vel_u[i,j] = - dphi/dy = - dpsi/dx
+vel_u = np.zeros((N_psi, N_phi), complex)
+vel_v = np.zeros((N_psi, N_phi), complex)
 
-# vel_v[i,j] = dphi/dx = - dpsi/dy
+# boundary conditions?
+# vel_v[i,0] = vel_v[i,N_phi-1] = 0
+# vel_u[0,j] = vel_u[N_psi-1,j] = parabolic in j
 
-vel_u = np.zeros((N_psi, N_phi))
+# why is inlet velocity not parabolic?? 
+# stress components or strain rate?
 
-vel_v = np.zeros((N_psi, N_phi))
-
-
-for i in range(0,N_psi-1):
+for i in range(1,N_psi-1):
     for j in range(1,N_phi-1):
 
-        z_N = f_zs[i,j+1]
-        z_S = f_zs[i, j-1]
+    
         z_E = f_zs[i+1, j]
         z_W = f_zs[i-1, j]
 
-        vel_u[i,j] = -(phis[j+1] - phis[j-1])/(z_N.imag - z_S.imag)
-
-        vel_v[i,j] = (phis[j+1] - phis[j-1])/(z_E.real - z_W.real)
+        psi_dz = (psis[i+1] - psis[i-1])/(z_E - z_W)
+        psi_dzconj = (psis[i+1] - psis[i-1])/(z_E.conjugate() - z_W.conjugate())
         
-
-        
-print("u = -phi_y", vel_u)
-
-print("v = -psi_y", vel_v)
+        vel_u[i,j] = - (psi_dz + psi_dzconj)
+        vel_v[i,j] = - complex(0, 1) * (psi_dz - psi_dzconj)
 
         
 #------------------------------------------------------------------------------
@@ -146,7 +142,14 @@ pp.legend([phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 pp.show()
 
 
-
+pp.figure()
+pp.rcParams['figure.dpi'] = 1000
+title = "Velocity $(U,V)$ "
+pp.quiver(f_zs.real, f_zs.imag, vel_u, vel_v, width=0.001)
+pp.title(title)
+pp.xlabel(ax[0])
+pp.ylabel(ax[1])
+pp.show()
 
 
 

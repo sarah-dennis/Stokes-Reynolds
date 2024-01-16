@@ -59,7 +59,7 @@ x_step = 1
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Square wave: numerical solves
-# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
 
