@@ -22,7 +22,7 @@ from matplotlib import pyplot as pp
 #    |--l1--|--l2--|  
 
 # flow:  <--U-- (U>0)
-U = 1
+U = -1
 
 h1 = 1
 h2 = 2
@@ -62,8 +62,8 @@ def f(w):
 
 #------------------------------------------------------------------------------
 # Make  psi and phi lists to sample   
-N_psi = 100
-N_phi = 100
+N_psi = 65
+N_phi = 50
 
 psi_min = -2*h2*U
 psi_max = 2*h2*U
@@ -98,13 +98,12 @@ vel_v = np.zeros((N_psi, N_phi), complex)
 # vel_v[i,0] = vel_v[i,N_phi-1] = 0
 # vel_u[0,j] = vel_u[N_psi-1,j] = parabolic in j
 
-# why is inlet velocity not parabolic?? 
+# why is inlet/outlet velocity not parabolic?? 
 # stress components or strain rate?
 
 for i in range(1,N_psi-1):
     for j in range(1,N_phi-1):
 
-    
         z_E = f_zs[i+1, j]
         z_W = f_zs[i-1, j]
 
@@ -136,16 +135,15 @@ for j in range(N_phi):
 for i in range(N_psi):
     psi_contr, = pp.plot(f_zs[i,:].real, f_zs[i,:].imag, color=reds[i%2])
 
-   
 pp.legend([phi_contr, psi_contr], ["$\phi$", "$\psi$"])
 
 pp.show()
-
 
 pp.figure()
 pp.rcParams['figure.dpi'] = 1000
 title = "Velocity $(U,V)$ "
 pp.quiver(f_zs.real, f_zs.imag, vel_u, vel_v, width=0.001)
+
 pp.title(title)
 pp.xlabel(ax[0])
 pp.ylabel(ax[1])
