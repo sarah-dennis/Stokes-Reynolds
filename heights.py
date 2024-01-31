@@ -74,7 +74,6 @@ class CorrugatedHeight(Height): #sinusoidal wave
         return -self.h_mid * self.r * self.k**2 * np.cos(self.k*x)
 
 
-
 class WedgeHeight(Height): #slider bearing
     
     def __init__(self, domain, h_min, m):
@@ -91,10 +90,22 @@ class WedgeHeight(Height): #slider bearing
         
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 
-
     def h(self, x):
         return self.h_min + self.m * (x - self.xf)
-
+    
+    
+class SawtoothHeight(Height):
+    # hs = [h_min0, h_max0, h_min1, h_max1,...]
+    def __init__(self, domain, hs, n):
+        self.n = n
+        self.L = (domain.xf - domain.x0)/n
+        self.hxs = dfd.center_diff(hs, domain)
+        self.hxxs = dfd.center_second_diff(hs, domain)
+        self.h_eq = "h(x) = "
+        self.h_str = "Sawtooth"
+        super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
+    
+    
 class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
     def __init__(self, domain, n_steps, h_steps, h_str, h_eq):

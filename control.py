@@ -27,7 +27,7 @@ U = 2   #V_x(x,0) = U
 visc = 1   
 
 # Grid size
-Nx = 500
+Nx = 100
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -50,7 +50,7 @@ x_step = 1
 # Analytic Solutions
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
-# height, pressure = ex.wedge(domain, p0, pN)
+height, pressure = ex.wedge(domain, p0, pN)
 # height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
@@ -59,7 +59,7 @@ x_step = 1
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Square wave: numerical solves
-height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
 
@@ -83,13 +83,13 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 #------------------------------------------------------------------------------
 # Velocity
 #------------------------------------------------------------------------------
-# velocity = vel.Velocity(domain, height, pressure)
+velocity = vel.Velocity(domain, height, pressure)
 
-# phv_title = "Pressure and Velocity for %s"%height.h_str
-# phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-# phv_ax_labels =  ['$x$', '$y$']
+phv_title = "Pressure and Velocity for %s"%height.h_str
+phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+phv_ax_labels =  ['$x$', '$y$']
 
-# graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
+graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
 
 
 #------------------------------------------------------------------------------

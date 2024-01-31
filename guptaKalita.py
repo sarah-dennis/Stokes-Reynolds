@@ -13,17 +13,17 @@ from scipy.sparse.linalg import bicgstab
 import graphics as graph
 
 x0 = 0
-xL = 2
+xL = 1
 
 y0 = 0
-yL = 4
+yL = 2
 
 slope = yL/(xL/2)
 U = 1
 
 Re = 1
 
-N = 75
+N = 80
 h = 1/N
 
 n = xL*N + 1
@@ -289,7 +289,7 @@ u = np.ones(n*m)
 v = np.ones(n*m)
 
 stab_tol = 1e-5
-trials = 20
+trials = 50
 
 for i in range(trials): 
 
@@ -303,7 +303,7 @@ ys = np.linspace(y0, yL, m)
 u = u.reshape((m,n))
 v = v.reshape((m,n))
 ax_labels = ['x', 'y']
-title = 'velocity stream-plot'
+title = 'velocity stream-plot ($N=%d$, $trials=%d$)'%(N, trials)
 graph.plot_stream(u, v, xs, ys, title, ax_labels)
 
 

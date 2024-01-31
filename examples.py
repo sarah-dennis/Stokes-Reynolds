@@ -8,6 +8,7 @@ import heights as hgt
 import pressures as prs
 import numpy as np
 
+
 # pressure solutions to reynolds equation for the given height functions
 
 # ------------------------------------------------------------------------------
@@ -40,6 +41,13 @@ def wedge(domain, p0, pN):
     h_min = 0.1
     m = -2
     height = hgt.WedgeHeight(domain, h_min, m)
+    pressure = prs.WedgePressure(domain, height, p0, pN)
+    return height, pressure
+
+def sawtooth(domain, p0, pN, h_min, h_max, n):
+    hs = np.random.sample(range(h_min, h_max), n)
+    
+    height = hgt.SawtoothHeight(domain, hs, n)
     pressure = prs.WedgePressure(domain, height, p0, pN)
     return height, pressure
 

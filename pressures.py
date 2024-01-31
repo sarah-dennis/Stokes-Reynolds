@@ -49,7 +49,8 @@ class ConstantPressure(Pressure):
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic"
+        p_str = "Analytic Reynolds"
+        #TODO: revisit this...
         ps = np.zeros(domain.Nx)
         for i in range(domain.Nx):
             h = height.hs[i]
@@ -59,7 +60,7 @@ class CorrugatedPressure(Pressure): #sinusoidal
         
 class WedgePressure(Pressure):
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic"
+        p_str = "Analytic Reynolds"
         ps = np.zeros(domain.Nx)
         a = height.h_max/height.h_min
         L = domain.xf - domain.x0
@@ -72,10 +73,24 @@ class WedgePressure(Pressure):
     def H(self, X, a):
         return a + (1-a)*X
 
+class SawtoothPressure(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Analytic piecewise-Reynolds"
+        #Nx/L integer
+        ps = np.zeros(domain.n)
+        hs = height.hs
+        n = height.n
+
+       #for i in range n     
+            
+        
+        
+        
+
 class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic"
+        p_str = "Analytic piecewise-Reynolds"
 
         ps = np.zeros(domain.Nx)
         
@@ -172,7 +187,6 @@ class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "schur-inv"
-        
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
         t0 = time.time()
@@ -248,9 +262,6 @@ class SquareWavePressure_schurLUSolve(Pressure):
                     
             w[i] = w_ij
             
-        
-        
-        
         # U block  - back sub
         # | I  B1 | |x| = |v|
         # | 0  I  | |y|   |w|
