@@ -10,6 +10,8 @@ import numpy as np
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
+import graphics as graph
+
 x0 = 0
 xL = 2
 
@@ -21,7 +23,7 @@ U = 1
 
 Re = 1
 
-N = 2
+N = 75
 h = 1/N
 
 n = xL*N + 1
@@ -35,18 +37,17 @@ m = yL*N + 1
 # if psi is 0, and boundary velocity's given, for (14) and (15)
 
 
+#rhs = c0*A - c1*(B - C)    
+c0 = 3*h
+c1 = 0.5 * h**2 * Re
+A, B, C = np.zeros(3)
+# A = u_S - u_N + v_E - v_W
+# B = v_C * (u_E + u_W + u_N + u_S)
+# C = u_C * (v_E + v_W + v_N + v_S)
+
 def make_rhs(u, v): #
     rhs = np.zeros(m*n)
-    c0 = 3*h
-    c1 = 0.5 * h**2 * Re
-    A, B, C = np.zeros(3)
-    
-    #rhs = c0*A - c1*(B - C)                
-    # A = u_S - u_N + v_E - v_W
-    # B = v_C * (u_E + u_W + u_N + u_S)
-    # C = u_C * (v_E + v_W + v_N + v_S)
 
-    
     for k in range(n*m):
         i = k % n
         j = k//n
@@ -113,13 +114,16 @@ def make_rhs(u, v): #
             
     return rhs
 
-
+#
+# new_u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
+# new_v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
+c2 = 3/(4*h)
+c3 = 1/4
 
 def uv_approx(u, v, psi):
     new_u = np.zeros(n*m)
     new_v = np.zeros(n*m)
-    c1 = 3/(4*h)
-    c2 = 1/4
+
     for k in range(n*m):
         i = k % n
         j = k//n
@@ -182,12 +186,9 @@ def uv_approx(u, v, psi):
                 v_W = v[j*n + (i-1)]
                 psi_W = psi[j*n + i-1]
    
-
-        
-            new_u[k] = c1 * (psi_N - psi_S) - c2 * (u_N + u_S)
-            new_v[k] = -c1 * (psi_E - psi_W) - c2 * (v_E + v_W)
+            new_u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
+            new_v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
     
-            
     return new_u, new_v
 
 class linOp(LinearOperator):
@@ -209,7 +210,6 @@ class linOp(LinearOperator):
             y = h*j
 
 
-            
             # outer boundary
             if i == 0 or i == n-1 or j == 0 or j == m-1:
                 self.mv[k] = 0
@@ -279,26 +279,40 @@ class linOp(LinearOperator):
 
         
                 self.mv[k] = v_SW - 8*v_S + v_SE + -8*v_W + 28*v_C -8*v_E + v_NW -8*v_N + v_NE
-        
 
         return self.mv
 
 
 M = linOp()
-atol = 1e-5
-exit_flag = 1
-
-
 
 u = np.ones(n*m)
 v = np.ones(n*m)
-rhs = make_rhs(u, v)
 
-for i in range(60): 
+stab_tol = 1e-5
+trials = 20
+
+for i in range(trials): 
 
     rhs = make_rhs(u, v)
-    psi, exit_flag = bicgstab(M, rhs, atol=atol)
-    u, v = uv_approx(u, v, psi)
+    stream, exit_flag = bicgstab(M, rhs, atol=stab_tol)
+    u, v = uv_approx(u, v, stream)
 
-print(psi.reshape((n,m)))
+#graphing...
+xs = np.linspace(x0, xL, n)
+ys = np.linspace(y0, yL, m)
+u = u.reshape((m,n))
+v = v.reshape((m,n))
+ax_labels = ['x', 'y']
+title = 'velocity stream-plot'
+graph.plot_stream(u, v, xs, ys, title, ax_labels)
+
+
+
+
+
+
+
+
+
+
 
