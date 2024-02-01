@@ -23,7 +23,7 @@ U = 1
 
 Re = 1
 
-N = 80
+N = 200
 h = 1/N
 
 n = xL*N + 1
@@ -289,7 +289,7 @@ u = np.ones(n*m)
 v = np.ones(n*m)
 
 stab_tol = 1e-5
-trials = 50
+trials = 30
 
 for i in range(trials): 
 

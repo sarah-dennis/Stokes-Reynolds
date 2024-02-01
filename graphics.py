@@ -96,7 +96,7 @@ def plot_2D_twin(fs, gs, xs, title, ax_labels):
     
 #------------------------------------------------------------------------------
 def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x), h(x) & quiver (vx,vy)
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = 500
     
     fig = pp.figure()
     X, Y = np.meshgrid(xs, ys)

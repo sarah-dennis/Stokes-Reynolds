@@ -7,9 +7,12 @@ Created on Wed Feb 22 10:01:42 2023
 import heights as hgt
 import pressures as prs
 import numpy as np
+import domain as dm
 
 
 # pressure solutions to reynolds equation for the given height functions
+#-------------------------------------------------------------------------
+
 
 # ------------------------------------------------------------------------------
 # 0. Constant Height
@@ -22,8 +25,6 @@ def flat(domain, p0, pN, h0):
 # ------------------------------------------------------------------------------
 # I. Corrugated Sinusoidal Height
 # ------------------------------------------------------------------------------
-
-
 def corrugated(domain, p0, pN):
     h_mid = 1
     r = 0.5
@@ -37,20 +38,57 @@ def corrugated(domain, p0, pN):
 # ------------------------------------------------------------------------------
 
 
-def wedge(domain, p0, pN):
-    h_min = 0.1
-    m = -2
-    height = hgt.WedgeHeight(domain, h_min, m)
-    pressure = prs.WedgePressure(domain, height, p0, pN)
+def wedge(domain, h0, hf):
+    slope = (hf - h0)/(domain.xs[-1]-domain.xs[0])
+    height = hgt.WedgeHeight(domain, hf, slope)
+    pressure = prs.WedgePressure(domain, height)
     return height, pressure
 
-def sawtooth(domain, p0, pN, h_min, h_max, n):
-    hs = np.random.sample(range(h_min, h_max), n)
+def sawtooth(domain, h_min, h_max, n):
     
-    height = hgt.SawtoothHeight(domain, hs, n)
-    pressure = prs.WedgePressure(domain, height, p0, pN)
+    h_peaks = np.random.uniform(h_min, h_max, n+1)
+    # h_peaks = [0.001, 2, 0.001]
+    Mx = int(domain.Nx//n)
+    hs = np.zeros(domain.Nx)
+    ps = np.zeros(domain.Nx)
+    
+    for i in range(n):
+        xi_0 = domain.xs[i*Mx]
+        xi_f = domain.xs[(i+1)*Mx-1]
+        subDomain = dm.Domain(xi_0, xi_f, domain.eta, domain.U, Mx, domain.BC)
+        
+        slope = (h_peaks[i+1] - h_peaks[i])/(xi_f - xi_0)
+        subHeight = hgt.WedgeHeight(subDomain, h_peaks[i+1], slope)
+        hs[i*Mx : (i+1)*Mx] = subHeight.hs
+        
+        subPressure = prs.WedgePressure(subDomain, subHeight)
+        
+        sub_max = max(abs(subPressure.ps))
+        ps[i*Mx : (i+1)*Mx] = subPressure.ps/(sub_max)
+
+    height = hgt.SawtoothHeight(domain, hs)
+    pressure = prs.SawtoothPressure(domain, ps)
+
     return height, pressure
 
+
+def sawtooth_finDiff(domain, h_min, h_max, n):
+    h_peaks = np.random.uniform(h_min, h_max, n+1)
+    # h_peaks = [0.001, 2, 0.001]
+    Mx = int(domain.Nx//n)
+    hs = np.zeros(domain.Nx)
+    for i in range(n):
+        xi_0 = domain.xs[i*Mx]
+        xi_f = domain.xs[(i+1)*Mx-1]
+        subDomain = dm.Domain(xi_0, xi_f, domain.eta, domain.U, Mx, domain.BC)
+        
+        slope = (h_peaks[i+1] - h_peaks[i])/(xi_f - xi_0)
+        subHeight = hgt.WedgeHeight(subDomain, h_peaks[i+1], slope)
+        hs[i*Mx : (i+1)*Mx] = subHeight.hs
+    height = hgt.SawtoothHeight(domain, hs)
+    pressure = prs.FinDiffPressure(domain, height, 0, 0)
+    return pressure, height
+    
 
 # ------------------------------------------------------------------------------
 # III a. Step Height Example (N = 1)
@@ -104,10 +142,10 @@ def squareWave_pySolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
     pressure = prs.SquareWavePressure_pySolve(domain, height, p0, pN)
     return height, pressure
 
-def squareWave_gmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
+def squareWave_schurGmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
     print("\n Loading %d-step Square Wave \n" % (n_steps))
     height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure_gmresSolve(domain, height, p0, pN)
+    pressure = prs.SquareWavePressure_schurGmresSolve(domain, height, p0, pN)
     return height, pressure
 
 

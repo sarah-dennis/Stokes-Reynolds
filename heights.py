@@ -76,12 +76,12 @@ class CorrugatedHeight(Height): #sinusoidal wave
 
 class WedgeHeight(Height): #slider bearing
     
-    def __init__(self, domain, h_min, m):
-        self.h_min = h_min
+    def __init__(self, domain, hf, m):
+        self.hf = hf
         self.m = m
         self.xf = domain.xf
         
-        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(h_min, m, domain.x0)
+        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(hf, m, domain.x0)
         self.h_str = "Wedge Slider"
         
         self.hs = np.asarray([self.h(x) for x in domain.xs])
@@ -91,20 +91,16 @@ class WedgeHeight(Height): #slider bearing
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 
     def h(self, x):
-        return self.h_min + self.m * (x - self.xf)
-    
-    
+        return self.hf + self.m * (x - self.xf)
+
 class SawtoothHeight(Height):
-    # hs = [h_min0, h_max0, h_min1, h_max1,...]
-    def __init__(self, domain, hs, n):
-        self.n = n
-        self.L = (domain.xf - domain.x0)/n
+    def __init__(self, domain, hs):
+        self.h_eq = "h(x)"
+        self.h_str = "Sawtooth"
+        self.hs = hs
         self.hxs = dfd.center_diff(hs, domain)
         self.hxxs = dfd.center_second_diff(hs, domain)
-        self.h_eq = "h(x) = "
-        self.h_str = "Sawtooth"
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
-    
     
 class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 

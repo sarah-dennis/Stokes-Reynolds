@@ -9,6 +9,7 @@ Created on Wed Jan 25 18:24:34 2023
 import graphics as graph
 import numpy as np
 import time
+import heights 
 
 import domain as dfd
 
@@ -59,30 +60,24 @@ class CorrugatedPressure(Pressure): #sinusoidal
         super().__init__(domain, ps, p0, pN,  p_str)
         
 class WedgePressure(Pressure):
-    def __init__(self, domain, height, p0, pN):
+    def __init__(self, domain, height):
         p_str = "Analytic Reynolds"
         ps = np.zeros(domain.Nx)
-        a = height.h_max/height.h_min
+        a = height.hs[0]/height.hs[-1]
         L = domain.xf - domain.x0
         for i in range(domain.Nx):
             X = domain.xs[i]/L
             Pi = a/(1-a**2)*(1/self.H(X, a)**2 - 1/a**2) - 1/(1-a)*(1/self.H(X, a)-1/a)
             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
-        super().__init__(domain, ps, p0, pN, p_str)
+        super().__init__(domain, ps, 0, 0, p_str)
         
     def H(self, X, a):
         return a + (1-a)*X
 
 class SawtoothPressure(Pressure):
-    def __init__(self, domain, height, p0, pN):
+    def __init__(self, domain, ps):
         p_str = "Analytic piecewise-Reynolds"
-        #Nx/L integer
-        ps = np.zeros(domain.n)
-        hs = height.hs
-        n = height.n
-
-       #for i in range n     
-            
+        super().__init__(domain, ps, ps[0], ps[-1], p_str)
         
         
         
@@ -150,7 +145,7 @@ class SquareWavePressure_pySolve(Pressure):
         
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
         
-class SquareWavePressure_gmresSolve(Pressure):
+class SquareWavePressure_schurGmresSolve(Pressure):
 
 # TODO: matvec overcalled, look in to preconditioners
     def __init__(self, domain, height, p0, pN):

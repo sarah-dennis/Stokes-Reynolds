@@ -17,17 +17,17 @@ import graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 5
+xf = 1
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = 2   #V_x(x,0) = U
+U = -1   #V_x(x,0) = U
 
 # kinematic viscosity
 visc = 1   
 
 # Grid size
-Nx = 100
+Nx = 600
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -46,29 +46,39 @@ h_avg = 0.75
 h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
 x_step = 1
 
+n = 1
+#for sawtooth: n | Nx
+h_min = 0.0001
+h_max = 1
+
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
-height, pressure = ex.wedge(domain, p0, pN)
+# height, pressure = ex.wedge(domain, h_min, h_max)
+height, pressure = ex.sawtooth(domain, h_min, h_max, n)
 # height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
 
+
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
-# Square wave: numerical solves
-# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# Sawtooth
+height, pressure = ex.sawtooth_finDiff(domain, h_min, h_max, n)
+
+
+# Square wave
+
+# height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
 
 # height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
 
-# height, pressure = ex.squareWave_gmresSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n_steps, r, h_avg)
 
-
+# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
 # height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
-
 # height, pressure  = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_avg+r, h_avg-r)
 
 
