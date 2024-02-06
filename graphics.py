@@ -187,10 +187,13 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     pp.streamplot(xs, ys, vx, vy)
     
+    
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
+    ax = pp.gca()
 
+    ax.set_aspect('equal', 'box')
     pp.show()
     
     

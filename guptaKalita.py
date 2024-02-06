@@ -23,7 +23,7 @@ U = 1
 
 Re = 1
 
-N = 200
+N = 100
 h = 1/N
 
 n = xL*N + 1
@@ -289,10 +289,10 @@ u = np.ones(n*m)
 v = np.ones(n*m)
 
 stab_tol = 1e-5
-trials = 30
+trials = 10
 
 for i in range(trials): 
-
+    print("trial %d of %d"%(i+1, trials))
     rhs = make_rhs(u, v)
     stream, exit_flag = bicgstab(M, rhs, atol=stab_tol)
     u, v = uv_approx(u, v, stream)

@@ -63,11 +63,15 @@ class WedgePressure(Pressure):
     def __init__(self, domain, height):
         p_str = "Analytic Reynolds"
         ps = np.zeros(domain.Nx)
-        a = height.hs[0]/height.hs[-1]
+        
+        a = height.h1 / height.h0
+
         L = domain.xf - domain.x0
+        
         for i in range(domain.Nx):
-            X = domain.xs[i]/L
-            Pi = a/(1-a**2)*(1/self.H(X, a)**2 - 1/a**2) - 1/(1-a)*(1/self.H(X, a)-1/a)
+            X = (domain.xs[i]-domain.x0)/L
+            hX = self.H(X, a)
+            Pi = a/(1-a**2)*(1/hX**2 - 1/a**2) - 1/(1-a)*(1/hX - 1/a)
             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
         super().__init__(domain, ps, 0, 0, p_str)
         
@@ -80,8 +84,6 @@ class SawtoothPressure(Pressure):
         super().__init__(domain, ps, ps[0], ps[-1], p_str)
         
         
-        
-
 class StepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):

@@ -27,7 +27,7 @@ U = -1   #V_x(x,0) = U
 visc = 1   
 
 # Grid size
-Nx = 600
+Nx = 200
 
 domain = dm.Domain(x0, xf, visc, U, Nx, BC)
 
@@ -46,17 +46,20 @@ h_avg = 0.75
 h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
 x_step = 1
 
-n = 1
+n = 4
 #for sawtooth: n | Nx
-h_min = 0.0001
+h0 = 1
+h1 = 0.5
+h_min = 0.01
 h_max = 1
 
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
-# height, pressure = ex.wedge(domain, h_min, h_max)
+# height, pressure = ex.wedge(domain, h0, h1)
 height, pressure = ex.sawtooth(domain, h_min, h_max, n)
+# TODO check pressure - solve for continuous pressure from the outset
 # height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
@@ -66,7 +69,7 @@ height, pressure = ex.sawtooth(domain, h_min, h_max, n)
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Sawtooth
-height, pressure = ex.sawtooth_finDiff(domain, h_min, h_max, n)
+# height, pressure = ex.sawtooth_finDiff(domain, h_min, h_max, n)
 
 
 # Square wave

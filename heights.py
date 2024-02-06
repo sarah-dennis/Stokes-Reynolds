@@ -44,7 +44,7 @@ class ConstantHeight(Height):
     def __init__(self, domain, h0):
         self.h_str = "Constant Height"
         self.h_eq = "h(x) = %.2f"%h0
-        self.hs = np.ones(domain.Nx)*h0
+        self.hs = np.ones(domain.Nx)*h0 
         self.hxs = np.zeros(domain.Nx)
         self.hxxs = np.zeros(domain.Nx)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
@@ -76,12 +76,13 @@ class CorrugatedHeight(Height): #sinusoidal wave
 
 class WedgeHeight(Height): #slider bearing
     
-    def __init__(self, domain, hf, m):
-        self.hf = hf
-        self.m = m
-        self.xf = domain.xf
+    def __init__(self, domain, h0, h1):
+        self.h0 = h0
+        self.h1 = h1
+        self.x0 = domain.x0
+        self.m = (h1 - h0)/(domain.xf - domain.x0)
         
-        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(hf, m, domain.x0)
+        self.h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(self.h0, self.m, self.x0)
         self.h_str = "Wedge Slider"
         
         self.hs = np.asarray([self.h(x) for x in domain.xs])
@@ -91,7 +92,7 @@ class WedgeHeight(Height): #slider bearing
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 
     def h(self, x):
-        return self.hf + self.m * (x - self.xf)
+        return self.h0 + self.m * (x - self.x0)
 
 class SawtoothHeight(Height):
     def __init__(self, domain, hs):
