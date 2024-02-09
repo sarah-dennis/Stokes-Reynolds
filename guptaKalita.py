@@ -6,11 +6,14 @@ Created on Mon Jan 22 14:59:46 2024
 @author: sarahdennis
 """
 import numpy as np
+import csv
 
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
 import graphics as graph
+
+
 
 x0 = 0
 xL = 1
@@ -23,31 +26,75 @@ U = 1
 
 Re = 1
 
-N = 100
+N = 500
 h = 1/N
 
 n = xL*N + 1
 m = yL*N + 1
 
+stab_tol = 1e-5
+trials = 10
+plot_every = 1
 
-# concatenated wedge slider bearings 
+name = "guptaKalita_N%d.csv"%N 
 
-# write to the new Biswas email
+def run_new(filename):
+    u = np.ones(n*m)
+    v = np.ones(n*m)
+    
+    u, v = run(u,v)
+    
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=' ')
+        for i in range(n*m):
+            writer.writerow([u[i], v[i]])
+    
+def run_load(filename):
 
-# if psi is 0, and boundary velocity's given, for (14) and (15)
+    with open(filename, newline='') as file:
+        reader = csv.reader(file)
+        u = np.ones(n*m)
+        v = np.ones(n*m)
+        
+        for i in range(n*m):
+            ui, vi = next(reader)[0].split(' ')
+            u[i] = float(ui)
+            v[i] = float(vi)
 
+    u, v = run(u,v)
+    
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=' ')
+        for i in range(n*m):
+            writer.writerow([u[i], v[i]])
+    
+    
+def run(u,v):
+    rhs = make_rhs(u,v)
+    M = Dpsi_linOp()
 
-#rhs = c0*A - c1*(B - C)    
-c0 = 3*h
-c1 = 0.5 * h**2 * Re
-A, B, C = np.zeros(3)
+    for i in range(trials): 
+        print("trial %d of %d"%(i+1, trials))
+        rhs = make_rhs(u, v)
+        stream, exit_flag = bicgstab(M, rhs, atol=stab_tol)
+        u, v = uv_approx(u, v, stream)
+        
+        if i % plot_every == 0:
+            make_plots(u, v, i)
+            
+    return u, v
+    
+# -----------------------------------------------------------------------------
+# rhs = c0*A - c1*(B - C)    
+
 # A = u_S - u_N + v_E - v_W
 # B = v_C * (u_E + u_W + u_N + u_S)
 # C = u_C * (v_E + v_W + v_N + v_S)
 
+c0 = 3*h
+c1 = 0.5 * h**2 * Re
 def make_rhs(u, v): #
     rhs = np.zeros(m*n)
-
     for k in range(n*m):
         i = k % n
         j = k//n
@@ -58,7 +105,6 @@ def make_rhs(u, v): #
         # boundary
         if i == 0 or j == 0 or i == n-1 or j == m-1:
             rhs[k] = 0
-            # TODO even for j=0 where ux=U ?
           
         # dead zones 
         elif y <= -slope * x + yL or y <= slope * x - yL:
@@ -114,12 +160,13 @@ def make_rhs(u, v): #
             
     return rhs
 
-#
+# -----------------------------------------------------------------------------
+
 # new_u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # new_v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
+
 c2 = 3/(4*h)
 c3 = 1/4
-
 def uv_approx(u, v, psi):
     new_u = np.zeros(n*m)
     new_v = np.zeros(n*m)
@@ -191,11 +238,12 @@ def uv_approx(u, v, psi):
     
     return new_u, new_v
 
-class linOp(LinearOperator):
+# -----------------------------------------------------------------------------
+
+class Dpsi_linOp(LinearOperator):
 
     def __init__(self):
-        #  global vars: Nx, Ny, h, slope, yL
-        
+        #  globals: Nx, Ny, h, slope, yL
         self.shape = ((n*m, n*m))        
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(n*m) 
@@ -209,7 +257,6 @@ class linOp(LinearOperator):
             x = h*i
             y = h*j
 
-
             # outer boundary
             if i == 0 or i == n-1 or j == 0 or j == m-1:
                 self.mv[k] = 0
@@ -220,11 +267,10 @@ class linOp(LinearOperator):
 
             #interior   
             else: 
-                            
+                # psi[k] at 9 point stencil         
+                
                 v_C = v[k]
         
-                # psi[k] at 9 point stencil
-                
                 #North (i, j+1)
                 y_N = h*(j+1)
                 if j+1 == m-1: 
@@ -282,37 +328,33 @@ class linOp(LinearOperator):
 
         return self.mv
 
+#-----------------------------------------------------------------------------
 
-M = linOp()
+def make_plots(u, v, k):
+# Grid domain
+    xs = np.linspace(x0, xL, n)
+    ys = np.linspace(y0, yL, m)
 
-u = np.ones(n*m)
-v = np.ones(n*m)
+# velocity 
+    u_2D = u.reshape((m,n))
+    v_2D = v.reshape((m,n))
+    ax_labels = ['x', 'y']
+    title = 'velocity stream-plot ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
+    graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
-stab_tol = 1e-5
-trials = 10
+# vorticity 
 
-for i in range(trials): 
-    print("trial %d of %d"%(i+1, trials))
-    rhs = make_rhs(u, v)
-    stream, exit_flag = bicgstab(M, rhs, atol=stab_tol)
-    u, v = uv_approx(u, v, stream)
+    uy_2D = np.gradient(u_2D, h, axis=0)
+    vx_2D = np.gradient(v_2D, h, axis=1)
+    w = np.zeros((m,n))
+    for j in range(m):
+        for i in range(n):   
+            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+            if w[j,i] == 0:
+                w[j,i] = None
 
-#graphing...
-xs = np.linspace(x0, xL, n)
-ys = np.linspace(y0, yL, m)
-u = u.reshape((m,n))
-v = v.reshape((m,n))
-ax_labels = ['x', 'y']
-title = 'velocity stream-plot ($N=%d$, $trials=%d$)'%(N, trials)
-graph.plot_stream(u, v, xs, ys, title, ax_labels)
-
-
-
-
-
-
-
-
-
+    ax_labels = ['$\omega = v_x - u_y$', 'x', 'y']
+    title = 'vorticity stream-plot ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
+    graph.plot_heatMap(w, xs, ys, title, ax_labels)
 
 

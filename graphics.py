@@ -193,10 +193,45 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    ax.set_aspect('equal', 'box')
+    ax.set_aspect('equal')
+    ax.set_ylim(0)
     pp.show()
     
+def plot_contour(zs, xs, ys, title, ax_labels):
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
     
+    X, Y = np.meshgrid(xs, ys)
+    
+    pp.contour(X, Y, zs)
+    # TODO spacing of contours, add heat map
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+
+    ax = pp.gca()
+    ax.set_aspect('equal', 'box')
+
+    pp.show()
+    
+def plot_heatMap(zs, xs, ys, title, ax_labels):
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    color_plot = pp.pcolor(X, Y, zs)
+    pp.colorbar(color_plot, label=ax_labels[0])
+    # TODO spacing of contours, add heat map
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[1])
+    pp.ylabel(ax_labels[2])
+    ax = pp.gca()
+
+    ax.set_aspect('equal', 'box')
+    pp.show()
 
 #------------------------------------------------------------------------------   
 

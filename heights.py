@@ -102,6 +102,7 @@ class SawtoothHeight(Height):
         self.hxs = dfd.center_diff(hs, domain)
         self.hxxs = dfd.center_second_diff(hs, domain)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
+   
     
 class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
