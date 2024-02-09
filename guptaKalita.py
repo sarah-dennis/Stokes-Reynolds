@@ -26,7 +26,7 @@ U = 1
 
 Re = 1
 
-N = 500
+N = 200
 h = 1/N
 
 n = xL*N + 1
@@ -151,7 +151,7 @@ def make_rhs(u, v): #
             else:
                 v_W = v[j*n + (i-1)]
                 u_W = v[j*n + (i-1)]
-                
+             
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)
             C = u_C * (v_E + v_W + v_N + v_S)
@@ -213,7 +213,7 @@ def uv_approx(u, v, psi):
                 psi_E = 0
             else:
                 v_E = v[j*n + i+1]
-                psi_E = psi[j*n + i]
+                psi_E = psi[j*n + i+1] #@ used to be +i
             
             # South (i, j-1)
             y_S = h*(j-1)
@@ -230,7 +230,7 @@ def uv_approx(u, v, psi):
                 v_W = 0
                 psi_W = 0
             else:
-                v_W = v[j*n + (i-1)]
+                v_W = v[j*n + i-1]
                 psi_W = psi[j*n + i-1]
    
             new_u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
@@ -248,7 +248,7 @@ class Dpsi_linOp(LinearOperator):
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(n*m) 
         
-    def _matvec(self, v): # v:= psi[i*n + j]  
+    def _matvec(self, psi): # v:= psi[i*n + j]  
 
         for k in range(n*m):
             i = k%n
@@ -269,62 +269,63 @@ class Dpsi_linOp(LinearOperator):
             else: 
                 # psi[k] at 9 point stencil         
                 
-                v_C = v[k]
+                psi_C = psi[k]
         
                 #North (i, j+1)
                 y_N = h*(j+1)
                 if j+1 == m-1: 
-                    v_N = 0
+                    psi_N = 0
                 else:
-                    v_N = v[(j+1)*n + i]
+                    psi_N = psi[(j+1)*n + i]
                     
                 #East (i+1, j)
                 x_E = h*(i+1)
                 if i+1 == n-1 or y <= slope * x_E - yL:
-                    v_E = 0
+                    psi_E = 0
                 else:
-                    v_E = v[j*n + (i+1)]
+                    psi_E = psi[j*n + (i+1)]
                         
                 #South (i, j-1)
                 y_S = h*(j-1)
                 if j-1 == 0 or y_S <= slope*x - yL or y_S <= -slope*x + yL: 
-                    v_S = 0
+                    psi_S = 0
                 else:
-                    v_S = v[(j-1)*n + i]
+                    psi_S = psi[(j-1)*n + i]
                 
                 #West (i-1,j)
                 x_W = h*(i-1)
                 if i-1 == 0 or y <= -slope * x_W - yL: 
-                    v_W = 0
+                    psi_W = 0
                 else:
-                    v_W = v[j*n + (i-1)]
+                    psi_W = psi[j*n + (i-1)]
                     
                 #NorthEast (i+1, j+1)
                 if i+1 == n-1 or j+1 == m-1 or y_N <= slope * x_E - yL: 
-                    v_NE = 0
+                    psi_NE = 0
                 else:
-                    v_NE  = v[(j+1)*n + (i+1)]
+                    psi_NE  = psi[(j+1)*n + (i+1)]
                 
                 #NorthWest (i-1, j+1)
                 if i-1 == 0 or j+1 == m-1 or y_N <= -slope * x_W - yL:
-                    v_NW = 0
+                    psi_NW = 0
                 else:
-                    v_NW = v[(j+1)*n + (i-1)]
+                    psi_NW = psi[(j+1)*n + (i-1)]
                 
                 #SouthEast (i+1, j-1)
                 if i+1 == n-1 or j-1 == 0 or y_S <= slope*x_E - yL or y_S <= -slope*x_E + yL: 
-                    v_SE = 0
+                    psi_SE = 0
                 else:
-                    v_SE = v[(j-1)*n + i+1]
+                    psi_SE = psi[(j-1)*n + i+1]
                 
                 #SouthWest (i-1, j-1)
                 if i-1 == 0 or j-1 == 0 or y_S <= slope*x_W - yL or y_S <= -slope*x_W + yL:
-                    v_SW = 0
+                    psi_SW = 0
                 else:
-                    v_SW = v[(j-1)*n + i-1]
+                    psi_SW = psi[(j-1)*n + i-1]
 
-        
-                self.mv[k] = v_SW - 8*v_S + v_SE + -8*v_W + 28*v_C -8*v_E + v_NW -8*v_N + v_NE
+            
+                self.mv[k] = 28*psi_C - 8*psi_S -8*psi_W -8*psi_E -8*psi_N + psi_SW + psi_SE + psi_NW + psi_NE
+
 
         return self.mv
 
@@ -338,8 +339,8 @@ def make_plots(u, v, k):
 # velocity 
     u_2D = u.reshape((m,n))
     v_2D = v.reshape((m,n))
-    ax_labels = ['x', 'y']
-    title = 'velocity stream-plot ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
+    ax_labels = ['$x$', '$y$']
+    title = 'velocity ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
     graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
 # vorticity 
@@ -353,8 +354,8 @@ def make_plots(u, v, k):
             if w[j,i] == 0:
                 w[j,i] = None
 
-    ax_labels = ['$\omega = v_x - u_y$', 'x', 'y']
-    title = 'vorticity stream-plot ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
+    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
+    title = 'vorticity ($N=%d$)'%(N)
     graph.plot_heatMap(w, xs, ys, title, ax_labels)
 
 
