@@ -53,7 +53,7 @@ def sawtooth(domain, h_min, h_max, n):
     for i in range(n):
         xi_0 = domain.xs[i*Mx]
         xi_f = domain.xs[(i+1)*Mx-1]
-        subDomain = dm.Domain(xi_0, xi_f, domain.eta, domain.U, Mx, domain.BC)
+        subDomain = dm.Domain(xi_0, xi_f, domain.U, Mx, domain.BC)
 
         subHeight = hgt.WedgeHeight(subDomain, h_peaks[i], h_peaks[i+1])
         hs[i*Mx : (i+1)*Mx] = subHeight.hs
@@ -75,7 +75,7 @@ def sawtooth_finDiff(domain, h_min, h_max, n):
     for i in range(n):
         xi_0 = domain.xs[i*Mx]
         xi_f = domain.xs[(i+1)*Mx-1]
-        subDomain = dm.Domain(xi_0, xi_f, domain.eta, domain.U, Mx, domain.BC)
+        subDomain = dm.Domain(xi_0, xi_f, domain.U, Mx, domain.BC)
         
         subHeight = hgt.WedgeHeight(subDomain, h_peaks[i], h_peaks[i+1])
         hs[i*Mx : (i+1)*Mx] = subHeight.hs

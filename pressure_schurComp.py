@@ -98,12 +98,12 @@ def make_S(n, C_prod, D):
     
     
 #------------------------------------------------------------------------------
-# Construct Reynolds matrix for Square Wave
+# Reynolds equation matrix for Square Wave
 
 # M @ lhs = rhs
 
-# |I B1||m| = |f|
-# |B2 0||p|   |g|
+# |I B1||m| = |f| <- flux continuity
+# |B2 0||p|   |g| <- pressure continuity
 
 def make_RHS(domain, height, p0, pN): 
     n = height.n_steps
@@ -120,7 +120,7 @@ def make_RHS(domain, height, p0, pN):
     
     return rhs
 
-# Takes (P_extrema, P_slopes) -> [p(x)] over domain Nx
+# (P_extrema, P_slopes) -> [p(x)] over domain Nx
 def make_ps(domain, height, p0, pN, slopes, extrema):
     ps = np.zeros(domain.Nx)
     x0 = domain.x0

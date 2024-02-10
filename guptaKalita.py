@@ -13,74 +13,93 @@ from scipy.sparse.linalg import bicgstab
 
 import graphics as graph
 
-
-
-x0 = 0
-xL = 1
-
-y0 = 0
-yL = 2
-
-slope = yL/(xL/2)
-U = 1
-
-Re = 1
-
-N = 200
-h = 1/N
-
-n = xL*N + 1
-m = yL*N + 1
+# N = 200
+# h = 1/N
+# n = xL*N + 1
+# m = yL*N + 1
 
 stab_tol = 1e-5
-trials = 10
-plot_every = 1
+n_trials= 15
+plot_mod = 1
 
-name = "guptaKalita_N%d.csv"%N 
+class triangle():
+    def __init__(self, x0, xL, y0, yL, U, Re, N):
+        self.x0 = x0
+        self.xL = xL
+        self.y0 = y0
+        self.yL = yL
+        self.slope = yL/(xL/2)
+        self.U = U
+        self.Re = Re
+        self.N = N
+        self.h = 1/N
+        self.Nx = xL*N + 1
+        self.Ny = yL*N + 1
+        self.filename = "guptaKalita_N%d.csv"%N
 
-def run_new(filename):
+class biswasKalita(triangle):
+    def __init__(self, N):
+        x0 = 0
+        xL = 1
+        y0 = 0
+        yL = 2
+
+        U = 1
+        Re = 1
+        super().__init__(x0, xL, y0, yL, U, Re, N)
+
+
+#Run with U,V = 1 and write to csv
+def run_new(tri):
+    n = tri.Nx
+    m = tri.Ny
+    
     u = np.ones(n*m)
     v = np.ones(n*m)
     
-    u, v = run(u,v)
+    u, v = run(u,v, n_trials, plot_mod)
     
-    with open(filename, 'w', newline='') as file:
+    with open(tri.filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
         for i in range(n*m):
             writer.writerow([u[i], v[i]])
-    
-def run_load(filename):
 
-    with open(filename, newline='') as file:
-        reader = csv.reader(file)
-        u = np.ones(n*m)
-        v = np.ones(n*m)
+#
+def run_load(tri):
+    n = tri.Nx
+    m = tri.Ny
+    
+    u = np.zeros(n*m)
+    v = np.zeros(n*m)
         
+    with open(tri.filename, newline='') as file:
+        reader = csv.reader(file)
+
         for i in range(n*m):
             ui, vi = next(reader)[0].split(' ')
             u[i] = float(ui)
             v[i] = float(vi)
 
-    u, v = run(u,v)
+    u, v = run(tri, u,v)
     
-    with open(filename, 'w', newline='') as file:
+    with open(tri.filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
         for i in range(n*m):
             writer.writerow([u[i], v[i]])
     
     
-def run(u,v):
-    rhs = make_rhs(u,v)
-    M = Dpsi_linOp()
+def run(tri,u,v):
+    rhs = make_rhs(tri,u,v)
+    M = Dpsi_linOp(tri)
 
-    for i in range(trials): 
-        print("trial %d of %d"%(i+1, trials))
-        rhs = make_rhs(u, v)
+    for i in range(n_trials): 
+        print("trial %d of %d"%(i+1, n_trials))
+        rhs = make_rhs(tri, u, v)
         stream, exit_flag = bicgstab(M, rhs, atol=stab_tol)
-        u, v = uv_approx(u, v, stream)
+        u, v = uv_approx(tri, u, v, stream)
         
-        if i % plot_every == 0:
-            make_plots(u, v, i)
+        if i % plot_mod == 0:
+            make_plots(tri, u, v)
             
     return u, v
     
@@ -91,9 +110,19 @@ def run(u,v):
 # B = v_C * (u_E + u_W + u_N + u_S)
 # C = u_C * (v_E + v_W + v_N + v_S)
 
-c0 = 3*h
-c1 = 0.5 * h**2 * Re
-def make_rhs(u, v): #
+
+def make_rhs(tri, u, v): #
+    n = tri.Nx
+    m = tri.Ny
+    h = tri.h
+
+    yL = tri.yL
+    slope = tri.slope
+    U = tri.U
+    
+    c0 = 3*tri.h
+    c1 = 0.5 * tri.h**2 * tri.Re
+    
     rhs = np.zeros(m*n)
     for k in range(n*m):
         i = k % n
@@ -165,9 +194,20 @@ def make_rhs(u, v): #
 # new_u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # new_v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
 
-c2 = 3/(4*h)
-c3 = 1/4
-def uv_approx(u, v, psi):
+
+def uv_approx(tri, u, v, psi):
+    
+    n = tri.Nx
+    m = tri.Ny
+    h = tri.h
+    
+    yL = tri.yL
+    slope = tri.slope
+    U = tri.U
+    
+    c2 = 3/(4*h)
+    c3 = 1/4
+    
     new_u = np.zeros(n*m)
     new_v = np.zeros(n*m)
 
@@ -242,13 +282,20 @@ def uv_approx(u, v, psi):
 
 class Dpsi_linOp(LinearOperator):
 
-    def __init__(self):
+    def __init__(self, tri):
         #  globals: Nx, Ny, h, slope, yL
-        self.shape = ((n*m, n*m))        
+        self.tri = tri
+        nm = tri.Nx * tri.Ny
+        self.shape = ((nm, nm))        
         self.dtype = np.dtype('f8')
-        self.mv = np.zeros(n*m) 
+        self.mv = np.zeros(nm) 
         
     def _matvec(self, psi): # v:= psi[i*n + j]  
+        n = self.tri.Nx
+        m = self.tri.Ny
+        h = self.tri.h
+        slope = self.tri.slope
+        yL = self.tri.yL
 
         for k in range(n*m):
             i = k%n
@@ -330,23 +377,42 @@ class Dpsi_linOp(LinearOperator):
         return self.mv
 
 #-----------------------------------------------------------------------------
+def load_plot(N):
+    tri = biswasKalita(N)
+    n = tri.Nx
+    m = tri.Ny
 
-def make_plots(u, v, k):
+    with open(tri.filename, newline='') as file:
+        reader = csv.reader(file)
+        u = np.ones(n*m)
+        v = np.ones(n*m)
+        
+        for i in range(n*m):
+            ui, vi = next(reader)[0].split(' ')
+            u[i] = float(ui)
+            v[i] = float(vi)
+    make_plots(tri, u,v)
+
+
+def make_plots(tri, u, v):
+    n = tri.Nx
+    m = tri.Ny
+
 # Grid domain
-    xs = np.linspace(x0, xL, n)
-    ys = np.linspace(y0, yL, m)
+    xs = np.linspace(tri.x0, tri.xL, n)
+    ys = np.linspace(tri.y0, tri.yL, m)
 
 # velocity 
     u_2D = u.reshape((m,n))
     v_2D = v.reshape((m,n))
+    
     ax_labels = ['$x$', '$y$']
-    title = 'velocity ($N=%d$, $trials=%d/%d$)'%(N, k, trials)
+    title = 'Velocity ($N=%d$)'%(tri.N)
     graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
-
+    
 # vorticity 
-
-    uy_2D = np.gradient(u_2D, h, axis=0)
-    vx_2D = np.gradient(v_2D, h, axis=1)
+    uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    vx_2D = np.gradient(v_2D, tri.h, axis=1)
     w = np.zeros((m,n))
     for j in range(m):
         for i in range(n):   
@@ -355,7 +421,8 @@ def make_plots(u, v, k):
                 w[j,i] = None
 
     ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    title = 'vorticity ($N=%d$)'%(N)
-    graph.plot_heatMap(w, xs, ys, title, ax_labels)
+    title = 'Vorticity ($N=%d$)'%(tri.N)
+    graph.plot_contour(w, xs, ys, title, ax_labels)
 
-
+N = 100
+mytri = biswasKalita(N)

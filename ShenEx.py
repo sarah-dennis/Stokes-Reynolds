@@ -34,7 +34,7 @@ xf = x0 + l_tot
 BC = 'fixed'
 Nx = 500
 
-domain = dm.Domain(x0, xf, visc, U, Nx, BC)
+domain = dm.Domain(x0, xf, U, Nx, BC)
 
 height, pressure = ex.step(domain, p0, pN, x_step, h_max, h_min)
 # height, pressure = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_max, h_min)

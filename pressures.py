@@ -9,7 +9,6 @@ Created on Wed Jan 25 18:24:34 2023
 import graphics as graph
 import numpy as np
 import time
-import heights 
 
 import domain as dfd
 

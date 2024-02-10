@@ -30,7 +30,7 @@ def vary_Nx_numErr(trials=6, N0 = 50):
 
     for k in range(trials):
         
-        domain_k = dfd.Domain(gc.x0, gc.xf, gc.eta, gc.U, Nx_k, gc.BC)
+        domain_k = dfd.Domain(gc.x0, gc.xf, gc.U, Nx_k, gc.BC)
         
         #---- EXAMPLES -----------------------------------------
         #height_k, pressure_k = eg.wedge(domain_k)
@@ -120,7 +120,7 @@ def plotTimes(filename, plotTitle):
     
 
 def vary_r_pMax(trials=10, r_0=0.05):
-    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
+    # ry.domain <- (x0, xf, Nx, BC, U, dx)
     n_steps = 5
     r_k = r_0
 
@@ -144,7 +144,7 @@ def vary_r_pMax(trials=10, r_0=0.05):
 
 
 def vary_nSteps_pMax(trials=7, n_steps_0=5):
-    # ry.domain <- (x0, xf, Nx, BC, U, eta, dx)
+    # ry.domain <- (x0, xf, Nx, BC, U, dx)
     n_steps_k = n_steps_0
     r = 0.1
     h_avg = 0.2

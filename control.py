@@ -29,7 +29,7 @@ visc = 1
 # Grid size
 Nx = 200
 
-domain = dm.Domain(x0, xf, visc, U, Nx, BC)
+domain = dm.Domain(x0, xf, U, Nx, BC)
 
 #------------------------------------------------------------------------------
 # Pressure & Height 

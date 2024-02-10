@@ -8,13 +8,13 @@ Created on Wed Jan 25 17:33:35 2023
 import numpy as np
 
 class Domain:
-
-    def __init__(self, x0, xf, eta, U, Nx, BC):
+##TODO switch/convert eta to Re
+    def __init__(self, x0, xf, U, Nx, BC='fixed'):
         self.x0 = x0
         self.xf = xf
         self.Nx = Nx
         self.BC = BC
-        self.eta = eta
+        self.eta = 1 #dynamic viscosity in reynolds eq
         self.U = U
         
         if BC == "periodic": #periodic

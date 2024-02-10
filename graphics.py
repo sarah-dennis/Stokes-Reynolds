@@ -111,7 +111,7 @@ def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x)
     P = [ps for y in ys]
     P = np.ma.array(P, mask=mask)
         
-    press_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral'))
+    press_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral_r'))
     fig.colorbar(press_plot, label="pressure")
 
     #Velocity vector plot
@@ -185,8 +185,11 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
     
-    pp.streamplot(xs, ys, vx, vy)
-    
+    stream_density=[1,2] #len(ys) = 2 len(xs)
+    magV = np.sqrt(vx**2 + vy**2)
+    # pp.streamplot(xs, ys, vx, vy, )
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
+    pp.colorbar(stream_plot.lines, label="$||V||_2$")
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
@@ -197,37 +200,37 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     ax.set_ylim(0)
     pp.show()
     
-def plot_contour(zs, xs, ys, title, ax_labels):
+def plot_contour(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
-    
+
     X, Y = np.meshgrid(xs, ys)
+    n_contours = max(zs.shape)
     
-    pp.contour(X, Y, zs)
-    # TODO spacing of contours, add heat map
+    contour_plot = pp.contour(X, Y, zs, n_contours, cmap='Spectral_r')
     
     pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-
+    pp.xlabel(labels[1])
+    pp.ylabel(labels[2])
+    pp.colorbar(contour_plot, label=labels[0])
+    
     ax = pp.gca()
     ax.set_aspect('equal', 'box')
-
     pp.show()
     
-def plot_heatMap(zs, xs, ys, title, ax_labels):
+def plot_heatMap(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
     
     color_plot = pp.pcolor(X, Y, zs)
-    pp.colorbar(color_plot, label=ax_labels[0])
+    pp.colorbar(color_plot, label=labels[0])
     # TODO spacing of contours, add heat map
     
     pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[1])
-    pp.ylabel(ax_labels[2])
+    pp.xlabel(labels[1])
+    pp.ylabel(labels[2])
     ax = pp.gca()
 
     ax.set_aspect('equal', 'box')
