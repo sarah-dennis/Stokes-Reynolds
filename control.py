@@ -46,7 +46,7 @@ h_avg = 0.75
 h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
 x_step = 1
 
-n = 4
+n = 8
 #for sawtooth: n | Nx
 h0 = 1
 h1 = 0.5
@@ -58,7 +58,7 @@ h_max = 1
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
 # height, pressure = ex.wedge(domain, h0, h1)
-height, pressure = ex.sawtooth(domain, h_min, h_max, n)
+# height, pressure = ex.sawtooth(domain, h_min, h_max, n)
 # TODO check pressure - solve for continuous pressure from the outset
 # height, pressure = ex.corrugated(domain, p0, pN)
 
@@ -81,14 +81,14 @@ height, pressure = ex.sawtooth(domain, h_min, h_max, n)
 # height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
+height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
 # height, pressure  = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_avg+r, h_avg-r)
 
 
 #------------------------------------------------------------------------------
 # Pressure & Height plotting 
 #------------------------------------------------------------------------------
-p_h_title = "Pressure (%s) and Height for %s"%(pressure.p_str, height.h_str)
+p_h_title = "Reynolds Solution (%s)"%(pressure.p_str)
 p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
 graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 
@@ -98,7 +98,7 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 #------------------------------------------------------------------------------
 velocity = vel.Velocity(domain, height, pressure)
 
-phv_title = "Pressure and Velocity for %s"%height.h_str
+phv_title = "Reynolds Pressure and Velocity for %s"%height.h_str
 phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
 phv_ax_labels =  ['$x$', '$y$']
 

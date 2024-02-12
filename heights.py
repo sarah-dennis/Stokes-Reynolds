@@ -97,7 +97,7 @@ class WedgeHeight(Height): #slider bearing
 class SawtoothHeight(Height):
     def __init__(self, domain, hs):
         self.h_eq = "h(x)"
-        self.h_str = "Sawtooth"
+        self.h_str = "Piecewise Linear"
         self.hs = hs
         self.hxs = dfd.center_diff(hs, domain)
         self.hxxs = dfd.center_second_diff(hs, domain)

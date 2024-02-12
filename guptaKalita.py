@@ -13,13 +13,8 @@ from scipy.sparse.linalg import bicgstab
 
 import graphics as graph
 
-# N = 200
-# h = 1/N
-# n = xL*N + 1
-# m = yL*N + 1
-
 stab_tol = 1e-5
-n_trials= 15
+n_trials= 10
 plot_mod = 1
 
 class triangle():
@@ -57,7 +52,7 @@ def run_new(tri):
     u = np.ones(n*m)
     v = np.ones(n*m)
     
-    u, v = run(u,v, n_trials, plot_mod)
+    u, v = run(tri, u,v)
     
     with open(tri.filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
@@ -411,18 +406,18 @@ def make_plots(tri, u, v):
     graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
     
 # vorticity 
-    uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    w = np.zeros((m,n))
-    for j in range(m):
-        for i in range(n):   
-            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-            if w[j,i] == 0:
-                w[j,i] = None
+    # uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    # vx_2D = np.gradient(v_2D, tri.h, axis=1)
+    # w = np.zeros((m,n))
+    # for j in range(m):
+    #     for i in range(n):   
+    #         w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+    #         if w[j,i] == 0:
+    #             w[j,i] = None
 
-    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$)'%(tri.N)
-    graph.plot_contour(w, xs, ys, title, ax_labels)
+    # ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
+    # title = 'Vorticity ($N=%d$)'%(tri.N)
+    # graph.plot_contour(w, xs, ys, title, ax_labels)
 
-N = 100
+N = 500
 mytri = biswasKalita(N)
