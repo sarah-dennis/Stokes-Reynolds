@@ -13,6 +13,7 @@ import time
 import domain as dfd
 
 import pressure_schurComp as sw
+# import pressure_sawtooth as st
 import pressure_finDiff as fd
 
 from scipy.sparse.linalg import gmres
@@ -33,20 +34,21 @@ class Pressure:
         p_title = "Pressure (%s)"%self.p_str
         p_axis = ["Pressure $p(x)$", "$x$"]
         graph.plot_2D(self.ps, domain.xs, p_title, p_axis )
+#------------------------------------------------------------------------------
 
 class FinDiffPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Finite Difference ($N_x = %d$)"%domain.Nx
         ps = fd.solve(domain, height, p0, pN)
         super().__init__(domain, ps, p0, pN,  p_str)
-        
+#------------------------------------------------------------------------------        
 class ConstantPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
         p_str = "Analytic"
         ps = [p0 for i in range(domain.Nx)]
         super().__init__(domain, ps, p0, pN,  p_str)
         
-
+#------------------------------------------------------------------------------
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
         p_str = "Analytic Reynolds"
@@ -57,7 +59,8 @@ class CorrugatedPressure(Pressure): #sinusoidal
             hx = height.hxs[i]
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
         super().__init__(domain, ps, p0, pN,  p_str)
-        
+ 
+#------------------------------------------------------------------------------
 class WedgePressure(Pressure):
     def __init__(self, domain, height):
         p_str = "Analytic Reynolds"
@@ -76,14 +79,16 @@ class WedgePressure(Pressure):
         
     def H(self, X, a):
         return a + (1-a)*X
-
-class SawtoothPressure(Pressure):
-    def __init__(self, domain, ps):
-        p_str = "Analytic piecewise-Reynolds"
-        super().__init__(domain, ps, ps[0], ps[-1], p_str)
+    
+#------------------------------------------------------------------------------
+# class SawtoothPressure(Pressure):
+#     def __init__(self, domain, height):
+#         p_str = "Analytic piecewise-Reynolds"
+#         stLinOp = st.sawtoothLinOp( , xs, hs, U)
+#         super().__init__(domain, ps, ps[0], ps[-1], p_str)
         
-        
-class StepPressure(Pressure):
+#------------------------------------------------------------------------------        
+class StepPressure(Pressure): #N=1
 
     def __init__(self, domain, height, p0, pN):
         p_str = "Analytic piecewise-Reynolds"
@@ -115,8 +120,9 @@ class StepPressure(Pressure):
         self.m_out = m_out
         super().__init__(domain, ps, p0, pN, p_str)
         
-
+#------------------------------------------------------------------------------
 class SquareWavePressure_pySolve(Pressure):
+# Make square wave matrix np.linalg.solve
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
@@ -147,7 +153,6 @@ class SquareWavePressure_pySolve(Pressure):
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
         
 class SquareWavePressure_schurGmresSolve(Pressure):
-
 # TODO: matvec overcalled, look in to preconditioners
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
@@ -180,6 +185,7 @@ class SquareWavePressure_schurGmresSolve(Pressure):
         super().__init__(domain, ps, p0, pN, p_str, t2-t1)
 
 class SquareWavePressure_schurInvSolve(Pressure):
+    # use schur complement to make the inverse
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
         p_str = "schur-inv"

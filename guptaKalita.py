@@ -14,7 +14,7 @@ from scipy.sparse.linalg import bicgstab
 import graphics as graph
 
 stab_tol = 1e-5
-n_trials= 10
+n_trials= 3
 plot_mod = 1
 
 class triangle():

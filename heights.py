@@ -48,7 +48,7 @@ class ConstantHeight(Height):
         self.hxs = np.zeros(domain.Nx)
         self.hxxs = np.zeros(domain.Nx)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
-
+#------------------------------------------------------------------------------
 class CorrugatedHeight(Height): #sinusoidal wave
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, domain, h_mid, r, k):
@@ -73,7 +73,7 @@ class CorrugatedHeight(Height): #sinusoidal wave
     def hxx(self, x):
         return -self.h_mid * self.r * self.k**2 * np.cos(self.k*x)
 
-
+#------------------------------------------------------------------------------
 class WedgeHeight(Height): #slider bearing
     
     def __init__(self, domain, h0, h1):
@@ -93,18 +93,34 @@ class WedgeHeight(Height): #slider bearing
 
     def h(self, x):
         return self.h0 + self.m * (x - self.x0)
-
+#------------------------------------------------------------------------------
+#N = num slopes
+#len(hs) =  N+1
+#len(xs) = N+1
 class SawtoothHeight(Height):
-    def __init__(self, domain, hs):
+    def __init__(self, domain, h_peaks, x_peaks):
         self.h_eq = "h(x)"
         self.h_str = "Piecewise Linear"
-        self.hs = hs
-        self.hxs = dfd.center_diff(hs, domain)
-        self.hxxs = dfd.center_second_diff(hs, domain)
+        self.h_peaks = h_peaks
+        self.x_peaks = x_peaks
+        self.hs = self.make_hs(domain, h_peaks, x_peaks)
+        self.hxs = dfd.center_diff(self.hs, domain)
+        self.hxxs = dfd.center_second_diff(self.hs, domain)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
    
-    
-class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
+    def make_hs(self, domain, h_peaks, x_peaks):
+        hs = np.zeros(domain.Nx)
+        k = 0
+        slope_k = (h_peaks[k+1] - h_peaks[k])/(x_peaks[k+1]-x_peaks[k])
+        for i in range(domain.Nx):
+            if domain.xs[i]>x_peaks[k]:
+                k += 1
+            hs[i] = h_peaks[k] + slope_k * (domain.xs[i]-x_peaks[k])
+        return hs
+        
+        
+#------------------------------------------------------------------------------    
+class NStepHeight(Height): # uniform step width [h1, h2, ..., hN+1]
 
     def __init__(self, domain, n_steps, h_steps, h_str, h_eq):
         self.n_steps = n_steps
@@ -120,18 +136,17 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
     def make_hs(self,domain, step_width, n_steps, h_steps):
         hs = np.zeros(domain.Nx)
         index_width = domain.Nx / (n_steps + 1)
-
         j=0
         for i in range(domain.Nx):
-
             if i >= (j+1)*index_width :
-                
                 j += 1
+                
             hs[i] = h_steps[j]
  
         return hs
         
-class StepHeight(NStepHeight): # N=1 (simulated with N>=1 for l1 \= l2)
+class RayleighStepHeight(NStepHeight): #variable step width, only N=1
+    #TODO: variable step width implement is sillyy
     def __init__(self, domain, x_step, h1, h2):
         self.x_step = x_step
         l1 = x_step - domain.x0
@@ -166,22 +181,3 @@ class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r
         h_eq = "h(x) = %0.1f \pm %0.1f"%(h_avg, r)
  
         super().__init__(domain, n_steps, h_steps, h_str, h_eq)
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

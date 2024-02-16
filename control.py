@@ -48,8 +48,8 @@ x_step = 1
 
 n = 8
 #for sawtooth: n | Nx
-h0 = 1
-h1 = 0.5
+h0 = 2
+h1 = 1
 h_min = 0.01
 h_max = 1
 
@@ -57,10 +57,10 @@ h_max = 1
 # Analytic Solutions
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
-# height, pressure = ex.wedge(domain, h0, h1)
+height, pressure = ex.wedge(domain, h0, h1)
 # height, pressure = ex.sawtooth(domain, h_min, h_max, n)
 # TODO check pressure - solve for continuous pressure from the outset
-# height, pressure = ex.corrugated(domain, p0, pN)
+# height, pressure = ex.sinsusoidal(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
 
@@ -81,7 +81,7 @@ h_max = 1
 # height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
+# height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
 # height, pressure  = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_avg+r, h_avg-r)
 
 
