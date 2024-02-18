@@ -59,7 +59,6 @@ h_max = 1
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
 # height, pressure = ex.wedge(domain, h0, h1)
 # height, pressure = ex.sawtooth(domain, h_min, h_max, n)
-# TODO check pressure - solve for continuous pressure from the outset
 # height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)

@@ -8,6 +8,7 @@ Graphics helpers
 """
 import numpy as np
 from matplotlib import pyplot as pp
+from matplotlib import colors
 
 #------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
@@ -187,7 +188,6 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     stream_density=[1,2] #len(ys) = 2 len(xs)
     magV = np.sqrt(vx**2 + vy**2)
-    # pp.streamplot(xs, ys, vx, vy, )
     stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
     pp.colorbar(stream_plot.lines, label="$||V||_2$")
     
@@ -223,9 +223,29 @@ def plot_heatMap(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    
-    color_plot = pp.pcolor(X, Y, zs)
+    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
     pp.colorbar(color_plot, label=labels[0])
+
+    pp.title(title, fontweight="bold")
+    pp.xlabel(labels[1])
+    pp.ylabel(labels[2])
+    ax = pp.gca()
+
+    ax.set_aspect('equal', 'box')
+    pp.show()
+    
+def plot_heat_contour(zs, xs, ys, title, labels):
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
+    pp.colorbar(color_plot, label=labels[0])
+    
+    n_contours = max(zs.shape)
+    # pp.rcParams['contour.negative_linestyle'] = 'solid'
+    pp.rcParams["lines.linewidth"] = .75
+    pp.contour(X, Y, zs, n_contours, cmap='gray')
     # TODO spacing of contours, add heat map
     
     pp.title(title, fontweight="bold")
@@ -235,7 +255,6 @@ def plot_heatMap(zs, xs, ys, title, labels):
 
     ax.set_aspect('equal', 'box')
     pp.show()
-
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
