@@ -16,7 +16,8 @@ import graphics as graph
 bicgstab_rtol = 1e-5
 
 plot_mod = 1
-write_mod = 5
+write_mod = 2
+error_mod = 5
 
 class cavity():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -81,7 +82,7 @@ def run(tri, u, v, iters, past_iters, past_psi):
     M = Dpsi_linOp(tri)
 
     for i in range(iters): 
-        print("trial %d of %d"%(+past_iters +i+1, iters+past_iters))
+        print("trial k=%d of %d"%(+past_iters +i+1, iters+past_iters))
         rhs = make_rhs(tri, u, v)
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         u, v = uv_approx(tri, u, v, psi)
@@ -92,12 +93,11 @@ def run(tri, u, v, iters, past_iters, past_psi):
         if i % write_mod == write_mod - 1:
             write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
         
-        
-        if past_psi.any(): 
+        if past_psi.any() and i % error_mod == 0: 
             infNormErr = np.max(np.abs(psi - past_psi))
-            print(infNormErr)
-            
+            print("error: %.5e"%infNormErr)
         past_psi = psi
+            
     return u, v, psi
 
 # -----------------------------------------------------------------------------
@@ -285,7 +285,7 @@ class Dpsi_linOp(LinearOperator):
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(nm) 
         
-    def _matvec(self, psi): # v:= psi[i*n + j]  
+    def _matvec(self, psi): # v:= psi[j*n + i]  
         n = self.tri.Nx
         m = self.tri.Ny
         h = self.tri.h
