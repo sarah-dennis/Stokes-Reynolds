@@ -15,9 +15,9 @@ import graphics as graph
 
 bicgstab_rtol = 1e-5
 
-plot_mod = 1
-write_mod = 2
-error_mod = 5
+plot_mod = 5
+write_mod = 5
+error_mod = 55
 
 class cavity():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -111,7 +111,6 @@ def make_rhs(tri, u, v): #
     n = tri.Nx
     m = tri.Ny
     h = tri.h
-
     yL = tri.yL
     slope = tri.slope
     U = tri.U
@@ -119,7 +118,7 @@ def make_rhs(tri, u, v): #
     c0 = 3*tri.h
     c1 = 0.5 * tri.h**2 * tri.Re
     
-    rhs = np.zeros(m*n)
+    rhs = np.zeros(n*m)
     for k in range(n*m):
         i = k % n
         j = k//n
@@ -280,7 +279,7 @@ class Dpsi_linOp(LinearOperator):
 
     def __init__(self, tri):
         self.tri = tri
-        nm = tri.Nx * tri.Ny
+        nm = tri.Nx * tri.Ny 
         self.shape = ((nm, nm))        
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(nm) 
@@ -320,38 +319,39 @@ class Dpsi_linOp(LinearOperator):
                 else:
                     psi_N = psi[(j+1)*n + i]
                     
-                #East (i+1, j)
-                x_E = h*(i+1)
-                if i+1 == n-1 or y <= slope * x_E - yL:
-                    psi_E = 0
-                else:
-                    psi_E = psi[j*n + (i+1)]
-                        
+    
                 #South (i, j-1)
                 y_S = h*(j-1)
                 if j-1 == 0 or y_S <= slope*x - yL or y_S <= -slope*x + yL: 
                     psi_S = 0
                 else:
                     psi_S = psi[(j-1)*n + i]
-                
+                    
+                #East (i+1, j)
+                x_E = h*(i+1)
+                if i+1 == n-1 or y <= slope * x_E - yL:
+                    psi_E = 0
+                else:
+                    psi_E = psi[j*n + i+1]
+                    
                 #West (i-1,j)
                 x_W = h*(i-1)
                 if i-1 == 0 or y <= -slope * x_W + yL:
                     psi_W = 0
                 else:
-                    psi_W = psi[j*n + (i-1)]
+                    psi_W = psi[j*n + i-1]
                     
                 #NorthEast (i+1, j+1)
                 if i+1 == n-1 or j+1 == m-1 or y_N <= slope * x_E - yL: 
                     psi_NE = 0
                 else:
-                    psi_NE  = psi[(j+1)*n + (i+1)]
+                    psi_NE  = psi[(j+1)*n + i+1]
                 
                 #NorthWest (i-1, j+1)
                 if i-1 == 0 or j+1 == m-1 or y_N <= -slope * x_W + yL: 
                     psi_NW = 0
                 else:
-                    psi_NW = psi[(j+1)*n + (i-1)]
+                    psi_NW = psi[(j+1)*n + i-1]
                 
                 #SouthEast (i+1, j-1)
                 if i+1 == n-1 or j-1 == 0 or y_S <= slope*x_E - yL or y_S <= -slope*x_E + yL: 

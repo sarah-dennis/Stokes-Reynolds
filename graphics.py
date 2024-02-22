@@ -246,7 +246,6 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     # pp.rcParams['contour.negative_linestyle'] = 'solid'
     pp.rcParams["lines.linewidth"] = .25
     pp.contour(X, Y, zs, n_contours, colors='white')
-    # TODO spacing of contours, add heat map
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
