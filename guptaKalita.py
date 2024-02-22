@@ -15,9 +15,9 @@ import graphics as graph
 
 bicgstab_rtol = 1e-5
 
-plot_mod = 5
-write_mod = 5
-error_mod = 55
+plot_mod = 10
+write_mod = 10
+error_mod = 25
 
 class cavity():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -82,7 +82,7 @@ def run(tri, u, v, iters, past_iters, past_psi):
     M = Dpsi_linOp(tri)
 
     for i in range(iters): 
-        print("trial k=%d of %d"%(+past_iters +i+1, iters+past_iters))
+        print("trial k=%d of %d"%(i+past_iters+1, iters+past_iters))
         rhs = make_rhs(tri, u, v)
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         u, v = uv_approx(tri, u, v, psi)
@@ -90,7 +90,7 @@ def run(tri, u, v, iters, past_iters, past_psi):
         if i % plot_mod == 0:
             make_plots(tri, u, v, psi, i+past_iters)
         
-        if i % write_mod == write_mod - 1:
+        if i % write_mod == 0:
             write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
         
         if past_psi.any() and i % error_mod == 0: 
@@ -381,15 +381,15 @@ def make_plots(tri, u, v, stream, iters):
     xs = np.linspace(tri.x0, tri.xL, n)
     ys = np.linspace(tri.y0, tri.yL, m)
 
-# velocity 
-    # u_2D = u.reshape((m,n))
-    # v_2D = v.reshape((m,n))
+# Velocity:
+    u_2D = u.reshape((m,n))
+    v_2D = v.reshape((m,n))
     
-    # ax_labels = ['$x$', '$y$']
-    # title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    ax_labels = ['$x$', '$y$']
+    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
     
-# stream 
+# Stream: Psi(x,y) contour & heat map
     stream_2D = u.reshape((m,n))
     for j in range(m):
         for i in range(n):   
@@ -398,21 +398,20 @@ def make_plots(tri, u, v, stream, iters):
     ax_labels = ['$\psi(x,y)$', '$x$', '$y$']
     title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters+1)
     graph.plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
-    # graph.plot_contour(stream_2D, xs, ys, title, ax_labels)
     
 # vorticity 
-    # uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    # vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    # w = np.zeros((m,n))
-    # for j in range(m):
-    #     for i in range(n):   
-    #         w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    #         if w[j,i] == 0:
-    #             w[j,i] = None
+    uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    vx_2D = np.gradient(v_2D, tri.h, axis=1)
+    w = np.zeros((m,n))
+    for j in range(m):
+        for i in range(n):   
+            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+            if w[j,i] == 0:
+                w[j,i] = None
 
-    # ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    # title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # graph.plot_heat_contour(w, xs, ys, title, ax_labels)
+    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
+    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    graph.plot_heat_contour(w, xs, ys, title, ax_labels)
 
 #------------------------------------------------------------------------------
 def read_solution(filename, nm):
@@ -439,5 +438,5 @@ def write_solution(filename, nm, u, v, psi, iters):
             writer.writerow([u[i], v[i], psi[i]])
         
         writer.writerow([iters])
-        print("Saved to csv: k=%d"%iters)
+        print("Saved to csv: k=%d"%iters+1)
         file.close()
