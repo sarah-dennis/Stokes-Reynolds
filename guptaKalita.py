@@ -393,7 +393,7 @@ def make_plots(tri, u, v, stream, iters):
     graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
     
 # Stream: Psi(x,y) contour & heat map
-    stream_2D = u.reshape((m,n))
+    stream_2D = stream.reshape((m,n))
     for j in range(m):
         for i in range(n):   
             if stream_2D[j,i] == 0:
@@ -422,7 +422,9 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
+    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-6, linscale=0.25))
+    
+
     pp.colorbar(color_plot, label=labels[0])
     
     n_contours = max(zs.shape)
