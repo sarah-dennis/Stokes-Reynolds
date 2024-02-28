@@ -36,52 +36,35 @@ def corrugated(domain, p0, pN):
 # II. Wedge Height
 # -----------------------------------------------------------------------------
 
-def wedge(domain, h0, hf):
+def wedge(domain, p0, pN, h0, hf):
     height = hgt.WedgeHeight(domain, h0, hf)
-    pressure = prs.WedgePressure(domain, height)
-    return height, pressure
-
-def sawtooth(domain, h_min, h_max, n):
-    
-    h_peaks = np.random.uniform(h_min, h_max, n+1)
-    # n = 2
-    # h_peaks = [0.001, 2, 0.001]
-    Mx = int(domain.Nx//n)
-    hs = np.zeros(domain.Nx)
-    ps = np.zeros(domain.Nx)
-    
-    for i in range(n):
-        xi_0 = domain.xs[i*Mx]
-        xi_f = domain.xs[(i+1)*Mx-1]
-        subDomain = dm.Domain(xi_0, xi_f, domain.U, Mx, domain.BC)
-
-        subHeight = hgt.WedgeHeight(subDomain, h_peaks[i], h_peaks[i+1])
-        hs[i*Mx : (i+1)*Mx] = subHeight.hs
-        
-        subPressure = prs.WedgePressure(subDomain, subHeight)
-        ps[i*Mx : (i+1)*Mx] = subPressure.ps
-
-    height = hgt.SawtoothHeight(domain, hs)
-    pressure = prs.SawtoothPressure(domain, ps)
+    pressure = prs.WedgePressure(domain, height, p0, pN)
 
     return height, pressure
 
-def sawtooth_finDiff(domain, h_min, h_max, n):
-    h_peaks = np.random.uniform(h_min, h_max, n+1)
-    # h_peaks = [0.001, 2, 0.001]
-    Mx = int(domain.Nx//n)
-    hs = np.zeros(domain.Nx)
+##TODO
+def sawtooth(domain, p0, pN, h_min, h_max, n_peaks): 
+    
+    x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
+    x_peaks = np.sort(x_peaks)
+    h_peaks = np.random.uniform(h_min, h_max, n_peaks)
+    
+    
+    height = hgt.SawtoothHeight(domain, x_peaks, h_peaks)
+    pressure = prs.SawtoothPressure(domain, height, p0, pN)
 
-    for i in range(n):
-        xi_0 = domain.xs[i*Mx]
-        xi_f = domain.xs[(i+1)*Mx-1]
-        subDomain = dm.Domain(xi_0, xi_f, domain.U, Mx, domain.BC)
-        
-        subHeight = hgt.WedgeHeight(subDomain, h_peaks[i], h_peaks[i+1])
-        hs[i*Mx : (i+1)*Mx] = subHeight.hs
+    return height, pressure
 
-    height = hgt.SawtoothHeight(domain, hs)
-    pressure = prs.FinDiffPressure(domain, height, 0, 0)
+
+
+def sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_peaks):
+
+    x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
+    x_peaks = np.sort(x_peaks)
+    h_peaks = np.random.uniform(h_min, h_max, n_peaks)
+    
+    height = hgt.SawtoothHeight(domain, x_peaks, h_peaks)
+    pressure = prs.FinDiffPressure(domain, height, p0, pN)
     return height, pressure
     
 
@@ -90,18 +73,11 @@ def sawtooth_finDiff(domain, h_min, h_max, n):
 # -----------------------------------------------------------------------------
 def step(domain, p0, pN, x_step, h1, h2):
 
-    height = hgt.StepHeight(domain, x_step, h1, h2)
-    pressure = prs.StepPressure(domain, height, p0, pN)
+    height = hgt.RayleighStepHeight(domain, x_step, h1, h2)
+    pressure = prs.RayleighStepPressure(domain, height, p0, pN)
 
     return height, pressure
 
-def variableStepLen_schurLUSolve(domain, p0, pN, x_step, h1, h2):
-    height = hgt.StepHeight(domain, x_step, h1, h2)
-    if height.n_steps == 1:
-        pressure = prs.StepPressure(domain, height, p0, pN)
-    else: #N > 1
-        pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
-    return height, pressure
 
 # -----------------------------------------------------------------------------
 # III b. N-Step Height Example (N > 1)

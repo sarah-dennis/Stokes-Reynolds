@@ -34,6 +34,15 @@ class Height:
         h_axis = ["Height $h(x)$", "$x$"]
         graph.plot_2D(self.hs, domain.xs, h_title, h_axis)
   
+
+class discreteHeight(Height):
+    def __init__(self, domain, hs):
+        self.h_str = "Discrete Height"
+        self.h_eq = "h(x)"
+        self.hs = hs
+        self.hxs = dfd.center_diff(self.hs, domain)
+        self.hxxs = dfd.center_second_diff(self.hs, domain)
+        super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
 #------------------------------------------------------------------------------
 # Example Height Functions
 #------------------------------------------------------------------------------
@@ -95,14 +104,37 @@ class WedgeHeight(Height): #slider bearing
         return self.h0 + self.m * (x - self.x0)
 
 class SawtoothHeight(Height):
-    def __init__(self, domain, hs):
+    def __init__(self, domain, x_peaks, h_peaks):
         self.h_eq = "h(x)"
         self.h_str = "Piecewise Linear"
-        self.hs = hs
-        self.hxs = dfd.center_diff(hs, domain)
-        self.hxxs = dfd.center_second_diff(hs, domain)
+        self.h_peaks = h_peaks
+        self.x_peaks = x_peaks
+        self.hs, self.slopes = self.make_linear_hs(domain, x_peaks, h_peaks)
+        self.hxs = dfd.center_diff(self.hs, domain)
+        self.hxxs = dfd.center_second_diff(self.hs, domain)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
-   
+        
+    def make_linear_hs(self, domain, x_peaks, h_peaks):
+
+        n_regions = len(h_peaks) - 1
+        slopes = np.zeros(n_regions)
+
+        for r in range(n_regions):
+            slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
+        
+        hs = np.zeros(domain.Nx)
+        r = 0
+        for i in range(domain.Nx):
+            xi = domain.xs[i]
+            
+            if xi > x_peaks[r+1] and r+1 < n_regions:
+
+                r = r + 1
+            
+            
+            hs[i] = h_peaks[r] + slopes[r] * (xi - x_peaks[r])
+            
+        return hs, slopes
     
 class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
@@ -111,13 +143,13 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
         self.h_steps = h_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
 
-        self.hs = self.make_hs(domain, self.step_width, n_steps, h_steps)
+        self.hs = self.make_const_hs(domain, self.step_width, n_steps, h_steps)
         self.hxs = dfd.center_diff(self.hs, domain)
         self.hxxs = dfd.center_second_diff(self.hs, domain)
         
         super().__init__(domain, self.hs, h_str, h_eq, self.hxs, self.hxxs)
 
-    def make_hs(self,domain, step_width, n_steps, h_steps):
+    def make_const_hs(self,domain, step_width, n_steps, h_steps):
         hs = np.zeros(domain.Nx)
         index_width = domain.Nx / (n_steps + 1)
 
@@ -131,27 +163,13 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
  
         return hs
         
-class StepHeight(NStepHeight): # N=1 (simulated with N>=1 for l1 \= l2)
+class RayleighStepHeight(NStepHeight): # N=1
     def __init__(self, domain, x_step, h1, h2):
         self.x_step = x_step
-        l1 = x_step - domain.x0
-        l2 = domain.xf - x_step
-        step_width = np.gcd(l1, l2)
-        
-        k = int(l1/step_width)
-        
-        n_steps = int((l1 + l2)/step_width - 1)
-    
-        h_steps = np.zeros(n_steps + 1)
-        for i in range(n_steps+1):
-            if i < k:
-                h_steps[i] = h1
-            else:
-                h_steps[i] = h2
-        
+
         h_str = "Step Height"
         h_eq = "h(x) = [%.2f, %.2f]"%(h1, h2)
-        super().__init__(domain, n_steps, h_steps, h_str, h_eq)
+        super().__init__(domain,1 , [h1,h2], h_str, h_eq)
     
 
 class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r

@@ -59,37 +59,46 @@ class CorrugatedPressure(Pressure): #sinusoidal
         super().__init__(domain, ps, p0, pN,  p_str)
         
 class WedgePressure(Pressure):
-    def __init__(self, domain, height):
+    def __init__(self, domain, height, p0, pN):
         p_str = "Analytic Reynolds"
         ps = np.zeros(domain.Nx)
         
         a = height.h1 / height.h0
 
         L = domain.xf - domain.x0
-        
+        #TODO ignores boundays pressures
         for i in range(domain.Nx):
             X = (domain.xs[i]-domain.x0)/L
             hX = self.H(X, a)
             Pi = a/(1-a**2)*(1/hX**2 - 1/a**2) - 1/(1-a)*(1/hX - 1/a)
             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
-        super().__init__(domain, ps, 0, 0, p_str)
+        super().__init__(domain, ps, p0, pN, p_str)
         
     def H(self, X, a):
         return a + (1-a)*X
 
 class SawtoothPressure(Pressure):
-    def __init__(self, domain, ps):
-        p_str = "Analytic piecewise-Reynolds"
-        super().__init__(domain, ps, ps[0], ps[-1], p_str)
-        
-        
-class StepPressure(Pressure):
-
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic piecewise-Reynolds"
-
+        p_str = "Analytic Reynolds"
         ps = np.zeros(domain.Nx)
         
+        
+        xs = domain.xs
+        hs = height.hs
+        h_peaks = height.h_peaks
+        x_peaks = height.x_peaks
+        slopes = height.slopes
+      
+        super().__init__(domain, ps, p0, pN, p_str,)
+        
+        
+class RayleighStepPressure(Pressure):
+
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Analytic Reynolds"
+
+        ps = np.zeros(domain.Nx)
+
         h_in = height.hs[0]
         h_out = height.hs[-1]
 
@@ -97,6 +106,7 @@ class StepPressure(Pressure):
         xm = height.x_step
         xf = domain.xf
         c = 6*domain.eta*domain.U
+
 
         m_in_numer = (h_out/h_in)**3 * (p0 - pN)/(xm - xf) - c * (h_out - h_in)/h_in**3
         m_in_denom = 1 - (h_out/h_in)**3 * (xm - x0)/(xm - xf)

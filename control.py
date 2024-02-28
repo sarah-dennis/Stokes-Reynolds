@@ -35,40 +35,44 @@ domain = dm.Domain(x0, xf, U, Nx, BC)
 # Pressure & Height 
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 0
+p0 = 1
 
-pN = 0
+pN = 2
 
 # Height params (see Examples for more)
-n_steps = 57
+n_steps = 3
 r = 0.25
 h_avg = 0.75
-h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
-x_step = 1
 
-n = 8
-#for sawtooth: n | Nx
+x_step = 0.4
+
+
+h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
+
 h0 = 1
 h1 = 0.5
-h_min = 0.01
+h_min = 0.5
 h_max = 1
 
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
 # height, pressure = ex.flat(domain, p0, pN, h_avg)
-# height, pressure = ex.wedge(domain, h0, h1)
-# height, pressure = ex.sawtooth(domain, h_min, h_max, n)
+
+# height, pressure = ex.wedge(domain, p0, pN, h0, h1)
+
 # height, pressure = ex.corrugated(domain, p0, pN)
 
-# height, pressure = ex.step(domain, p0, pN, x_step, r, h_avg)
+# height, pressure = ex.step(domain, p0, pN, x_step, h_avg-r, h_avg+r)
 
+# height, pressure = ex.sawtooth(domain, h_min, h_max, n_steps)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Sawtooth
-# height, pressure = ex.sawtooth_finDiff(domain, h_min, h_max, n)
+
+height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_steps)
 
 
 # Square wave
@@ -80,8 +84,7 @@ h_max = 1
 # height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n_steps, r, h_avg)
 
 # height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
-# height, pressure  = ex.variableStepLen_schurLUSolve(domain, p0, pN, x_step, h_avg+r, h_avg-r)
+# height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
 
 
 #------------------------------------------------------------------------------
