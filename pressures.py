@@ -12,10 +12,12 @@ import time
 
 import domain as dfd
 
-import pressure_schurComp as sw
+import pressure_sqrWave as sw
+import pressure_sawtooth as st
 import pressure_finDiff as fd
 
 from scipy.sparse.linalg import gmres
+from scipy.sparse.linalg import spsolve
 
 class Pressure:
     
@@ -79,17 +81,26 @@ class WedgePressure(Pressure):
 
 class SawtoothPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic Reynolds"
-        ps = np.zeros(domain.Nx)
+        p_str = "spsolve"
         
         
-        xs = domain.xs
-        hs = height.hs
-        h_peaks = height.h_peaks
-        x_peaks = height.x_peaks
-        slopes = height.slopes
+        Xs = height.x_peaks #[x0, x1, ..., xN]
+        Hs = height.h_peaks #[h0, h1, ..., hN]
+        slopes = height.slopes #[(i, i+1): i = 0, ... N-1]
+        
+        N = len(Xs)
+        
+        rhs = st.make_rhs(N, Xs, Hs, slopes, p0, pN)
+        
+        st_linOp = st.stLinOp(N, Xs, Hs, slopes)
+        
+        Cs = spsolve(st_linOp, rhs) #N+1 : [Cp0, Cp1, ..., Cp_N-1, Cq]
+        
+        ps = st.make_ps(domain, height, Cs)
+        
+        
       
-        super().__init__(domain, ps, p0, pN, p_str,)
+        super().__init__(domain, ps, p0, pN, p_str)
         
         
 class RayleighStepPressure(Pressure):
@@ -134,11 +145,11 @@ class SquareWavePressure_pySolve(Pressure):
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
-        M = sw.make_M(domain, height, p0, pN)  
+        sw_M = sw.make_M(domain, height, p0, pN)  
 
         t1 = time.time()
         
-        sol = np.linalg.solve(M, rhs)
+        sol = np.linalg.solve(sw_M, rhs)
         t2 = time.time()
         
         print("\n Python Inverse Solve")
@@ -146,7 +157,7 @@ class SquareWavePressure_pySolve(Pressure):
         print("Solve time: %.5f "%(t2-t1))
         print("Total time: %.5f "%(t2-t0))
         
-        condNum = np.linalg.cond(M)
+        condNum = np.linalg.cond(sw_M)
         print("condNum: %.5f"%condNum)
         
         p_slopes = sol[0:n+1]
@@ -166,14 +177,14 @@ class SquareWavePressure_schurGmresSolve(Pressure):
         
         t0 = time.time()
         
-        M_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
+        sw_linOp = sw.swLinOp(n, height.step_width, height.h_steps)
         
         t1 = time.time()
         
         tol = 1e-12
         # max_iter = 200
         
-        sol, exit_code = gmres(M_linOp, rhs, tol=tol)
+        sol, exit_code = gmres(sw_linOp, rhs, tol=tol)
     
         t2 = time.time()
         

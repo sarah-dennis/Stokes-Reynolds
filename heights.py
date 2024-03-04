@@ -109,6 +109,7 @@ class SawtoothHeight(Height):
         self.h_str = "Piecewise Linear"
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
+
         self.hs, self.slopes = self.make_linear_hs(domain, x_peaks, h_peaks)
         self.hxs = dfd.center_diff(self.hs, domain)
         self.hxxs = dfd.center_second_diff(self.hs, domain)
