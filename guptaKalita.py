@@ -21,6 +21,7 @@ plot_mod = 25
 write_mod = 10
 error_mod = 25
 
+
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
         self.x0 = x0
@@ -54,8 +55,8 @@ def run_new(N, iters):
     n = tri.Nx
     m = tri.Ny
     
-    u_init = np.ones(n*m)
-    v_init = np.ones(n*m)
+    u_init = np.zeros(n*m)
+    v_init = np.zeros(n*m)
     psi_init = np.zeros(n*m)
     past_iters = 0
 
@@ -159,19 +160,16 @@ def update_rhs(tri, u, v): #
                 
                 
             # East (i+1, j)
-            x_E = h*(i+1)
-            if i+1 == n-1 or y <= slope * x_E - yL: 
+            if i+1 == n-1: 
                 u_E = 0
                 v_E = 0
             else:
                 k_E = j*n + i + 1
                 u_E = u[k_E]
                 v_E = v[k_E]
-
             
             # South (i, j-1)
-            y_S = h*(j-1)
-            if j-1 == 0 or y_S <= dy - yL or y_S <= -dy + yL: 
+            if j-1 == 0: 
                 u_S = 0
                 v_S = 0
             else:
@@ -181,8 +179,7 @@ def update_rhs(tri, u, v): #
 
                 
             # West (i-1, j)  
-            x_W = h*(i-1)
-            if i-1 == 0 or y <= -slope * x_W + yL: 
+            if i-1 == 0: 
                 u_W = 0
                 v_W = 0
 
@@ -190,7 +187,6 @@ def update_rhs(tri, u, v): #
                 k_W = j*n + i - 1
                 u_W = u[k_W]
                 v_W = v[k_W]
-
              
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)
@@ -205,7 +201,8 @@ def update_rhs(tri, u, v): #
 # u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
 
-
+# enforces velocity boundary condition - updates each outer iteration
+# assumes u, v, psi were initialized to 0
 def uv_approx(tri, u, v, psi):
     
     n = tri.Nx
@@ -238,7 +235,6 @@ def uv_approx(tri, u, v, psi):
             v[k] = 0 
                 
         else: #interior
-            
             # (u,v) at 4 point stencil
 
             # North (i, j+1)
@@ -251,8 +247,7 @@ def uv_approx(tri, u, v, psi):
                 psi_N = psi[k_N]
                 
             # East (i+1, j)
-            x_E = h*(i+1)
-            if i+1 == n-1 or y <= slope * x_E - yL: 
+            if i+1 == n-1 : 
                 v_E = 0
                 psi_E = 0 #TODO: psi_E = -psi[k_W]
             else:
@@ -261,8 +256,7 @@ def uv_approx(tri, u, v, psi):
                 psi_E = psi[k_E] 
             
             # South (i, j-1)
-            y_S = h*(j-1)
-            if j-1 == 0 or y_S <= dy - yL or y_S <= -dy + yL: 
+            if j-1 == 0 : 
                 u_S = 0
                 psi_S = 0 #TODO: psi_S = -psi[k_N]
             else:
@@ -271,8 +265,7 @@ def uv_approx(tri, u, v, psi):
                 psi_S = psi[k_S]
                 
             # West (i-1, j)  
-            x_W = h*(i-1)
-            if i-1 == 0 or y <= -slope * x_W + yL:
+            if i-1 == 0 :
                 v_W = 0
                 psi_W = 0 #TODO: psi_W = -psi[k_E]
             else:
@@ -323,7 +316,6 @@ class Dpsi_linOp(LinearOperator):
                 psi_C = psi[k]
         
                 #North (i, j+1)
-                y_N = h*(j+1)
                 if j+1 == m-1: 
                     psi_N = 0
                 else:
@@ -331,48 +323,43 @@ class Dpsi_linOp(LinearOperator):
                     
     
                 #South (i, j-1)
-                y_S = h*(j-1)
-                if j-1 == 0 or y_S <= dy - yL or y_S <= -dy + yL: 
+                if j-1 == 0 : 
                     psi_S = 0
                 else:
                     psi_S = psi[(j-1)*n + i]
                     
                 #East (i+1, j)
-                x_E = h*(i+1)
-                dy_E = slope*x_E
-                if i+1 == n-1 or y <= dy_E - yL:
+                if i+1 == n-1:
                     psi_E = 0
                 else:
                     psi_E = psi[j*n + i+1]
                     
                 #West (i-1,j)
-                x_W = h*(i-1)
-                dy_W = slope*x_W
-                if i-1 == 0 or y <= -dy_W + yL:
+                if i-1 == 0 :
                     psi_W = 0
                 else:
                     psi_W = psi[j*n + i-1]
                     
                 #NorthEast (i+1, j+1)
-                if i+1 == n-1 or j+1 == m-1 or y_N <= dy_E - yL: 
+                if i+1 == n-1 or j+1 == m-1 : 
                     psi_NE = 0
                 else:
                     psi_NE  = psi[(j+1)*n + i+1]
                 
                 #NorthWest (i-1, j+1)
-                if i-1 == 0 or j+1 == m-1 or y_N <= -dy_W + yL: 
+                if i-1 == 0 or j+1 == m-1: 
                     psi_NW = 0
                 else:
                     psi_NW = psi[(j+1)*n + i-1]
                 
                 #SouthEast (i+1, j-1)
-                if i+1 == n-1 or j-1 == 0 or y_S <= dy_E - yL or y_S <= -dy_E + yL: 
+                if i+1 == n-1 or j-1 == 0: 
                     psi_SE = 0
                 else:
                     psi_SE = psi[(j-1)*n + i+1]
                 
                 #SouthWest (i-1, j-1)
-                if i-1 == 0 or j-1 == 0 or y_S <= dy_W - yL or y_S <= -dy_W + yL:
+                if i-1 == 0 or j-1 == 0:
                     psi_SW = 0
                 else:
                     psi_SW = psi[(j-1)*n + i-1]
@@ -456,7 +443,8 @@ def read_solution(filename, nm):
         reader = csv.reader(file)
 
         for i in range(nm):
-            ui, vi, psii = next(reader)[0].split(' ')
+            line = next(reader)
+            ui, vi, psii = line[0].split(' ')
             u[i] = float(ui)
             v[i] = float(vi)
             psi[i] = float(psii)
