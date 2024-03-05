@@ -5,10 +5,11 @@ Created on Mon Jan 22 14:59:46 2024
 
 @author: sarahdennis
 """
+import csv
+import time
 import numpy as np
 from matplotlib import pyplot as pp
 from matplotlib import colors
-import csv
 
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
@@ -18,7 +19,7 @@ import graphics as graph
 bicgstab_rtol = 1e-5
 
 plot_mod = 25
-write_mod = 10
+write_mod = 25
 error_mod = 25
 
 
@@ -51,10 +52,10 @@ class biswasEx(triangle):
 def run_new(N, iters):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
     tri = biswasEx(N)
-
+    
     n = tri.Nx
     m = tri.Ny
-    
+
     u_init = np.zeros(n*m)
     v_init = np.zeros(n*m)
     psi_init = np.zeros(n*m)
@@ -85,24 +86,30 @@ def run(tri, u, v, past_psi, iters, past_iters):
     M = Dpsi_linOp(tri)
     
     for i in range(iters): 
-        print("trial k=%d of %d"%(i+past_iters+1, iters+past_iters))
         
+        t0 = time.time()
         rhs = update_rhs(tri, u, v)
         
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         
         u, v = uv_approx(tri, u, v, psi)
+        tf = time.time()
         
+        
+        
+        if i % error_mod == 0: 
+            infNormErr = np.max(np.abs(psi - past_psi))
+            print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
+            print("  time: %.3f s"%(tf-t0))
+            print("  error: %.5e"%infNormErr)      
+            
         if i % plot_mod == 0:
-            make_plots(tri, u, v, psi, i+past_iters)
+            make_plots(tri, u, v, psi, i+1 + past_iters)
         
         if i % write_mod == 0:
             write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
         
-        if i % error_mod == 0: 
-            
-            infNormErr = np.max(np.abs(psi - past_psi))
-            print("error: %.5e"%infNormErr)
+
         past_psi = psi
             
     return u, v, psi
@@ -381,12 +388,12 @@ def make_plots(tri, u, v, stream, iters):
     ys = np.linspace(tri.y0, tri.yL, m)
 
 # Velocity:
-    u_2D = u.copy().reshape((m,n))
-    v_2D = v.copy().reshape((m,n))
+    # u_2D = u.copy().reshape((m,n))
+    # v_2D = v.copy().reshape((m,n))
     
-    ax_labels = ['$x$', '$y$']
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    # ax_labels = ['$x$', '$y$']
+    # title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    # graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
     
 # Stream: Psi(x,y) contour & heat map
     stream_2D = stream.copy().reshape((m,n))
@@ -395,20 +402,20 @@ def make_plots(tri, u, v, stream, iters):
     #         if stream_2D[j,i] == 0:
     #             stream_2D[j,i] = None
     ax_labels = ['$\psi(x,y)$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
     plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
     
 # vorticity 
-    uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    w = np.zeros((m,n))
-    for j in range(m):
-        for i in range(n):   
-            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+    # uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    # vx_2D = np.gradient(v_2D, tri.h, axis=1)
+    # w = np.zeros((m,n))
+    # for j in range(m):
+    #     for i in range(n):   
+    #         w[j,i] = vx_2D[j,i] - uy_2D[j,i]
 
-    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    plot_heat_contour(w, xs, ys, title, ax_labels)
+    # ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
+    # title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    # plot_heat_contour(w, xs, ys, title, ax_labels)
 
 
 def plot_heat_contour(zs, xs, ys, title, labels):
@@ -460,5 +467,5 @@ def write_solution(filename, nm, u, v, psi, iters):
             writer.writerow([u[i], v[i], psi[i]])
         
         writer.writerow([iters])
-        print("Saved to csv: k=%d"%(iters))
+        print("  saved csv")
         file.close()
