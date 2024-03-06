@@ -303,6 +303,8 @@ class Dpsi_linOp(LinearOperator):
         slope = self.tri.slope
         yL = self.tri.yL
 
+        # adjust boundary psi's 
+        
         for k in range(n*m):
             i = k%n
             j = k//n
@@ -388,12 +390,12 @@ def make_plots(tri, u, v, stream, iters):
     ys = np.linspace(tri.y0, tri.yL, m)
 
 # Velocity:
-    # u_2D = u.copy().reshape((m,n))
-    # v_2D = v.copy().reshape((m,n))
+    u_2D = u.copy().reshape((m,n))
+    v_2D = v.copy().reshape((m,n))
     
-    # ax_labels = ['$x$', '$y$']
-    # title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    ax_labels = ['$x$', '$y$']
+    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    graph.plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
     
 # Stream: Psi(x,y) contour & heat map
     stream_2D = stream.copy().reshape((m,n))
@@ -406,16 +408,16 @@ def make_plots(tri, u, v, stream, iters):
     plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
     
 # vorticity 
-    # uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    # vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    # w = np.zeros((m,n))
-    # for j in range(m):
-    #     for i in range(n):   
-    #         w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+    uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    vx_2D = np.gradient(v_2D, tri.h, axis=1)
+    w = np.zeros((m,n))
+    for j in range(m):
+        for i in range(n):   
+            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
 
-    # ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    # title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # plot_heat_contour(w, xs, ys, title, ax_labels)
+    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
+    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    plot_heat_contour(w, xs, ys, title, ax_labels)
 
 
 def plot_heat_contour(zs, xs, ys, title, labels):
