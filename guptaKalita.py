@@ -18,8 +18,8 @@ import graphics as graph
 
 bicgstab_rtol = 1e-5
 
-plot_mod = 25
-write_mod = 25
+plot_mod = 5
+write_mod = 10
 error_mod = 25
 
 
@@ -34,8 +34,8 @@ class triangle():
         self.Re = Re
         self.N = N # even
         self.h = 1/N
-        self.Nx = xL*N + 1
-        self.Ny = yL*N + 1
+        self.n = xL*N + 1
+        self.m = yL*N + 1
         self.filename = "guptaKalita_N%d.csv"%N
 
 class biswasEx(triangle):
@@ -53,8 +53,8 @@ def run_new(N, iters):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
     tri = biswasEx(N)
     
-    n = tri.Nx
-    m = tri.Ny
+    n = tri.n
+    m = tri.m
 
     u_init = np.zeros(n*m)
     v_init = np.zeros(n*m)
@@ -63,12 +63,12 @@ def run_new(N, iters):
 
     u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
     
-    write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, iters)
+    write_solution(tri.filename, n*m, u, v, psi, iters)
 #
 def run_load(N, iters):
     tri = biswasEx(N)
-    n = tri.Nx
-    m = tri.Ny
+    n = tri.n
+    m = tri.m
     
     u, v, psi, past_iters = read_solution(tri.filename, n*m)
     u, v, psi = run(tri, u, v, psi, iters, past_iters)
@@ -77,7 +77,7 @@ def run_load(N, iters):
 
 def plot_load(N):
     tri = biswasEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename, tri.Nx * tri.Ny)
+    u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
     make_plots(tri, u, v, psi, past_iters)
     
 #------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ def run(tri, u, v, past_psi, iters, past_iters):
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         
         u, v = uv_approx(tri, u, v, psi)
+        psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+        
         tf = time.time()
-        
-        
         
         if i % error_mod == 0: 
             infNormErr = np.max(np.abs(psi - past_psi))
@@ -107,7 +107,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
             make_plots(tri, u, v, psi, i+1 + past_iters)
         
         if i % write_mod == 0:
-            write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
+            write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
         
 
         past_psi = psi
@@ -123,8 +123,8 @@ def run(tri, u, v, past_psi, iters, past_iters):
 
 def update_rhs(tri, u, v): #
     
-    n = tri.Nx
-    m = tri.Ny
+    n = tri.n
+    m = tri.m
     
     rhs = np.zeros(n*m)
 
@@ -151,6 +151,7 @@ def update_rhs(tri, u, v): #
         
         # interior
         else:
+
             # (u,v) at 9 point stencil
             #k = j*n + i
             u_C = u[k]
@@ -170,6 +171,7 @@ def update_rhs(tri, u, v): #
             if i+1 == n-1: 
                 u_E = 0
                 v_E = 0
+                
             else:
                 k_E = j*n + i + 1
                 u_E = u[k_E]
@@ -208,12 +210,10 @@ def update_rhs(tri, u, v): #
 # u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
 
-# enforces velocity boundary condition - updates each outer iteration
-# assumes u, v, psi were initialized to 0
 def uv_approx(tri, u, v, psi):
     
-    n = tri.Nx
-    m = tri.Ny
+    n = tri.n
+    m = tri.m
     
     h = tri.h
     yL = tri.yL
@@ -291,19 +291,20 @@ class Dpsi_linOp(LinearOperator):
 
     def __init__(self, tri):
         self.tri = tri
-        nm = tri.Nx * tri.Ny 
+        nm = tri.n * tri.m
         self.shape = ((nm, nm))        
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(nm) 
         
     def _matvec(self, psi): # v:= psi[j*n + i]  
-        n = self.tri.Nx
-        m = self.tri.Ny
+        n = self.tri.n
+        m = self.tri.m
         h = self.tri.h
         slope = self.tri.slope
         yL = self.tri.yL
 
         # adjust boundary psi's 
+        psi = psi_mirror_boundary(n, m, slope, psi)
         
         for k in range(n*m):
             i = k%n
@@ -379,11 +380,60 @@ class Dpsi_linOp(LinearOperator):
 
         return self.mv
 
+def test_mirror_boundary(n, m, slope):
+    psi = np.ones(n*m)
+    
+    i_mid = int((n-1)/2)
+    
+    for j in range(m-1):
+        
+        i_step = int(j//slope)
+
+        k_left = j*n + i_mid - i_step
+        k_right = j*n + i_mid + i_step
+
+        psi[k_left-1] = 0
+        psi[k_right+1] = 0
+    
+    psi = psi.reshape((m,n))
+    return psi
+    
+
+def psi_mirror_boundary(n, m, slope, psi):
+    i_mid = int((n-1)/2)
+
+    for j in range(m-1):
+        
+        i_step = int(j//slope)
+
+        k_left = j*n + i_mid - i_step
+        k_right = j*n + i_mid + i_step
+
+        psi[k_left-1] = -psi[k_left+1]
+        psi[k_right+1] = -psi[k_right-1]
+    
+    return psi
+        
+def psi_unmirror_boundary(n, m, slope, psi):
+    i_mid = int((n-1)/2)
+    
+    for j in range(m-1):
+        
+        i_step = int(j//slope)
+    
+        k_left = j*n + i_mid - i_step
+        k_right = j*n + i_mid + i_step
+    
+        psi[k_left-1] = 0
+        psi[k_right+1] = 0
+    
+    return psi
+
 #-----------------------------------------------------------------------------
 
 def make_plots(tri, u, v, stream, iters):
-    n = tri.Nx
-    m = tri.Ny
+    n = tri.n
+    m = tri.m
 
 # Grid domain
     xs = np.linspace(tri.x0, tri.xL, n)
@@ -428,7 +478,6 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     norm_symLog = colors.SymLogNorm(linthresh=1e-8, linscale=0.35)
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
-
     pp.colorbar(color_plot, label=labels[0])
     
     n_contours = max(zs.shape)//2
