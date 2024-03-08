@@ -14,11 +14,13 @@ from matplotlib import colors
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
+
 bicgstab_rtol = 1e-5
 
 plot_mod = 250
 write_mod = 250
 error_mod = 250
+
 
 
 class triangle():
@@ -262,7 +264,7 @@ def uv_approx(tri, u, v, psi):
             # East (i+1, j)
             if i+1 == n-1 : 
                 v_E = 0
-                psi_E = 0 #TODO: psi_E = -psi[k_W]
+                psi_E = 0 
             else:
                 k_E = j*n + i + 1
                 v_E = v[k_E]
@@ -271,7 +273,7 @@ def uv_approx(tri, u, v, psi):
             # South (i, j-1)
             if j-1 == 0 : 
                 u_S = 0
-                psi_S = 0 #TODO: psi_S = -psi[k_N]
+                psi_S = 0 
             else:
                 k_S = (j-1)*n + i
                 u_S = u[k_S]
@@ -280,7 +282,7 @@ def uv_approx(tri, u, v, psi):
             # West (i-1, j)  
             if i-1 == 0 :
                 v_W = 0
-                psi_W = 0 #TODO: psi_W = -psi[k_E]
+                psi_W = 0 
             else:
                 k_W = j*n + i - 1
                 v_W = v[k_W]
@@ -428,15 +430,18 @@ def make_plots(tri, u, v, stream, iters):
     ys = np.linspace(tri.y0, tri.yL, m)
 
 
+
 # Stream: Psi(x,y) heat & contour
-    stream_2D = stream.copy().reshape((m,n))
-    # for j in range(m):
-    #     for i in range(n):   
-    #         if stream_2D[j,i] == 0:
-    #             stream_2D[j,i] = None
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
-    plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
+
+    # stream_2D = stream.copy().reshape((m,n))
+    # # for j in range(m):
+    # #     for i in range(n):   
+    # #         if stream_2D[j,i] == 0:
+    # #             stream_2D[j,i] = None
+    # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
+    # title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
+    # plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
+
     
 # Velocity: (U, V)  streamplot
     
@@ -447,17 +452,13 @@ def make_plots(tri, u, v, stream, iters):
     title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
     plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
-# Vorticity:  
-    uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    w = np.zeros((m,n))
-    for j in range(m):
-        for i in range(n):   
-            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-
-    ax_labels = ['$\omega = v_x - u_y$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    plot_heat_contour(w, xs, ys, title, ax_labels)
+# # Vorticity:  
+#     uy_2D = np.gradient(u_2D, tri.h, axis=0)
+#     vx_2D = np.gradient(v_2D, tri.h, axis=1)
+#     w = np.zeros((m,n))
+#     for j in range(m):
+#         for i in range(n):   
+#             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
 
 
 def plot_heat_contour(zs, xs, ys, title, labels):
@@ -470,7 +471,9 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     
     pp.colorbar(color_plot, label=labels[0])
     
+
     n_contours = max(zs.shape)
+
     pp.rcParams["lines.linewidth"] = .15
     pp.contour(X, Y, zs, n_contours, colors='white')
     
