@@ -17,7 +17,7 @@ from scipy.sparse.linalg import bicgstab
 
 bicgstab_rtol = 1e-5
 
-plot_mod = 250
+plot_mod = 25
 write_mod = 250
 error_mod = 250
 
@@ -433,24 +433,20 @@ def make_plots(tri, u, v, stream, iters):
 
 # Stream: Psi(x,y) heat & contour
 
-    # stream_2D = stream.copy().reshape((m,n))
-    # # for j in range(m):
-    # #     for i in range(n):   
-    # #         if stream_2D[j,i] == 0:
-    # #             stream_2D[j,i] = None
-    # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
-    # title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
-    # plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
+    stream_2D = stream.copy().reshape((m,n))
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
+    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
+    plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
 
     
 # Velocity: (U, V)  streamplot
     
-    u_2D = u.copy().reshape((m,n))
-    v_2D = v.copy().reshape((m,n))
+    # u_2D = u.copy().reshape((m,n))
+    # v_2D = v.copy().reshape((m,n))
     
-    ax_labels = ['$x$', '$y$', '$|(u,v)|_2$']
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    # ax_labels = ['$x$', '$y$', '$|(u,v)|_2$']
+    # title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
 # # Vorticity:  
 #     uy_2D = np.gradient(u_2D, tri.h, axis=0)
