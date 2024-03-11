@@ -15,7 +15,7 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
 
-bicgstab_rtol = 1e-5
+bicgstab_rtol = 1e-8
 
 plot_mod = 25
 write_mod = 50
