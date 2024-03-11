@@ -15,13 +15,11 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
 
-bicgstab_rtol = 1e-5
+bicgstab_rtol = 1e-12
 
 plot_mod = 25
 write_mod = 50
 error_mod = 50
-
-
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -433,31 +431,31 @@ def make_plots(tri, u, v, stream, iters):
     plot_heat_contour(stream_2D, xs, ys, title, ax_labels, True)
 
     
-# Velocity: (U, V)  streamplot
-    u_2D = u.copy().reshape((m,n))
-    v_2D = v.copy().reshape((m,n))
+# # Velocity: (U, V)  streamplot
+#     u_2D = u.copy().reshape((m,n))
+#     v_2D = v.copy().reshape((m,n))
     
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$', ]
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+#     ax_labels = ['$|(u,v)|_2$','$x$', '$y$', ]
+#     title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+#     plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
-# Vorticity: w = vx - uy heat & contour
-    uy_2D = np.gradient(u_2D, tri.h, axis=0)
-    vx_2D = np.gradient(v_2D, tri.h, axis=1)
-    w = np.zeros((m,n))
-    for j in range(m):
-        for i in range(n):   
-            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    ax_labels = ['$\omega(x,y)$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters)
-    plot_heat_contour(w, xs, ys, title, ax_labels, False)
+# # Vorticity: w = vx - uy heat & contour
+#     uy_2D = np.gradient(u_2D, tri.h, axis=0)
+#     vx_2D = np.gradient(v_2D, tri.h, axis=1)
+#     w = np.zeros((m,n))
+#     for j in range(m):
+#         for i in range(n):   
+#             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+#     ax_labels = ['$\omega(x,y)$', '$x$', '$y$']
+#     title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters)
+#     plot_heat_contour(w, xs, ys, title, ax_labels, False)
 
 def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    norm_symLog = colors.SymLogNorm(linthresh=1e-8, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=bicgstab_rtol, linscale=0.35)
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
     pp.colorbar(color_plot, label=labels[0])
