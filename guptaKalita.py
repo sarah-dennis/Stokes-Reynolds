@@ -141,12 +141,12 @@ def update_rhs(tri, u, v): #
     slope = tri.slope
     U = tri.U
     
-    c0 = 3*tri.h
+    c0 = 3 * tri.h
     c1 = 0.5 * tri.h**2 * tri.Re
     
     for k in range(n*m):
         i = k % n
-        j = k//n
+        j = k // n
         
         x = h*i
         y = h*j
@@ -174,12 +174,10 @@ def update_rhs(tri, u, v): #
                 u_N = u[k_N]
                 v_N = v[k_N]
                 
-                
             # East (i+1, j)
             if i+1 == n-1: 
                 u_E = 0
                 v_E = 0
-                
             else:
                 k_E = j*n + i + 1
                 u_E = u[k_E]
@@ -199,7 +197,6 @@ def update_rhs(tri, u, v): #
             if i-1 == 0: 
                 u_W = 0
                 v_W = 0
-
             else:
                 k_W = j*n + i - 1
                 u_W = u[k_W]
@@ -233,11 +230,11 @@ def uv_approx(tri, u, v, psi):
 
     for k in range(n*m):
         i = k % n
-        j = k//n
+        j = k // n
         
-        x = h*i
-        y = h*j
-        dy = slope*x
+        x = h * i
+        y = h * j
+        dy = slope * x
     
         # y=yL boundary
         if j == m-1: 
@@ -307,6 +304,7 @@ class Dpsi_linOp(LinearOperator):
     def _matvec(self, psi): # v:= psi[j*n + i]  
         n = self.tri.n
         m = self.tri.m
+        
         h = self.tri.h
         slope = self.tri.slope
         yL = self.tri.yL
@@ -315,11 +313,11 @@ class Dpsi_linOp(LinearOperator):
         psi = psi_mirror_boundary(n, m, slope, psi)
         
         for k in range(n*m):
-            i = k%n
-            j = k//n
+            i = k % n
+            j = k // n
             
-            x = h*i
-            y = h*j
+            x = h * i
+            y = h * j
             
             dy = slope*x
 
@@ -383,8 +381,7 @@ class Dpsi_linOp(LinearOperator):
                     psi_SW = psi[(j-1)*n + i-1]
 
             
-                self.mv[k] = 28*psi_C - 8*(psi_N + psi_S + psi_E + psi_W) + psi_NE + psi_SE + psi_SW + psi_NW 
-
+                self.mv[k] = 28*psi_C - 8*(psi_N + psi_S + psi_E + psi_W) + psi_NE + psi_SE + psi_NW + psi_SW
 
         return self.mv
 
@@ -394,9 +391,9 @@ def psi_mirror_boundary(n, m, slope, psi):
 
     for j in range(m-1):
         
-        i_step = int(j//slope)
+        i_step = int(j//slope) #distance to i_mid \<-|->/
 
-        k_left = j*n + i_mid - i_step
+        k_left = j*n + i_mid - i_step #k
         k_right = j*n + i_mid + i_step
 
         psi[k_left-1] = -psi[k_left+1]
@@ -429,35 +426,33 @@ def make_plots(tri, u, v, stream, iters):
     xs = np.linspace(tri.x0, tri.xL, n)
     ys = np.linspace(tri.y0, tri.yL, m)
 
-
-
 # Stream: Psi(x,y) heat & contour
-
     stream_2D = stream.copy().reshape((m,n))
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
-    plot_heat_contour(stream_2D, xs, ys, title, ax_labels)
+    plot_heat_contour(stream_2D, xs, ys, title, ax_labels, True)
 
     
 # Velocity: (U, V)  streamplot
+    u_2D = u.copy().reshape((m,n))
+    v_2D = v.copy().reshape((m,n))
     
-    # u_2D = u.copy().reshape((m,n))
-    # v_2D = v.copy().reshape((m,n))
-    
-    # ax_labels = ['$x$', '$y$', '$|(u,v)|_2$']
-    # title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    ax_labels = ['$|(u,v)|_2$','$x$', '$y$', ]
+    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
+    plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
-# # Vorticity:  
-#     uy_2D = np.gradient(u_2D, tri.h, axis=0)
-#     vx_2D = np.gradient(v_2D, tri.h, axis=1)
-#     w = np.zeros((m,n))
-#     for j in range(m):
-#         for i in range(n):   
-#             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+# Vorticity: w = vx - uy heat & contour
+    uy_2D = np.gradient(u_2D, tri.h, axis=0)
+    vx_2D = np.gradient(v_2D, tri.h, axis=1)
+    w = np.zeros((m,n))
+    for j in range(m):
+        for i in range(n):   
+            w[j,i] = vx_2D[j,i] - uy_2D[j,i]
+    ax_labels = ['$\omega(x,y)$', '$x$', '$y$']
+    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters)
+    plot_heat_contour(w, xs, ys, title, ax_labels, False)
 
-
-def plot_heat_contour(zs, xs, ys, title, labels):
+def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
@@ -473,11 +468,27 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     pp.rcParams["lines.linewidth"] = .15
     pp.contour(X, Y, zs, n_contours, colors='white')
     
+    #line plots
+    if veriLines:
+        #center line
+        pp.plot([0.5, 0.5], [0, 2], '-k')
+        
+        # vortex centers
+        pp.plot([0, 1], [1.802, 1.802], '-k')
+        pp.plot([0, 1], [.905, .905], '-k')
+        pp.plot([0, 1], [.449, .449], '-k')
+        
+        # vortex dividers
+        pp.plot([0, 1], [1.041, 1.041], '-w')
+        pp.plot([0, 1], [.517, .517], '-w')
+        pp.plot([0, 1], [.255, .255], '-w')
+    
+    
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
+    
     ax = pp.gca()
-
     ax.set_aspect('equal', 'box')
     pp.show()
 
@@ -492,11 +503,11 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     stream_density=[1,2] #len(ys) = 2 len(xs)
     magV = np.sqrt(vx**2 + vy**2)
     stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
-    pp.colorbar(stream_plot.lines, label=ax_labels[2])
+    pp.colorbar(stream_plot.lines, label=ax_labels[0])
     
     pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
+    pp.xlabel(ax_labels[1])
+    pp.ylabel(ax_labels[2])
     ax = pp.gca()
 
     ax.set_aspect('equal')
