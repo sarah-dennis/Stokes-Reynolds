@@ -14,7 +14,6 @@ from matplotlib import colors
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
-
 bicgstab_rtol = 1e-12
 
 plot_mod = 25
