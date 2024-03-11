@@ -124,16 +124,16 @@ class SawtoothHeight(Height):
             slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
         
         hs = np.zeros(domain.Nx)
-        r = 0
+        region = 0
         for i in range(domain.Nx):
             xi = domain.xs[i]
             
-            if xi > x_peaks[r+1] and r+1 < n_regions:
+            if xi > x_peaks[region+1] and region+1 < n_regions:
 
-                r = r + 1
+                region +=1
             
             
-            hs[i] = h_peaks[r] + slopes[r] * (xi - x_peaks[r])
+            hs[i] = h_peaks[region] + slopes[region] * (xi - x_peaks[region])
             
         return hs, slopes
     
@@ -143,7 +143,6 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
         self.n_steps = n_steps
         self.h_steps = h_steps
         self.step_width = (domain.xf - domain.x0)/(n_steps+1)
-
         self.hs = self.make_const_hs(domain, self.step_width, n_steps, h_steps)
         self.hxs = dfd.center_diff(self.hs, domain)
         self.hxxs = dfd.center_second_diff(self.hs, domain)
@@ -165,12 +164,12 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
         return hs
         
 class RayleighStepHeight(NStepHeight): # N=1
-    def __init__(self, domain, x_step, h1, h2):
+    def __init__(self, domain, x_step, h0, h1):
         self.x_step = x_step
 
         h_str = "Step Height"
-        h_eq = "h(x) = [%.2f, %.2f]"%(h1, h2)
-        super().__init__(domain,1 , [h1,h2], h_str, h_eq)
+        h_eq = "h(x) = [%.2f, %.2f]"%(h0, h1)
+        super().__init__(domain, 1 , [h0,h1], h_str, h_eq)
     
 
 class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r

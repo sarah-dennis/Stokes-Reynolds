@@ -18,8 +18,8 @@ from scipy.sparse.linalg import bicgstab
 bicgstab_rtol = 1e-5
 
 plot_mod = 25
-write_mod = 250
-error_mod = 250
+write_mod = 50
+error_mod = 50
 
 
 

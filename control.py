@@ -40,7 +40,7 @@ p0 = 1
 pN = 2
 
 # Height params (see Examples for more)
-n_steps = 3
+n_steps = 4
 r = 0.25
 h_avg = 0.75
 
@@ -65,14 +65,14 @@ h_max = 1
 
 # height, pressure = ex.step(domain, p0, pN, x_step, h_avg-r, h_avg+r)
 
-# height, pressure = ex.sawtooth(domain, h_min, h_max, n_steps)
+height, pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n_steps)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
 # Sawtooth
 
-height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_steps)
+# height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_steps)
 
 
 # Square wave

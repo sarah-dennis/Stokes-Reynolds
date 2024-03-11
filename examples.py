@@ -45,10 +45,11 @@ def wedge(domain, p0, pN, h0, hf):
 ##TODO
 def sawtooth(domain, p0, pN, h_min, h_max, n_peaks): 
     
-    x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
-    x_peaks = np.sort(x_peaks)
-    h_peaks = np.random.uniform(h_min, h_max, n_peaks)
-    
+    # x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
+    # x_peaks = np.sort(x_peaks)
+    # h_peaks = np.random.uniform(h_min, h_max, n_peaks)
+    x_peaks = [0,.25,.5, .75, 1]
+    h_peaks = [1,3,1,5,2]
     
     height = hgt.SawtoothHeight(domain, x_peaks, h_peaks)
     pressure = prs.SawtoothPressure(domain, height, p0, pN)
@@ -59,10 +60,12 @@ def sawtooth(domain, p0, pN, h_min, h_max, n_peaks):
 
 def sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_peaks):
 
-    x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
-    x_peaks = np.sort(x_peaks)
-    h_peaks = np.random.uniform(h_min, h_max, n_peaks)
-    
+    # x_peaks = (np.random.random_sample(n_peaks) * (domain.xf - domain.x0) + domain.x0)
+    # x_peaks = np.sort(x_peaks)
+    # h_peaks = np.random.uniform(h_min, h_max, n_peaks)
+    # print(h_peaks)
+    x_peaks = [0,.25,.5, .75, 1]
+    h_peaks = [1,3,1,5,2]
     height = hgt.SawtoothHeight(domain, x_peaks, h_peaks)
     pressure = prs.FinDiffPressure(domain, height, p0, pN)
     return height, pressure
