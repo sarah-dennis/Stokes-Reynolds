@@ -14,11 +14,11 @@ from matplotlib import colors
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
-bicgstab_rtol = 1e-12
+bicgstab_rtol = 1e-9
 
 plot_mod = 25
-write_mod = 50
-error_mod = 50
+write_mod = 25
+error_mod = 25
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -105,12 +105,12 @@ def run(tri, u, v, past_psi, iters, past_iters):
             print("  time: %.3f s"%(tf-t0))
             print("  error: %.5e psi"%err_i)      
             
-            
         if i % plot_mod == 0:
             make_plots(tri, u, v, psi, i+1 + past_iters)
         
         if i % write_mod == 0:
             write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
+        
         
 
         past_psi = psi
