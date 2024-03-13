@@ -14,11 +14,11 @@ from matplotlib import colors
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
-bicgstab_rtol = 1e-9
+bicgstab_rtol = 1e-10
 
-plot_mod = 25
+plot_mod = 50
 write_mod = 25
-error_mod = 25
+error_mod = 50
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N):
@@ -476,9 +476,9 @@ def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
         pp.plot([0, 1], [.449, .449], '-k')
         
         # vortex dividers
-        pp.plot([0, 1], [1.041, 1.041], '-w')
-        pp.plot([0, 1], [.517, .517], '-w')
-        pp.plot([0, 1], [.255, .255], '-w')
+        pp.plot([0, 1], [1.041, 1.041], '-k')
+        pp.plot([0, 1], [.517, .517], '-k')
+        pp.plot([0, 1], [.255, .255], '-k')
     
     
     pp.title(title, fontweight="bold")
