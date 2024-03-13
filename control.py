@@ -21,13 +21,13 @@ xf = 1
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = -1   #V_x(x,0) = U
+U = 1   #V_x(x,0) = U
 
 # kinematic viscosity
 visc = 1   
 
 # Grid size
-Nx = 200
+Nx = 500
 
 domain = dm.Domain(x0, xf, U, Nx, BC)
 
@@ -35,64 +35,64 @@ domain = dm.Domain(x0, xf, U, Nx, BC)
 # Pressure & Height 
 #------------------------------------------------------------------------------
 # Pressure boundary
-p0 = 1
+p0 = 0
 
-pN = 2
+pN = 1
 
 # Height params (see Examples for more)
-n_steps = 4
+n = 1
+
 r = 0.25
 h_avg = 0.75
 
 x_step = 0.4
 
-
-h_steps = [h_avg+r, h_avg-r, h_avg+r/2, h_avg-r/2]
-
-h0 = 1
-h1 = 0.5
-h_min = 0.5
-h_max = 1
+h_min = .1
+h_max = h_min + 0.5
 
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
-# height, pressure = ex.flat(domain, p0, pN, h_avg)
+height, pressure = ex.flat(domain, p0, pN, h_avg)
 
-# height, pressure = ex.wedge(domain, p0, pN, h0, h1)
+# height, pressure = ex.wedge(domain, p0, pN, h_max, h_min)
 
 # height, pressure = ex.corrugated(domain, p0, pN)
 
 # height, pressure = ex.step(domain, p0, pN, x_step, h_avg-r, h_avg+r)
 
-height, pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n_steps)
+# height, pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n)
+# height, pressure = ex.sawtooth_gk(domain, p0, pN, h_min, h_max)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
+
+# height, pressure = ex.fdSolve(domain, p0, pN)
+
 # Sawtooth
 
-# height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n_steps)
-
+# height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n)
 
 # Square wave
 
-# height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n_steps)
+# height, pressure  = ex.squareWave_pySolve(domain, p0, pN, n)
 
-# height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure = ex.squareWave_schurInvSolve(domain, p0, pN, n, r, h_avg)
 
-# height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n, r, h_avg)
 
 # height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
-# height, pressure = ex.mySteps_schurLUSolve(domain, p0, pN, h_steps)
+
+# height, pressure = ex.randSteps_schurLUSolve(domain, p0, pN, h_min, h_max, n)
 
 
 #------------------------------------------------------------------------------
 # Pressure & Height plotting 
 #------------------------------------------------------------------------------
-p_h_title = "Reynolds Solution (%s)"%(pressure.p_str)
-p_h_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
+ph_title = "Pressure & Height: \n %s"%(pressure.p_str)
+ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
 
 
 #------------------------------------------------------------------------------
@@ -100,12 +100,11 @@ graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, p_h_title, p_h_labels)
 #------------------------------------------------------------------------------
 velocity = vel.Velocity(domain, height, pressure)
 
-phv_title = "Reynolds Pressure and Velocity for %s"%height.h_str
-phv_fun_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-phv_ax_labels =  ['$x$', '$y$']
+v_title = "Velocity: \n %s"%(pressure.p_str)
+v_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
+v_ax_labels =  ['$x$', '$y$']
 
-graph.plot_phv(pressure.ps, height.hs, velocity.vx, velocity.vy, domain.xs, domain.ys, phv_title, phv_fun_labels,  phv_ax_labels)
-
+graph.plot_stream(velocity.vx, velocity.vy, domain.xs, domain.ys, v_title, v_ax_labels)
 
 #------------------------------------------------------------------------------
 # Error

@@ -5,17 +5,16 @@ Created on Wed Aug 30 12:20:23 2023
 @author: sarah
 """
 import numpy as np
-import graphics as graph
 
 class Velocity:
     
     def __init__(self, domain, height, pressure):
         self.domain = domain
         self.vel_str = "Velocity for %s (%s)"%(height.h_str, pressure.p_str)
-        self.vx, self.vy = self.makeField(height, pressure)
+        self.vx, self.vy = self.make_velocity(height, pressure)
     
     
-    def makeField(self, height, pressure):
+    def make_velocity(self, height, pressure):
         U = self.domain.U
         eta = self.domain.eta
         self.domain.set_ys(height, self.domain.Nx)
@@ -46,9 +45,4 @@ class Velocity:
         vx = np.ma.array(vx, mask=mask)
         vy = np.ma.array(vy, mask=mask)
         return vx, vy
-    
-      
-    def plot_quivers(self):
-        ax_labels = ["x", "y"]
-        graph.plot_quivers(self.vx, self.vy, self.domain.xs, self.domain.ys, self.vel_str, ax_labels)
-        
+

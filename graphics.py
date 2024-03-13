@@ -94,90 +94,6 @@ def plot_2D_twin(fs, gs, xs, title, ax_labels):
     pp.title(title, fontweight ="bold")
      
     pp.show()
-    
-#------------------------------------------------------------------------------
-def plot_phv(ps, hs, vx, vy, xs, ys, title, fun_labels, ax_labels):  # twin p(x), h(x) & quiver (vx,vy)
-    pp.rcParams['figure.dpi'] = 500
-    
-    fig = pp.figure()
-    X, Y = np.meshgrid(xs, ys)
-    
-    # mask y > h(x)
-    mask = np.zeros((len(xs), len(ys)), dtype=bool)
-    for i in range(len(ys)):
-        for j in range(len(xs)):
-            mask[i,j] = ys[i] > hs[j]
-    
-    #Spectral pressure plot 
-    P = [ps for y in ys]
-    P = np.ma.array(P, mask=mask)
-        
-    press_plot = pp.scatter(X, Y, c=P, cmap=pp.cm.get_cmap('Spectral_r'))
-    fig.colorbar(press_plot, label="pressure")
-
-    #Velocity vector plot
-    skip = 1
-    
-    thin_xs = xs[::skip]
-    thin_ys = ys[::skip]
-    
-    thin_X, thin_Y = np.meshgrid(thin_xs, thin_ys)
-
-    thin_vx = np.zeros((len(thin_xs), len(thin_ys)))
-    thin_vy = np.zeros((len(thin_xs), len(thin_ys)))
-    thin_mask = np.zeros((len(thin_xs), len(thin_ys)))
-    j = 0
-    for i in range(0, len(vx), skip):
-        thin_vx[j] = vx[i][::skip]
-        thin_vy[j] = vy[i][::skip]
-        thin_mask[j] = mask[i][::skip]
-        j+=1
-    
-    thin_vx = np.ma.array(thin_vx, mask=thin_mask)
-    thin_vy = np.ma.array(thin_vy, mask=thin_mask)
-    
-    pp.quiver(thin_X, thin_Y, thin_vx, thin_vy, width=0.001)
-    
-    # pp.plot(xs, hs, label='height', color='white')
-    
-    # pp.legend()
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-    
-
-    pp.show()
-    
-    
-
-#------------------------------------------------------------------------------
-def plot_quivers(vx, vy, xs, ys, title, ax_labels):   
-    pp.rcParams['figure.dpi'] = 500
-
-    pp.figure()
-    X, Y = np.meshgrid(xs, ys)
-
-    skip = 1
-    pp.quiver(X[::skip], Y[::skip], vx[::skip], vy[::skip], width=0.001)
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-
-    pp.show()
-    
-def plot_quivers_flat(vx, vy, xs, ys, title, ax_labels):   
-    pp.rcParams['figure.dpi'] = 500
-
-    pp.figure()
-    pp.quiver(xs, ys, vx, vy, width=0.0001)
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-
-    pp.show()
-
 
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
@@ -185,11 +101,16 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
+     
+    m = len(ys)/len(xs)
+    stream_density=[1,m] 
     
-    stream_density=[1,2] #len(ys) = 2 len(xs)
-    magV = np.sqrt(vx**2 + vy**2)
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
-    pp.colorbar(stream_plot.lines, label="$||V||_2$")
+    # magV = np.sqrt(vx**2 + vy**2)
+    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
+    # pp.colorbar(stream_plot.lines, label="$||V||_2$")
+    
+    pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
+
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])

@@ -62,7 +62,7 @@ def make_rhs(N, hs, slopes, p0, pN, eta_U):
     rhs[N] = c * (1/hs[N]) * (1/slopes[N-1]) - pN
     return rhs
 
-def make_ps(domain, height, vs):
+def make_ps(domain, height, vs, N):
     ps = np.zeros(domain.Nx)
     slopes = height.slopes
     hs = height.hs
@@ -76,7 +76,7 @@ def make_ps(domain, height, vs):
     
     for i in range(domain.Nx):
         
-        if xs[i] > x_peaks[k+1]:
+        if xs[i] > x_peaks[k+1] and k+1 < N:
             k += 1
         
         dxdh = 1/slopes[k]
