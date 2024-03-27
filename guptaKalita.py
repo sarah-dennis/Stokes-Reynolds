@@ -120,7 +120,10 @@ def run(tri, u, v, past_psi, iters, past_iters):
             
             print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
             print("  time: %.3f s"%(tf-t0))
-            print("  error: %.5e psi"%err_i)      
+            print("  error: %.5e psi"%err_i)
+            
+            # if err_i < bicgstab_rtol:
+            #     bicgstab_rtol /=10
             
         if i % plot_mod == 0:
             psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
