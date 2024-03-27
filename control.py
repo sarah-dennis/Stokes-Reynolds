@@ -5,7 +5,7 @@ Created on Mon May 22 15:05:40 2023
 @author: sarahdennis
 """
 import numpy as np
-
+import csv
 import domain as dm
 import pressure_finDiff as fd
 import examples as ex
@@ -17,19 +17,19 @@ import graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xf = 1
+xN = 1
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = 1   #V_x(x,0) = U
+U = -1   #V_x(x,0) = U
 
 # kinematic viscosity
 visc = 1   
 
 # Grid size
-Nx = 500
+N = 10000
 
-domain = dm.Domain(x0, xf, U, Nx, BC)
+domain = dm.Domain(x0, xN, U, N, BC)
 
 #------------------------------------------------------------------------------
 # Pressure & Height 
@@ -37,31 +37,31 @@ domain = dm.Domain(x0, xf, U, Nx, BC)
 # Pressure boundary
 p0 = 0
 
-pN = 1
+pN = 0
 
 # Height params (see Examples for more)
-n = 1
+n = 3
 
-r = 0.25
-h_avg = 0.75
+x_step = 0.4  #x0 < step < xN
 
-x_step = 0.4
+r = 1
 
-h_min = .1
-h_max = h_min + 0.5
+h_min = 1e-1 
+h_max = h_min + r
 
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
-height, pressure = ex.flat(domain, p0, pN, h_avg)
-
-# height, pressure = ex.wedge(domain, p0, pN, h_max, h_min)
+# height, pressure = ex.constant(domain, p0, pN, h_avg)
 
 # height, pressure = ex.corrugated(domain, p0, pN)
 
-# height, pressure = ex.step(domain, p0, pN, x_step, h_avg-r, h_avg+r)
+# height, pressure = ex.step(domain, p0, pN, x_step, h_min, h_max)
 
-# height, pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n)
+
+height, al_pressure, fd_pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n)
+
+# height, pressure = ex.sawtooth_two(domain, p0, pN, h_min, h_max, n)
 # height, pressure = ex.sawtooth_gk(domain, p0, pN, h_min, h_max)
 
 #------------------------------------------------------------------------------
@@ -86,37 +86,66 @@ height, pressure = ex.flat(domain, p0, pN, h_avg)
 
 # height, pressure = ex.randSteps_schurLUSolve(domain, p0, pN, h_min, h_max, n)
 
-
 #------------------------------------------------------------------------------
 # Pressure & Height plotting 
 #------------------------------------------------------------------------------
-ph_title = "Pressure & Height: \n %s"%(pressure.p_str)
-ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
+def plot_ph(domain, pressure, height):
+    ph_title = "Pressure & Height: \n %s"%(pressure.p_str)
+    ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+    graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
 
-
+plot_ph(domain, fd_pressure, height)
+plot_ph(domain, al_pressure, height)
 #------------------------------------------------------------------------------
 # Velocity
 #------------------------------------------------------------------------------
-velocity = vel.Velocity(domain, height, pressure)
 
-v_title = "Velocity: \n %s"%(pressure.p_str)
-v_labels = ['velocity $(v_x, v_y)$', 'pressure $p(x)$', 'height $h(x)$']
-v_ax_labels =  ['$x$', '$y$']
+def plot_v(domain, pressure, height):
+    velocity = vel.Velocity(domain, height, pressure)
 
-graph.plot_stream(velocity.vx, velocity.vy, domain.xs, domain.ys, v_title, v_ax_labels)
+    v_title = "Velocity: \n %s"%(pressure.p_str)
+    v_ax_labels =  ['$x$', '$y$']
+
+    graph.plot_stream(velocity.vx, velocity.vy, domain.xs, domain.ys, v_title, v_ax_labels)
+
+# plot_v(domain, fd_pressure, height)
+# plot_v(domain, al_pressure, height)
 
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
 # num_anl_title = "Numerical and Analytic Pressure for %s"%height.h_str
-# num_anl_labels = [pressure.p_str, "finDiff"]
-# num_anl_axis = ["$x$", "Error"]
-# graph.plot_2D_multi([pressure.ps, num_pressure], domain.xs, num_anl_title, num_anl_labels, num_anl_axis)
+# num_anl_labels = ["piecewise analytic", "finite difference"]
+# num_anl_axis = ["$x$", "Pressure $p$"]
+# graph.plot_2D_multi([al_pressure.ps, fd_pressure.ps], domain.xs, num_anl_title, num_anl_labels, num_anl_axis)
 
-# max_num_err = np.max(np.abs(num_pressure - pressure.ps))
-# print("Analytic to Numerical Error: %.3f"%max_num_err)
+infNorm_err = np.max(np.abs(al_pressure.ps - fd_pressure.ps))
+print("Analytic to Numerical Error: %.8f"%infNorm_err)
 
-# num_err_title = "Numerical Error for %s"%height.h_str
-# num_err_axis = ["$x$", "Pressure $p$"]
-# graph.plot_2D(pressure.ps - num_pressure, domain.xs, num_err_title, num_err_axis)
+num_err_title = "Numerical Error for %s"%height.h_str
+num_err_axis = ["$x$", "Pressure $p$"]
+graph.plot_2D(al_pressure.ps - fd_pressure.ps, domain.xs, num_err_title, num_err_axis)
+
+#------------------------------------------------------------------------------
+# CSV writing
+#------------------------------------------------------------------------------
+
+def write_solution(filename, length, fd_ps, al_ps, N, err):
+
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=' ')
+        writer.writerow(["N=%d"%N])
+        writer.writerow(["err:", err])
+        writer.writerow(["finDiff", "analytic"])
+        
+        for i in range(length):
+            writer.writerow([fd_ps[i], al_ps[i]])
+        
+        print("  saved csv")
+        file.close()
+
+
+filename = "%d_linear_pressure_%d"%(n, N)
+
+write_solution(filename, domain.Nx, fd_pressure.ps, al_pressure.ps, N, infNorm_err)
+

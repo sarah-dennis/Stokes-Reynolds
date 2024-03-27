@@ -30,9 +30,10 @@ def fdSolve(domain, p0, pN):
 # -----------------------------------------------------------------------------
 # 0. Constant Height
 # -----------------------------------------------------------------------------
-def flat(domain, p0, pN, h0):
+def constant(domain, p0, pN, h0):
     height = hgt.ConstantHeight(domain, h0)
-    pressure = prs.ConstantPressure(domain, height, p0, pN)
+    pressure = prs.LinearPressure(domain, height, p0, pN)
+    # pressure = prs.FinDiffPressure(domain, height, p0, pN)
     return height, pressure
 
 # -----------------------------------------------------------------------------
@@ -50,57 +51,59 @@ def corrugated(domain, p0, pN):
 # II. Linear Height
 # -----------------------------------------------------------------------------
 
-# II. a) Solution from  reference (assumes p0 = pN = 0)
-#                                   just run sawtooth with N=1
-def wedge(domain, p0, pN, h0, hf):
-    height = hgt.WedgeHeight(domain, h0, hf)
-    
-    pressure = prs.WedgePressure(domain, height)
-    
 
-    return height, pressure
+# II. a) Piecewise-linear -> piecewise solution (from double int. Reynolds )
 
-# II. b) Piecewise-linear -> piecewise solution (from double int. Reynolds )
 def sawtooth(domain, p0, pN, h_min, h_max, N): 
     
+    #uniform dx
+    xi = domain.x0 + np.arange(0, N+1) * (domain.xf - domain.x0)/N
+
+    #random hi
+    # hi = np.random.uniform(h_min, h_max, N+1)
+    
+    hi = np.array([h_min, h_max/2, h_max, h_max/2])
+    
+    height = hgt.SawtoothHeight(domain, xi, hi)
+    
+    st_pressure = prs.SawtoothPressure(domain, height, p0, pN)
+    
+    fd_pressure = prs.FinDiffPressure(domain, height, p0, pN)
+
+    return height, st_pressure, fd_pressure
+
+
+def sawtoothRand(domain, p0, pN, h_min, h_max, N): 
+    
+    #random dx
     xi = np.sort(np.random.uniform(domain.x0, domain.xf, N+1))
     xi[0] = domain.x0
     xi[-1] = domain.xf
     
     hi = np.random.uniform(h_min, h_max, N+1)
     
-    
-    height = hgt.SawtoothHeight(domain, xi, hi)
-    pressure = prs.SawtoothPressure(domain, height, p0, pN)
-
-    return height, pressure
-
-# initialise slope 4 triangle 
-def sawtooth_gk(domain, p0, pN, h_min, h_max): 
-    xa = (domain.xf - domain.x0)/2
-    xi = np.array([domain.x0, xa, domain.xf])
-    
-    hi = np.array([h_min,h_max,h_min])
-    
-    
     height = hgt.SawtoothHeight(domain, xi, hi)
     
     pressure = prs.SawtoothPressure(domain, height, p0, pN)
-    # pressure = prs.FinDiffPressure(domain, height, p0, pN)
+
     return height, pressure
 
-#II. c) Piecewise-linear -> finite difference solve
-def sawtooth_finDiff(domain, p0, pN, h_min, h_max, N):
-
-    xi = np.sort(np.random.uniform(domain.x0, domain.xf, N+1))
-    xi[0] = domain.x0
-    xi[-1] = domain.xf
-    hi = np.random.uniform(h_min, h_max, N+1)
-
-    height = hgt.SawtoothHeight(domain, xi, hi)
-    pressure = prs.FinDiffPressure(domain, height, p0, pN)
-    return height, pressure
+# def sawtooth_two(domain, p0, pN, h_min, h_max, N): 
     
+#     N = 5
+#     # xi = np.sort(np.random.uniform(domain.x0, domain.xf, N+1))
+#     xi = [0, 1/5, 2/5, 3/5, 4/5, 5/5]
+#     xi[0] = domain.x0
+#     xi[-1] = domain.xf
+    
+#     # hi = np.random.uniform(h_min, h_max, N+1)
+#     hi = [1, 2, 1, 1, 3, 2]
+    
+#     height = hgt.SawtoothHeight(domain, xi, hi)
+#     pressure = prs.SawtoothPressure_two(domain, height, p0, pN)
+#     # pressure = prs.FinDiffPressure(domain, height, p0, pN)
+
+#     return height, pressure
 
 # -----------------------------------------------------------------------------
 # III a. Step Height Example (N = 1)

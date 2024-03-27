@@ -41,17 +41,31 @@ class FinDiffPressure(Pressure):
         ps = fd.solve(domain, height, p0, pN)
         super().__init__(domain, ps, p0, pN,  p_str)
         
-class ConstantPressure(Pressure):
+class LinearPressure(Pressure):
+    #constant height 
     def __init__(self, domain, height, p0, pN):
         p_str = "Analytic Reynolds"
-        ps = [p0 for i in range(domain.Nx)]
+        
+        h = height.h0
+        
+        etaU = 6*domain.U*domain.eta
+        
+        cq = h**3 * (pN - p0)/(domain.xf - domain.x0) - etaU*h
+        
+        ps = np.zeros(domain.Nx)
+        
+        for i in range(domain.Nx):
+            dx = domain.xs[i] - domain.x0
+            
+            ps[i] = (cq * dx / h**3) + (etaU * dx / h**2) + p0
+        
         super().__init__(domain, ps, p0, pN,  p_str)
         
 
 class CorrugatedPressure(Pressure): #sinusoidal
     def __init__(self, domain, height, p0, pN):
         p_str = "Analytic Reynolds"
-        #TODO: revisit this...
+        #TODO: ignores boundary pressures
         ps = np.zeros(domain.Nx)
         for i in range(domain.Nx):
             h = height.hs[i]
@@ -59,24 +73,24 @@ class CorrugatedPressure(Pressure): #sinusoidal
             ps[i] = -6*domain.eta*domain.U * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
         super().__init__(domain, ps, p0, pN,  p_str)
         
-class WedgePressure(Pressure):
-    def __init__(self, domain, height):
-        p_str = "Analytic Reynolds"
-        ps = np.zeros(domain.Nx)
+# class WedgePressure(Pressure):
+#     def __init__(self, domain, height):
+#         p_str = "Analytic Reynolds"
+#         ps = np.zeros(domain.Nx)
         
-        a = height.h1 / height.h0
+#         a = height.h1 / height.h0
 
-        L = domain.xf - domain.x0
-        #TODO ignores boundays pressures
-        for i in range(domain.Nx):
-            X = (domain.xs[i]-domain.x0)/L
-            hX = self.H(X, a)
-            Pi = a/(1-a**2)*(1/hX**2 - 1/a**2) - 1/(1-a)*(1/hX - 1/a)
-            ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
-        super().__init__(domain, ps, 0, 0, p_str)
+#         L = domain.xf - domain.x0
+#         #TODO ignores boundays pressures
+#         for i in range(domain.Nx):
+#             X = (domain.xs[i]-domain.x0)/L
+#             hX = self.H(X, a)
+#             Pi = a/(1-a**2)*(1/hX**2 - 1/a**2) - 1/(1-a)*(1/hX - 1/a)
+#             ps[i] = Pi * 6 * domain.eta * domain.U * L / height.h_min**2
+#         super().__init__(domain, ps, 0, 0, p_str)
         
-    def H(self, X, a):
-        return a + (1-a)*X
+#     def H(self, X, a):
+#         return a + (1-a)*X
 
 class SawtoothPressure(Pressure):
     def __init__(self, domain, height, p0, pN):
@@ -91,13 +105,34 @@ class SawtoothPressure(Pressure):
         rhs = st.make_rhs(N, Hs, slopes, p0, pN, domain.eta*domain.U)
  
         st_linOp = st.stLinOp(N, Hs, slopes)
-        # print(st_linOp.matvec(np.ones(N+1)))
-        # cs = linsolve.spsolve(st_linOp, rhs) #N+1 : [Cp0, Cp1, ..., Cp_N-1, Cq]
+     
         tol = 1e-12
-        # max_iter = 200
         
         cs, exit_code = gmres(st_linOp, rhs, tol=tol)
         ps = st.make_ps(domain, height, cs, N)
+        
+      
+        super().__init__(domain, ps, p0, pN, p_str)
+
+
+class SawtoothPressure_two(Pressure):
+    def __init__(self, domain, height, p0, pN):
+        p_str = "Piecewise Analytic Reynolds"
+        
+        Xs = height.x_peaks #[x0, x1, ..., xN]
+        Hs = height.h_peaks #[h0, h1, ..., hN]
+        slopes = height.slopes #[(i, i+1): i = 0, ... N-1]
+        dxs = height.dxs
+        N = len(Xs)-1
+       
+        rhs = st.make_rhs_two(N, Hs, slopes, dxs, p0, pN, domain.eta*domain.U)
+ 
+        st_linOp = st.stLinOp_two(N, Hs, slopes, dxs)
+     
+        tol = 1e-12
+        
+        cs, exit_code = gmres(st_linOp, rhs, tol=tol)
+        ps = st.make_ps_two(domain, height, cs, N)
         
       
         super().__init__(domain, ps, p0, pN, p_str)

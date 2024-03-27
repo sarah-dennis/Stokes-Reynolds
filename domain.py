@@ -53,7 +53,6 @@ def center_diff(fs, domain):
         D[domain.Nx-1][0] = 1
         
     D = D/(2*domain.dx)
-        
     fs_dx = D@fs 
     
     if  domain.BC == "fixed": #prescribed 
@@ -73,14 +72,11 @@ def center_second_diff(fs, domain):
         D[domain.Nx-1][0] = 1
         
     elif domain.BC == "fixed": #prescribed 
-        #None # boundary not used
+        # None # boundary not used
         D[0][domain.Nx-1] = 0
         D[domain.Nx-1][0] = 0
         
-        
-        
     D = D/(domain.dx**2)
-        
     fs_dxx = D@fs 
     
     return np.asarray(fs_dxx)

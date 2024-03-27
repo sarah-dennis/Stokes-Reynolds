@@ -53,6 +53,7 @@ class ConstantHeight(Height):
     def __init__(self, domain, h0):
         self.h_str = "Constant Height"
         self.h_eq = "h(x) = %.2f"%h0
+        self.h0 = h0
         self.hs = np.ones(domain.Nx)*h0 
         self.hxs = np.zeros(domain.Nx)
         self.hxxs = np.zeros(domain.Nx)
@@ -110,7 +111,7 @@ class SawtoothHeight(Height):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
 
-        self.hs, self.slopes = self.make_linear_hs(domain, x_peaks, h_peaks)
+        self.hs, self.slopes, self.dxs = self.make_linear_hs(domain, x_peaks, h_peaks)
         self.hxs = dfd.center_diff(self.hs, domain)
         self.hxxs = dfd.center_second_diff(self.hs, domain)
         super().__init__(domain, self.hs, self.h_str, self.h_eq, self.hxs, self.hxxs)
@@ -119,6 +120,7 @@ class SawtoothHeight(Height):
 
         n_regions = len(h_peaks) - 1
         slopes = np.zeros(n_regions)
+        dxs = np.zeros(n_regions)
 
         for r in range(n_regions):
             slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
@@ -128,14 +130,15 @@ class SawtoothHeight(Height):
         for i in range(domain.Nx):
             xi = domain.xs[i]
             
+            
             if xi > x_peaks[region+1] and region+1 < n_regions:
 
                 region +=1
             
+            dxs[region] = (xi - x_peaks[region])
+            hs[i] = h_peaks[region] + slopes[region] * dxs[region]
             
-            hs[i] = h_peaks[region] + slopes[region] * (xi - x_peaks[region])
-            
-        return hs, slopes
+        return hs, slopes, dxs
     
 class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
