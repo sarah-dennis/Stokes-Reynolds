@@ -62,7 +62,7 @@ def sawtooth(domain, p0, pN, h_min, h_max, N):
     #random hi
     # hi = np.random.uniform(h_min, h_max, N+1)
     
-    hi = np.array([h_min, h_max/2, h_max, h_max/2])
+    hi = np.array([h_min, h_max, h_min])
     
     height = hgt.SawtoothHeight(domain, xi, hi)
     
@@ -88,22 +88,6 @@ def sawtoothRand(domain, p0, pN, h_min, h_max, N):
 
     return height, pressure
 
-# def sawtooth_two(domain, p0, pN, h_min, h_max, N): 
-    
-#     N = 5
-#     # xi = np.sort(np.random.uniform(domain.x0, domain.xf, N+1))
-#     xi = [0, 1/5, 2/5, 3/5, 4/5, 5/5]
-#     xi[0] = domain.x0
-#     xi[-1] = domain.xf
-    
-#     # hi = np.random.uniform(h_min, h_max, N+1)
-#     hi = [1, 2, 1, 1, 3, 2]
-    
-#     height = hgt.SawtoothHeight(domain, xi, hi)
-#     pressure = prs.SawtoothPressure_two(domain, height, p0, pN)
-#     # pressure = prs.FinDiffPressure(domain, height, p0, pN)
-
-#     return height, pressure
 
 # -----------------------------------------------------------------------------
 # III a. Step Height Example (N = 1)

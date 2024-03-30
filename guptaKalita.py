@@ -14,6 +14,8 @@ from matplotlib import colors
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
+from scipy.signal import argrelextrema as relEx
+
 bicgstab_rtol = 1e-9
 
 plot_mod = 20
@@ -45,19 +47,9 @@ class biswasEx(triangle):
         yL = 2
         U = 1
         Re = 1
-        filename = "guptaKalita_N%d.csv"%N
+        filename = "biharmonicStokes_N%d.csv"%N
         super().__init__(x0, xL, y0, yL, U, Re, N, filename)
         
-class rightTri(triangle):
-    def __init__(self, N):
-        x0 = 0
-        xL = 2
-        y0 = 0
-        yL = 1
-        U = 1
-        Re = 1
-        filename = "rightTri_N%d.csv"%N
-        super().__init__(x0, xL, y0, yL, U, Re, N, filename)
 
 #------------------------------------------------------------------------------
 def run_new(N, iters):
@@ -74,7 +66,7 @@ def run_new(N, iters):
 
     u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
     
-    psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+    psi = psi_unmirror_boundary(tri, psi)
     write_solution(tri.filename, nm, u, v, psi, iters)
 #
 def run_load(N, iters):
@@ -85,14 +77,53 @@ def run_load(N, iters):
     
     u, v, psi = run(tri, u, v, psi, iters, past_iters)
     
-    psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+    psi = psi_unmirror_boundary(tri, psi)
     write_solution(tri.filename, tri.n*tri.m, u, v, psi, iters+past_iters)
 
 def plot_load(N):
     tri = biswasEx(N)
     u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
     make_plots(tri, u, v, psi, past_iters)
+    
+def print_bndry(N):
+    tri = biswasEx(N)
+    u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
+    
+    left, right = get_boundary(tri, psi)
+    
+    print("Psi sign changes...")
+    sign_ref = 0
+    for (x, y, p) in left:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            print("(x:%.5f, y:%.6f)"%(x,y))
+        
+    sign_ref = 0
+    for (x, y, p) in right:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            
+            print("(x:%.5f, y:%.6f)"%(x,y))
+    
+    print("Psi center-line extrema...")
+    center = get_center(tri, psi)
+    max_inds = relEx(center[:,2], np.greater)[0]
+    min_inds = relEx(center[:,2], np.less)[0]
+    
 
+    for i in max_inds:
+        x,y,p = center[i]
+        print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+    
+
+    for i in min_inds:
+        x,y,p = center[i]
+        print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+
+    make_plots(tri, u, v, psi, past_iters)
+# 
 #------------------------------------------------------------------------------
 def run(tri, u, v, past_psi, iters, past_iters):
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
@@ -107,14 +138,13 @@ def run(tri, u, v, past_psi, iters, past_iters):
         
         u, v = uv_approx(tri, u, v, psi)
         
-        psi = psi_mirror_boundary(tri.n, tri.m, tri.slope, tri.h, psi)
-        
+        psi = psi_mirror_boundary(tri, psi)
         
         tf = time.time()
         
         if i % error_mod == 0: 
-            past_psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, past_psi)
-            psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+            past_psi = psi_unmirror_boundary(tri, past_psi)
+            psi = psi_unmirror_boundary(tri, psi)
             
             err_i = np.max(np.abs(psi - past_psi))
             
@@ -122,15 +152,12 @@ def run(tri, u, v, past_psi, iters, past_iters):
             print("  time: %.3f s"%(tf-t0))
             print("  error: %.5e psi"%err_i)
             
-            # if err_i < bicgstab_rtol:
-            #     bicgstab_rtol /=10
-            
         if i % plot_mod == 0:
-            psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+            psi = psi_unmirror_boundary(tri, psi)
             make_plots(tri, u, v, psi, i+1 + past_iters)
         
         if i % write_mod == 0:
-            psi = psi_unmirror_boundary(tri.n, tri.m, tri.slope, psi)
+            psi = psi_unmirror_boundary(tri, psi)
             write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
 
 
@@ -164,12 +191,7 @@ def update_rhs(tri, u, v): #
     for k in range(n*m):
         i = k % n
         j = k // n
-        
-        # x = h*i
-        # y = h*j
-        
-        # dy = slope*x
-        
+
         # boundary & dead zones
         if i == 0 or j == 0 or i == n-1 or j == m-1:
             rhs[k] = 0
@@ -253,17 +275,14 @@ def uv_approx(tri, u, v, psi):
         i = k % n
         j = k // n
         
-        # x = h * i
-        # y = h * j
-        # dy = slope * x
-    
+
         # y=yL boundary
         if j == m-1: 
             u[k] = U
             v[k] = 0 
             
         # other side boundaries & dead zones
-        elif i == 0 or j == 0 or i == n-1: # or y <= -dy + yL or y <= dy - yL:
+        elif i == 0 or j == 0 or i == n-1:
             u[k] = 0
             v[k] = 0 
         
@@ -331,31 +350,19 @@ class Dpsi_linOp(LinearOperator):
         nc = n//2
         m = self.tri.m
         
-        # h = self.tri.h
         slope = self.tri.slope
-        
-        # yL = self.tri.yL
 
-        # adjust boundary psi's 
-        # psi = psi_mirror_boundary(n, m, slope, psi)
-        
         for k in range(n*m):
             i = k % n
             j = k // n
             
-            # x = h * i
-            # y = h * j
-            
-            # dy = slope*x
-
             # cavity boundary & dead zones
-            if i == 0 or i == n-1 or j == 0 or j == m-1: #or y <= -dy + yL or y <= dy - yL:
+            if i == 0 or i == n-1 or j == 0 or j == m-1: 
                 self.mv[k] = 0
             
             elif  (i < nc and j < (m-1) - slope*i) or (i > nc and j < slope * (i - nc)):
                 self.mv[k] = 0
-
-#  TODO  :           
+       
             #interior   
             else: 
                 # psi[k] at 9 point stencil         
@@ -417,7 +424,12 @@ class Dpsi_linOp(LinearOperator):
         return self.mv
 
 
-def psi_mirror_boundary(n, m, slope, dx, psi):
+def psi_mirror_boundary(tri, psi):
+    n = tri.n 
+    m = tri.m 
+    slope = tri.slope
+    dx = tri.h
+    
     i_mid = n//2
     
     for j in range(m-1):
@@ -436,19 +448,22 @@ def psi_mirror_boundary(n, m, slope, dx, psi):
     
             psi[k_left-1] = (1 - dj*dx/slope)*psi[k_left]
             psi[k_right+1] = (1 + dj*dx/slope)*psi[k_right] 
-    
              
     return psi
         
-def psi_unmirror_boundary(n, m, slope, psi):
+def psi_unmirror_boundary(tri, psi):
+    n = tri.n
+    m = tri.m
+    slope = tri.slope
+    
     i_mid = n//2
 
     for j in range(m-1):
         
-        i = int(j//slope) 
+        di = int(j//slope) 
     
-        k_left = j*n + i_mid - i
-        k_right = j*n + i_mid + i
+        k_left = j*n + i_mid - di
+        k_right = j*n + i_mid + di
         
         psi[k_left-1] = 0
         psi[k_right+1] = 0
@@ -464,22 +479,48 @@ def get_boundary(tri, psi):
     left = np.zeros((m,3)) # x, y, psi
     right = np.zeros((m,3)) 
     
+    
     for j in range(m):
         
-        di = int(j//tri.slope) 
-
-        k_left = j*n + i_mid - di 
-        k_right = j*n + i_mid + di
-
         y = tri.y0 + j*tri.h
         
-        x_left = (i_mid - di)*tri.h + tri.x0
-        x_right = tri.xL - (i_mid - di)*tri.h
+        dj = j % tri.slope
+        di = int(j//tri.slope) 
+        
+        if dj == 0: #true boundary points
+            k_left = j*n + i_mid - di 
+            k_right = j*n + i_mid + di
+        else: #interior boundary points
+            k_left = j*n + i_mid - di + 1  
+            k_right = j*n + i_mid + di - 1
+        
+        x_left = (i_mid - di + 1)*tri.h + tri.x0
+        x_right = tri.xL - (i_mid - di - 1)*tri.h
         
         left[j] = [x_left, y, psi[k_left]]
         right[j] = [x_right, y, psi[k_right]]
         
     return left, right
+
+def get_center(tri, psi):
+    n = tri.n 
+    m = tri.m 
+    
+    i_mid = n//2
+    x = i_mid * tri.h + tri.x0
+    
+    center = np.zeros((m,3)) # x, y, psi
+    
+    for j in range(m):
+        
+        y = tri.y0 + j*tri.h
+        
+        k = j*n + i_mid
+        
+        center[j] = [x, y, psi[k]]
+        
+    return center
+
 
 #-----------------------------------------------------------------------------
 
@@ -496,8 +537,6 @@ def make_plots(tri, u, v, stream, iters):
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
     plot_heat_contour(stream_2D, xs, ys, title, ax_labels, True)
-
-
       
 #  Velocity: (U, V)  streamplot
     u_2D = u.copy().reshape((m,n))
@@ -534,7 +573,8 @@ def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
     pp.rcParams["lines.linewidth"] = .15
     pp.contour(X, Y, zs, n_contours, colors='white')
 
-    #line plots
+    # vertification of critical points... 
+    
     # if veriLines:
         
     #     #center line

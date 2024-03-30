@@ -21,13 +21,13 @@ xN = 1
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
-U = -1   #V_x(x,0) = U
+U = 1   #V_x(x,0) = U
 
 # kinematic viscosity
 visc = 1   
 
 # Grid size
-N = 10000
+N = 2000
 
 domain = dm.Domain(x0, xN, U, N, BC)
 
@@ -40,13 +40,13 @@ p0 = 0
 pN = 0
 
 # Height params (see Examples for more)
-n = 3
+n = 2
 
-x_step = 0.4  #x0 < step < xN
+x_step = 0.5  #x0 < step < xN
 
 r = 1
 
-h_min = 1e-1 
+h_min = .1
 h_max = h_min + r
 
 #------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ def plot_ph(domain, pressure, height):
     ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
     graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
 
-plot_ph(domain, fd_pressure, height)
+# plot_ph(domain, fd_pressure, height)
 plot_ph(domain, al_pressure, height)
 #------------------------------------------------------------------------------
 # Velocity
@@ -108,8 +108,8 @@ def plot_v(domain, pressure, height):
 
     graph.plot_stream(velocity.vx, velocity.vy, domain.xs, domain.ys, v_title, v_ax_labels)
 
-# plot_v(domain, fd_pressure, height)
-# plot_v(domain, al_pressure, height)
+plot_v(domain, fd_pressure, height)
+plot_v(domain, al_pressure, height)
 
 #------------------------------------------------------------------------------
 # Error
