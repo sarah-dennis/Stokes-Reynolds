@@ -16,11 +16,11 @@ from scipy.sparse.linalg import bicgstab
 
 from scipy.signal import argrelextrema as relEx
 
-bicgstab_rtol = 1e-9
+bicgstab_rtol = 1e-7
 
-plot_mod = 20
-write_mod = 10
-error_mod = 20
+plot_mod = 25
+write_mod = 15
+error_mod = 25
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N, filename):
