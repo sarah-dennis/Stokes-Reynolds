@@ -18,9 +18,9 @@ from scipy.signal import argrelextrema as relEx
 
 bicgstab_rtol = 1e-7
 
-plot_mod = 25
-write_mod = 15
-error_mod = 25
+plot_mod = 50
+write_mod = 25
+error_mod = 50
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N, filename):
