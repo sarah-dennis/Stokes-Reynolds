@@ -7,7 +7,6 @@ Created on Mon May 22 15:05:40 2023
 import numpy as np
 import csv
 import domain as dm
-import pressure_finDiff as fd
 import examples as ex
 import velocity as vel
 import graphics as graph
@@ -29,7 +28,7 @@ visc = 1
 # Grid size
 N = 2000
 
-domain = dm.Domain(x0, xN, U, N, BC)
+domain = dm.Domain(x0, xN, U, N, N, BC)
 
 #------------------------------------------------------------------------------
 # Pressure & Height 
@@ -40,7 +39,7 @@ p0 = 0
 pN = 0
 
 # Height params (see Examples for more)
-n = 2
+n = 4
 
 x_step = 0.5  #x0 < step < xN
 
@@ -52,27 +51,22 @@ h_max = h_min + r
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
-# height, pressure = ex.constant(domain, p0, pN, h_avg)
+# height, al_pressure = ex.constant(domain, p0, pN, h_avg)
 
-# height, pressure = ex.corrugated(domain, p0, pN)
+# height, al_pressure = ex.corrugated(domain, p0, pN)
 
-# height, pressure = ex.step(domain, p0, pN, x_step, h_min, h_max)
+# height, al_pressure = ex.step(domain, p0, pN, x_step, h_min, h_max)
 
 
-height, al_pressure, fd_pressure = ex.sawtooth(domain, p0, pN, h_min, h_max, n)
+# height, al_pressure= ex.sawtooth(domain, p0, pN, h_min, h_max, n)
 
-# height, pressure = ex.sawtooth_two(domain, p0, pN, h_min, h_max, n)
-# height, pressure = ex.sawtooth_gk(domain, p0, pN, h_min, h_max)
+height, al_pressure = ex.sawtoothRand(domain, p0, pN, h_min, h_max, n)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
 
-# height, pressure = ex.fdSolve(domain, p0, pN)
-
-# Sawtooth
-
-# height, pressure = ex.sawtooth_finDiff(domain, p0, pN, h_min, h_max, n)
+fd_pressure = ex.fdSolve(domain, p0, pN, height)
 
 # Square wave
 
@@ -94,7 +88,7 @@ def plot_ph(domain, pressure, height):
     ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
     graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
 
-# plot_ph(domain, fd_pressure, height)
+plot_ph(domain, fd_pressure, height)
 plot_ph(domain, al_pressure, height)
 #------------------------------------------------------------------------------
 # Velocity
@@ -114,16 +108,12 @@ plot_v(domain, al_pressure, height)
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-# num_anl_title = "Numerical and Analytic Pressure for %s"%height.h_str
-# num_anl_labels = ["piecewise analytic", "finite difference"]
-# num_anl_axis = ["$x$", "Pressure $p$"]
-# graph.plot_2D_multi([al_pressure.ps, fd_pressure.ps], domain.xs, num_anl_title, num_anl_labels, num_anl_axis)
 
 infNorm_err = np.max(np.abs(al_pressure.ps - fd_pressure.ps))
 print("Analytic to Numerical Error: %.8f"%infNorm_err)
 
 num_err_title = "Numerical Error for %s"%height.h_str
-num_err_axis = ["$x$", "Pressure $p$"]
+num_err_axis = ["$x$", "Error (Analytic - Numerical)"]
 graph.plot_2D(al_pressure.ps - fd_pressure.ps, domain.xs, num_err_title, num_err_axis)
 
 #------------------------------------------------------------------------------
@@ -145,7 +135,7 @@ def write_solution(filename, length, fd_ps, al_ps, N, err):
         file.close()
 
 
-filename = "%d_linear_pressure_%d"%(n, N)
+# filename = "%d_linear_pressure_%d"%(n, N)
 
-write_solution(filename, domain.Nx, fd_pressure.ps, al_pressure.ps, N, infNorm_err)
+# write_solution(filename, domain.Nx, fd_pressure.ps, al_pressure.ps, N, infNorm_err)
 

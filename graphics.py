@@ -160,8 +160,11 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
+    norm_symLog = colors.SymLogNorm(linthresh=1e-7, linscale=0.35)
+    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
+    
     pp.colorbar(color_plot, label=labels[0])
+    
     
     n_contours = max(zs.shape)
     # pp.rcParams['contour.negative_linestyle'] = 'solid'
@@ -175,6 +178,9 @@ def plot_heat_contour(zs, xs, ys, title, labels):
 
     ax.set_aspect('equal', 'box')
     pp.show()
+    
+    
+
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
@@ -204,7 +210,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(1.22, 0.5))
+    fig.legend(bbox_to_anchor=(1.1, 0.7))
     
     return fig
 

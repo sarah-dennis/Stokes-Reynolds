@@ -9,10 +9,11 @@ import numpy as np
 
 class Domain:
 ##TODO switch/convert eta to Re
-    def __init__(self, x0, xf, U, Nx, BC='fixed'):
+    def __init__(self, x0, xf, U, Nx, Ny, BC='fixed'):
         self.x0 = x0
         self.xf = xf
         self.Nx = Nx
+        self.Ny = Ny
         self.BC = BC
         self.eta = 1 #dynamic viscosity in reynolds eq
         self.U = U
@@ -35,8 +36,8 @@ class Domain:
         # always fixed BC in y
         # used by Velocity once height is made
         self.Ny = Ny
-        self.yf = 1.1*height.h_max
-        self.y0 = 0
+        self.yf = height.h_max
+        self.y0 = height.h_min
         self.dy = (self.yf - self.y0)/(Ny-1)
         self.ys = np.asarray([self.y0 + i*self.dy for i in range(Ny)])
   

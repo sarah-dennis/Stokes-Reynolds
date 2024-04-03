@@ -17,7 +17,7 @@ class Velocity:
     def make_velocity(self, height, pressure):
         U = self.domain.U
         eta = self.domain.eta
-        self.domain.set_ys(height, self.domain.Nx)
+        self.domain.set_ys(height, self.domain.Ny)
 
         vx = np.zeros((self.domain.Ny, self.domain.Nx))
         vy = np.zeros((self.domain.Ny, self.domain.Nx))
@@ -32,17 +32,21 @@ class Velocity:
 
             for j in range(self.domain.Ny):
                 y = self.domain.ys[j]
-                
-                vx[j,i] = U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3
+                if y <= height.hs[i]:
+                    vx[j,i] = U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3
                                 
-                vy[j,i] = -2*hx*(U/h**3 - 3*q/h**4) * y**2 * (h-y)
+                    vy[j,i] = -2*hx*(U/h**3 - 3*q/h**4) * y**2 * (h-y)
+                else:
+                    vx[j,i] = 0
+                                
+                    vy[j,i] = 0
             
-            
-        mask = np.zeros((self.domain.Nx, self.domain.Ny), dtype=bool)
-        for i in range(self.domain.Ny):
-            for j in range(self.domain.Nx):
-                mask[i,j] = self.domain.ys[i] > height.hs[j]     
-        vx = np.ma.array(vx, mask=mask)
-        vy = np.ma.array(vy, mask=mask)
+        # mask = np.zeros((self.domain.Nx, self.domain.Ny), dtype=bool)
+        # for i in range(self.domain.Ny):
+        #     for j in range(self.domain.Nx):
+        #         mask[i,j] = self.domain.ys[i] > height.hs[j]     
+        # vx = np.ma.array(vx, mask=mask)
+        # vy = np.ma.array(vy, mask=mask)
+
         return vx, vy
 

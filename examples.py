@@ -12,20 +12,20 @@ import numpy as np
 # pressure solutions to reynolds equation for the given height functions
 #-------------------------------------------------------------------------
 
-def fdSolve(domain, p0, pN):
+def fdSolve(domain, p0, pN, height):
     
     #-------- paste height here ------------------
-    xa = (domain.xf - domain.x0)/2
-    xi = np.array([domain.x0, xa, domain.xf])
+    # xa = (domain.xf - domain.x0)/2
+    # xi = np.array([domain.x0, xa, domain.xf])
     
-    hi = np.array([0.01,1,0.01])
+    # hi = np.array([0.01,1,0.01])
     
     
-    height = hgt.SawtoothHeight(domain, xi, hi)
+    # height = hgt.SawtoothHeight(domain, xi, hi)
     #---------------------------------------------
 
     pressure = prs.FinDiffPressure(domain, height, p0, pN)
-    return height, pressure
+    return pressure
 
 # -----------------------------------------------------------------------------
 # 0. Constant Height
@@ -59,18 +59,18 @@ def sawtooth(domain, p0, pN, h_min, h_max, N):
     #uniform dx
     xi = domain.x0 + np.arange(0, N+1) * (domain.xf - domain.x0)/N
 
-    #random hi
+    #I. random height
     # hi = np.random.uniform(h_min, h_max, N+1)
     
+    #II. prescribed height
     hi = np.array([h_min, h_max, h_min])
     
     height = hgt.SawtoothHeight(domain, xi, hi)
     
     st_pressure = prs.SawtoothPressure(domain, height, p0, pN)
     
-    fd_pressure = prs.FinDiffPressure(domain, height, p0, pN)
 
-    return height, st_pressure, fd_pressure
+    return height, st_pressure
 
 
 def sawtoothRand(domain, p0, pN, h_min, h_max, N): 
