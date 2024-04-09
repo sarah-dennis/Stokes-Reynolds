@@ -39,10 +39,10 @@ def constant(domain, p0, pN, h0):
 # -----------------------------------------------------------------------------
 # I. Sinusoidal Height
 # -----------------------------------------------------------------------------
-def corrugated(domain, p0, pN):
-    h_mid = 1 #median axis for sinsuoid
-    r = 0.5 #radius 
-    k = 2*np.pi *2#period
+def corrugated(domain, p0, pN, h_mid, r, n):
+    # h_mid = .5 #median axis for sinsuoid
+    # r = 0.2 #radius 
+    k = n*np.pi * 4#period
     height = hgt.CorrugatedHeight(domain, h_mid, r, k)
     pressure = prs.CorrugatedPressure(domain, height, p0, pN)
     return height, pressure
@@ -55,6 +55,7 @@ def corrugated(domain, p0, pN):
 # II. a) Piecewise-linear -> piecewise solution (from double int. Reynolds )
 
 def sawtooth(domain, p0, pN, h_min, h_max, N): 
+    N = 6
     
     #uniform dx
     xi = domain.x0 + np.arange(0, N+1) * (domain.xf - domain.x0)/N
@@ -63,12 +64,14 @@ def sawtooth(domain, p0, pN, h_min, h_max, N):
     # hi = np.random.uniform(h_min, h_max, N+1)
     
     #II. prescribed height
-    hi = np.array([h_min, h_max, h_min])
-    
+    # hi = np.array([h_min + .3*h_max, h_min + .8*h_max, h_min +.2*h_max, h_min +  .5*h_max, h_min + .1*h_max, h_min + h_max, h_min + .4*h_max])
+    hi = np.array([h_min + .3*h_max, h_min + .4*h_max, h_min +.2*h_max, h_min +  .35*h_max, h_min + .1*h_max, h_min + .4*h_max, h_min + .25*h_max])
+
     height = hgt.SawtoothHeight(domain, xi, hi)
     
     st_pressure = prs.SawtoothPressure(domain, height, p0, pN)
     
+
 
     return height, st_pressure
 
@@ -85,6 +88,8 @@ def sawtoothRand(domain, p0, pN, h_min, h_max, N):
     height = hgt.SawtoothHeight(domain, xi, hi)
     
     pressure = prs.SawtoothPressure(domain, height, p0, pN)
+
+
 
     return height, pressure
 

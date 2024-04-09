@@ -28,9 +28,9 @@ def plot_3D(f_2D, xs, zs, title):
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis):
     fig = pp.figure()
-    pp.plot(xs, fs, color='b')
+    pp.plot(xs, fs, color='b', linewidth=.8)
 
-    pp.title(title)
+    pp.title(title, fontweight="bold")
     
     pp.xlabel(axis[0])
     
@@ -101,15 +101,20 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-     
+    
     m = len(ys)/len(xs)
-    stream_density=[1,m] 
+    h_max = max(ys)
+    stream_density_broken=[1,4*m] 
+    stream_density_unbroken=[1,.6*m] 
+    
     
     # magV = np.sqrt(vx**2 + vy**2)
     # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
     # pp.colorbar(stream_plot.lines, label="$||V||_2$")
     
-    pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
+    # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
+    
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
 
     
     pp.title(title, fontweight="bold")
@@ -118,7 +123,40 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     ax = pp.gca()
 
     ax.set_aspect('equal')
-    ax.set_ylim(0)
+    ax.set_ylim(0,1.01*h_max)
+    pp.show()
+    
+      
+def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
+    
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    m = len(ys)/len(xs)
+    h_max = max(ys)
+    stream_density_broken=[1,4*m] 
+    stream_density_unbroken=[1,.6*m] 
+    
+    
+    # magV = np.sqrt(vx**2 + vy**2)
+    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
+    # pp.colorbar(stream_plot.lines, label="$||V||_2$")
+    
+    # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
+    
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
+    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    ax = pp.gca()
+
+    ax.set_aspect('equal')
+    ax.set_ylim(0,1.25*h_max)
+    pp.legend(loc='upper left')
     pp.show()
     
 def plot_contour(zs, xs, ys, title, labels):
@@ -138,6 +176,7 @@ def plot_contour(zs, xs, ys, title, labels):
     ax = pp.gca()
     ax.set_aspect('equal', 'box')
     pp.show()
+
     
 def plot_heatMap(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500

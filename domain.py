@@ -15,6 +15,7 @@ class Domain:
         self.Nx = Nx
         self.Ny = Ny
         self.BC = BC
+        self.rho = 1 #density
         self.eta = 1 #dynamic viscosity in reynolds eq
         self.U = U
         
@@ -37,7 +38,7 @@ class Domain:
         # used by Velocity once height is made
         self.Ny = Ny
         self.yf = height.h_max
-        self.y0 = height.h_min
+        self.y0 = 0
         self.dy = (self.yf - self.y0)/(Ny-1)
         self.ys = np.asarray([self.y0 + i*self.dy for i in range(Ny)])
   

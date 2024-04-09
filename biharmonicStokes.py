@@ -562,7 +562,7 @@ def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    norm_symLog = colors.SymLogNorm(linthresh=bicgstab_rtol, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-8, linscale=0.35)
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
     pp.colorbar(color_plot, label=labels[0])

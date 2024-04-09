@@ -99,6 +99,18 @@ graph.plot_stream(stokes_u, stokes_v, domain.xs, domain.ys, stokes_title_vel, ax
 # Error calculations
 #------------------------------------------------------------------------------
 
+def getMax(us, vs, Nx, Ny):
+    max_uv = 0
+    for j in range(Ny):
+        for i in range(Nx):
+            u = us[j,i]
+            v = vs[j,i]
+            if u > v and u > max_uv:
+                max_uv = u
+            elif v > max_uv:
+                max_uv = v
+    return max_uv
+
 def L1Error(us_reyn, vs_reyn, us_stokes, vs_stokes, Nx, Ny):
     max_err = 0.0
     
@@ -166,10 +178,14 @@ def LinfError(us_reyn, vs_reyn, vs_stokes, us_stokes, Nx, Ny):
                 max_err = err_ij
             
     return max_err
+ 
+max_uv = np.abs(getMax(stokes_u, stokes_v, Nx, Ny))
 
-l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)
-l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)
-linf = LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)
+##scale by stokes_u in the same norm -- percent
+
+l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
+l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
+linf = LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
 
 print('l1 error: %.4f'%l1)
 print('l2 error: %.4f'%l2)
