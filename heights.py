@@ -25,7 +25,7 @@ class Height:
         self.hxxs = hxxs
          
         self.h_max = max(self.hs)
-        self.h_min = min(self.hs)
+        self.h_min = 0
         self.h_avg = np.mean(self.hs)
         
 

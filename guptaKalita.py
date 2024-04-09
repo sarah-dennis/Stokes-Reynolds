@@ -15,13 +15,13 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
 from scipy.signal import argrelextrema as relEx
-from scipy.interpolate import CubicSpline
+from scipy.ndimage import zoom
 
-bicgstab_rtol = 1e-7
+bicgstab_rtol = 1e-8
 
-plot_mod = 50
-write_mod = 25
-error_mod = 50
+plot_mod = 10
+write_mod = 5
+error_mod = 5
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N, filename):
@@ -89,27 +89,24 @@ def load_scale(N_load, N_new):
     v_load_2D = v_load.reshape((m_load,n_load))
     psi_load_2D = psi_load.reshape((m_load,n_load))
 
+
     tri_new = biswasEx(N_new)
     n_new, m_new = tri_new.n, tri_new.m
-    new_shape = (m_new, n_new)
+    new_shape = (m_new/m_load, n_new/n_load)
     
-    
-    
-    
-    
-    print(u_load_2D.shape)
-    print(new_shape)
-    # spline_order = 4
+
+    # # spline_order = 4
     u_scaled_2D = zoom(u_load_2D, new_shape)
     v_scaled_2D = zoom(v_load_2D, new_shape)
     psi_scaled_2D = zoom(psi_load_2D, new_shape)
-    print(u_scaled_2D.shape)
+    # print(u_scaled_2D.shape)
 
     u_scaled = u_scaled_2D.ravel()
     v_scaled = v_scaled_2D.ravel()
     psi_scaled = psi_scaled_2D.ravel()
 
     write_solution(tri_new.filename, n_new*m_new, u_scaled, v_scaled, psi_scaled, 0)
+    plot_load(N_new)
     
 def plot_load(N):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)

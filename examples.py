@@ -40,9 +40,9 @@ def constant(domain, p0, pN, h0):
 # I. Sinusoidal Height
 # -----------------------------------------------------------------------------
 def corrugated(domain, p0, pN, h_mid, r, n):
-    # h_mid = .5 #median axis for sinsuoid
-    # r = 0.2 #radius 
-    k = n*np.pi * 4#period
+
+    k = n*np.pi #period
+
     height = hgt.CorrugatedHeight(domain, h_mid, r, k)
     pressure = prs.CorrugatedPressure(domain, height, p0, pN)
     return height, pressure

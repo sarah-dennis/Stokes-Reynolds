@@ -16,7 +16,7 @@ import graphics as graph
 #------------------------------------------------------------------------------
 # x boundary
 x0 = 0
-xN = 1
+xN = 2
 BC = "fixed" # Boundary Condition in x (alt. "periodic")
 
 # surface velocity 
@@ -38,14 +38,17 @@ p0 = 0
 
 pN = 0
 
+
 # Height params (see Examples for more)
 n = 1
 
+
 x_step = 0.5  #x0 < step < xN
 
-r = 1
+r = .4305
 
 h_min = .01
+
 h_max = h_min + 2*r
 
 Re = U * h_max / visc
@@ -66,8 +69,6 @@ height, al_pressure = ex.corrugated(domain, p0, pN, h_min + r, r, n)
 #------------------------------------------------------------------------------
 # Numerical Solutions
 #------------------------------------------------------------------------------
-
-
 
 # Square wave
 
@@ -90,6 +91,7 @@ def plot_ph(domain, pressure, height):
     ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
     graph.plot_2D_twin(pressure.ps, height.hs, domain.xs, ph_title, ph_labels)
 
+
 def plot_p(domain, pressure):
     p_title = "Pressure: \n %s"%(pressure.p_str)
     p_labels = ["$x$", "Pressure $p(x)$", ]
@@ -99,6 +101,7 @@ def plot_p(domain, pressure):
 # plot_ph(domain, fd_pressure, height)
 # plot_ph(domain, al_pressure, height)
 plot_p(domain, al_pressure)
+
 #------------------------------------------------------------------------------
 # Velocity
 #------------------------------------------------------------------------------
