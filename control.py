@@ -26,7 +26,7 @@ U = 1   #V_x(x,0) = U
 visc = 1   
 
 # Grid size
-N = 2000
+N = 1000
 
 domain = dm.Domain(x0, xN, U, N, N, BC)
 
@@ -40,19 +40,19 @@ pN = 0
 
 
 # Height params (see Examples for more)
-n = 1
+n = 2
 
 
 x_step = 0.5  #x0 < step < xN
 
-r = .4305
-
 h_min = .01
+
+r = 50*h_min
 
 h_max = h_min + 2*r
 
 Re = U * h_max / visc
-print("Re: %.2f"%Re)
+print("Re: %.5f"%Re)
 #------------------------------------------------------------------------------
 # Analytic Solutions
 #------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ height, al_pressure = ex.corrugated(domain, p0, pN, h_min + r, r, n)
 
 # height, pressure = ex.squareWave_schurGmresSolve(domain, p0, pN, n, r, h_avg)
 
-# height, pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n_steps, r, h_avg)
+# height, al_pressure = ex.squareWave_schurLUSolve(domain, p0, pN, n, r, h_min+r)
 
 # height, pressure = ex.randSteps_schurLUSolve(domain, p0, pN, h_min, h_max, n)
 
@@ -113,6 +113,7 @@ def plot_v(domain, pressure, height):
     v_ax_labels =  ['$x$', '$y$']
 
     graph.plot_stream_height(velocity.vx, velocity.vy, height.hs, domain.xs, domain.ys, v_title, v_ax_labels)
+    graph.plot_quiver_height(velocity.vx, velocity.vy, height.hs, domain.xs, domain.ys, v_title, v_ax_labels)
 
 # plot_v(domain, fd_pressure, height)
 plot_v(domain, al_pressure, height)

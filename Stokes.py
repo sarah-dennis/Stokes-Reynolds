@@ -506,15 +506,17 @@ def make_plots(tri, u, v, stream, iters):
     stream_2D = stream.copy().reshape((m,n))
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
-    plot_heat_contour(stream_2D, xs, ys, title, ax_labels, True)
+    plot_contour_heat(stream_2D, xs, ys, title, ax_labels)
       
 #  Velocity: (U, V)  streamplot
     u_2D = u.copy().reshape((m,n))
     v_2D = v.copy().reshape((m,n))
     
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$', ]
+    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
     title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
     plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$','$x$', '$y$']
+    plot_stream_heat(u_2D, v_2D,  xs, ys, stream_2D, title, ax_labels)
 
 #  Vorticity: w = vx - uy heat & contour
     uy_2D = np.gradient(u_2D, tri.h, axis=0)
@@ -523,11 +525,11 @@ def make_plots(tri, u, v, stream, iters):
     for j in range(m):
         for i in range(n):   
             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    ax_labels = ['$\omega(x,y)$', '$x$', '$y$']
+    ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
     title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters)
-    plot_heat_contour(w, xs, ys, title, ax_labels, False)
+    plot_contour_heat(w, xs, ys, title, ax_labels)
 
-def plot_heat_contour(zs, xs, ys, title, labels, veriLines):
+def plot_contour_heat(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
@@ -560,9 +562,9 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     X, Y = np.meshgrid(xs, ys)
     
     stream_density=[1,2] #len(ys) = 2 len(xs)
-    magV = np.sqrt(vx**2 + vy**2)
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
-    pp.colorbar(stream_plot.lines, label=ax_labels[0])
+    
+    
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, color='k', linewidth=0.5, broken_streamlines=False)
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
@@ -572,6 +574,33 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     ax.set_aspect('equal')
     ax.set_ylim(0)
     pp.show()
+    
+def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
+    
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    stream_density=[1,2] #len(ys) = 2 len(xs)
+    
+    norm_symLog = colors.SymLogNorm(linthresh=bicgstab_rtol, linscale=0.35)
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=psi, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False)
+    pp.colorbar(stream_plot.lines, label=ax_labels[0])
+    
+    # magV = np.sqrt(vx**2 + vy**2)
+    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False)
+    # pp.colorbar(stream_plot.lines, label=ax_labels[0])
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[1])
+    pp.ylabel(ax_labels[2])
+    ax = pp.gca()
+
+    ax.set_aspect('equal')
+    ax.set_ylim(0)
+    pp.show()
+
 
 
 #------------------------------------------------------------------------------

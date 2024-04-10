@@ -154,11 +154,51 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     ax.set_ylim(0,1.25*h_max)
     pp.legend(loc='upper left')
     pp.show()
     
+def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
+    
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    m = len(ys)
+    n = len(xs)
+    h_max = max(ys)
+    
+    quiver_density = 50
+    vx = mask(vx, ys, hs, m, n, quiver_density)
+    vy = mask(vy, ys, hs, m, n, quiver_density)
+    
+    pp.quiver(xs, ys, vx, vy, color='k', scale=8, scale_units='x')
+    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    ax = pp.gca()
+
+    # ax.set_aspect('equal')
+    ax.set_ylim(0,1.25*h_max)
+    pp.legend(loc='upper left')
+    pp.show()
+
+def mask(grid, ys, hs, m, n, density):
+    mask = grid.copy()
+    
+    for j in range(m):
+        for i in range(n):
+            if ys[j] > hs[i]:
+                mask[j,i] = None
+            elif i % density != 0 or j%density != 0:
+                    mask[j,i] = None
+    return mask
+        
+
 def plot_contour(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()

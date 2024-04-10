@@ -105,7 +105,7 @@ class SawtoothPressure(Pressure):
 class RayleighStepPressure(Pressure):
 
     def __init__(self, domain, height, p0, pN):
-        p_str = "Analytic Reynolds"
+        p_str = "Reynolds Analytic"
 
         ps = np.zeros(domain.Nx)
 
@@ -140,7 +140,7 @@ class SquareWavePressure_pySolve(Pressure):
 
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "Piecewise Analytic Reynolds (np.linalg)"
+        p_str = "Reynolds Piecewise Analytic (np.linalg)"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
@@ -171,7 +171,7 @@ class SquareWavePressure_schurGmresSolve(Pressure):
 # TODO: matvec overcalled, look in to preconditioners
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "Piecewise Analytic Reynolds (schur reduced -> gmres)"
+        p_str = "Reynolds Piecewise Analytic (schur & gmres)"
         rhs = sw.make_RHS(domain, height, p0, pN)
         
         t0 = time.time()
@@ -202,7 +202,7 @@ class SquareWavePressure_schurGmresSolve(Pressure):
 class SquareWavePressure_schurInvSolve(Pressure):
     def __init__(self, domain, height, p0, pN):
         n = height.n_steps
-        p_str = "Reynolds Piecewise Analytic (schur invervse)"
+        p_str = "Reynolds Piecewise Analytic (schur inv)"
 
        # Build S, evaluate M_inv(S) @ rhs = sol 
         t0 = time.time()
@@ -238,7 +238,7 @@ class SquareWavePressure_schurLUSolve(Pressure):
         
         L = height.step_width
         hs = height.h_steps
-        p_str = "Piecewise Analytic Reynolds (schur reduced -> LU)"
+        p_str = "Reynolds Piecewise Analytic (schur & LU)"
         
         t0 = time.time()
         
