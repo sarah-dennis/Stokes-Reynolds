@@ -114,7 +114,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
     
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
 
     
     pp.title(title, fontweight="bold")
@@ -146,7 +146,7 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     
     # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
     
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
     pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
     
     pp.title(title, fontweight="bold")
@@ -154,9 +154,9 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    # ax.set_aspect('equal')
-    ax.set_ylim(0,1.25*h_max)
-    pp.legend(loc='upper left')
+    ax.set_aspect('equal')
+    ax.set_ylim(0,1.01*h_max)
+    # pp.legend(loc='upper left')
     pp.show()
     
 def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):

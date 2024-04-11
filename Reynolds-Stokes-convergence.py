@@ -37,7 +37,7 @@ U = 1   #V_x(x,0) = U
 visc = 1   
 
 # Numerical grid size
-N = 120
+N = 240
 
 Nx = N+1
 Ny = (2*N)+1
@@ -66,13 +66,13 @@ reyn_pressure = reyns.SawtoothPressure(domain, height, p0, pN)
 reyn_vel = vel.Velocity(domain, height, reyn_pressure)
 
 reyn_u, reyn_v = np.flip(reyn_vel.vx), np.flip(reyn_vel.vy)
-
+hs = height.h_max - height.hs
 
 
 reyn_title = "Velocity: \n %s"%(reyn_pressure.p_str)
 ax_labels =  ['$x$', '$y$']
 
-graph.plot_stream(reyn_u, reyn_v, domain.xs, domain.ys, reyn_title, ax_labels)
+graph.plot_stream_height(reyn_u, reyn_v, hs, domain.xs, domain.ys, reyn_title, ax_labels)
 
 
 #------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ ax_labels_stream = ['$\psi$', '$x$', '$y$']
 graph.plot_heat_contour(stokes_stream, domain.xs, domain.ys, stokes_title_stream, ax_labels_stream)
 
 stokes_title_vel = "Velocity: \n Biharmonic Stokes $k=%d$"%past_iters
-graph.plot_stream(stokes_u, stokes_v, domain.xs, domain.ys, stokes_title_vel, ax_labels)
+graph.plot_stream_height(stokes_u, stokes_v, hs, domain.xs, domain.ys, stokes_title_vel, ax_labels)
 
 
 #------------------------------------------------------------------------------

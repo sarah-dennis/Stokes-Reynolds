@@ -564,7 +564,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     stream_density=[1,2] #len(ys) = 2 len(xs)
     
     
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, color='k', linewidth=0.5, broken_streamlines=False)
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, color='k', linewidth=0.5, broken_streamlines=False,  arrowsize=0)
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
@@ -584,8 +584,8 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
     
     stream_density=[1,2] #len(ys) = 2 len(xs)
     
-    norm_symLog = colors.SymLogNorm(linthresh=bicgstab_rtol, linscale=0.35)
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=psi, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35)
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=psi, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False, arrowsize=0)
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     
     # magV = np.sqrt(vx**2 + vy**2)

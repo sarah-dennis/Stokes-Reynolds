@@ -55,7 +55,7 @@ def corrugated(domain, p0, pN, h_mid, r, n):
 # II. a) Piecewise-linear -> piecewise solution (from double int. Reynolds )
 
 def sawtooth(domain, p0, pN, h_min, h_max, N): 
-    N = 6
+    N = 2
     
     #uniform dx
     xi = domain.x0 + np.arange(0, N+1) * (domain.xf - domain.x0)/N
@@ -65,8 +65,8 @@ def sawtooth(domain, p0, pN, h_min, h_max, N):
     
     #II. prescribed height
     # hi = np.array([h_min + .3*h_max, h_min + .8*h_max, h_min +.2*h_max, h_min +  .5*h_max, h_min + .1*h_max, h_min + h_max, h_min + .4*h_max])
-    hi = np.array([h_min + .3*h_max, h_min + .4*h_max, h_min +.2*h_max, h_min +  .35*h_max, h_min + .1*h_max, h_min + .4*h_max, h_min + .25*h_max])
-
+    # hi = np.array([h_min + .3*h_max, h_min + .4*h_max, h_min +.2*h_max, h_min +  .35*h_max, h_min + .1*h_max, h_min + .4*h_max, h_min + .25*h_max])
+    hi = np.array([h_min, h_max, h_min])
     height = hgt.SawtoothHeight(domain, xi, hi)
     
     st_pressure = prs.SawtoothPressure(domain, height, p0, pN)
