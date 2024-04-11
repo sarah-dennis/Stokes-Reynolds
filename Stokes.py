@@ -18,6 +18,10 @@ from scipy.sparse.linalg import bicgstab
 from scipy.signal import argrelextrema as relEx
 from scipy.ndimage import zoom
 
+# scipy.interpolate.interpn
+
+# atkins iteration acceleration 
+
 bicgstab_rtol = 1e-8
 
 plot_mod = 20
@@ -554,7 +558,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     ax.set_aspect('equal', 'box')
     pp.show()
 
-
+#TODO arrow marker size 
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     pp.rcParams['figure.dpi'] = 500
@@ -668,6 +672,7 @@ def get_center(tri, psi):
         center[j] = [x, y, psi[k]]
         
     return center
+
 def print_criticals(N):
     tri = biswasEx(N)
     u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)

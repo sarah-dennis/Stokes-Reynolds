@@ -125,7 +125,6 @@ def L2Max(us, vs, Nx, Ny):
             u = abs(us[j,i])
             v = abs(vs[j,i])
             n = (u**2 + v**2)**(1/2)
-            print(n)
             max_n = max(n, max_n)
     return max_n
 
@@ -202,8 +201,6 @@ linf_max = LinfMax(stokes_u, stokes_v, Nx, Ny)
 l1_max = L1Max(stokes_u, stokes_v, Nx, Ny)
 l2_max = L2Max(stokes_u, stokes_v, Nx, Ny)
 
-print(l2_max)
-##scale by stokes_u in the same norm -- percent
 
 l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l1_max
 l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l2_max
