@@ -17,7 +17,6 @@ import velocity as vel
 
 import biharmonicStokes as stokes
 
-
 #------------------------------------------------------------------------------
 # Domain 
 #------------------------------------------------------------------------------
@@ -98,18 +97,38 @@ graph.plot_stream_height(stokes_u, stokes_v, hs, domain.xs, domain.ys, stokes_ti
 #------------------------------------------------------------------------------
 # Error calculations
 #------------------------------------------------------------------------------
-
-def getMax(us, vs, Nx, Ny):
-    max_uv = 0
+def L1Max(us, vs, Nx, Ny):
+    max_n = 0
     for j in range(Ny):
         for i in range(Nx):
-            u = us[j,i]
-            v = vs[j,i]
-            if u > v and u > max_uv:
-                max_uv = u
-            elif v > max_uv:
-                max_uv = v
-    return max_uv
+            u = abs(us[j,i])
+            v = abs(vs[j,i])
+            n = u + v
+            max_n = max(n, max_n)
+    return max_n
+
+def LinfMax(us, vs, Nx, Ny):
+    max_n = 0
+    for j in range(Ny):
+        for i in range(Nx):
+            u = abs(us[j,i])
+            v = abs(vs[j,i])
+            n = max(u,v)
+            max_n = max(n, max_n)
+    return max_n
+
+
+def L2Max(us, vs, Nx, Ny):
+    max_n = 0
+    for j in range(Ny):
+        for i in range(Nx):
+            u = abs(us[j,i])
+            v = abs(vs[j,i])
+            n = (u**2 + v**2)**(1/2)
+            print(n)
+            max_n = max(n, max_n)
+    return max_n
+
 
 def L1Error(us_reyn, vs_reyn, us_stokes, vs_stokes, Nx, Ny):
     max_err = 0.0
@@ -179,14 +198,17 @@ def LinfError(us_reyn, vs_reyn, vs_stokes, us_stokes, Nx, Ny):
             
     return max_err
  
-max_uv = np.abs(getMax(stokes_u, stokes_v, Nx, Ny))
+linf_max = LinfMax(stokes_u, stokes_v, Nx, Ny)
+l1_max = L1Max(stokes_u, stokes_v, Nx, Ny)
+l2_max = L2Max(stokes_u, stokes_v, Nx, Ny)
 
+print(l2_max)
 ##scale by stokes_u in the same norm -- percent
 
-l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
-l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
-linf = LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/max_uv
+l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l1_max
+l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l2_max
+linf = LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/linf_max
 
-print('l1 error: %.4f'%l1)
-print('l2 error: %.4f'%l2)
-print('l* error: %.4f'%linf)
+print('l1 pct error: %.4f'%l1)
+print('l2 pct error: %.4f'%l2)
+print('l* pct error: %.4f'%linf)

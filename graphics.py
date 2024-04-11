@@ -9,6 +9,7 @@ Graphics helpers
 import numpy as np
 from matplotlib import pyplot as pp
 from matplotlib import colors
+from matplotlib import patches
 
 #------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
@@ -104,23 +105,26 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     m = len(ys)/len(xs)
     h_max = max(ys)
-    stream_density_broken=[1,4*m] 
     stream_density_unbroken=[1,.6*m] 
     
-    
+    # colour with l2 velocity 
     # magV = np.sqrt(vx**2 + vy**2)
-    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
+    # pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
     # pp.colorbar(stream_plot.lines, label="$||V||_2$")
-    
     # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
     
     pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
-
+    
+    #remove arrows
+    ax = pp.gca()
+    for art in ax.get_children():
+        if not isinstance(art, patches.FancyArrowPatch):
+            continue
+        art.remove()        
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
-    ax = pp.gca()
 
     ax.set_aspect('equal')
     ax.set_ylim(0,1.01*h_max)
@@ -136,26 +140,25 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     
     m = len(ys)/len(xs)
     h_max = max(ys)
-    stream_density_broken=[1,4*m] 
     stream_density_unbroken=[1,.6*m] 
     
     
-    # magV = np.sqrt(vx**2 + vy**2)
-    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r', broken_streamlines=False)
-    # pp.colorbar(stream_plot.lines, label="$||V||_2$")
-    
-    # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
-    
     pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
+    
+    ax = pp.gca()
+    for art in ax.get_children():
+        if not isinstance(art, patches.FancyArrowPatch):
+            continue
+        art.remove()        
+    
     pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
-    ax = pp.gca()
 
     ax.set_aspect('equal')
-    ax.set_ylim(0,1.01*h_max)
+    ax.set_ylim(0,h_max)
     # pp.legend(loc='upper left')
     pp.show()
     
@@ -239,13 +242,13 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    norm_symLog = colors.SymLogNorm(linthresh=1e-7, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35)
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
     pp.colorbar(color_plot, label=labels[0])
     
     
-    n_contours = max(zs.shape)
+    n_contours = 12
     # pp.rcParams['contour.negative_linestyle'] = 'solid'
     pp.rcParams["lines.linewidth"] = .25
     pp.contour(X, Y, zs, n_contours, colors='white')
@@ -258,8 +261,6 @@ def plot_heat_contour(zs, xs, ys, title, labels):
     ax.set_aspect('equal', 'box')
     pp.show()
     
-    
-
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
