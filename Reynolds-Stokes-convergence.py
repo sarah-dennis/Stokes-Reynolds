@@ -143,11 +143,16 @@ def L1Error(us_reyn, vs_reyn, us_stokes, vs_stokes, Nx, Ny):
             
             v_s = vs_stokes[j,i]
             
-            err_ij = np.abs(u_r - u_s) + np.abs(v_r - v_s)
+            err_ij = abs(u_r - u_s) + abs(v_r - v_s)
             
-            if err_ij > max_err:
-                max_err = err_ij
+            # norm_ij = abs(u_s) + abs(v_s)
             
+            # if norm_ij == 0:
+            #     continue
+            # else:
+            #     normErr_ij = err_ij/norm_ij
+            #     max_err = max(normErr_ij, max_err)
+            max_err = max(err_ij, max_err)
     return max_err
 
 def L2Error(us_reyn, vs_reyn, vs_stokes, us_stokes, Nx, Ny):
@@ -164,10 +169,18 @@ def L2Error(us_reyn, vs_reyn, vs_stokes, us_stokes, Nx, Ny):
             
             v_s = vs_stokes[j,i]
             
-            err_ij = (np.abs(u_r - u_s)**2 + np.abs(v_r - v_s)**2)**(1/2)
+            err_ij = (abs(u_r - u_s)**2 + abs(v_r - v_s)**2)**(1/2)
             
-            if err_ij > max_err:
-                max_err = err_ij
+            # norm_ij = (u_s**2 + v_s**2)**(1/2)
+            
+            # normErr_ij = err_ij/norm_ij
+            
+            # if norm_ij == 0:
+            #     continue
+            # else:
+            #     normErr_ij = err_ij/norm_ij
+            #     max_err = max(normErr_ij, max_err)
+            max_err = max(err_ij, max_err)
     return max_err
 
 
@@ -184,28 +197,28 @@ def LinfError(us_reyn, vs_reyn, vs_stokes, us_stokes, Nx, Ny):
             
             v_s = vs_stokes[j,i]
            
-            err_u = np.abs(u_r - u_s)
-            err_v = np.abs(v_r - v_s)
+            err_ij = max(abs(u_r - u_s), abs(v_r - v_s))
             
-            if err_u > err_v:
-                err_ij = err_u
-            else:
-                err_ij = err_v
-           
-            if err_ij > max_err:
-                max_err = err_ij
+            # norm_ij = max(abs(u_s), abs(v_s))
             
+            # normErr_ij = err_ij/norm_ij
+            
+            # if norm_ij == 0:
+            #     continue
+            # else:
+            #     normErr_ij = err_ij/norm_ij
+            #     max_err = max(normErr_ij, max_err)
+            max_err = max(err_ij, max_err)
     return max_err
- 
-linf_max = LinfMax(stokes_u, stokes_v, Nx, Ny)
-l1_max = L1Max(stokes_u, stokes_v, Nx, Ny)
-l2_max = L2Max(stokes_u, stokes_v, Nx, Ny)
 
+l1max = L1Max(stokes_u, stokes_v, Nx, Ny)
+l2max = L2Max(stokes_u, stokes_v, Nx, Ny)
+linfmax = LinfMax(stokes_u, stokes_v, Nx, Ny)
 
-l1 = L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l1_max
-l2 = L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l2_max
-linf = LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/linf_max
+l1_pcterr = 100*L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l1max
+l2_pcterr = 100*L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l2max
+linf_pcterr = 100*LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/linfmax
 
-print('l1 pct error: %.4f'%l1)
-print('l2 pct error: %.4f'%l2)
-print('l* pct error: %.4f'%linf)
+print('l1 pct error: %.4f'%l1_pcterr)
+print('l2 pct error: %.4f'%l2_pcterr)
+print('l* pct error: %.4f'%linf_pcterr)

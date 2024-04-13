@@ -22,7 +22,8 @@ from scipy.ndimage import zoom
 
 # atkins iteration acceleration 
 
-bicgstab_rtol = 1e-8
+bicgstab_rtol = 1e-9
+
 
 plot_mod = 20
 write_mod = 5
