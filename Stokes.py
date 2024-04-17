@@ -16,7 +16,11 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
 
 from scipy.signal import argrelextrema as relEx
+
 from scipy.ndimage import zoom
+
+from scipy.interpolate import interpn
+
 
 # scipy.interpolate.interpn
 
@@ -45,6 +49,8 @@ class triangle():
         self.n = xL*N + 1
         self.m = yL*N + 1
         self.filename = filename
+        self.xs = np.linspace(x0, xL, self.n)
+        self.ys = np.linspace(y0, yL, self.m)
 
 class biswasEx(triangle):
     def __init__(self, N):
@@ -85,33 +91,41 @@ def run_load(N, iters):
     psi = psi_unmirror_boundary(tri, psi)
     write_solution(tri.filename, tri.n*tri.m, u, v, psi, iters+past_iters)
 
+
 def load_scale(N_load, N_new):
-    # tri = triangle(x0, xL, y0, yL, U, Re, N)
-    tri = biswasEx(N_load)
-    n_load, m_load = tri.n, tri.m
-    u_load, v_load, psi_load, past_iters = read_solution(tri.filename, n_load*m_load)
-
-    u_load_2D = u_load.reshape((m_load,n_load))
-    v_load_2D = v_load.reshape((m_load,n_load))
-    psi_load_2D = psi_load.reshape((m_load,n_load))
-
-
-    tri_new = biswasEx(N_new)
-    n_new, m_new = tri_new.n, tri_new.m
-    new_shape = (m_new/m_load, n_new/n_load)
+    # tri_load = triangle(x0, xL, y0, yL, U, Re, N)
+    tri_load = biswasEx(N_load) #slope 4 example
     
+    # points_load = np.meshgrid(tri_load.ys, tri_load.xs)
+    
+    u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename, tri_load.m*tri_load.n)
+    u_load_2D = u_load.reshape((tri_load.m,tri_load.n))
+    v_load_2D = v_load.reshape((tri_load.m,tri_load.n))
+    psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n))
 
-    # # spline_order = 4
+
+    tri_scale = biswasEx(N_new)
+    
+    # points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
+
+#TODO
+    # previously...
+    new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
     u_scaled_2D = zoom(u_load_2D, new_shape)
     v_scaled_2D = zoom(v_load_2D, new_shape)
     psi_scaled_2D = zoom(psi_load_2D, new_shape)
-    # print(u_scaled_2D.shape)
+    
+    # and now...
+    # u_scaled_2D = interpn(points_load, u_load_2D, points_scale, method='linear')
+    # v_scaled_2D = interpn(points_load, v_load_2D, points_scale, method='linear')
+    # psi_scaled_2D = interpn(points_load, psi_load_2D, points_scale, method='linear')
+
 
     u_scaled = u_scaled_2D.ravel()
     v_scaled = v_scaled_2D.ravel()
     psi_scaled = psi_scaled_2D.ravel()
 
-    write_solution(tri_new.filename, n_new*m_new, u_scaled, v_scaled, psi_scaled, 0)
+    write_solution(tri_scale.filename, tri_scale.m*tri_scale.n, u_scaled, v_scaled, psi_scaled, 0)
     plot_load(N_new)
     
 def plot_load(N):
@@ -289,7 +303,6 @@ def uv_approx(tri, u, v, psi):
 
     nc = n//2
     h = tri.h
-    # yL = tri.yL
     slope = tri.slope
     U = tri.U
     
@@ -299,15 +312,14 @@ def uv_approx(tri, u, v, psi):
     for k in range(n*m):
         i = k % n
         j = k // n
-        
 
-        # y=yL boundary
+        # y=yL moving boundary
         if j == m-1: 
             u[k] = U
             v[k] = 0 
             
-        # other side boundaries & dead zones
-        elif i == 0 or j == 0 or i == n-1:
+        # other boundaries & dead zones
+        elif j == 0 or i == 0 or i == n-1:
             u[k] = 0
             v[k] = 0 
         
@@ -505,8 +517,8 @@ def make_plots(tri, u, v, stream, iters):
     m = tri.m
 
 # Grid domain
-    xs = np.linspace(tri.x0, tri.xL, n)
-    ys = np.linspace(tri.y0, tri.yL, m)
+    xs = tri.xs
+    ys = tri.ys
 
 # Stream: Psi(x,y) heat & contour
     stream_2D = stream.copy().reshape((m,n))
@@ -559,7 +571,6 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     ax.set_aspect('equal', 'box')
     pp.show()
 
-#TODO arrow marker size 
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     pp.rcParams['figure.dpi'] = 500
