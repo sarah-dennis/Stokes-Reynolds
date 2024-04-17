@@ -107,7 +107,8 @@ def load_scale(N_load, N_new):
     tri_scale = biswasEx(N_new)
     
     # points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
-
+    ## points_scale is the wrong shape? accepts one point [y,x], but not the whole grid
+    
 #TODO
     # previously...
     new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
@@ -119,6 +120,7 @@ def load_scale(N_load, N_new):
     # u_scaled_2D = interpn(points_load, u_load_2D, points_scale, method='linear')
     # v_scaled_2D = interpn(points_load, v_load_2D, points_scale, method='linear')
     # psi_scaled_2D = interpn(points_load, psi_load_2D, points_scale, method='linear')
+
 
 
     u_scaled = u_scaled_2D.ravel()
@@ -691,36 +693,46 @@ def print_criticals(N):
     
     left, right = get_boundary(tri, psi)
     
-    print("Psi sign changes...")
-    sign_ref = 0
-    for (x, y, p) in left:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            print("(x:%.5f, y:%.6f)"%(x,y))
+    crits_filename = 'crits_' + tri.filename 
+    with open(crits_filename, 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=' ')
+    
+        # print("Psi sign changes...")
+        writer.writerow('x y')
+        sign_ref = 0
+        for (x, y, p) in left:
+            sign_new = np.sign(p)
+            if sign_new != 0 and sign_new != sign_ref:
+                sign_ref = sign_new
+                # print("(x:%.5f, y:%.6f)"%(x,y))
+                writer.writerow([x,y])
+                
+        writer.writerow('x y')
+        sign_ref = 0
+        for (x, y, p) in right:
+            sign_new = np.sign(p)
+            if sign_new != 0 and sign_new != sign_ref:
+                sign_ref = sign_new
+                # print("(x:%.5f, y:%.6f)"%(x,y))
+                writer.writerow([x,y])
+
+    
+        # print("Psi center-line extrema...")
+        writer.writerow('x y p')
+        center = get_center(tri, psi)
+        max_inds = relEx(center[:,2], np.greater)[0]
+        min_inds = relEx(center[:,2], np.less)[0]
         
-    sign_ref = 0
-    for (x, y, p) in right:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            
-            print("(x:%.5f, y:%.6f)"%(x,y))
     
-    print("Psi center-line extrema...")
-    center = get_center(tri, psi)
-    max_inds = relEx(center[:,2], np.greater)[0]
-    min_inds = relEx(center[:,2], np.less)[0]
-    
-
-    for i in max_inds:
-        x,y,p = center[i]
-        print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
-    
-
-    for i in min_inds:
-        x,y,p = center[i]
-        print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        for i in max_inds:
+            x,y,p = center[i]
+            # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+            writer.writerow([x,y,p])
+        
+        writer.writerow('x y p')
+        for i in min_inds:
+            x,y,p = center[i]
+            # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+            writer.writerow([x,y,p])
 
     make_plots(tri, u, v, psi, past_iters)
-# 
