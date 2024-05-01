@@ -40,14 +40,14 @@ pN = 0
 
 
 # Height params (see Examples for more)
-n = 2
+n = 5
 
 
 x_step = 0.5  #x0 < step < xN
 
 h_min = .01
 
-r = 1
+r = .05
 
 h_max = h_min + 2*r
 
@@ -62,9 +62,9 @@ print("Re: %.5f"%Re)
 
 # height, al_pressure = ex.step(domain, p0, pN, x_step, h_min, h_max)
 
-height, al_pressure= ex.sawtooth(domain, p0, pN, h_min, h_max, n)
+# height, al_pressure= ex.sawtooth(domain, p0, pN, h_min, h_max, n)
 
-# height, al_pressure = ex.sawtoothRand(domain, p0, pN, h_min, h_max, n)
+height, al_pressure = ex.sawtoothRand(domain, p0, pN, h_min, h_max, n)
 
 #------------------------------------------------------------------------------
 # Numerical Solutions

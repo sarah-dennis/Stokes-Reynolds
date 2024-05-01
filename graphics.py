@@ -113,7 +113,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     # pp.colorbar(stream_plot.lines, label="$||V||_2$")
     # pp.streamplot(xs, ys, vx, vy, stream_density_broken, linewidth=0.5, color='k', broken_streamlines=True)
     
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows
     ax = pp.gca()
@@ -143,7 +143,7 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     stream_density_unbroken=[1,.6*m] 
     
     
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False,  arrowsize=0)
+    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
     
     ax = pp.gca()
     for art in ax.get_children():
