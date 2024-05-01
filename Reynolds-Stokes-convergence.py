@@ -215,6 +215,12 @@ l1max = L1Max(stokes_u, stokes_v, Nx, Ny)
 l2max = L2Max(stokes_u, stokes_v, Nx, Ny)
 linfmax = LinfMax(stokes_u, stokes_v, Nx, Ny)
 
+
+Y = cdist(XA, XB, 'minkowski', p=2.)
+
+Y = cdist(XA, XB, 'seuclidean', V=None)
+
+
 l1_pcterr = 100*L1Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l1max
 l2_pcterr = 100*L2Error(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/l2max
 linf_pcterr = 100*LinfError(reyn_u, reyn_v, stokes_u, stokes_v, Nx, Ny)/linfmax

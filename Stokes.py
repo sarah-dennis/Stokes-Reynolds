@@ -17,20 +17,21 @@ from scipy.sparse.linalg import bicgstab
 
 from scipy.signal import argrelextrema as relEx
 
-from scipy.ndimage import zoom
+# from scipy.ndimage import zoom
 
 from scipy.interpolate import interpn
+# from scipy.interpolate import griddata
 
 
 # scipy.interpolate.interpn
 
 # atkins iteration acceleration 
 
-bicgstab_rtol = 1e-9
+bicgstab_rtol = 1e-6
 
 
-plot_mod = 20
-write_mod = 5
+plot_mod = 100
+write_mod = 10
 error_mod = 10
 
 class triangle():
@@ -60,7 +61,7 @@ class biswasEx(triangle):
         yL = 2
         U = 1
         Re = 1
-        filename = "biharmonicStokes_N%d.csv"%N
+        filename = "stokes_N%d.csv"%(N)
         super().__init__(x0, xL, y0, yL, U, Re, N, filename)
         
 #------------------------------------------------------------------------------
@@ -79,7 +80,7 @@ def run_new(N, iters):
     
     psi = psi_unmirror_boundary(tri, psi)
     write_solution(tri.filename, nm, u, v, psi, iters)
-#
+                                                                                                                                                                                                                                                                             
 def run_load(N, iters):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
     tri = biswasEx(N)
@@ -96,31 +97,29 @@ def load_scale(N_load, N_new):
     # tri_load = triangle(x0, xL, y0, yL, U, Re, N)
     tri_load = biswasEx(N_load) #slope 4 example
     
-    # points_load = np.meshgrid(tri_load.ys, tri_load.xs)
+    points_load = (tri_load.ys, tri_load.xs)
     
     u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename, tri_load.m*tri_load.n)
-    u_load_2D = u_load.reshape((tri_load.m,tri_load.n))
-    v_load_2D = v_load.reshape((tri_load.m,tri_load.n))
-    psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n))
+    u_load_2D = u_load.reshape((tri_load.m,tri_load.n), order='F')
+    v_load_2D = v_load.reshape((tri_load.m,tri_load.n), order='F')
+    psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n), order='F')
 
 
     tri_scale = biswasEx(N_new)
     
-    # points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
-    ## points_scale is the wrong shape? accepts one point [y,x], but not the whole grid
-    
+    points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
+
 #TODO
     # previously...
-    new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
-    u_scaled_2D = zoom(u_load_2D, new_shape)
-    v_scaled_2D = zoom(v_load_2D, new_shape)
-    psi_scaled_2D = zoom(psi_load_2D, new_shape)
+    # new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
+    # u_scaled_2D = zoom(u_load_2D, new_shape)
+    # v_scaled_2D = zoom(v_load_2D, new_shape)
+    # psi_scaled_2D = zoom(psi_load_2D, new_shape)
     
     # and now...
-    # u_scaled_2D = interpn(points_load, u_load_2D, points_scale, method='linear')
-    # v_scaled_2D = interpn(points_load, v_load_2D, points_scale, method='linear')
-    # psi_scaled_2D = interpn(points_load, psi_load_2D, points_scale, method='linear')
-
+    u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale))
+    v_scaled_2D = interpn(points_load, v_load_2D, tuple(points_scale))
+    psi_scaled_2D = interpn(points_load, psi_load_2D, tuple(points_scale))
 
 
     u_scaled = u_scaled_2D.ravel()
@@ -182,7 +181,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
         psi = psi_mirror_boundary(tri, psi)
         
         tf = time.time()
-        
+        print("  time: %.3f s"%(tf-t0))
         if i % error_mod == 0: 
             past_psi = psi_unmirror_boundary(tri, past_psi)
             psi = psi_unmirror_boundary(tri, psi)
@@ -190,7 +189,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
             err_i = np.max(np.abs(psi - past_psi))
             
             print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
-            print("  time: %.3f s"%(tf-t0))
+            
             print("  error: %.5e psi"%err_i)
             
         if i % plot_mod == 0:
@@ -558,7 +557,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    norm_symLog = colors.SymLogNorm(linthresh=bicgstab_rtol, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-7, linscale=0.35)
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
     pp.colorbar(color_plot, label=labels[0])
