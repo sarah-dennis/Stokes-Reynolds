@@ -17,20 +17,20 @@ from scipy.sparse.linalg import bicgstab
 
 from scipy.signal import argrelextrema as relEx
 
-from scipy.ndimage import zoom
-
+# from scipy.ndimage import zoom
 from scipy.interpolate import interpn
 
+from scipy.linalg import lu
 
 
-bicgstab_rtol = 1e-9
-##TODO: 1. change this tolerance ,  2. other iterative methods, 3. incomplete LU preconditioning,
+
+bicgstab_rtol = 1e-7
+##TODO: 1. change this tolerance,  2. other iterative methods, 3. incomplete LU preconditioning,
 # atkins iteration acceleration 
 
-
-plot_mod = 20
+plot_mod = 5
 write_mod = 5
-error_mod = 10
+error_mod = 5
 
 class triangle():
     def __init__(self, x0, xL, y0, yL, U, Re, N, filename):
@@ -107,7 +107,6 @@ def load_scale(N_load, N_new):
     
     points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs) #transpose
     
-#TODO
     # previously...
     # new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
     # u_scaled_2D = zoom(u_load_2D, new_shape)
@@ -165,8 +164,14 @@ def write_solution(filename, nm, u, v, psi, iters):
 
 #------------------------------------------------------------------------------
 def run(tri, u, v, past_psi, iters, past_iters):
+    ##TODO: speed-up ?
+    
     # precondition M since it never changes
+    # bicgstab accepts a pseudo inverse for M as preconditioning
     M = Dpsi_linOp(tri)
+    
+    mat = Dpsi_matrixBuild(tri.m, tri.n)
+    p, L, U = lu(mat)
     
     for i in range(iters): 
         
@@ -175,7 +180,6 @@ def run(tri, u, v, past_psi, iters, past_iters):
         
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         
-        ##TODO: can do with LU instead?
         
         u, v = uv_approx(tri, u, v, psi)
         
@@ -193,6 +197,9 @@ def run(tri, u, v, past_psi, iters, past_iters):
             print("  time: %.3f s"%(tf-t0))
             print("  error: %.5e psi"%err_i)
             
+            if err_i < bicgstab_rtol:
+                print('warning: lower bicgstab_rtol')
+            
         if i % plot_mod == 0:
             psi = psi_unmirror_boundary(tri, psi)
             make_plots(tri, u, v, psi, i+1 + past_iters)
@@ -205,6 +212,48 @@ def run(tri, u, v, past_psi, iters, past_iters):
         past_psi = psi
 
     return u, v, psi
+
+# def run_LU(tri, u, v, past_psi, iters, past_iters):
+    
+#     mat = Dpsi_matrixBuild(tri.m, tri.n)
+#     p, L, U = lu(mat)
+    
+#     for i in range(iters): 
+        
+#         t0 = time.time()
+#         rhs = update_rhs(tri, u, v)
+        
+#         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
+        
+        
+#         u, v = uv_approx(tri, u, v, psi)
+        
+#         psi = psi_mirror_boundary(tri, psi)
+        
+#         tf = time.time()
+        
+#         if i % error_mod == 0: 
+#             past_psi = psi_unmirror_boundary(tri, past_psi)
+#             psi = psi_unmirror_boundary(tri, psi)
+            
+#             err_i = np.max(np.abs(psi - past_psi))
+            
+#             print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
+#             print("  time: %.3f s"%(tf-t0))
+#             print("  error: %.5e psi"%err_i)
+            
+#         if i % plot_mod == 0:
+#             psi = psi_unmirror_boundary(tri, psi)
+#             make_plots(tri, u, v, psi, i+1 + past_iters)
+        
+#         if i % write_mod == 0:
+#             psi = psi_unmirror_boundary(tri, psi)
+#             write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
+
+
+#         past_psi = psi
+
+#     return u, v, psi
 
 # -----------------------------------------------------------------------------
 # rhs = c0*A - c1*(B - C)
@@ -463,6 +512,42 @@ class Dpsi_linOp(LinearOperator):
                 self.mv[k] = 28*psi_C - 8*(psi_N + psi_S + psi_E + psi_W) + psi_NE + psi_SE + psi_NW + psi_SW
 
         return self.mv
+
+def Dpsi_matrixBuild(m, n):
+    
+    mat = np.zeros((m*n, m*n))
+    
+    #fill mat row by row
+    for k in range(m*n):
+        
+    
+        i = k % n
+        j = k // n
+        
+        # k = j*n + i
+        
+        mat[k][j*n + i] = 28
+        if i != 0:
+            mat[k][j*n + i - 1] = -8
+        if i != n-1:
+            mat[k][j*n + i + 1] = -8
+            
+        if j != 0:
+            mat[k][(j-1)*n + i] = -8
+            if i != 0:
+                mat[k][(j-1)*n + i-1]   = 1
+            if i != n-1:
+                mat[k][(j-1)*n + i+1]   = 1
+                
+        if j != m-1:
+            mat[k][(j+1)*n + i]     = -8
+            if i != 0:
+                mat[k][(j+1)*n + i-1]   = 1
+            if i != n-1:
+                mat[k][(j+1)*n + i+1]   = 1
+    
+    return mat
+
 
 # -----------------------------------------------------------------------------
 # boundary mirroring
