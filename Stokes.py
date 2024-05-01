@@ -22,11 +22,10 @@ from scipy.ndimage import zoom
 from scipy.interpolate import interpn
 
 
-# scipy.interpolate.interpn
-
-# atkins iteration acceleration 
 
 bicgstab_rtol = 1e-9
+##TODO: 1. change this tolerance ,  2. other iterative methods, 3. incomplete LU preconditioning,
+# atkins iteration acceleration 
 
 
 plot_mod = 20
@@ -96,31 +95,30 @@ def load_scale(N_load, N_new):
     # tri_load = triangle(x0, xL, y0, yL, U, Re, N)
     tri_load = biswasEx(N_load) #slope 4 example
     
-    # points_load = np.meshgrid(tri_load.ys, tri_load.xs)
+    points_load = (tri_load.ys, tri_load.xs)
     
     u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename, tri_load.m*tri_load.n)
-    u_load_2D = u_load.reshape((tri_load.m,tri_load.n))
-    v_load_2D = v_load.reshape((tri_load.m,tri_load.n))
-    psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n))
+    u_load_2D = u_load.reshape((tri_load.m,tri_load.n), order='F')
+    v_load_2D = v_load.reshape((tri_load.m,tri_load.n), order='F')
+    psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n), order='F')
 
 
     tri_scale = biswasEx(N_new)
     
-    # points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
-    ## points_scale is the wrong shape? accepts one point [y,x], but not the whole grid
+    points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs) #transpose
     
 #TODO
     # previously...
-    new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
-    u_scaled_2D = zoom(u_load_2D, new_shape)
-    v_scaled_2D = zoom(v_load_2D, new_shape)
-    psi_scaled_2D = zoom(psi_load_2D, new_shape)
+    # new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
+    # u_scaled_2D = zoom(u_load_2D, new_shape)
+    # v_scaled_2D = zoom(v_load_2D, new_shape)
+    # psi_scaled_2D = zoom(psi_load_2D, new_shape)
     
     # and now...
-    # u_scaled_2D = interpn(points_load, u_load_2D, points_scale, method='linear')
-    # v_scaled_2D = interpn(points_load, v_load_2D, points_scale, method='linear')
-    # psi_scaled_2D = interpn(points_load, psi_load_2D, points_scale, method='linear')
-
+    points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
+    u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale), method='linear')
+    v_scaled_2D = interpn(points_load, v_load_2D, tuple(points_scale), method='linear')
+    psi_scaled_2D = interpn(points_load, psi_load_2D, tuple(points_scale), method='linear')
 
 
     u_scaled = u_scaled_2D.ravel()
@@ -176,6 +174,8 @@ def run(tri, u, v, past_psi, iters, past_iters):
         rhs = update_rhs(tri, u, v)
         
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
+        
+        ##TODO: can do with LU instead?
         
         u, v = uv_approx(tri, u, v, psi)
         
@@ -691,7 +691,7 @@ def get_center(tri, psi):
         
     return center
 
-def print_criticals(N):
+def write_criticals(N):
     tri = biswasEx(N)
     u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
     
@@ -702,7 +702,7 @@ def print_criticals(N):
         writer = csv.writer(file, delimiter=' ')
     
         # print("Psi sign changes...")
-        writer.writerow('x y')
+        writer.writerow('xy')
         sign_ref = 0
         for (x, y, p) in left:
             sign_new = np.sign(p)
@@ -711,7 +711,7 @@ def print_criticals(N):
                 # print("(x:%.5f, y:%.6f)"%(x,y))
                 writer.writerow([x,y])
                 
-        writer.writerow('x y')
+        writer.writerow('xy')
         sign_ref = 0
         for (x, y, p) in right:
             sign_new = np.sign(p)
@@ -722,7 +722,7 @@ def print_criticals(N):
 
     
         # print("Psi center-line extrema...")
-        writer.writerow('x y p')
+        writer.writerow('xyp')
         center = get_center(tri, psi)
         max_inds = relEx(center[:,2], np.greater)[0]
         min_inds = relEx(center[:,2], np.less)[0]
@@ -733,10 +733,27 @@ def print_criticals(N):
             # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
             writer.writerow([x,y,p])
         
-        writer.writerow('x y p')
+        writer.writerow('xyp')
         for i in min_inds:
             x,y,p = center[i]
             # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
             writer.writerow([x,y,p])
 
     make_plots(tri, u, v, psi, past_iters)
+
+# def read_criticals(N, k_hs, k_extr):
+#     tri = biswasEx(N)
+#     crits_filename = 'crits_' + tri.filename 
+    
+    
+#     with open(crits_filename, newline='') as file:
+#         reader = csv.reader(file)
+#         for line in reader:
+#             if line[0] !== 'x':
+                
+            
+
+# def write_criticals_error(N_a, N_b): # compare N_a grid with N_b grid
+
+
+    

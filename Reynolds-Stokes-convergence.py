@@ -15,7 +15,7 @@ import heights as hgt
 import pressures as reyns
 import velocity as vel
 
-import biharmonicStokes as stokes
+import Stokes as stokes
 
 #------------------------------------------------------------------------------
 # Domain 
