@@ -8,12 +8,14 @@ Created on Mon Jan 22 14:59:46 2024
 import csv
 import time
 import numpy as np
+
 from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
 from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import bicgstab
+from scipy.linalg import lu_factor, lu_solve
 
 from scipy.signal import argrelextrema as relEx
 
@@ -22,7 +24,6 @@ from scipy.signal import argrelextrema as relEx
 from scipy.interpolate import interpn
 # from scipy.interpolate import griddata
 
-from scipy.linalg import lu
 
 
 
@@ -30,9 +31,9 @@ bicgstab_rtol = 1e-7
 
 bicgstab_rtol = 1e-6
 
-plot_mod = 5
-write_mod = 5
-error_mod = 5
+plot_mod = 20
+write_mod = 20
+error_mod = 20
 
 
 class triangle():
@@ -89,6 +90,7 @@ def run_load(N, iters):
     u, v, psi, past_iters = read_solution(tri.filename, tri.n*tri.m)
     
     u, v, psi = run(tri, u, v, psi, iters, past_iters)
+    # u, v, psi = run_LU(tri, u, v, psi, iters, past_iters)
     
     psi = psi_unmirror_boundary(tri, psi)
     write_solution(tri.filename, tri.n*tri.m, u, v, psi, iters+past_iters)
@@ -107,7 +109,7 @@ def load_scale(N_load, N_new):
 
 
     tri_scale = biswasEx(N_new)
-
+    
     # previously...
     # new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
     # u_scaled_2D = zoom(u_load_2D, new_shape)
@@ -171,10 +173,8 @@ def run(tri, u, v, past_psi, iters, past_iters):
     
     # precondition M since it never changes
     # bicgstab accepts a pseudo inverse for M as preconditioning
-    M = Dpsi_linOp(tri)
     
-    mat = Dpsi_matrixBuild(tri.m, tri.n)
-    p, L, U = lu(mat)
+    M = Dpsi_linOp(tri)
     
     for i in range(iters): 
         
@@ -189,7 +189,6 @@ def run(tri, u, v, past_psi, iters, past_iters):
         psi = psi_mirror_boundary(tri, psi)
         
         tf = time.time()
-        print("  time: %.3f s"%(tf-t0))
         if i % error_mod == 0: 
             past_psi = psi_unmirror_boundary(tri, past_psi)
             psi = psi_unmirror_boundary(tri, psi)
@@ -216,47 +215,47 @@ def run(tri, u, v, past_psi, iters, past_iters):
 
     return u, v, psi
 
-# def run_LU(tri, u, v, past_psi, iters, past_iters):
+def run_LU(tri, u, v, past_psi, iters, past_iters):
     
-#     mat = Dpsi_matrixBuild(tri.m, tri.n)
-#     p, L, U = lu(mat)
+    M = Dpsi_matrixBuild(tri)
+    LU, piv = lu_factor(M)
     
-#     for i in range(iters): 
+    for i in range(iters): 
         
-#         t0 = time.time()
-#         rhs = update_rhs(tri, u, v)
+        t0 = time.time()
+        rhs = update_rhs(tri, u, v)
         
-#         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
+        # psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
+        psi = lu_solve((LU, piv), rhs)
         
+        u, v = uv_approx(tri, u, v, psi)
         
-#         u, v = uv_approx(tri, u, v, psi)
+        psi = psi_mirror_boundary(tri, psi)
         
-#         psi = psi_mirror_boundary(tri, psi)
+        tf = time.time()
         
-#         tf = time.time()
-        
-#         if i % error_mod == 0: 
-#             past_psi = psi_unmirror_boundary(tri, past_psi)
-#             psi = psi_unmirror_boundary(tri, psi)
+        if i % error_mod == 0: 
+            past_psi = psi_unmirror_boundary(tri, past_psi)
+            psi = psi_unmirror_boundary(tri, psi)
             
-#             err_i = np.max(np.abs(psi - past_psi))
+            err_i = np.max(np.abs(psi - past_psi))
             
-#             print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
-#             print("  time: %.3f s"%(tf-t0))
-#             print("  error: %.5e psi"%err_i)
+            print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
+            print("  time: %.3f s"%(tf-t0))
+            print("  error: %.5e psi"%err_i)
             
-#         if i % plot_mod == 0:
-#             psi = psi_unmirror_boundary(tri, psi)
-#             make_plots(tri, u, v, psi, i+1 + past_iters)
+        if i % plot_mod == 0:
+            psi = psi_unmirror_boundary(tri, psi)
+            make_plots(tri, u, v, psi, i+1 + past_iters)
         
-#         if i % write_mod == 0:
-#             psi = psi_unmirror_boundary(tri, psi)
-#             write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
+        if i % write_mod == 0:
+            psi = psi_unmirror_boundary(tri, psi)
+            write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
 
 
-#         past_psi = psi
+        past_psi = psi
 
-#     return u, v, psi
+    return u, v, psi
 
 # -----------------------------------------------------------------------------
 # rhs = c0*A - c1*(B - C)
@@ -516,10 +515,12 @@ class Dpsi_linOp(LinearOperator):
 
         return self.mv
 
-def Dpsi_matrixBuild(m, n):
-    
+def Dpsi_matrixBuild(tri):
+    m = tri.m
+    n = tri.n
     mat = np.zeros((m*n, m*n))
-    
+    slope = tri.slope
+    nc = n//2
     #fill mat row by row
     for k in range(m*n):
         
@@ -529,25 +530,25 @@ def Dpsi_matrixBuild(m, n):
         
         # k = j*n + i
         
-        mat[k][j*n + i] = 28
-        if i != 0:
-            mat[k][j*n + i - 1] = -8
-        if i != n-1:
-            mat[k][j*n + i + 1] = -8
+        if i == 0 or j == 0 or i == n-1 or j == m-1:
+            mat[k][k] = 1
+        
+        elif  (i < nc and j < (m-1) - slope*i) or (i > nc and j < slope * (i - nc)):
+            mat[k][k] = 1
+
+        else: 
             
-        if j != 0:
+            mat[k][k] = 28
+            
+            mat[k][j*n + i - 1] = -8
+            mat[k][j*n + i + 1] = -8
             mat[k][(j-1)*n + i] = -8
-            if i != 0:
-                mat[k][(j-1)*n + i-1]   = 1
-            if i != n-1:
-                mat[k][(j-1)*n + i+1]   = 1
-                
-        if j != m-1:
-            mat[k][(j+1)*n + i]     = -8
-            if i != 0:
-                mat[k][(j+1)*n + i-1]   = 1
-            if i != n-1:
-                mat[k][(j+1)*n + i+1]   = 1
+            mat[k][(j+1)*n + i] = -8
+            
+            mat[k][(j-1)*n + i-1] = 1
+            mat[k][(j-1)*n + i+1] = 1
+            mat[k][(j+1)*n + i-1] = 1
+            mat[k][(j+1)*n + i+1] = 1
     
     return mat
 
@@ -646,7 +647,9 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    norm_symLog = colors.SymLogNorm(linthresh=1e-7, linscale=0.35)
+
+    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35)
+
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
     pp.colorbar(color_plot, label=labels[0])
