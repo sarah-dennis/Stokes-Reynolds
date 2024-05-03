@@ -183,7 +183,6 @@ def run(tri, u, v, past_psi, iters, past_iters):
         
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         
-        
         u, v = uv_approx(tri, u, v, psi)
         
         psi = psi_mirror_boundary(tri, psi)
