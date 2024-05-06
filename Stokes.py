@@ -14,8 +14,10 @@ from matplotlib import colors
 from matplotlib import patches
 
 from scipy.sparse.linalg import LinearOperator
+from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import bicgstab
 from scipy.linalg import lu_factor, lu_solve
+from scipy.sparse.linalg import splu
 
 from scipy.signal import argrelextrema as relEx
 
@@ -37,7 +39,7 @@ error_mod = 20
 
 
 class triangle():
-    def __init__(self, x0, xL, y0, yL, U, Re, N, filename):
+    def __init__(self, x0, xL, y0, yL, U, Re, N, filestr):
         # N even --> (xL-x0)/2 is triangle vertex
         # slope dividing 2N  --> maximal true boundary points
         self.x0 = x0
@@ -51,7 +53,7 @@ class triangle():
         self.h = 1/N
         self.n = xL*N + 1
         self.m = yL*N + 1
-        self.filename = filename
+        self.filename = filestr
         self.xs = np.linspace(x0, xL, self.n)
         self.ys = np.linspace(y0, yL, self.m)
 
@@ -63,8 +65,8 @@ class biswasEx(triangle):
         yL = 2
         U = 1
         Re = 1
-        filename = "stokes_N%d.csv"%(N)
-        super().__init__(x0, xL, y0, yL, U, Re, N, filename)
+        filestr = "stokes_N%d.csv"%(N)
+        super().__init__(x0, xL, y0, yL, U, Re, N, filestr)
         
 #------------------------------------------------------------------------------
 def run_new(N, iters):
@@ -78,10 +80,12 @@ def run_new(N, iters):
     psi_init = np.zeros(nm)
     past_iters = 0
 
-    u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
+    # u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
+    # u, v, psi = run_LU(tri, u_init, v_init, psi_init, iters, past_iters)
+    u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters)
     
     psi = psi_unmirror_boundary(tri, psi)
-    write_solution(tri.filename, nm, u, v, psi, iters)
+    write_solution(tri.filename+"_LU", nm, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def run_load(N, iters):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
@@ -89,11 +93,12 @@ def run_load(N, iters):
 
     u, v, psi, past_iters = read_solution(tri.filename, tri.n*tri.m)
     
-    u, v, psi = run(tri, u, v, psi, iters, past_iters)
+    # u, v, psi = run(tri, u, v, psi, iters, past_iters)
     # u, v, psi = run_LU(tri, u, v, psi, iters, past_iters)
+    u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters)
     
     psi = psi_unmirror_boundary(tri, psi)
-    write_solution(tri.filename, tri.n*tri.m, u, v, psi, iters+past_iters)
+    write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, iters+past_iters)
 
 
 def load_scale(N_load, N_new):
@@ -196,7 +201,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
             err_i = np.max(np.abs(psi - past_psi))
             
             print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
-            
+            print("  time: %.3f s"%(tf-t0))
             print("  error: %.5e psi"%err_i)
             
             if err_i < bicgstab_rtol:
@@ -219,13 +224,11 @@ def run_LU(tri, u, v, past_psi, iters, past_iters):
     
     M = Dpsi_matrixBuild(tri)
     LU, piv = lu_factor(M)
-    
     for i in range(iters): 
         
         t0 = time.time()
         rhs = update_rhs(tri, u, v)
-        
-        # psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
+
         psi = lu_solve((LU, piv), rhs)
         
         u, v = uv_approx(tri, u, v, psi)
@@ -250,12 +253,55 @@ def run_LU(tri, u, v, past_psi, iters, past_iters):
         
         if i % write_mod == 0:
             psi = psi_unmirror_boundary(tri, psi)
-            write_solution(tri.filename, tri.n*tri.m, u, v, psi, i+1+past_iters)
+            write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, i+1+past_iters)
 
 
         past_psi = psi
 
     return u, v, psi
+
+def run_spLU(tri, u, v, past_psi, iters, past_iters):
+    
+    M = Dpsi_cscmatrixBuild(tri)
+    LU = splu(M)
+    
+    for i in range(iters): 
+        
+        t0 = time.time()
+        rhs = update_rhs(tri, u, v)
+
+        psi = LU.solve(rhs)
+        
+        u, v = uv_approx(tri, u, v, psi)
+        
+        psi = psi_mirror_boundary(tri, psi)
+        
+        tf = time.time()
+        
+        if i % error_mod == 0: 
+            past_psi = psi_unmirror_boundary(tri, past_psi)
+            psi = psi_unmirror_boundary(tri, psi)
+            
+            err_i = np.max(np.abs(psi - past_psi))
+            
+            print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
+            print("  time: %.3f s"%(tf-t0))
+            print("  error: %.5e psi"%err_i)
+            
+        if i % plot_mod == 0:
+            psi = psi_unmirror_boundary(tri, psi)
+            make_plots(tri, u, v, psi, i+1 + past_iters)
+        
+        if i % write_mod == 0:
+            psi = psi_unmirror_boundary(tri, psi)
+            write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, i+1+past_iters)
+
+
+        past_psi = psi
+
+    return u, v, psi
+
+
 
 # -----------------------------------------------------------------------------
 # rhs = c0*A - c1*(B - C)
@@ -552,6 +598,43 @@ def Dpsi_matrixBuild(tri):
     
     return mat
 
+def Dpsi_cscmatrixBuild(tri):
+    m = tri.m
+    n = tri.n
+    mat = csc_matrix((m*n, m*n))
+    slope = tri.slope
+    nc = n//2
+    #fill mat row by row
+    for k in range(m*n):
+        
+    
+        i = k % n
+        j = k // n
+        
+        # k = j*n + i
+        
+        if i == 0 or j == 0 or i == n-1 or j == m-1:
+            mat[k][k] = 1
+        
+        elif  (i < nc and j < (m-1) - slope*i) or (i > nc and j < slope * (i - nc)):
+            mat[k][k] = 1
+
+        else: 
+            
+            mat[k][k] = 28
+            
+            mat[k][j*n + i - 1] = -8
+            mat[k][j*n + i + 1] = -8
+            mat[k][(j-1)*n + i] = -8
+            mat[k][(j+1)*n + i] = -8
+            
+            mat[k][(j-1)*n + i-1] = 1
+            mat[k][(j-1)*n + i+1] = 1
+            mat[k][(j+1)*n + i-1] = 1
+            mat[k][(j+1)*n + i+1] = 1
+    
+    return mat
+
 
 # -----------------------------------------------------------------------------
 # boundary mirroring
@@ -604,9 +687,9 @@ def psi_unmirror_boundary(tri, psi):
 
 
 
-#-----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PLOTTING 
-#-----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 def make_plots(tri, u, v, stream, iters):
     n = tri.n
     m = tri.m
