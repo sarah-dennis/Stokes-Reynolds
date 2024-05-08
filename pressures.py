@@ -6,11 +6,8 @@ Created on Wed Jan 25 18:24:34 2023
 @author: sarahdennis
 """
 
-import graphics as graph
 import numpy as np
 import time
-
-import domain as dfd
 
 import pressure_sqrWave as sw
 import pressure_sawtooth as st
@@ -18,49 +15,44 @@ import pressure_finDiff as fd
 
 from scipy.sparse.linalg import gmres
 
+
 class Pressure:
-    
-    def __init__(self, domain, ps, p0, pN, p_str, time=0):
-        self.ps = ps
-        
-        self.pxs = dfd.center_diff(self.ps, domain)
-        
-        self.pxxs = dfd.center_second_diff(self.ps, domain)
-        self.p_str = p_str
+    def __init__(self, height, p0, pN, p_solver, p_str):
+        self.height = height
         self.p0 = p0
         self.pN = pN
-        self.time = time
-            
-    def plot(self, domain):
-        p_title = "Pressure (%s)"%self.p_str
-        p_axis = ["Pressure $p(x)$", "$x$"]
-        graph.plot_2D(self.ps, domain.xs, p_title, p_axis )
+        self.solve = p_solver #pressure.solve(height, p0, pN)
+        self.p_str = p_str
+    
 
 class FinDiffPressure(Pressure):
-    def __init__(self, domain, height, p0, pN):
-        p_str = "Finite Difference Reynolds ($N_x = %d$)"%domain.Nx
-        ps = fd.solve(domain, height, p0, pN)
-        super().__init__(domain, ps, p0, pN,  p_str)
+    def __init__(self, height, p0, pN):
+        p_str = "Finite Difference Reynolds ($N_x = %d$)"%height.Nx
+        solver = fd.solve
+        super().__init__(height, p0, pN, solver, p_str)
         
 class LinearPressure(Pressure):
-    #constant height 
-    def __init__(self, domain, height, p0, pN):
+    def __init__(self, height, p0, pN):
         p_str = "Analytic Reynolds"
+        p_solver = LinearPressure.solve
+        
+        super().__init__(height, p0, pN, p_solver, p_str)
+    
+    def solve(height, p0, pN):
         
         h = height.h0
         
-        etaU = 6*domain.U*domain.eta
+        etaU = 6*height.U*height.visc
         
-        cq = h**3 * (pN - p0)/(domain.xf - domain.x0) - etaU*h
+        cq = h**3 * (pN - p0)/(height.xf - height.x0) - etaU*h
         
-        ps = np.zeros(domain.Nx)
+        ps = np.zeros(height.Nx)
         
-        for i in range(domain.Nx):
-            dx = domain.xs[i] - domain.x0
+        for i in range(height.Nx):
+            dx = height.xs[i] - height.x0
             
             ps[i] = (cq * dx / h**3) + (etaU * dx / h**2) + p0
-        
-        super().__init__(domain, ps, p0, pN,  p_str)
+        return ps
         
 
 class CorrugatedPressure(Pressure): #sinusoidal
