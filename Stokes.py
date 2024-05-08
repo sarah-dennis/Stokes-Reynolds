@@ -21,17 +21,10 @@ from scipy.sparse.linalg import splu
 
 from scipy.signal import argrelextrema as relEx
 
-# from scipy.ndimage import zoom
-
 from scipy.interpolate import interpn
-# from scipy.interpolate import griddata
 
 
-
-
-bicgstab_rtol = 1e-7
-
-bicgstab_rtol = 1e-6
+bicgstab_rtol = 1e-8
 
 plot_mod = 20
 write_mod = 20
@@ -65,7 +58,7 @@ class biswasEx(triangle):
         yL = 2
         U = 1
         Re = 1
-        filestr = "stokes_N%d.csv"%(N)
+        filestr = "stokes_N%d"%(N)
         super().__init__(x0, xL, y0, yL, U, Re, N, filestr)
         
 #------------------------------------------------------------------------------
@@ -85,20 +78,20 @@ def run_new(N, iters):
     u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters)
     
     psi = psi_unmirror_boundary(tri, psi)
-    write_solution(tri.filename+"_LU", nm, u, v, psi, iters)
+    write_solution(tri.filename+"_spLU"+".csv", nm, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def run_load(N, iters):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
     tri = biswasEx(N)
 
-    u, v, psi, past_iters = read_solution(tri.filename, tri.n*tri.m)
+    u, v, psi, past_iters = read_solution(tri.filename+"_spLU"+".csv", tri.n*tri.m)
     
     # u, v, psi = run(tri, u, v, psi, iters, past_iters)
     # u, v, psi = run_LU(tri, u, v, psi, iters, past_iters)
     u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters)
     
     psi = psi_unmirror_boundary(tri, psi)
-    write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, iters+past_iters)
+    write_solution(tri.filename+"_spLU"+".csv", tri.n*tri.m, u, v, psi, iters+past_iters)
 
 
 def load_scale(N_load, N_new):
@@ -107,40 +100,32 @@ def load_scale(N_load, N_new):
     
     points_load = (tri_load.ys, tri_load.xs)
     
-    u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename, tri_load.m*tri_load.n)
+    u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename+"_spLU"+".csv", tri_load.m*tri_load.n)
     u_load_2D = u_load.reshape((tri_load.m,tri_load.n), order='F')
     v_load_2D = v_load.reshape((tri_load.m,tri_load.n), order='F')
     psi_load_2D = psi_load.reshape((tri_load.m,tri_load.n), order='F')
 
 
     tri_scale = biswasEx(N_new)
-    
-    # previously...
-    # new_shape = (tri_scale.m/tri_load.m, tri_scale.n/tri_load.n)
-    # u_scaled_2D = zoom(u_load_2D, new_shape)
-    # v_scaled_2D = zoom(v_load_2D, new_shape)
-    # psi_scaled_2D = zoom(psi_load_2D, new_shape)
-    
-    # and now...
 
     points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
+    
     u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale), method='linear')
     v_scaled_2D = interpn(points_load, v_load_2D, tuple(points_scale), method='linear')
     psi_scaled_2D = interpn(points_load, psi_load_2D, tuple(points_scale), method='linear')
-
-
 
     u_scaled = u_scaled_2D.ravel()
     v_scaled = v_scaled_2D.ravel()
     psi_scaled = psi_scaled_2D.ravel()
 
-    write_solution(tri_scale.filename, tri_scale.m*tri_scale.n, u_scaled, v_scaled, psi_scaled, 0)
+    write_solution(tri_scale.filename+"_spLU"+".csv", tri_scale.m*tri_scale.n, u_scaled, v_scaled, psi_scaled, 0)
     plot_load(N_new)
     
 def plot_load(N):
     # tri = triangle(x0, xL, y0, yL, U, Re, N)
     tri = biswasEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
+    u, v, psi, past_iters = read_solution(tri.filename+"_spLU"+".csv", tri.n * tri.m)
+
     make_plots(tri, u, v, psi, past_iters)
 
 #------------------------------------------------------------------------------
@@ -174,10 +159,6 @@ def write_solution(filename, nm, u, v, psi, iters):
 
 #------------------------------------------------------------------------------
 def run(tri, u, v, past_psi, iters, past_iters):
-    ##TODO: speed-up ?
-    
-    # precondition M since it never changes
-    # bicgstab accepts a pseudo inverse for M as preconditioning
     
     M = Dpsi_linOp(tri)
     
@@ -191,7 +172,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
         u, v = uv_approx(tri, u, v, psi)
         
         psi = psi_mirror_boundary(tri, psi)
-        
+
         tf = time.time()
         if i % error_mod == 0: 
             past_psi = psi_unmirror_boundary(tri, past_psi)
@@ -252,7 +233,7 @@ def run_LU(tri, u, v, past_psi, iters, past_iters):
         
         if i % write_mod == 0:
             psi = psi_unmirror_boundary(tri, psi)
-            write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, i+1+past_iters)
+            write_solution(tri.filename+"_LU"+".csv", tri.n*tri.m, u, v, psi, i+1+past_iters)
 
 
         past_psi = psi
@@ -293,7 +274,7 @@ def run_spLU(tri, u, v, past_psi, iters, past_iters):
         
         if i % write_mod == 0:
             psi = psi_unmirror_boundary(tri, psi)
-            write_solution(tri.filename+"_LU", tri.n*tri.m, u, v, psi, i+1+past_iters)
+            write_solution(tri.filename+"_spLU"+".csv", tri.n*tri.m, u, v, psi, i+1+past_iters)
 
 
         past_psi = psi
@@ -317,8 +298,6 @@ def update_rhs(tri, u, v): #
     
     rhs = np.zeros(n*m)
 
-    # h = tri.h
-    # yL = tri.yL
     slope = tri.slope
     U = tri.U
     
@@ -329,7 +308,7 @@ def update_rhs(tri, u, v): #
         i = k % n
         j = k // n
 
-        # boundary & dead zones
+        # boundary & exterior zones
         if i == 0 or j == 0 or i == n-1 or j == m-1:
             rhs[k] = 0
                
@@ -390,6 +369,8 @@ def update_rhs(tri, u, v): #
     return rhs
 
 # -----------------------------------------------------------------------------
+
+# Velocity update
 
 # u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
@@ -600,12 +581,17 @@ def Dpsi_matrixBuild(tri):
 def Dpsi_cscmatrixBuild(tri):
     m = tri.m
     n = tri.n
-    mat = csc_matrix((m*n, m*n))
+
     slope = tri.slope
     nc = n//2
-    #fill mat row by row
+
+    data = np.zeros(m*n*9)
+    row = np.zeros(m*n*9)
+    col = np.zeros(m*n*9)
+    
+    s=0
+    
     for k in range(m*n):
-        
     
         i = k % n
         j = k // n
@@ -613,26 +599,64 @@ def Dpsi_cscmatrixBuild(tri):
         # k = j*n + i
         
         if i == 0 or j == 0 or i == n-1 or j == m-1:
-            mat[k][k] = 1
+            row[s] = k
+            col[s] = k
+            data[s] = 1
+            s+=1
         
         elif  (i < nc and j < (m-1) - slope*i) or (i > nc and j < slope * (i - nc)):
-            mat[k][k] = 1
-
+            row[s] = k
+            col[s] = k
+            data[s] = 1
+            s+=1
         else: 
+            row[s] = k
+            col[s] = k
+            data[s] = 28
+            s+=1
             
-            mat[k][k] = 28
+            row[s] = k
+            col[s] = j*n + i - 1
+            data[s] = -8
+            s+=1 
             
-            mat[k][j*n + i - 1] = -8
-            mat[k][j*n + i + 1] = -8
-            mat[k][(j-1)*n + i] = -8
-            mat[k][(j+1)*n + i] = -8
+            row[s] = k
+            col[s] = j*n + i + 1
+            data[s] = -8
+            s+=1 
+
+            row[s] = k
+            col[s] = (j-1)*n + i
+            data[s] = -8
+            s+=1
             
-            mat[k][(j-1)*n + i-1] = 1
-            mat[k][(j-1)*n + i+1] = 1
-            mat[k][(j+1)*n + i-1] = 1
-            mat[k][(j+1)*n + i+1] = 1
-    
-    return mat
+            row[s] = k
+            col[s] = (j+1)*n + i
+            data[s] = -8
+            s+=1
+            
+            row[s] = k
+            col[s] = (j-1)*n + i-1
+            data[s] = 1
+            s+=1
+            
+            row[s] = k
+            col[s] = (j-1)*n + i+1
+            data[s] = 1
+            s+=1
+            
+            row[s] = k
+            col[s] = (j+1)*n + i-1
+            data[s] = 1
+            s+=1
+            
+            row[s] = k
+            col[s] = (j+1)*n + i+1
+            data[s] = 1
+            s+=1
+            
+    csc_mat = csc_matrix((data, (row, col)), (m*n, m*n))
+    return csc_mat
 
 
 # -----------------------------------------------------------------------------
@@ -698,20 +722,20 @@ def make_plots(tri, u, v, stream, iters):
     ys = tri.ys
 
 # Stream: Psi(x,y) heat & contour
-    stream_2D = stream.copy().reshape((m,n))
+    stream_2D = stream.reshape((m,n))
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
     plot_contour_heat(stream_2D, xs, ys, title, ax_labels)
       
 #  Velocity: (U, V)  streamplot
-    u_2D = u.copy().reshape((m,n))
-    v_2D = v.copy().reshape((m,n))
+    u_2D = u.reshape((m,n))
+    v_2D = v.reshape((m,n))
     
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters+1)
-    # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters)
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$','$x$', '$y$']
-    plot_stream_heat(u_2D, v_2D,  xs, ys, stream_2D, title, ax_labels)
+    plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels)
+    # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
 #  Vorticity: w = vx - uy heat & contour
     uy_2D = np.gradient(u_2D, tri.h, axis=0)
@@ -730,7 +754,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     
     X, Y = np.meshgrid(xs, ys)
 
-    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
 
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
@@ -759,7 +783,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     stream_density=[1,2] #len(ys) = 2 len(xs)
     
-    pp.streamplot(xs, ys, vx, vy, stream_density, color='k', linewidth=0.5, broken_streamlines=False, )
+    pp.streamplot(xs, ys, vx, vy, stream_density, color='k', linewidth=0.5, broken_streamlines=False) #
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
@@ -775,30 +799,21 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
 
-
     X, Y = np.meshgrid(xs, ys)
     
     stream_density=[1,2] #len(ys) = 2 len(xs)
     
-    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35)
+    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
 
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=psi, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False)
-    
+    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
+    pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
     for art in ax.get_children():
         if not isinstance(art, patches.FancyArrowPatch):
             continue
         art.remove()        
     
-    
-    
-    pp.colorbar(stream_plot.lines, label=ax_labels[0])
-    # stream_plot.arrows.FancyArrowPatch.set_arrowstyle("fancy", visible=False)
-    
-    # magV = np.sqrt(vx**2 + vy**2)
-    # stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color=magV, cmap='Spectral_r',  norm=norm_symLog, broken_streamlines=False)
-    # pp.colorbar(stream_plot.lines, label=ax_labels[0])
-    
+
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
@@ -866,11 +881,11 @@ def get_center(tri, psi):
 
 def write_criticals(N):
     tri = biswasEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename, tri.n * tri.m)
+    u, v, psi, past_iters = read_solution(tri.filename+"_spLU"+".csv", tri.n * tri.m)
     
     left, right = get_boundary(tri, psi)
     
-    crits_filename = 'crits_' + tri.filename 
+    crits_filename = 'crits_' + tri.filename +".csv"
     with open(crits_filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
     
@@ -913,20 +928,3 @@ def write_criticals(N):
             writer.writerow([x,y,p])
 
     make_plots(tri, u, v, psi, past_iters)
-
-# def read_criticals(N, k_hs, k_extr):
-#     tri = biswasEx(N)
-#     crits_filename = 'crits_' + tri.filename 
-    
-    
-#     with open(crits_filename, newline='') as file:
-#         reader = csv.reader(file)
-#         for line in reader:
-#             if line[0] !== 'x':
-                
-            
-
-# def write_criticals_error(N_a, N_b): # compare N_a grid with N_b grid
-
-
-    
