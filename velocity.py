@@ -8,30 +8,28 @@ import numpy as np
 
 class Velocity:
     
-    def __init__(self, domain, height, pressure):
-        self.domain = domain
+    def __init__(self, height, pressure):
         self.vel_str = "Velocity for %s (%s)"%(height.h_str, pressure.p_str)
         self.vx, self.vy = self.make_velocity(height, pressure)
     
-    
+    # 2D velocity field from 1D pressure under Reynolds assumptions
     def make_velocity(self, height, pressure):
-        U = self.domain.U
-        eta = self.domain.eta
-        self.domain.set_ys(height, self.domain.Ny)
+        U = height.U
+        visc = height.visc
 
-        vx = np.zeros((self.domain.Ny, self.domain.Nx))
-        vy = np.zeros((self.domain.Ny, self.domain.Nx))
+        vx = np.zeros((height.Ny, height.Nx))
+        vy = np.zeros((height.Ny, height.Nx))
 
-        for i in range(self.domain.Nx):
+        for i in range(height.Nx):
             px = pressure.pxs[i]
             
             h = height.hs[i]
             hx = height.hxs[i]
             
-            q = (U*h)/2 - (px*h**3)/(12*eta)
+            q = (U*h)/2 - (px*h**3)/(12*visc)
 
-            for j in range(self.domain.Ny):
-                y = self.domain.ys[j]
+            for j in range(height.Ny):
+                y = height.ys[j]
                 if y <= height.hs[i]:
                     vx[j,i] = U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3
                                 
@@ -40,13 +38,7 @@ class Velocity:
                     vx[j,i] = 0
                                 
                     vy[j,i] = 0
-            
-        # mask = np.zeros((self.domain.Nx, self.domain.Ny), dtype=bool)
-        # for i in range(self.domain.Ny):
-        #     for j in range(self.domain.Nx):
-        #         mask[i,j] = self.domain.ys[i] > height.hs[j]     
-        # vx = np.ma.array(vx, mask=mask)
-        # vy = np.ma.array(vy, mask=mask)
+        
 
         return vx, vy
 

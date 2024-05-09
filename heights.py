@@ -38,7 +38,7 @@ class Height(dm.Domain):
 # All example heights must have a height function h(self, x) 
 # First and second derivative height functions hx(self, x) and hxx(self, x) can be specified
 
-class discreteHeight(Height):
+class DiscreteHeight(Height):
 
     def __init__(self, x0, xf, Nx, hs):
 
@@ -120,8 +120,8 @@ class SawtoothHeight(Height):
     def __init__(self, x0, xf, Nx, x_peaks, h_peaks):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
-      
-        hs, self.slopes, self.dxs = self.make_hs(x0, xf, Nx, x_peaks, h_peaks)
+        self.N_peaks = len(x_peaks) - 1
+        self.widths, self.slopes, hs = self.make_sawtooth_hs(x0, xf, Nx, x_peaks, h_peaks)
                 
         h_eq = "h(x)"
         h_str = "Piecewise Linear"
@@ -132,7 +132,7 @@ class SawtoothHeight(Height):
         
         super().__init__(x0, xf, y0, yf, Nx, Ny, hs,  h_str, h_eq)
         
-    def make_hs(self, x0, xf, Nx, x_peaks, h_peaks):
+    def make_sawtooth_hs(self, x0, xf, Nx, x_peaks, h_peaks):
         dx_grid = (xf - x0)/(Nx-1)
         xs = np.asarray([x0 + i*dx_grid for i in range(Nx)])
         
@@ -155,7 +155,7 @@ class SawtoothHeight(Height):
             dxs[region] = (xi - x_peaks[region])
             hs[i] = h_peaks[region] + slopes[region] * dxs[region]
             
-        return hs, slopes, dxs
+        return dxs, slopes, hs
     
         
     
@@ -166,7 +166,7 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
         self.h_steps = h_steps
         self.step_width = (xf - x0)/(n_steps+1)
         
-        hs = self.make_hs(x0, xf, Nx, n_steps, h_steps, self.step_width)
+        hs = self.make_step_hs(x0, xf, Nx, n_steps, h_steps, self.step_width)
         
         y0 = 0
         yf = 1.1*max(h_steps)
@@ -174,7 +174,7 @@ class NStepHeight(Height): # uniform width [h1, h2, ..., hN+1]
 
         super().__init__(x0, xf, y0, yf, Nx, Ny, hs, h_str, h_eq)
 
-    def make_hs(self, x0, xf, Nx, n_steps, h_steps, step_width):
+    def make_step_hs(self, x0, xf, Nx, n_steps, h_steps, step_width):
         hs = np.zeros(Nx)
         index_width = Nx / (n_steps + 1)
 
@@ -195,6 +195,7 @@ class RayleighStepHeight(NStepHeight): # N=1
         h_str = "Step Height"
         h_eq = "h(x) = [%.2f, %.2f]"%(h0, h1)
         super().__init__(x0, xf, Nx, 1 , h_steps, h_str, h_eq)
+
 
 class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r
     def __init__(self, x0, xf, Nx, h_avg, r, n_steps):
