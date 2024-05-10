@@ -5,10 +5,10 @@ Created on Sun Jan 29 08:18:07 2023
 
 @author: sarahdennis
 """
-import graphics as graph
 import numpy as np
-import domain as dm
+import random
 
+import domain as dm
 #------------------------------------------------------------------------------
 # A domain [x0, xf],[y0, yf] with a height function y = h_fun(x) 
 class Height(dm.Domain):
@@ -18,7 +18,9 @@ class Height(dm.Domain):
         super().__init__(x0, xf, y0, yf, Nx, Ny) # -> {dx, dy, xs, ys}
         
         self.hs = hs
-    
+        self.hxs = dm.center_diff(self.hs, self.Nx, self.dx)
+        self.hxs = dm.center_second_diff(self.hs, self.Nx, self.dx)
+        
         self.h_str = h_str
         self.h_eq = h_eq
 
@@ -29,19 +31,16 @@ class Height(dm.Domain):
         self.U = 1   # velocity on to flat lower surface
         self.dens = 1 # density
         self.visc = 1 # dynamic viscosity 
+    
         self.Re = self.U * self.h_avg / self.visc
-
+ 
 
 #------------------------------------------------------------------------------
-# Example Height FunctionsS
+# Example Height Functions
 #------------------------------------------------------------------------------
-# All example heights must have a height function h(self, x) 
-# First and second derivative height functions hx(self, x) and hxx(self, x) can be specified
 
 class DiscreteHeight(Height):
-
     def __init__(self, x0, xf, Nx, hs):
-
         h_str = "Discrete Height"
         h_eq = "h(x) = h_i"
         
@@ -50,25 +49,18 @@ class DiscreteHeight(Height):
         Ny = Nx
 
         super().__init__(x0, xf, y0, yf, Nx, Ny, hs, h_str, h_eq)
+  
+class Random(DiscreteHeight):
+    def __init__(self, x0, xf, h_min, h_max, Nx):
+        hs = np.zeros(Nx)
+        for i in range (Nx):
+            hs[i] = h_min + (h_max - h_min) * random.random()
+        super().__init__(x0, xf, Nx, hs)
+        
 
-        
-        
-class ConstantHeight(Height):
-    def __init__(self, x0, xf, Nx, h0):
-        h_str = "Constant Height"
-        h_eq = "h(x) = %.2f"%h0
-        
-        hs = np.ones(Nx)*h0
-        
-        y0 = 0
-        yf = 1.1*h0
-        Ny = Nx
-        
-        super().__init__(x0, xf, y0, yf, Nx, Ny, hs, h_str, h_eq)
+#------------------------------------------------------------------------------   
 
-
-     
-class SinsusoidalHeight(Height): #sinusoidal wave
+class SinsusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, x0, xf, Nx, h_avg, r, k):
         
@@ -91,14 +83,27 @@ class SinsusoidalHeight(Height): #sinusoidal wave
 
     def h_fun(self, x):
         return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+#------------------------------------------------------------------------------
+class ConstantHeight(Height):
+    def __init__(self, x0, xf, Nx, h0):
+        h_str = "Constant Height"
+        h_eq = "h(x) = %.2f"%h0
+        
+        hs = np.ones(Nx)*h0
+        
+        y0 = 0
+        yf = 1.1*h0
+        Ny = Nx
+        
+        super().__init__(x0, xf, y0, yf, Nx, Ny, hs, h_str, h_eq)
 
-class WedgeHeight(Height): #slider bearing
+#------------------------------------------------------------------------------
+class LinearHeight(Height): #slider bearing
     
-    def __init__(self, x0, xf, Nx, h0, h1):
+    def __init__(self, x0, xf, Nx, h0, hf):
         self.h0 = h0
-        self.h1 = h1
-        self.xa = x0
-        self.m = (h1 - h0)/(xf - x0)
+        self.x0 = x0
+        self.m = (hf - h0)/(xf - x0)
         
         h_eq = "h(x) = %0.1f + %0.1f(x - %0.1f)"%(self.h0, self.m, self.xa)
         h_str = "Wedge Slider"
@@ -108,14 +113,14 @@ class WedgeHeight(Height): #slider bearing
         hs = np.asarray([self.h_fun(x) for x in xs])
 
         y0 = 0
-        yf = 1.1*max(h0, h1)
+        yf = 1.1*max(h0, hf)
         Ny = Nx
         
         super().__init__(x0, xf, y0, yf, Nx, Ny, hs,  h_str, h_eq)
 
     def h_fun(self, x):
-        return self.h0 + self.m * (x - self.xa)
-
+        return self.h0 + self.m * (x - self.x0)
+     
 class SawtoothHeight(Height):
     def __init__(self, x0, xf, Nx, x_peaks, h_peaks):
         self.h_peaks = h_peaks
@@ -195,7 +200,6 @@ class RayleighStepHeight(NStepHeight): # N=1
         h_str = "Step Height"
         h_eq = "h(x) = [%.2f, %.2f]"%(h0, h1)
         super().__init__(x0, xf, Nx, 1 , h_steps, h_str, h_eq)
-
 
 class SquareWaveHeight(NStepHeight): #N > 1, #h(x) = h_avg +/- r
     def __init__(self, x0, xf, Nx, h_avg, r, n_steps):

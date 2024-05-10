@@ -4,48 +4,69 @@ Created on Wed Feb 22 10:01:42 2023
 
 @author: sarah
 """
-from Lubrication_Project import heights as hgt
-import pressures as prs
+
 import numpy as np
+import heights 
 
+import pressures
 #-------------------------------------------------------------------------
-# pressure solutions to reynolds equation for the given height functions
+# Pressure solutions to reynolds equation for the given height functions
 #-------------------------------------------------------------------------
 
-def fdSolve(domain, p0, pN, height):
+def fd_random():
+    Nx = 100 
+    ps = np.zeros(Nx)
     
-    #-------- paste height here ------------------
-    # xa = (domain.xf - domain.x0)/2
-    # xi = np.array([domain.x0, xa, domain.xf])
+    p0 = 0 
+    pN = 0 
     
-    # hi = np.array([0.01,1,0.01])
-    
-    
-    # height = hgt.SawtoothHeight(domain, xi, hi)
-    #---------------------------------------------
+    x0 = 0
+    xf = 1
 
-    pressure = prs.FinDiffPressure(domain, height, p0, pN)
-    return pressure
+    h_min = 0.1 
+    h_max = 0.5
+    height = heights.Random(x0, xf, h_min, h_max, Nx)
 
-# -----------------------------------------------------------------------------
-# 0. Constant Height
-# -----------------------------------------------------------------------------
-def constant(domain, p0, pN, h0):
-    height = hgt.ConstantHeight(domain, h0)
-    pressure = prs.LinearPressure(domain, height, p0, pN)
-    # pressure = prs.FinDiffPressure(domain, height, p0, pN)
-    return height, pressure
+    pressure = pressures.FinDiffPressure(height, p0, pN)
+    
+    ps = pressure.solve()
+    
+    return ps
+
+def fd_blank():
+    Nx = 100
+    ps = np.zeros(Nx)
+    
+    # p0 = 0
+    # pN = 0
+    
+    # x0 = 0
+    # xf = 1
+
+    # height = ...
+    # pressure = ...
+    # ps = pressure.solve()
+    
+    return ps
 
 # -----------------------------------------------------------------------------
 # I. Sinusoidal Height
 # -----------------------------------------------------------------------------
-def corrugated(domain, p0, pN, h_mid, r, n):
+def analytic_sinusoidal():
+    Nx = 100
+    ps = np.zeros(Nx)
+    
+    # p0 = 0
+    # pN = 0
+    
+    # x0 = 0
+    # xf = 1
+    
+    # height = ...
+    # pressure = ...
+    # ps = pressure.solve()
 
-    k = n*np.pi #period
-
-    height = hgt.CorrugatedHeight(domain, h_mid, r, k)
-    pressure = prs.CorrugatedPressure(domain, height, p0, pN)
-    return height, pressure
+    return ps
 
 # -----------------------------------------------------------------------------
 # II. Linear Height

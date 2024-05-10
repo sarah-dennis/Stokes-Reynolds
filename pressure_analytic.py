@@ -6,56 +6,87 @@ Created on Thu May  9 11:59:05 2024
 """
 
 import numpy as np
-    
-def linearHeight_solve(height, p0, pN):
-    
-    h = height.h0
-    
-    etaU = 6*height.U*height.visc
-    
-    cq = h**3 * (pN - p0)/(height.xf - height.x0) - etaU*h
-    
-    ps = np.zeros(height.Nx)
-    
-    for i in range(height.Nx):
-        dx = height.xs[i] - height.x0
+from pressures import P_Solver
+
+class Solver_Sinusoidal(P_Solver):
+    def __init__(self, height, p0, pN):
+        super().__init__(height, p0, pN, self.solve)
+
+    def solve(self):
+        #TODO: ignores boundary pressures
+        # p0 = self.p0 = 0
+        # pN = self.pN = 0
+        Nx = self.height.Nx
+        hs = self.height.hs
+        hxs = self.height.hxs
+        h_mid = self.height.h_mid
+        k = self.height.k
+        r = self.height.r
+        etaU = 6*self.height.U*self.height.visc
         
-        ps[i] = (cq * dx / h**3) + (etaU * dx / h**2) + p0
-    return ps
-
-def sinsusoidalHeight_solve(height, p0, pN):
-    #TODO: ignores boundary pressures
-    ps = np.zeros(height.Nx)
-    etaU = 6*height.U*height.visc
+        ps = np.zeros(Nx)
+        for i in range(Nx):
+            h = hs[i]
+            hx = hxs[i]
+            ps[i] = -etaU * (h + h_mid) * h**2 / (hx * (k*h_mid)**2 * (2 + r**2)) 
+        return ps
     
-    for i in range(height.Nx):
-        h = height.hs[i]
-        hx = height.hxs[i]
-        ps[i] = -etaU * (h + height.h_mid)/((height.k*height.h_mid)**2*(2 + height.r**2)) * hx / h**2
-
-def stepHeight_solve(height, p0, pN):
+class Solver_Constant(P_Solver):
+    def __init__(self, height, p0, pN):
+        super().__init__(height, p0, pN, self.solve)
     
-    ps = np.zeros(height.Nx)
+    def solve(self):
+        p0 = self.p0
+        pN = self.pN
+        x0 = self.height.x0
+        xf = self.height.xf
+        xs = self.height.xs
+        h0 = self.height.h0
+        Nx = self.height.Nx
+        
+        etaU = 6*self.height.U*self.height.visc
+        
+        cq = h0**3 * (pN - p0)/(xf - x0) - etaU*h0
+        
+        ps = np.zeros(Nx)
 
-    h_in = height.hs[0]
-    h_out = height.hs[-1]
+        for i in range(Nx):
+            dx = xs[i] - x0
+            ps[i] = (cq * dx / h0**3) + (etaU * dx / h0**2) + p0
+        return ps
 
-    x0 = height.x0
-    xm = height.x_step
-    xf = height.xf
-    xs = height.xs
-    etaU = 6*height.U*height.visc
-
-
-    m_in_numer = (h_out/h_in)**3 * (p0 - pN)/(xm - xf) - etaU * (h_out - h_in)/h_in**3
-    m_in_denom = 1 - (h_out/h_in)**3 * (xm - x0)/(xm - xf)
     
-    m_in = m_in_numer/m_in_denom
-
-    m_out = ((xm - x0)*m_in + (p0 - pN))/(xm - xf)
-
-    for i in range(height.Nx):
-        if height.xs[i] <= height.x_step:
-            ps[i] = m_in * (xs[i] - x0) + p0
-        else:
-            ps[i] = m_out * (xs[i] - xf) + pN
+class Solver_Step(P_Solver):
+    def __init__(self, height, p0, pN):
+        super().__init__(height, p0, pN, self.solve) 
+    
+    def solve(self):
+        p0 = self.p0
+        pN = self.pN
+        Nx = self.height.Nx
+        
+        ps = np.zeros(Nx)
+    
+        h_in = self.height.hs[0]
+        h_out = self.height.hs[-1]
+    
+        x0 = self.height.x0
+        xm = self.height.x_step
+        xf = self.height.xf
+        xs = self.height.xs
+        etaU = 6*self.height.U*self.height.visc
+    
+    
+        m_in_numer = (h_out/h_in)**3 * (p0 - pN)/(xm - xf) - etaU * (h_out - h_in)/h_in**3
+        m_in_denom = 1 - (h_out/h_in)**3 * (xm - x0)/(xm - xf)
+        
+        m_in = m_in_numer/m_in_denom
+    
+        m_out = ((xm - x0)*m_in + (p0 - pN))/(xm - xf)
+    
+        for i in range(Nx):
+            if xs[i] <= xm:
+                ps[i] = m_in * (xs[i] - x0) + p0
+            else:
+                ps[i] = m_out * (xs[i] - xf) + pN
+        return ps

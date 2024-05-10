@@ -5,23 +5,24 @@ Created on Thu Feb 29 13:14:58 2024
 
 @author: sarahdennis
 """
-
+import numpy as np
         
 from scipy.sparse.linalg import LinearOperator 
 from scipy.sparse.linalg import gmres
-import numpy as np
- 
-def solve(height, p0, pN, tol=1e-12):
 
-    rhs = make_rhs(height, p0, pN)
+from pressures import P_Solver
 
-    st_linOp = stLinOp(height)
-     
-    cs, exit_code = gmres(st_linOp, rhs, tol=tol)
-    ps = make_ps(height, cs)
-    return ps 
-        
-        
+class Solver_Sawtooth(P_Solver):   
+    def __init__(self, height, p0, pN):
+        self.height = height
+        self.rhs = make_rhs(height, p0, pN)
+        self.linOp = stLinOp(height)
+        super().__init__(self.solve)
+    
+    def solve(self, tol=1e-12):
+        cs, exit_code = gmres(self.linOp, self.rhs, tol)
+        ps = make_ps(self.height, cs)
+        return ps
               
 class stLinOp(LinearOperator):
     def __init__(self, height):

@@ -7,8 +7,9 @@ Created on Mon May 22 15:05:40 2023
 import numpy as np
 import csv
 
-from lubrication_project import domain as dm
-from lubrication_project import graphics as graph
+import graphics as graph
+import domain as dm
+
 
 import examples as ex
 import velocity as vel
