@@ -9,8 +9,9 @@ import numpy as np
 from pressures import P_Solver
 
 class Solver_Sinusoidal(P_Solver):
-    def __init__(self, height, p0, pN):
-        super().__init__(height, p0, pN, self.solve)
+    def __init__(self, height, p0, pN):        
+        p_str = "Reynolds Analytic"
+        super().__init__(height, p0, pN, self.solve, p_str)
 
     def solve(self):
         #TODO: ignores boundary pressures
@@ -33,7 +34,8 @@ class Solver_Sinusoidal(P_Solver):
     
 class Solver_Constant(P_Solver):
     def __init__(self, height, p0, pN):
-        super().__init__(height, p0, pN, self.solve)
+        p_str = "Reynolds Analytic"
+        super().__init__(height, p0, pN, self.solve, p_str)
     
     def solve(self):
         p0 = self.p0
@@ -41,7 +43,7 @@ class Solver_Constant(P_Solver):
         x0 = self.height.x0
         xf = self.height.xf
         xs = self.height.xs
-        h0 = self.height.h0
+        h0 = self.height.hs[0]
         Nx = self.height.Nx
         
         etaU = 6*self.height.U*self.height.visc
@@ -55,10 +57,37 @@ class Solver_Constant(P_Solver):
             ps[i] = (cq * dx / h0**3) + (etaU * dx / h0**2) + p0
         return ps
 
+class Solver_Linear(P_Solver):
+    def __init__(self, height, p0, pN):
+        p_str = "Reynolds Analytic"
+        super().__init__(height, p0, pN, self.solve, p_str)
+    
+    def solve(self):
+        #TODO: ignores boundary pressures
+        # p0 = self.p0
+        # pN = self.pN
+        x0 = self.height.x0
+        xf = self.height.xf
+        xs = self.height.xs
+        Nx = self.height.Nx
+
+        a = self.height.h0/self.height.hf
+        h_min = self.height.h_min
+        etaU = 6*self.height.U*self.height.visc
+        L = xf - x0
+        ps = np.zeros(Nx)
+        for i in range(Nx):
+            X = (xs[i]-x0)/L
+            h = a + (1-a)*X 
+            Pi = a/(1-a**2)*(1/h**2 - 1/a**2) - 1/(1-a)*(1/h - 1/a)
+            ps[i] = Pi * etaU * L / h_min**2
+        return ps
+
     
 class Solver_Step(P_Solver):
     def __init__(self, height, p0, pN):
-        super().__init__(height, p0, pN, self.solve) 
+        p_str = "Reynolds Analytic"
+        super().__init__(height, p0, pN, self.solve, p_str)
     
     def solve(self):
         p0 = self.p0
@@ -71,8 +100,9 @@ class Solver_Step(P_Solver):
         h_out = self.height.hs[-1]
     
         x0 = self.height.x0
-        xm = self.height.x_step
+  
         xf = self.height.xf
+        xm = self.height.x_step
         xs = self.height.xs
         etaU = 6*self.height.U*self.height.visc
     

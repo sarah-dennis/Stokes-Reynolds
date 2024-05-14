@@ -5,24 +5,27 @@ Created on Wed Aug 30 12:20:23 2023
 @author: sarah
 """
 import numpy as np
+import domain
 
 class Velocity:
     
-    def __init__(self, height, pressure):
-        self.vel_str = "Velocity for %s (%s)"%(height.h_str, pressure.p_str)
-        self.vx, self.vy = self.make_velocity(height, pressure)
+    def __init__(self, height, ps):
+        self.vel_str = "Velocity for %s "%(height.h_str)
+        self.vx, self.vy = self.make_velocity(height, ps)
     
     # 2D velocity field from 1D pressure under Reynolds assumptions
-    def make_velocity(self, height, pressure):
+    def make_velocity(self, height, ps):
         U = height.U
         visc = height.visc
 
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
+        pxs = domain.center_diff(ps, height.Nx, height.dx)
+    
         for i in range(height.Nx):
-            px = pressure.pxs[i]
             
+            px = pxs[i]
             h = height.hs[i]
             hx = height.hxs[i]
             

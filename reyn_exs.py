@@ -6,164 +6,215 @@ Created on Wed Feb 22 10:01:42 2023
 """
 
 import numpy as np
+
 import heights 
 
-import pressures
+import pressures_stepWave as p_stepWave
+import pressures_sawtooth as p_sawtooth
+import pressures_finDiff as p_finDiff
+import pressures_analytic as p_analytic
+
+import velocity 
+import graphics
+
+class ReynoldsExample:
+    def __init__(self, pSolver):
+        self.pSolver = pSolver
+        self.ps = pSolver.solve()
+        self.vel = velocity.Velocity(self.pSolver.height, self.ps)
+        
+    def plot_p(self):
+        p_title = "Pressure: \n %s"%(self.pSolver.p_str)
+        p_labels = ["$x$", "Pressure $p(x)$", ]
+        graphics.plot_2D(self.ps, self.pSolver.height.xs, p_title, p_labels)
+
+    def plot_ph(self):
+        ph_title = "Pressure & Height: \n %s"%(self.pSolver.p_str)
+        ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
+        graphics.plot_2D_twin(self.ps, self.pSolver.height.hs, self.pSolver.height.xs, ph_title, ph_labels)
+
+    def plot_v(self):
+        v_title = "Velocity: \n%s"%(self.pSolver.p_str)
+        v_ax_labels =  ['$x$', '$y$']
+        graphics.plot_stream_height(self.vel.vx, self.vel.vy, self.pSolver.height.hs, self.pSolver.height.xs, self.pSolver.height.ys, v_title, v_ax_labels)
+
 #-------------------------------------------------------------------------
-# Pressure solutions to reynolds equation for the given height functions
+# I. Finite Difference
 #-------------------------------------------------------------------------
+class FinDiff(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_finDiff.Solver_finDiff(height, p0, pN)
+        super().__init__(pSolver)
 
-def fd_random():
-    Nx = 100 
-    ps = np.zeros(Nx)
-    
-    p0 = 0 
-    pN = 0 
-    
-    x0 = 0
-    xf = 1
-
-    h_min = 0.1 
-    h_max = 0.5
-    height = heights.Random(x0, xf, h_min, h_max, Nx)
-
-    pressure = pressures.FinDiffPressure(height, p0, pN)
-    
-    ps = pressure.solve()
-    
-    return ps
-
-def fd_blank():
-    Nx = 100
-    ps = np.zeros(Nx)
-    
-    # p0 = 0
-    # pN = 0
-    
-    # x0 = 0
-    # xf = 1
-
-    # height = ...
-    # pressure = ...
-    # ps = pressure.solve()
-    
-    return ps
+class FinDiff_Ex1(FinDiff):
+    def __init__(self):
+        Nx = 100 
+        p0 = 0 
+        pN = 0 
+        x0 = 0
+        xf = 1
+        h_min = 0.1 
+        h_max = 0.15
+        height = heights.Random(x0, xf, h_min, h_max, Nx)
+        super().__init__(height, p0, pN)
 
 # -----------------------------------------------------------------------------
-# I. Sinusoidal Height
+# II. Sinusoidal Height
 # -----------------------------------------------------------------------------
-def analytic_sinusoidal():
-    Nx = 100
-    ps = np.zeros(Nx)
-    
-    # p0 = 0
-    # pN = 0
-    
-    # x0 = 0
-    # xf = 1
-    
-    # height = ...
-    # pressure = ...
-    # ps = pressure.solve()
-
-    return ps
+class Analytic_Sinusoidal(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_analytic.Solver_Sinusoidal(height, p0, pN)
+        super().__init__(pSolver)
+        
+class Sinusoidal_Ex1(Analytic_Sinusoidal):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 10
+        h_avg = 0.5
+        r = 0.2 
+        k = 2
+        height = heights.SinsusoidalHeight(x0, xf, Nx, h_avg, r, k)
+        super().__init__(height, p0, pN)
 
 # -----------------------------------------------------------------------------
-# II. Linear Height
+# III. Constant Height
 # -----------------------------------------------------------------------------
+class Analytic_Constant(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_analytic.Solver_Constant(height, p0, pN)
+        super().__init__(pSolver)
+        
+class Constant_Ex1(Analytic_Constant):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        h0 = 1
+        height = heights.ConstantHeight(x0, xf, Nx, h0)
+        super().__init__(height, p0, pN)
 
-
-# II. a) Piecewise-linear -> piecewise solution (from double int. Reynolds )
-
-def sawtooth(domain, p0, pN, h_min, h_max, N): 
-    N = 2
-    
-    #uniform dx
-    xi = domain.x0 + np.arange(0, N+1) * (domain.xf - domain.x0)/N
-
-    #I. random height
-    # hi = np.random.uniform(h_min, h_max, N+1)
-    
-    #II. prescribed height
-    # hi = np.array([h_min + .3*h_max, h_min + .8*h_max, h_min +.2*h_max, h_min +  .5*h_max, h_min + .1*h_max, h_min + h_max, h_min + .4*h_max])
-    # hi = np.array([h_min + .3*h_max, h_min + .4*h_max, h_min +.2*h_max, h_min +  .35*h_max, h_min + .1*h_max, h_min + .4*h_max, h_min + .25*h_max])
-    hi = np.array([h_min, h_max, h_min])
-    height = hgt.SawtoothHeight(domain, xi, hi)
-    
-    st_pressure = prs.SawtoothPressure(domain, height, p0, pN)
-    
-
-
-    return height, st_pressure
-
-
-def sawtoothRand(domain, p0, pN, h_min, h_max, N): 
-    
-    #random dx
-    xi = np.sort(np.random.uniform(domain.x0, domain.xf, N+1))
-    xi[0] = domain.x0
-    xi[-1] = domain.xf
-    
-    hi = np.random.uniform(h_min, h_max, N+1)
-    
-    height = hgt.SawtoothHeight(domain, xi, hi)
-    
-    pressure = prs.SawtoothPressure(domain, height, p0, pN)
-
-
-
-    return height, pressure
+# -----------------------------------------------------------------------------
+# IV. Linear
+# -----------------------------------------------------------------------------
+class Analytic_Linear(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_analytic.Solver_Linear(height, p0, pN)
+        super().__init__(pSolver)
+        
+class Linear_Ex1(Analytic_Linear):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        h0 = 0.1
+        h1 = 0.01 # h1 != h0
+        height = heights.LinearHeight(x0, xf, Nx, h0, h1)
+        super().__init__(height, p0, pN) 
 
 
 # -----------------------------------------------------------------------------
-# III a. Step Height Example (N = 1)
+# V. Step Height 
 # -----------------------------------------------------------------------------
-def step(domain, p0, pN, x_step, h1, h2):
-
-    height = hgt.RayleighStepHeight(domain, x_step, h1, h2)
-    pressure = prs.RayleighStepPressure(domain, height, p0, pN)
-
-    return height, pressure
-
+class Analytic_Step(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_analytic.Solver_Step(height, p0, pN)
+        super().__init__(pSolver)
+        
+class Step_Ex1(Analytic_Step):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        x_step = (xf - x0) / 3
+        h0 = 0.1
+        h1 = 0.1
+        height = heights.StepHeight(x0, xf, Nx, h0, h1, x_step)
+        super().__init__(height, p0, pN)
 
 # -----------------------------------------------------------------------------
-# III b. N-Step Height Example (N > 1)
+# VI. Step Wave **
 # -----------------------------------------------------------------------------
+class PWA_StepWave(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        # pSolver = p_stepWave.Solver_schurLU(height, p0, pN)
+        # pSolver = p_stepWave.Solver_schurInv(height, p0, pN)
+        pSolver = p_stepWave.Solver_numpy(height, p0, pN)
+        super().__init__(pSolver)
+        
+class StepWave_Ex1(PWA_StepWave):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        N_steps = 5
+        h_min = 0.1 
+        h_max = 0.5
+        h_steps = np.zeros(N_steps+1)
 
-def squareWave_schurLUSolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
-    print("\n Loading %d-step Square Wave \n" % (n_steps))
-    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
-    return height, pressure
+        # symmetric oscillation
+        h_avg = (h_max + h_min)/2
+        r = (h_max - h_min)/2
+        for i in range(N_steps+1):
+                h_steps[i] = h_avg + (-1)**i * r
+        
+        height = heights.StepWaveHeight(x0, xf, Nx, N_steps, h_steps)
+        super().__init__(height, p0, pN)
 
+class StepWave_Ex2(PWA_StepWave):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        N_steps = 5
+        h_min = 0.1 
+        h_max = 0.5
+        h_steps = np.zeros(N_steps+1)
+        
+        # random wave
+        h_steps = np.random.uniform(h_min, h_max, N_steps+1)
+        
+        height = heights.StepWaveHeight(x0, xf, Nx, N_steps, h_steps)
+        super().__init__(height, p0, pN)
 
-def randSteps_schurLUSolve(domain, p0, pN, h_min, h_max, n_steps):
-    print("\n Loading %d-step  Wave \n" % (n_steps))
-    h_str = " %d-step Wave \n" % (n_steps)
-    h_eq =  "h(x) \in [%.2f, ..., %.2f]"%(h_min, h_max)
-    h_steps = np.random.uniform(h_min, h_max, n_steps+1)
-    height = hgt.NStepHeight(domain, n_steps, h_steps, h_str, h_eq)
-    pressure = prs.SquareWavePressure_schurLUSolve(domain, height, p0, pN)
-    return height, pressure
+# -----------------------------------------------------------------------------
+# VI. Sawtooth **
+# -----------------------------------------------------------------------------
+#TODO: does PWA_Sawtooth break for an interval of constant height?
+class PWA_Sawtooth(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_sawtooth.Solver(height, p0, pN)
+        super().__init__(pSolver)
+        
+class Sawtooth_Ex1(PWA_Sawtooth):
+    def __init__(self):
+        Nx = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        N_regions = 5
+        h_min = 0.1 
+        h_max = 0.5
+        
+        # uniform width 
+        x_peaks = x0 + np.arange(0, N_regions+1) * (xf - x0)/N_regions
 
-def squareWave_schurInvSolve(domain, p0, pN, n_steps=205, r=0.001, h_avg=0.1):
-    print("\n Loading %d-step Square Wave \n" % (n_steps))
-    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure_schurInvSolve(domain, height, p0, pN)
-    return height, pressure
+        # random height
+        h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
 
-
-def squareWave_pySolve(domain, p0, pN, n_steps=25, r=0.001, h_avg=0.1):
-    print("\n Loading %d-step Square Wave \n" % (n_steps))
-    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure_pySolve(domain, height, p0, pN)
-    return height, pressure
-
-def squareWave_schurGmresSolve(domain, p0, pN, n_steps=2105, r=0.001, h_avg=0.1):
-    print("\n Loading %d-step Square Wave \n" % (n_steps))
-    height = hgt.SquareWaveHeight(domain, h_avg, r, n_steps)
-    pressure = prs.SquareWavePressure_schurGmresSolve(domain, height, p0, pN)
-    return height, pressure
-
-
+        height = heights.SawtoothHeight(x0, xf, Nx, N_regions, x_peaks, h_peaks)
+        super().__init__(height, p0, pN)
 
