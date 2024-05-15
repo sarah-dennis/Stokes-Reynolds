@@ -205,16 +205,18 @@ class Sawtooth_Ex1(PWA_Sawtooth):
         pN = 0
         x0 = 0
         xf = 1
+        
         N_regions = 5
         h_min = 0.1 
         h_max = 0.5
         
         # uniform width 
-        x_peaks = x0 + np.arange(0, N_regions+1) * (xf - x0)/N_regions
+        # x_peaks = x0 + np.arange(0, N_regions+1) * (xf - x0)/N_regions
+        x_peaks = np.array([0, 0.1, 0.5, 0.6, 0.8, 1])
 
         # random height
-        h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
-
+        # h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
+        h_peaks = np.array([1, 2, 1, 2, 1, 2])
         height = heights.SawtoothHeight(x0, xf, Nx, N_regions, x_peaks, h_peaks)
         super().__init__(height, p0, pN)
 

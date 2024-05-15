@@ -27,7 +27,7 @@ class Solver(P_Solver):
     
 def make_rhs(height, p0, pN):
     N = height.N_regions
-    hs = height.hs
+    hs = height.h_peaks
     slopes = height.slopes
     widths = height.widths
     
@@ -91,7 +91,7 @@ class stLinOp(LinearOperator):
     def __init__(self, height):
 
         self.N = height.N_regions
-        self.hs = height.h_peaks
+        self.h_peaks = height.h_peaks
         self.widths = height.widths
         self.slopes = height.slopes
         
@@ -100,7 +100,7 @@ class stLinOp(LinearOperator):
         self.mv = np.zeros(self.N+1)
          
     def _matvec(self, v):
-        hs = self.hs
+        hs = self.h_peaks
         slopes = self.slopes
         widths = self.widths
         N = self.N

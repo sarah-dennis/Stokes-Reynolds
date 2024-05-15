@@ -163,7 +163,7 @@ class SawtoothHeight(Height):
     def __init__(self, x0, xf, Nx, N_regions, x_peaks, h_peaks):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
-        self.N_regions = N_regions
+        self.N_regions = N_regions #=len(hpeaks)-1
         hs, self.slopes, self.widths = self.make_hs(x0, xf, Nx, x_peaks, h_peaks)
                 
         h_eq = "h(x)"
@@ -179,40 +179,26 @@ class SawtoothHeight(Height):
         slopes = np.zeros(self.N_regions)
         widths = np.zeros(self.N_regions)
         
-        for r in range(n_regions):
+        for r in range(self.N_regions):            
+
             slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
-            widhts[r] 
+
             
         hs = np.zeros(Nx)
-        
-        
+        dx = (xf - x0)/(Nx-1)
+        r = 0
+        for i in range(Nx):
+            xi = x0 + i*dx
+            
+            if xi > x_peaks[r+1] and r+1 < self.N_regions:
+                r +=1
+                
+            widths[r] = xi - x_peaks[r]
+            hs[i] = h_peaks[r] + slopes[r] * (xi - x_peaks[r])
+
         return  hs, slopes, widths
  
-         #TODO: fix make_hs, dxs do more than it looooks
-     def make_linear_hs(self, domain, x_peaks, h_peaks):
 
-         n_regions = len(h_peaks) - 1
-         slopes = np.zeros(n_regions)
-         dxs = np.zeros(n_regions)
-
-         for r in range(n_regions):
-             slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
-         
-         hs = np.zeros(domain.Nx)
-         region = 0
-         for i in range(domain.Nx):
-             xi = domain.xs[i]
-             
-             
-             if xi > x_peaks[region+1] and region+1 < n_regions:
-
-                 region +=1
-             
-             dxs[region] = (xi - x_peaks[region])
-             hs[i] = h_peaks[region] + slopes[region] * dxs[region]
-             
-         return hs, slopes, dxs   
-    
     
     
     
