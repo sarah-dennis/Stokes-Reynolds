@@ -45,14 +45,12 @@ def run_new(N, iters):
     write_solution(tri.filename+".csv", nm, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def run_load(N, iters):
-
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
 
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
     # u, v, psi = run(tri, u, v, psi, iters, past_iters)
-    # u, v, psi = run_LU(tri, u, v, psi, iters, past_iters)
     u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters)
     
     psi = solver.unmirror_boundary(tri, psi)
@@ -60,10 +58,7 @@ def run_load(N, iters):
 
 
 def load_scale(N_load, N_new):
-    # tri_load = triangle(x0, xf, y0, yf, U, Re, N)
-    tri_load = examples.biswasEx(N_load) #slope 4 example
-    
-    
+    tri_load = examples.biswasEx(N_load)
     points_load = (tri_load.ys, tri_load.xs)
     
     u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename+".csv", tri_load.Ny*tri_load.Nx)
@@ -73,7 +68,6 @@ def load_scale(N_load, N_new):
 
 
     tri_scale = examples.biswasEx(N_new)
-
     points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
     
     u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale), method='linear')
@@ -88,9 +82,8 @@ def load_scale(N_load, N_new):
     plot_load(N_new)
     
 def plot_load(N):
-    # tri = triangle(x0, xf, y0, yf, U, Re, N)
-    # tri = biswasEx(N)
-    tri = examples.zeroReynEx(N)
+    tri = examples.biswasEx(N)
+    # tri = examples.zeroReynEx(N)
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     make_plots(tri, u, v, psi, past_iters)
@@ -304,52 +297,125 @@ def get_center(tri, psi):
         
     return center
 
-def write_criticals(N):
+
+def get_criticals(N):
     tri = examples.biswasEx(N)
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
     
     left, right = get_boundary(tri, psi)
+    center = get_center(tri, psi)
     
-    crits_filename = 'crits_' + tri.filename +".csv"
-    with open(crits_filename, 'w', newline='') as file:
+    left_signs = []
+    right_signs = []
+    
+    center_maxs = []
+    center_mins = []
+    max_inds = relEx(center[:,2], np.greater)[0]
+    min_inds = relEx(center[:,2], np.less)[0]
+    
+    for i in max_inds:
+        x,y,p = center[i]
+        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        center_maxs.append([x,y,p])
+    
+
+    for i in min_inds:
+        x,y,p = center[i]
+        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        center_mins.append([x,y,p])
+    
+    sign_ref = 0
+    for (x, y, p) in left:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            left_signs.append([x,y])
+
+    sign_ref = 0
+    for (x, y, p) in right:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            right_signs.append([x,y])
+    
+    center_maxs.reverse()
+    center_mins.reverse()
+    left_signs.reverse()
+    right_signs.reverse()
+    
+    return center_maxs, center_mins, left_signs, right_signs
+    
+def write_criticals(N):
+    maxs, mins, left, right = get_criticals(N)
+    
+    crits_filename = 'crits_stokes_N%d.csv'%N 
+    with open (crits_filename,'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
-    
-        # print("Psi sign changes...")
+
         writer.writerow('xy')
-        sign_ref = 0
-        for (x, y, p) in left:
-            sign_new = np.sign(p)
-            if sign_new != 0 and sign_new != sign_ref:
-                sign_ref = sign_new
-                # print("(x:%.5f, y:%.6f)"%(x,y))
-                writer.writerow([x,y])
+        for (x, y) in left:
+            writer.writerow([x,y])
                 
         writer.writerow('xy')
-        sign_ref = 0
-        for (x, y, p) in right:
-            sign_new = np.sign(p)
-            if sign_new != 0 and sign_new != sign_ref:
-                sign_ref = sign_new
-                # print("(x:%.5f, y:%.6f)"%(x,y))
-                writer.writerow([x,y])
+        for (x, y) in right:
+            writer.writerow([x,y])
 
-    
-        # print("Psi center-line extrema...")
         writer.writerow('xyp')
-        center = get_center(tri, psi)
-        max_inds = relEx(center[:,2], np.greater)[0]
-        min_inds = relEx(center[:,2], np.less)[0]
-        
-    
-        for i in max_inds:
-            x,y,p = center[i]
-            # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        for (x, y, p) in maxs:
             writer.writerow([x,y,p])
-        
+            
         writer.writerow('xyp')
-        for i in min_inds:
-            x,y,p = center[i]
-            # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        for (x, y, p) in mins:
             writer.writerow([x,y,p])
 
-    make_plots(tri, u, v, psi, past_iters)
+
+def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
+    tru_maxs, tru_mins, tru_left, tru_right = get_criticals(N_max)
+    
+    M = len(Ns)
+    a = len(tru_maxs)
+    b = len(tru_mins)
+    c = len(tru_left)
+    d = len(tru_right)
+    
+    err_maxs = np.zeros((M, a))
+    err_mins = np.zeros((M, b))
+    err_left = np.zeros((M, c))
+    err_right = np.zeros((M, d))
+    
+    for i in range(M):
+        N = Ns[i]
+        
+        N_maxs, N_mins,  N_left, N_right = get_criticals(N)
+        
+        for j in range(a):
+            if j < len(N_maxs): #[2] = psi
+                err_maxs[i, j] = tru_maxs[j][2] - N_maxs[j][2]
+            else:
+                err_maxs[i, j] = tru_maxs[j][2]
+        
+        for j in range(b):
+            if j < len(N_mins): 
+                err_mins[i, j] = tru_mins[j][2] - N_mins[j][2]
+            else:
+                err_mins[i, j] = tru_mins[j][2]
+            
+        for j in range(c):
+            if j < len(N_maxs): #[1] = y
+                err_left[i, j] = tru_left[j][1] - N_left[j][1]
+            else:
+                err_left[i, j] = tru_left[j][1]
+        
+        for j in range(d):
+            if j < len(N_mins):
+                err_right[i, j] = tru_right[j][1] - N_right[j][1]
+            else:
+                err_right[i, j] = tru_right[j][1]
+        
+    return err_maxs, err_mins, err_left, err_right
+        
+        
+        
+        
+        
+        
