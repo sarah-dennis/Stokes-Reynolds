@@ -45,8 +45,8 @@ def run_new(N, iters):
     write_solution(tri.filename+".csv", nm, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def run_load(N, iters):
-    tri = examples.biswasEx(N)
-    # tri = examples.zeroReynEx(N)
+    # tri = examples.biswasEx(N)
+    tri = examples.zeroReynEx(N)
 
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
@@ -82,8 +82,8 @@ def load_scale(N_load, N_new):
     plot_load(N_new)
     
 def plot_load(N):
-    tri = examples.biswasEx(N)
-    # tri = examples.zeroReynEx(N)
+    # tri = examples.biswasEx(N)
+    tri = examples.zeroReynEx(N)
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     make_plots(tri, u, v, psi, past_iters)
@@ -378,44 +378,95 @@ def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
     c = len(tru_left)
     d = len(tru_right)
     
-    err_maxs = np.zeros((M, a))
-    err_mins = np.zeros((M, b))
-    err_left = np.zeros((M, c))
-    err_right = np.zeros((M, d))
+    err_maxs = np.zeros((M, a))  # error in stream maximums along x=0.5
+    err_mins = np.zeros((M, b))  #   ''       ''   minimums  ''
+    err_left = np.zeros((M, c))  # error in saddle point y along left boundary
+    err_right = np.zeros((M, d)) #  ''        ''         ''      right   ''
     
     for i in range(M):
         N = Ns[i]
         
         N_maxs, N_mins,  N_left, N_right = get_criticals(N)
+        #index [[x,y,stream]] and [[x,y]] 
         
         for j in range(a):
-            if j < len(N_maxs): #[2] = psi
-                err_maxs[i, j] = tru_maxs[j][2] - N_maxs[j][2]
+            if j < len(N_maxs):                 
+                err_maxs[i, j] = np.abs(tru_maxs[j][2] - N_maxs[j][2])
             else:
-                err_maxs[i, j] = tru_maxs[j][2]
-        
+                err_maxs[i, j] = None #tru_maxs[j][2]
+         
         for j in range(b):
-            if j < len(N_mins): 
-                err_mins[i, j] = tru_mins[j][2] - N_mins[j][2]
+            if j < len(N_mins):             
+                err_mins[i, j] = np.abs(tru_mins[j][2] - N_mins[j][2])
             else:
-                err_mins[i, j] = tru_mins[j][2]
+                err_mins[i, j] = None #tru_mins[j][2]
             
         for j in range(c):
-            if j < len(N_maxs): #[1] = y
-                err_left[i, j] = tru_left[j][1] - N_left[j][1]
+            if j < len(N_left): #[1] = y
+                err_left[i, j] = np.abs(tru_left[j][1] - N_left[j][1])
             else:
-                err_left[i, j] = tru_left[j][1]
+                err_left[i, j] = None #tru_left[j][1]
         
         for j in range(d):
-            if j < len(N_mins):
-                err_right[i, j] = tru_right[j][1] - N_right[j][1]
+            if j < len(N_right):
+                err_right[i, j] = np.abs(tru_right[j][1] - N_right[j][1])
             else:
-                err_right[i, j] = tru_right[j][1]
+                err_right[i, j] = None #tru_right[j][1]
         
-    return err_maxs, err_mins, err_left, err_right
+    return err_maxs.T, err_mins.T, err_left.T, err_right.T
         
-        
-        
-        
+def plot_compare_N(Ns, N_max):
+    err_maxs, err_mins, err_left, err_right = compare_N(Ns, N_max)
+    
+    title_maxs = "Error to $N^{*}=$%d in stream-max along $x_c=0.5$"%N_max
+    title_mins = "Error to $N^{*}=$%d in stream-min along $x_c=0.5$"%N_max
+    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
+    
+    n_feats = 3
+    
+    labels_stream_maxs = np.arange(1, n_feats+1)
+    labels_stream_mins = np.arange(1, n_feats+1)
+    
+    graphics.plot_log_multi(err_maxs[:n_feats], Ns, title_maxs, labels_stream_maxs, ax_labels_stream)
+    graphics.plot_log_multi(err_mins[:n_feats], Ns, title_mins, labels_stream_mins, ax_labels_stream)
+    
+    
+    title_left = "Error to $N^{*}=$%d in saddle-$y$ along left boundary"%N_max
+    title_right = "Error to $N^{*}=$%d in saddle-$y$ along right boundary"%N_max
+    ax_labels_saddle = ["N", "$|y_{N^{*}} - y_{N}|$"]
+    
+
+    labels_stream_left = np.arange(1, n_feats+1)
+    labels_stream_right = np.arange(1, n_feats+1)
+    
+    graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
+    graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
+    
+    
+    
+    # graphics.plot_log_multi(fs, xs, title, f_labels, ax_labels)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         

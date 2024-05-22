@@ -306,10 +306,17 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     
     ax = fig.add_subplot()
     colors = ['r', 'b', 'g', 'orange', 'purple']
-    
+    pp.rcParams["lines.linewidth"] = .5
     for i in range(len(fs)):
         ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
-        
+    
+    
+    # reference lines
+    O_l = 10
+    O_q = 30
+    ax.loglog(xs, [O_l*x**-1 for x in xs], label="$O(%s)$"%ax_labels[0], color='black')    
+    ax.loglog(xs, [O_q*x**-2 for x in xs], label="$O(%s^2)$"%ax_labels[0], color='grey')
+    
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     
