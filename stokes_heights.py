@@ -23,6 +23,7 @@ class triangle(Height):
         # self.m = (yf-y0)*N + 1
         
         Nx = (xf-x0)*N + 1
-        hs = np.zeros(Nx) # Reynolds needs this, Stokes its built into dPsi 
+        hs = np.zeros(Nx) # Reynolds needs this, Stokes its built into dPsi
+        # TODO: make hs since it could be helpful to make for plotting
         
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)

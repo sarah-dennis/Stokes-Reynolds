@@ -20,14 +20,13 @@ import stokes_solvers as solver
 
 bicgstab_rtol = 1e-8
 
-plot_mod = 50
-write_mod = 50
+write_mod = 100
 error_mod = 100
 
 import stokes_examples as examples
 
 #------------------------------------------------------------------------------
-def run_new(N, iters):
+def new_run(N, iters):
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
 
@@ -41,20 +40,20 @@ def run_new(N, iters):
     # u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
     u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters)
     
-    psi = solver.unmirror_boundary(tri, psi)
-    write_solution(tri.filename+".csv", nm, u, v, psi, iters)
+    psi_unmirr = solver.unmirror_boundary(tri, psi)
+    write_solution(tri, u, v, psi_unmirr, iters)
                                                                                                                                                                                                                                                                              
-def run_load(N, iters):
-    # tri = examples.biswasEx(N)
-    tri = examples.zeroReynEx(N)
+def load_run(N, iters):
+    tri = examples.biswasEx(N)
+    # tri = examples.zeroReynEx(N)
 
     u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
     # u, v, psi = run(tri, u, v, psi, iters, past_iters)
     u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters)
     
-    psi = solver.unmirror_boundary(tri, psi)
-    write_solution(tri.filename+".csv", tri.Nx*tri.Ny, u, v, psi, iters+past_iters)
+    psi_unmirr= solver.unmirror_boundary(tri, psi)
+    write_solution(tri, u, v, psi_unmirr, iters+past_iters)
 
 
 def load_scale(N_load, N_new):
@@ -65,7 +64,6 @@ def load_scale(N_load, N_new):
     u_load_2D = u_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
     v_load_2D = v_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
     psi_load_2D = psi_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
-
 
     tri_scale = examples.biswasEx(N_new)
     points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
@@ -78,15 +76,7 @@ def load_scale(N_load, N_new):
     v_scaled = v_scaled_2D.ravel()
     psi_scaled = psi_scaled_2D.ravel()
 
-    write_solution(tri_scale.filename+".csv", tri_scale.Ny*tri_scale.Nx, u_scaled, v_scaled, psi_scaled, 0)
-    plot_load(N_new)
-    
-def plot_load(N):
-    # tri = examples.biswasEx(N)
-    tri = examples.zeroReynEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
-
-    make_plots(tri, u, v, psi, past_iters)
+    write_solution(tri_scale, u_scaled, v_scaled, psi_scaled, 0)
 
 #------------------------------------------------------------------------------
 def read_solution(filename, nm):
@@ -106,19 +96,20 @@ def read_solution(filename, nm):
         file.close()
     return u, v, psi, past_iters
 
-def write_solution(filename, nm, u, v, psi, iters):
-
+def write_solution(tri, u, v, psi, iters):
+    nm = tri.Nx * tri.Ny
+    filename = tri.filename + ".csv"
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
         for i in range(nm):
             writer.writerow([u[i], v[i], psi[i]])
         
         writer.writerow([iters])
-        print("  saved csv")
+        print("  saved N=%d"%tri.N)
         file.close()    
 
 #------------------------------------------------------------------------------
-def run(tri, u, v, past_psi, iters, past_iters):
+def run_bicgstab(tri, u, v, past_psi, iters, past_iters):
     
     M = solver.Dpsi_linOp(tri)
     
@@ -126,7 +117,7 @@ def run(tri, u, v, past_psi, iters, past_iters):
         
         t0 = time.time()
         rhs = solver.update_rhs(tri, u, v)
-        
+
         psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
         
         u, v = solver.uv_approx(tri, u, v, psi)
@@ -147,66 +138,56 @@ def run(tri, u, v, past_psi, iters, past_iters):
             if err_i < bicgstab_rtol:
                 print('warning: lower bicgstab_rtol')
             
-        if i % plot_mod == 0:
-            psi = solver.psi_unmirror_boundary(tri, psi)
-            make_plots(tri, u, v, psi, i+1 + past_iters)
-        
         if i % write_mod == 0:
             psi = solver.unmirror_boundary(tri, psi)
             write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
 
-
         past_psi = psi
 
     return u, v, psi
 
-def run_spLU(tri, u, v, past_psi, iters, past_iters):
-    
+#TODO: changed order so mirror then uv approx
+def run_spLU(tri, u, v, old_psi, iters, past_iters):
+    t0 = time.time()
     M = solver.Dpsi_cscmatrixBuild(tri)
     LU = splu(M)
+    t_k0 = time.time()
+    print("N=%d constr. t=%.2f"%(tri.N, t_k0-t0))
     
-    for i in range(iters): 
-        
-        t0 = time.time()
+    for k in range(iters): 
+        # t_ki = time.time()
         rhs = solver.update_rhs(tri, u, v)
 
         psi = LU.solve(rhs)
         
-        u, v = solver.uv_approx(tri, u, v, psi)
-        
         psi = solver.mirror_boundary(tri, psi)
         
-        tf = time.time()
+        u, v = solver.uv_approx(tri, u, v, psi)
         
-        if i % error_mod == 0: 
-            past_psi = solver.unmirror_boundary(tri, past_psi)
-            psi = solver.unmirror_boundary(tri, psi)
-            
-            err_i = np.max(np.abs(psi - past_psi))
-            
-            print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
-            print("  time: %.3f s"%(tf-t0))
-            print("  error: %.5e psi"%err_i)
-            
-        if i % plot_mod == 0:
-            psi = solver.unmirror_boundary(tri, psi)
-            make_plots(tri, u, v, psi, i+1 + past_iters)
+        # t_kj = time.time()
         
-        if i % write_mod == 0:
-            psi = solver.unmirror_boundary(tri, psi)
-            write_solution(tri.filename+".csv", tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
+        if k % error_mod == 0: 
+            old_psi_unmirr = solver.unmirror_boundary(tri, old_psi)
+            psi_unmirr = solver.unmirror_boundary(tri, psi)
+            stream_error(tri, old_psi_unmirr, psi_unmirr, k)
 
-
-        past_psi = psi
+        if k % write_mod == 0:
+            psi_unmirr = solver.unmirror_boundary(tri, psi)
+            write_solution(tri, u, v, psi_unmirr, k+1+past_iters)
+            
+        old_psi = psi
 
     return u, v, psi
 
-
-
+      
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
-def make_plots(tri, u, v, stream, iters):
+def make_plots(N):
+    tri = examples.biswasEx(N)
+    # tri = examples.zeroReynEx(N)
+    u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
+
     n = tri.Nx
     m = tri.Ny
 
@@ -215,9 +196,9 @@ def make_plots(tri, u, v, stream, iters):
     ys = tri.ys
 
 # Stream: Psi(x,y) heat & contour
-    stream_2D = stream.reshape((m,n))
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, iters)
+    stream_2D = psi.reshape((tri.Ny,tri.Nx))
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, past_iters)
     graphics.plot_contour_heat(stream_2D, xs, ys, title, ax_labels)
       
 #  Velocity: (U, V)  streamplot
@@ -225,8 +206,8 @@ def make_plots(tri, u, v, stream, iters):
     v_2D = v.reshape((m,n))
     
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, iters)
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = \psi_x$','$x$', '$y$']
+    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, past_iters)
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels)
     # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
 
@@ -238,13 +219,19 @@ def make_plots(tri, u, v, stream, iters):
         for i in range(n):   
             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, iters)
+    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, past_iters)
     graphics.plot_contour_heat(w, xs, ys, title, ax_labels)
 
 
 #------------------------------------------------------------------------------
-# Critiacal points 
+# Error & Analysis
 #------------------------------------------------------------------------------
+def stream_error(tri, past_psi, new_psi, i): # max |z*-z|, 
+
+    err_psi = np.abs(past_psi - new_psi)
+    max_err = np.max(err_psi)
+    print(" k=%d max error: %.4e psi"%(i, max_err))
+    return max_err, err_psi  
 
 def get_boundary(tri, psi):
     n = tri.Nx
@@ -338,6 +325,7 @@ def get_criticals(N):
             sign_ref = sign_new
             right_signs.append([x,y])
     
+    # order starting at y=yL not y=y0
     center_maxs.reverse()
     center_mins.reverse()
     left_signs.reverse()
@@ -414,7 +402,8 @@ def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
                 err_right[i, j] = None #tru_right[j][1]
         
     return err_maxs.T, err_mins.T, err_left.T, err_right.T
-        
+   
+# plot_compare_N([120,240,512,1000],2000)     
 def plot_compare_N(Ns, N_max):
     err_maxs, err_mins, err_left, err_right = compare_N(Ns, N_max)
     
@@ -430,43 +419,13 @@ def plot_compare_N(Ns, N_max):
     graphics.plot_log_multi(err_maxs[:n_feats], Ns, title_maxs, labels_stream_maxs, ax_labels_stream)
     graphics.plot_log_multi(err_mins[:n_feats], Ns, title_mins, labels_stream_mins, ax_labels_stream)
     
-    
     title_left = "Error to $N^{*}=$%d in saddle-$y$ along left boundary"%N_max
     title_right = "Error to $N^{*}=$%d in saddle-$y$ along right boundary"%N_max
     ax_labels_saddle = ["N", "$|y_{N^{*}} - y_{N}|$"]
     
-
     labels_stream_left = np.arange(1, n_feats+1)
     labels_stream_right = np.arange(1, n_feats+1)
     
     graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
     graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
     
-    
-    
-    # graphics.plot_log_multi(fs, xs, title, f_labels, ax_labels)
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        
