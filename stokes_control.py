@@ -5,23 +5,25 @@ Created on Mon Jan 22 14:59:46 2024
 
 @author: sarahdennis
 """
-import csv
+
 import time
 import numpy as np
 
-from scipy.sparse.linalg import bicgstab
-from scipy.sparse.linalg import splu
+
 
 from scipy.interpolate import interpn
-from scipy.signal import argrelextrema as relEx
+
 
 import graphics
-import stokes_solvers as solver
+from stokes_solver_helpers import unmirror_boundary
+import stokes_readwrite as rw
+from stokes_solver_spLU import run_spLU
+from stokes_solver_bcg import run_bicgstab
 
 bicgstab_rtol = 1e-8
 
-write_mod = 100
-error_mod = 100
+write_mod = 250
+error_mod = 500
 
 import stokes_examples as examples
 
@@ -37,30 +39,29 @@ def new_run(N, iters):
     psi_init = np.zeros(nm)
     past_iters = 0
 
-    # u, v, psi = run(tri, u_init, v_init, psi_init, iters, past_iters)
-    u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters)
-    
-    psi_unmirr = solver.unmirror_boundary(tri, psi)
-    write_solution(tri, u, v, psi_unmirr, iters)
+    # u, v, psi = run_bicgstab(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
+    u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
+    psi_unmirr = unmirror_boundary(tri, psi)
+    rw.write_solution(tri, u, v, psi_unmirr, iters)
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
 
-    u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
+    u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
     # u, v, psi = run(tri, u, v, psi, iters, past_iters)
-    u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters)
+    u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters, error_mod, write_mod)
     
-    psi_unmirr= solver.unmirror_boundary(tri, psi)
-    write_solution(tri, u, v, psi_unmirr, iters+past_iters)
+    psi_unmirr= unmirror_boundary(tri, psi)
+    rw.write_solution(tri, u, v, psi_unmirr, iters+past_iters)
 
 
 def load_scale(N_load, N_new):
     tri_load = examples.biswasEx(N_load)
     points_load = (tri_load.ys, tri_load.xs)
     
-    u_load, v_load, psi_load, past_iters = read_solution(tri_load.filename+".csv", tri_load.Ny*tri_load.Nx)
+    u_load, v_load, psi_load, past_iters = rw.read_solution(tri_load.filename+".csv", tri_load.Ny*tri_load.Nx)
     u_load_2D = u_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
     v_load_2D = v_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
     psi_load_2D = psi_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
@@ -76,117 +77,15 @@ def load_scale(N_load, N_new):
     v_scaled = v_scaled_2D.ravel()
     psi_scaled = psi_scaled_2D.ravel()
 
-    write_solution(tri_scale, u_scaled, v_scaled, psi_scaled, 0)
-
-#------------------------------------------------------------------------------
-def read_solution(filename, nm):
-    u = np.zeros(nm)
-    v = np.zeros(nm)
-    psi = np.zeros(nm)
-    with open(filename, newline='') as file:
-        reader = csv.reader(file)
-
-        for i in range(nm):
-            line = next(reader)
-            ui, vi, psii = line[0].split(' ')
-            u[i] = float(ui)
-            v[i] = float(vi)
-            psi[i] = float(psii)
-        past_iters = int(next(reader)[0])
-        file.close()
-    return u, v, psi, past_iters
-
-def write_solution(tri, u, v, psi, iters):
-    nm = tri.Nx * tri.Ny
-    filename = tri.filename + ".csv"
-    with open(filename, 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=' ')
-        for i in range(nm):
-            writer.writerow([u[i], v[i], psi[i]])
-        
-        writer.writerow([iters])
-        print("  saved N=%d"%tri.N)
-        file.close()    
-
-#------------------------------------------------------------------------------
-def run_bicgstab(tri, u, v, past_psi, iters, past_iters):
-    
-    M = solver.Dpsi_linOp(tri)
-    
-    for i in range(iters): 
-        
-        t0 = time.time()
-        rhs = solver.update_rhs(tri, u, v)
-
-        psi, exit_flag = bicgstab(M, rhs, tol=bicgstab_rtol)
-        
-        u, v = solver.uv_approx(tri, u, v, psi)
-        
-        psi = solver.mirror_boundary(tri, psi)
-
-        tf = time.time()
-        if i % error_mod == 0: 
-            past_psi = solver.unmirror_boundary(tri, past_psi)
-            psi = solver.unmirror_boundary(tri, psi)
-            
-            err_i = np.max(np.abs(psi - past_psi))
-            
-            print("k=%d of %d"%(i+past_iters+1, iters+past_iters))
-            print("  time: %.3f s"%(tf-t0))
-            print("  error: %.5e psi"%err_i)
-            
-            if err_i < bicgstab_rtol:
-                print('warning: lower bicgstab_rtol')
-            
-        if i % write_mod == 0:
-            psi = solver.unmirror_boundary(tri, psi)
-            write_solution(tri.filename, tri.Nx*tri.Ny, u, v, psi, i+1+past_iters)
-
-        past_psi = psi
-
-    return u, v, psi
-
-#TODO: changed order so mirror then uv approx
-def run_spLU(tri, u, v, old_psi, iters, past_iters):
-    t0 = time.time()
-    M = solver.Dpsi_cscmatrixBuild(tri)
-    LU = splu(M)
-    t_k0 = time.time()
-    print("N=%d constr. t=%.2f"%(tri.N, t_k0-t0))
-    
-    for k in range(iters): 
-        # t_ki = time.time()
-        rhs = solver.update_rhs(tri, u, v)
-
-        psi = LU.solve(rhs)
-        
-        psi = solver.mirror_boundary(tri, psi)
-        
-        u, v = solver.uv_approx(tri, u, v, psi)
-        
-        # t_kj = time.time()
-        
-        if k % error_mod == 0: 
-            old_psi_unmirr = solver.unmirror_boundary(tri, old_psi)
-            psi_unmirr = solver.unmirror_boundary(tri, psi)
-            stream_error(tri, old_psi_unmirr, psi_unmirr, k)
-
-        if k % write_mod == 0:
-            psi_unmirr = solver.unmirror_boundary(tri, psi)
-            write_solution(tri, u, v, psi_unmirr, k+1+past_iters)
-            
-        old_psi = psi
-
-    return u, v, psi
-
-      
+    rw.write_solution(tri_scale, u_scaled, v_scaled, psi_scaled, 0)
+     
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
-def make_plots(N):
+def load_plot(N):
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
+    u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     n = tri.Nx
     m = tri.Ny
@@ -221,211 +120,3 @@ def make_plots(N):
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
     title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, past_iters)
     graphics.plot_contour_heat(w, xs, ys, title, ax_labels)
-
-
-#------------------------------------------------------------------------------
-# Error & Analysis
-#------------------------------------------------------------------------------
-def stream_error(tri, past_psi, new_psi, i): # max |z*-z|, 
-
-    err_psi = np.abs(past_psi - new_psi)
-    max_err = np.max(err_psi)
-    print(" k=%d max error: %.4e psi"%(i, max_err))
-    return max_err, err_psi  
-
-def get_boundary(tri, psi):
-    n = tri.Nx
-    m = tri.Ny
-    
-    i_mid = n//2
-    
-    left = np.zeros((m,3)) # x, y, psi
-    right = np.zeros((m,3)) 
-    
-    
-    for j in range(m):
-        
-        y = tri.y0 + j*tri.dx
-        
-        dj = j % tri.slope
-        di = int(j//tri.slope) 
-        
-        if dj == 0: #true boundary points
-            k_left = j*n + i_mid - di 
-            k_right = j*n + i_mid + di
-        else: #interior boundary points
-            k_left = j*n + i_mid - di + 1  
-            k_right = j*n + i_mid + di - 1
-        
-        x_left = (i_mid - di + 1)*tri.dx + tri.x0
-        x_right = tri.xf - (i_mid - di - 1)*tri.dx
-        
-        left[j] = [x_left, y, psi[k_left]]
-        right[j] = [x_right, y, psi[k_right]]
-        
-    return left, right
-
-def get_center(tri, psi):
-    n = tri.Nx 
-    m = tri.Ny 
-    
-    i_mid = n//2
-    x = i_mid * tri.dx+ tri.x0
-    
-    center = np.zeros((m,3)) # x, y, psi
-    
-    for j in range(m):
-        
-        y = tri.y0 + j*tri.dx
-        
-        k = j*n + i_mid
-        
-        center[j] = [x, y, psi[k]]
-        
-    return center
-
-
-def get_criticals(N):
-    tri = examples.biswasEx(N)
-    u, v, psi, past_iters = read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
-    
-    left, right = get_boundary(tri, psi)
-    center = get_center(tri, psi)
-    
-    left_signs = []
-    right_signs = []
-    
-    center_maxs = []
-    center_mins = []
-    max_inds = relEx(center[:,2], np.greater)[0]
-    min_inds = relEx(center[:,2], np.less)[0]
-    
-    for i in max_inds:
-        x,y,p = center[i]
-        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
-        center_maxs.append([x,y,p])
-    
-
-    for i in min_inds:
-        x,y,p = center[i]
-        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
-        center_mins.append([x,y,p])
-    
-    sign_ref = 0
-    for (x, y, p) in left:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            left_signs.append([x,y])
-
-    sign_ref = 0
-    for (x, y, p) in right:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            right_signs.append([x,y])
-    
-    # order starting at y=yL not y=y0
-    center_maxs.reverse()
-    center_mins.reverse()
-    left_signs.reverse()
-    right_signs.reverse()
-    
-    return center_maxs, center_mins, left_signs, right_signs
-    
-def write_criticals(N):
-    maxs, mins, left, right = get_criticals(N)
-    
-    crits_filename = 'crits_stokes_N%d.csv'%N 
-    with open (crits_filename,'w', newline='') as file:
-        writer = csv.writer(file, delimiter=' ')
-
-        writer.writerow('xy')
-        for (x, y) in left:
-            writer.writerow([x,y])
-                
-        writer.writerow('xy')
-        for (x, y) in right:
-            writer.writerow([x,y])
-
-        writer.writerow('xyp')
-        for (x, y, p) in maxs:
-            writer.writerow([x,y,p])
-            
-        writer.writerow('xyp')
-        for (x, y, p) in mins:
-            writer.writerow([x,y,p])
-
-
-def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
-    tru_maxs, tru_mins, tru_left, tru_right = get_criticals(N_max)
-    
-    M = len(Ns)
-    a = len(tru_maxs)
-    b = len(tru_mins)
-    c = len(tru_left)
-    d = len(tru_right)
-    
-    err_maxs = np.zeros((M, a))  # error in stream maximums along x=0.5
-    err_mins = np.zeros((M, b))  #   ''       ''   minimums  ''
-    err_left = np.zeros((M, c))  # error in saddle point y along left boundary
-    err_right = np.zeros((M, d)) #  ''        ''         ''      right   ''
-    
-    for i in range(M):
-        N = Ns[i]
-        
-        N_maxs, N_mins,  N_left, N_right = get_criticals(N)
-        #index [[x,y,stream]] and [[x,y]] 
-        
-        for j in range(a):
-            if j < len(N_maxs):                 
-                err_maxs[i, j] = np.abs(tru_maxs[j][2] - N_maxs[j][2])
-            else:
-                err_maxs[i, j] = None #tru_maxs[j][2]
-         
-        for j in range(b):
-            if j < len(N_mins):             
-                err_mins[i, j] = np.abs(tru_mins[j][2] - N_mins[j][2])
-            else:
-                err_mins[i, j] = None #tru_mins[j][2]
-            
-        for j in range(c):
-            if j < len(N_left): #[1] = y
-                err_left[i, j] = np.abs(tru_left[j][1] - N_left[j][1])
-            else:
-                err_left[i, j] = None #tru_left[j][1]
-        
-        for j in range(d):
-            if j < len(N_right):
-                err_right[i, j] = np.abs(tru_right[j][1] - N_right[j][1])
-            else:
-                err_right[i, j] = None #tru_right[j][1]
-        
-    return err_maxs.T, err_mins.T, err_left.T, err_right.T
-   
-# plot_compare_N([120,240,512,1000],2000)     
-def plot_compare_N(Ns, N_max):
-    err_maxs, err_mins, err_left, err_right = compare_N(Ns, N_max)
-    
-    title_maxs = "Error to $N^{*}=$%d in stream-max along $x_c=0.5$"%N_max
-    title_mins = "Error to $N^{*}=$%d in stream-min along $x_c=0.5$"%N_max
-    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
-    
-    n_feats = 3
-    
-    labels_stream_maxs = np.arange(1, n_feats+1)
-    labels_stream_mins = np.arange(1, n_feats+1)
-    
-    graphics.plot_log_multi(err_maxs[:n_feats], Ns, title_maxs, labels_stream_maxs, ax_labels_stream)
-    graphics.plot_log_multi(err_mins[:n_feats], Ns, title_mins, labels_stream_mins, ax_labels_stream)
-    
-    title_left = "Error to $N^{*}=$%d in saddle-$y$ along left boundary"%N_max
-    title_right = "Error to $N^{*}=$%d in saddle-$y$ along right boundary"%N_max
-    ax_labels_saddle = ["N", "$|y_{N^{*}} - y_{N}|$"]
-    
-    labels_stream_left = np.arange(1, n_feats+1)
-    labels_stream_right = np.arange(1, n_feats+1)
-    
-    graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
-    graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
-    

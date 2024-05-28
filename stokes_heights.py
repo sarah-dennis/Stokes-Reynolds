@@ -23,7 +23,23 @@ class triangle(Height):
         # self.m = (yf-y0)*N + 1
         
         Nx = (xf-x0)*N + 1
+        self.apex = Nx//2
         hs = np.zeros(Nx) # Reynolds needs this, Stokes its built into dPsi
         # TODO: make hs since it could be helpful to make for plotting
         
+        
+        
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
+        
+    def is_interior(self, i,j):
+        if i == 0 or j == 0 or i == self.Nx-1 or j == self.Ny-1:
+            return False 
+   
+        elif  (i < self.apex and j < (self.Ny-1) - self.slope*i):
+            return False
+        
+        elif  (i > self.apex and j < self.slope * (i - self.apex)):
+            return False
+          
+        else:
+            return True
