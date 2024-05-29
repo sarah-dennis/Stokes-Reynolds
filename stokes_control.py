@@ -23,7 +23,7 @@ from stokes_solver_bcg import run_bicgstab
 bicgstab_rtol = 1e-8
 
 write_mod = 250
-error_mod = 500
+error_mod = 250
 
 import stokes_examples as examples
 

@@ -11,13 +11,14 @@ from stokes_solver_helpers import uv_approx, mirror_boundary
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 
-#TODO: changed order so mirror then uv approx
 def run_spLU(tri, u, v, old_psi, iters, past_iters, error_mod, write_mod):
     t0 = time.time()
+    
     M = Dpsi_cscmatrixBuild(tri)
     LU = splu(M)
     psi_mirr = mirror_boundary(tri, old_psi)
     rhs = update_rhs(tri, u, v, psi_mirr)
+    
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(tri.N, t_k0-t0))
      
@@ -65,16 +66,8 @@ def Dpsi_cscmatrixBuild(tri):
     m = tri.Ny
     n = tri.Nx
 
-    # slope = tri.slope
-    # nc = n//2
     mat = DPsi_Mat(m, n)
-    # coefs = np.zeros(m*n*9)
-    # row = np.zeros(m*n*9)
-    # col = np.zeros(m*n*9)
 
-    
-    # s=0
-    
     for k in range(m*n):
     
         i = k % n
@@ -85,77 +78,37 @@ def Dpsi_cscmatrixBuild(tri):
         # Identity row for exterior points
         if not tri.is_interior(i, j):
             mat.append(k, k, 1)
-            # row[s] = k
-            # col[s] = k
-            # coefs[s] = 1
-            # s+=1
-        
-        # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
-        else: #i,j is interior --> check 8 nbrs 
-            mat.append(k, k, 28)
-            # row[s] = k
-            # col[s] = k
-            # coefs[s] = 28
-            # s+=1
             
+        # i,j is interior --> check 8 nbrs 
+        # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
+        else: 
+            mat.append(k, k, 28)
+
             if tri.is_interior(i-1, j):
                 mat.append(k, j*n + i-1, -8)
-                # row[s] = k
-                # col[s] = j*n + i - 1
-                # coefs[s] = -8
-                # s+=1 
-            
+
             if tri.is_interior(i+1, j):
                 mat.append(k, j*n + i+1, -8)
-                # row[s] = k
-                # col[s] = j*n + i + 1
-                # coefs[s] = -8
-                # s+=1 
             
             if tri.is_interior(i, j-1):
                 mat.append(k, (j-1)*n + i, -8)
-                # row[s] = k
-                # col[s] = (j-1)*n + i
-                # coefs[s] = -8
-                # s+=1
-            
             
             if tri.is_interior(i, j+1):
                 mat.append(k, (j+1)*n + i, -8)
-                # row[s] = k
-                # col[s] = (j+1)*n + i
-                # coefs[s] = -8
-                # s+=1
                 
             if tri.is_interior(i-1, j-1):
                 mat.append(k, (j-1)*n + i-1, 1)  
-                # row[s] = k
-                # col[s] = (j-1)*n + i-1
-                # coefs[s] = 1
-                # s+=1
 
             if tri.is_interior(i+1, j-1):
                 mat.append(k, (j-1)*n + i+1, 1)
-                # row[s] = k
-                # col[s] = (j-1)*n + i+1
-                # coefs[s] = 1
-                # s+=1
 
             if tri.is_interior(i-1, j+1):
                 mat.append(k, (j+1)*n + i-1, 1)
-                # row[s] = k
-                # col[s] = (j+1)*n + i-1
-                # coefs[s] = 1
-                # s+=1
 
             if tri.is_interior(i+1, j+1):
                 mat.append(k, (j+1)*n + i+1, 1)
-                # row[s] = k
-                # col[s] = (j+1)*n + i+1
-                # coefs[s] = 1
-                # s+=1
-            
-            # if nbr is exterior... adjust on rhs (each iteration, relies on updated psi)
+
+            # if nbr is exterior... adjust on rhs each iteration
 
     csc_mat = csc_matrix((mat.coefs, (mat.row, mat.col)), (m*n, m*n))
 
@@ -172,13 +125,10 @@ def Dpsi_cscmatrixBuild(tri):
 def update_rhs(tri, u, v, psi_mirr): #
     
     n = tri.Nx 
-    # nc = tri.apex # i-index of triangle apex
     m = tri.Ny
     
     rhs = np.zeros(n*m)
 
-
-    # slope = tri.slope
     U = tri.U
     
     c0 = 3 * tri.dx
@@ -188,13 +138,6 @@ def update_rhs(tri, u, v, psi_mirr): #
         i = k % n
         j = k // n
 
-        # boundary & exterior zones
-        # if i == 0 or j == 0 or i == n-1 or j == m-1:
-        #     rhs[k] = 0
-               
-        # elif (i < nc and j < (m-1) - slope*i) or (i > nc and j < slope * (i - nc)):
-        #     rhs[k] = 0
-        
         if not tri.is_interior(i,j):
             rhs[k] = 0
         

@@ -171,13 +171,14 @@ def plot_compare_N(Ns, N_max):
     title_mins = "Error to $N^{*}=$%d in stream-min along $x_c=0.5$"%N_max
     ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
     
-    n_feats = 5
+    n_feats = 2
     
-    labels_stream_maxs = np.arange(1, n_feats+1)
-    labels_stream_mins = np.arange(1, n_feats+1)
+    labels_stream_maxs = ['max %d'%i for i in np.arange(1, n_feats+1)]
+    labels_stream_mins = ['min %d'%i for i in np.arange(1, n_feats+1)]
     
-    graphics.plot_log_multi(err_maxs[:n_feats], Ns, title_maxs, labels_stream_maxs, ax_labels_stream)
     graphics.plot_log_multi(err_mins[:n_feats], Ns, title_mins, labels_stream_mins, ax_labels_stream)
+    graphics.plot_log_multi(err_maxs[:n_feats], Ns, title_maxs, labels_stream_maxs, ax_labels_stream)
+
     
     title_left = "Error to $N^{*}=$%d in saddle-$y$ along left boundary"%N_max
     title_right = "Error to $N^{*}=$%d in saddle-$y$ along right boundary"%N_max

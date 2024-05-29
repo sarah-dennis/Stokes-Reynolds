@@ -96,7 +96,7 @@ def mirror_boundary(tri, psi):
     dx = tri.dx
     i_mid = n//2
     
-    for j in range(m-1):
+    for j in range(slope, m-1):
         
         dj = j % slope #j-index within sub triangle between two true boundary points
         di = int(j//slope) 
@@ -109,11 +109,16 @@ def mirror_boundary(tri, psi):
             psi_mirr[k_right] = 0
         
         else:
-    
+
             # psi_mirr[k_left-1] = (1 - dj*dx/slope)*psi[k_left]
             # psi_mirr[k_right+1] = (1 + dj*dx/slope)*psi[k_right] 
-            psi_mirr[k_left-1] = -psi[k_left] * dx*dj/(slope-dj)
-            psi_mirr[k_right+1] = -psi[k_right] * dx*dj/(slope-dj)
+            # psi_mirr[k_left-1] = -psi[k_left] * dx*dj/(slope-dj)
+            # psi_mirr[k_right+1] = -psi[k_right] * dx*dj/(slope-dj)
+            psi_mirr[k_right+1] = psi[k_right] * (dj - slope)/dj
+            psi_mirr[k_left-1] =  psi[k_left] * (dj - slope)/dj
+            
+            # print(psi_mirr[k_left-1]+ (slope-dj)/slope * (psi[k_left] - psi_mirr[k_left-1] ) )
+            # print(psi_mirr[k_right+1]+ (slope-dj)/slope * (psi[k_right] - psi_mirr[k_right+1] ) )
 
     return psi_mirr
         
