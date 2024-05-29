@@ -217,6 +217,7 @@ def update_rhs(tri, u, v, psi_mirr): #
 
             rhs[k] = c0 * A + c1 * (B - C) + dpsi_bc
 
+
     return rhs
  
 

@@ -57,7 +57,7 @@ def scatter_2D(fs, xs, title, axis):
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'orange', 'purple']
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
 
     for i in range(len(fs)):
         
@@ -305,8 +305,9 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     
     
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'orange', 'purple']
-    pp.rcParams["lines.linewidth"] = .5
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+
+    pp.rcParams["lines.linewidth"] = .8
     for i in range(len(fs)):
         ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
     
@@ -314,8 +315,8 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     # reference lines
     O_l = 10
     O_q = 30
-    ax.loglog(xs, [O_l*x**-1 for x in xs], label="$O(1/%s)$"%ax_labels[0], color='black')    
-    ax.loglog(xs, [O_q*x**-2 for x in xs], label="$O(1/%s^2)$"%ax_labels[0], color='grey')
+    ax.loglog(xs, [O_l*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
+    ax.loglog(xs, [O_q*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
     
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])

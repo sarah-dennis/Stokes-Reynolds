@@ -97,7 +97,7 @@ def load_plot(N):
 # Stream: Psi(x,y) heat & contour
     stream_2D = psi.reshape((tri.Ny,tri.Nx))
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, $k=%d$)'%(tri.N, past_iters)
+    title = 'Stream ($N=%d$)'%(tri.N)
     graphics.plot_contour_heat(stream_2D, xs, ys, title, ax_labels)
       
 #  Velocity: (U, V)  streamplot
@@ -105,7 +105,7 @@ def load_plot(N):
     v_2D = v.reshape((m,n))
     
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$, $k=%d$)'%(tri.N, past_iters)
+    title = 'Velocity ($N=%d$)'%(tri.N)
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels)
     # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
@@ -118,5 +118,5 @@ def load_plot(N):
         for i in range(n):   
             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, $k=%d$)'%(tri.N, past_iters)
+    title = 'Vorticity ($N=%d$)'%(tri.N)
     graphics.plot_contour_heat(w, xs, ys, title, ax_labels)
