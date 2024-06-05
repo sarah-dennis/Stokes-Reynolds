@@ -5,22 +5,26 @@ Created on Mon May 22 15:05:40 2023
 @author: sarahdennis
 """
 import csv
-
 import reyn_examples as rex
 
-solution = rex.FinDiff_Ex1()
-# solution = rex.Sinusoidal_Ex1() #TODO ignores boundary pressures
+# solution = rex.FinDiff_Ex1()
+# solution = rex.FinDiff_Ex2()
 # solution = rex.Constant_Ex1()
-# solution = rex.Linear_Ex1()       #TODO ignores boundary pressures
+# solution = rex.Linear_Ex1()       
 # solution = rex.Step_Ex1()
 # solution = rex.StepWave_Ex1()
 # solution = rex.StepWave_Ex2()
 # solution = rex.Sawtooth_Ex1()
+# solution = rex.Sawtooth_Ex2()
+
+solution = rex.StepWave_Ex3()
 
 #------------------------------------------------------------------------------
 # plotting 
 #------------------------------------------------------------------------------
-solution.plot_ph()
+# solution.plot_ph()
+solution.plot_p()
+# solution.plot_h()
 solution.plot_v()
 
 #------------------------------------------------------------------------------

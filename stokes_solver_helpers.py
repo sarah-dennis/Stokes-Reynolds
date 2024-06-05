@@ -4,8 +4,7 @@ Created on Tue May 21 13:58:57 2024
 
 @author: sarah
 """
-import numpy as np
-import graphics
+
 # -----------------------------------------------------------------------------
 
 # Velocity <-> Stream update
@@ -95,11 +94,10 @@ def mirror_boundary(tri, psi):
     slope = tri.slope
 
     i_mid = n//2
-    
     for j in range(slope, m-1):
         
-        dj = j % slope #height-index within sub triangle 
-        di = int(j//slope) 
+        dj = j % slope #j-distance above last known boundary 
+        di = int(j//slope) #i-distance left or right from apex
         
         # index of interior points nearest to boundary \*...*/
         k_left = j*n + i_mid - di
@@ -108,15 +106,22 @@ def mirror_boundary(tri, psi):
         if dj == 0: # then
             psi_mirr[k_left] = 0 
             psi_mirr[k_right] = 0
-        
+
         else:
 
             psi_mirr[k_right+1] = psi[k_right] * (dj - slope)/dj
             psi_mirr[k_left-1] =  psi[k_left] *  (dj - slope)/dj
             
-            # print( psi_mirr[k_left-1]  + (slope-dj)/slope * (psi[k_left]  - psi_mirr[k_left-1]  ) )
-            # print( psi_mirr[k_right+1] + (slope-dj)/slope * (psi[k_right] - psi_mirr[k_right+1] ) )
+            # bdry_left = psi_mirr[k_left-1]  + (slope-dj)/slope * (psi[k_left]  - psi_mirr[k_left-1]) # == 0
+            # bdry_right = psi_mirr[k_right+1] + (slope-dj)/slope * (psi[k_right] - psi_mirr[k_right+1] ) # == 0
 
+    # Plot the mirrored boundary 
+    
+    # stream_2D = psi_mirr.reshape((tri.Ny,tri.Nx))
+    # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+    # title = 'Stream mirror ($N=%d$)'%(tri.N)
+    # graphics.plot_contour_heat(stream_2D, tri.xs, tri.ys, title, ax_labels)
+      
     return psi_mirr
         
 def unmirror_boundary(tri, psi):

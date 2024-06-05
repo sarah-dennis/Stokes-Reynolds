@@ -37,7 +37,7 @@ class Height(Domain):
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
-        self.hxs = center_second_diff(self.hs, self.Nx, self.dx)
+        self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
         self.h_str = h_str
         self.h_eq = "h(x)"

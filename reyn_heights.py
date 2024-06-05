@@ -22,8 +22,8 @@ class RandomHeight(Height):
         hs = np.zeros(Nx)
         for i in range (Nx):
             hs[i] = h_min + (h_max - h_min) * random.random()
-            y0 = 0
-            yf = 1.1*max(hs)
+        y0 = 0
+        yf = max(hs)
             
         U = 1    
         h_avg = np.mean(hs)
@@ -54,8 +54,11 @@ class SinsusoidalHeight(Height):
         Re = U*h_avg
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
 
+    # def h_fun(self, x):
+    #     return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+    
     def h_fun(self, x):
-        return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+        return self.h_mid * (1 + self.r * np.cos(self.k*x) + self.r/4 * np.sin(self.k*5*x))    
 
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):
@@ -78,7 +81,7 @@ class LinearHeight(Height): #slider bearing
         self.hf = hf
         self.x0 = x0
         self.m = (hf - h0)/(xf - x0)
-        
+        self.N_regions=1
         h_str = "Wedge Slider"
         Nx = (xf-x0)*N + 1
         dx = (xf - x0)/(Nx-1)
@@ -86,7 +89,7 @@ class LinearHeight(Height): #slider bearing
         hs = np.asarray([self.h_fun(x) for x in xs])
 
         y0 = 0
-        yf = 1.1*max(h0, hf)
+        yf = max(h0, hf)
         U = 1    
         h_avg = np.mean(hs)
         Re = U*h_avg
@@ -105,7 +108,7 @@ class StepWaveHeight(Height): # uniform width [h1, h2, ..., hN+1]
         h_str = "N=%d Step Height"%N_steps
         
         y0 = 0
-        yf = 1.1*max(h_steps)
+        yf = max(h_steps)
         Nx = (xf-x0)*N + 1
         hs = self.make_hs(x0, xf, Nx, N_steps, h_steps, self.step_width)
         U = 1    
@@ -147,7 +150,7 @@ class SawtoothHeight(Height):
 
         hs, self.slopes, self.widths = self.make_hs(x0, xf, Nx, x_peaks, h_peaks)
         y0 = 0
-        yf = 1.1*max(hs)
+        yf = max(hs)
         U = 1    
         h_avg = np.mean(hs)
         Re = U*h_avg

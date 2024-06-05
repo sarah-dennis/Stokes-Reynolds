@@ -27,15 +27,15 @@ def plot_3D(f_2D, xs, zs, title):
     ax.view_init(theta, phi)
     
 #------------------------------------------------------------------------------
-def plot_2D(fs, xs, title, axis):
+def plot_2D(fs, xs, title, axis_labels, color='b'):
     fig = pp.figure()
     pp.plot(xs, fs, color='b', linewidth=.8)
 
     pp.title(title, fontweight="bold")
     
-    pp.xlabel(axis[0])
+    pp.xlabel(axis_labels[0])
     
-    pp.ylabel(axis[1])
+    pp.ylabel(axis_labels[1])
     # pp.ylim(0, 1.1*max(fs))
     
     return fig
@@ -121,7 +121,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     ax.set_ylim(0,1.01*h_max)
     pp.show()
     
@@ -150,8 +150,8 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
 
-    ax.set_aspect('equal')
-    ax.set_ylim(0,2) #min max ys
+    # ax.set_aspect('equal')
+    ax.set_ylim(0,max(ys)) #min max ys
     pp.show()
 
 def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
@@ -161,18 +161,18 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
     
-    m = len(ys)/len(xs)
+    # m = len(ys)/len(xs)
     h_max = max(ys)
-    stream_density_unbroken=[1,.6*m] 
+    # stream_density_unbroken=[1,.6*m] 
     
     
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
+    pp.streamplot(xs, ys, vx, vy, linewidth=0.5, color='k', broken_streamlines=False)
     
     ax = pp.gca()
-    for art in ax.get_children():
-        if not isinstance(art, patches.FancyArrowPatch):
-            continue
-        art.remove()        
+    # for art in ax.get_children():
+    #     if not isinstance(art, patches.FancyArrowPatch):
+    #         continue
+    #     art.remove()        
     
     pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
     
@@ -180,13 +180,15 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     ax.set_ylim(0,h_max)
     # pp.legend(loc='upper left')
     pp.show()
     
 def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
-    
+
+    v_scale = .5
+
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
@@ -196,11 +198,12 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     n = len(xs)
     h_max = max(ys)
     
-    quiver_density = 50
+    quiver_density = (10, 150)
     vx = mask(vx, ys, hs, m, n, quiver_density)
     vy = mask(vy, ys, hs, m, n, quiver_density)
     
-    pp.quiver(xs, ys, vx, vy, color='k', scale=8, scale_units='x')
+
+    pp.quiver(xs, ys, vx, vy, color='k', width=.001, scale=v_scale, scale_units='x')
     pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
     
     pp.title(title, fontweight="bold")
@@ -209,18 +212,18 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     ax = pp.gca()
 
     # ax.set_aspect('equal')
-    ax.set_ylim(0,1.25*h_max)
+    ax.set_ylim(0,h_max)
     pp.legend(loc='upper left')
     pp.show()
 
 def mask(grid, ys, hs, m, n, density):
     mask = grid.copy()
-    
+    j_mod, i_mod = density
     for j in range(m):
         for i in range(n):
             if ys[j] > hs[i]:
                 mask[j,i] = None
-            elif i % density != 0 or j%density != 0:
+            elif i % i_mod != 0 or j%j_mod!= 0:
                     mask[j,i] = None
     return mask
         
@@ -283,7 +286,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     pp.ylabel(labels[2])
     
     ax = pp.gca()
-    ax.set_aspect('equal', 'box')
+    # ax.set_aspect('equal', 'box')
     pp.show()    
 #------------------------------------------------------------------------------   
 

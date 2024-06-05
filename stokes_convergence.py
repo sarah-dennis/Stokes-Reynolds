@@ -10,11 +10,48 @@ import stokes_examples as examples
 import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
 
-def stream_error(tri, past_psi, new_psi, i): 
-    max_err = np.max(np.abs(past_psi - new_psi))
-    print(" k=%d max error: %.4e psi"%(i, max_err))
+#-------------------------------------------------------------------------------
+def get_criticals(N):
+    tri = examples.biswasEx(N)
+    u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
+    
+    left, right = get_boundary(tri, psi)
+    center = get_center(tri, psi)
+    
+    left_signs = []
+    right_signs = []
+    
+    center_extrs = []
 
-# ----- Error found along y center line and diagonal boundaries
+    extr_inds = relEx(abs(center[:,2]), np.greater)[0]
+  
+    for i in extr_inds:
+        x,y,p = center[i]
+        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
+        center_extrs.append([x,y,p])
+    
+    
+    sign_ref = 0
+    for (x, y, p) in left:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            left_signs.append([x,y])
+
+    sign_ref = 0
+    for (x, y, p) in right:
+        sign_new = np.sign(p)
+        if sign_new != 0 and sign_new != sign_ref:
+            sign_ref = sign_new
+            right_signs.append([x,y])
+    
+    # order starting at y=yL not y=y0
+    left_signs.reverse()
+    right_signs.reverse()
+    center_extrs.reverse()
+    
+    return center_extrs, left_signs, right_signs
+
 def get_boundary(tri, psi):
     n = tri.Nx
     m = tri.Ny
@@ -66,49 +103,60 @@ def get_center(tri, psi):
         
     return center
 
-#-------------------------------------------------------------------------------
-def get_criticals(N):
-    tri = examples.biswasEx(N)
-    u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
-    
-    left, right = get_boundary(tri, psi)
-    center = get_center(tri, psi)
-    
-    left_signs = []
-    right_signs = []
-    
-    center_extrs = []
 
-    extr_inds = relEx(abs(center[:,2]), np.greater)[0]
-  
-    for i in extr_inds:
-        x,y,p = center[i]
-        # print("(x:%.1f, y:%.6f) p=%.5e"% (x,y,p))
-        center_extrs.append([x,y,p])
-    
-    
-    sign_ref = 0
-    for (x, y, p) in left:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            left_signs.append([x,y])
 
-    sign_ref = 0
-    for (x, y, p) in right:
-        sign_new = np.sign(p)
-        if sign_new != 0 and sign_new != sign_ref:
-            sign_ref = sign_new
-            right_signs.append([x,y])
-    
-    # order starting at y=yL not y=y0
-    left_signs.reverse()
-    right_signs.reverse()
-    center_extrs.reverse()
-    
-    return center_extrs, left_signs, right_signs
-    
 
+#------------------------------------------------------------------------------
+
+def get_all_error(N_c, N_f):
+    
+    
+    
+    if N_f % N_c != 0:
+        
+        return Exception("misaligned grid (Course: %d, Fine: %d)"%(N_c, N_f))
+    
+    
+    tri_c = examples.biswasEx(N_c)
+    u_c, v_c, psi_c, past_iters = rw.read_solution(tri_c.filename+".csv", tri_c.Nx * tri_c.Ny)
+    
+    tri_f = examples.biswasEx(N_f)
+    u_f, v_f, psi_f, past_iters = rw.read_solution(tri_f.filename+".csv", tri_f.Nx * tri_f.Ny)
+    
+    
+    
+    stream_c = psi_c.reshape(tri_c.Ny, tri_c.Nx)
+    u_c = u_c.reshape(tri_c.Ny, tri_c.Nx)
+    v_c = v_c.reshape(tri_c.Ny, tri_c.Nx)
+    uv_c = np.dstack((u_c, v_c))
+    
+    stream_f = psi_f.reshape(tri_f.Ny, tri_f.Nx)
+    u_f = u_f.reshape(tri_f.Ny, tri_f.Nx)
+    v_f = v_f.reshape(tri_f.Ny, tri_f.Nx)
+    uv_f = np.dstack((u_f, v_f))   
+    
+    
+    err = np.zeros((tri_c.Ny*tri_c.Nx))
+    
+    # N_f % N_c = 0, 
+
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------------
 
 def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
     tru_extrs, tru_left, tru_right = get_criticals(N_max)

@@ -13,11 +13,10 @@ class Velocity:
         self.vel_str = "Velocity for %s "%(height.h_str)
         self.vx, self.vy = self.make_velocity(height, ps)
     
-    # 2D velocity field from 1D pressure under Reynolds assumptions
+    # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
         visc = height.visc
-
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 

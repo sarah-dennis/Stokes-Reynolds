@@ -75,15 +75,16 @@ def Dpsi_cscmatrixBuild(tri):
         
         # k = j*n + i
         
-        # Identity row for exterior points
+        # exterior & boundry points --> identity row
         if not tri.is_interior(i, j):
+    
             mat.append(k, k, 1)
             
-        # i,j is interior --> check 8 nbrs 
+        # interior 
         # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
         else: 
             mat.append(k, k, 28)
-
+            # if a nbr is exterior... adjust on rhs each iteration
             if tri.is_interior(i-1, j):
                 mat.append(k, j*n + i-1, -8)
 
@@ -108,7 +109,7 @@ def Dpsi_cscmatrixBuild(tri):
             if tri.is_interior(i+1, j+1):
                 mat.append(k, (j+1)*n + i+1, 1)
 
-            # if nbr is exterior... adjust on rhs each iteration
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
     csc_mat = csc_matrix((mat.coefs, (mat.row, mat.col)), (m*n, m*n))
 
@@ -129,87 +130,76 @@ def update_rhs(tri, u, v, psi_mirr): #
     
     rhs = np.zeros(n*m)
 
-    U = tri.U
-    
     c0 = 3 * tri.dx
     c1 = 0.5 * tri.dx**2 * tri.Re
     
     for k in range(n*m):
         i = k % n
         j = k // n
-
+        
+        di = int(j//tri.slope) 
+        
+        #Psi = 0 for exterior and boundary
         if not tri.is_interior(i,j):
             rhs[k] = 0
         
-        # interior
-        else:
-
+        else: # interior
             # (u,v) at 9 point stencil
-            #k = j*n + i
+
             u_C = u[k]
             v_C = v[k]
-            dpsi_bc = 0
-            
-            # North (i, j+1) -- never exterior
+
+            # North (i, j+1) 
             k_N = (j+1)*n + i
-            if j+1 == m-1: 
-                u_N = U
-                v_N = 0
-            else:
-                u_N = u[k_N]
-                v_N = v[k_N]
-                
+            u_N = u[k_N]
+            v_N = v[k_N]
                 
             # East (i+1, j)                
             k_E = j*n + i + 1
-            if not tri.is_interior(i+1,j): 
-                u_E = 0
-                v_E = 0
-                dpsi_bc += 8 * psi_mirr[k_E]
-            else:
-                u_E = u[k_E]
-                v_E = v[k_E]
+            u_E = u[k_E]
+            v_E = v[k_E]
                 
             # South (i, j-1)
             k_S = (j-1)*n + i
-            if not tri.is_interior(i, j-1): 
-                u_S = 0
-                v_S = 0
-                dpsi_bc += 8 * psi_mirr[k_S]
-            else:
-                u_S = u[k_S]
-                v_S = v[k_S]
+            u_S = u[k_S]
+            v_S = v[k_S]
                 
             # West (i-1, j)          
             k_W = j*n + i - 1
-            if not tri.is_interior(i-1, j): 
-                u_W = 0
-                v_W = 0
-                dpsi_bc += 8 * psi_mirr[k_W]
-            else:
+            u_W = u[k_W]
+            v_W = v[k_W]
+            
 
-                u_W = u[k_W]
-                v_W = v[k_W]
+            dpsi_bc = 0
+                                
+            #possible exterior nbrs west
+            if i == tri.apex - di:
                 
-            #NorthEast
-            k_NE = (j+1)*n + i+1
-            if not tri.is_interior(i+1, j+1): 
-                dpsi_bc += -1 * psi_mirr[k_NE]
+                if tri.bndry_nbrs[j,0]:                
+                    k_NW = (j+1)*n + i-1
+                    dpsi_bc += -1 * psi_mirr[k_NW]
 
-            #NorthWest
-            k_NW = (j+1)*n + i-1
-            if not tri.is_interior(i-1, j+1): 
-                dpsi_bc += -1 * psi_mirr[k_NW]
+                if tri.bndry_nbrs[j,1]:
+                    dpsi_bc += 8 * psi_mirr[k_W]
+                    
+                if tri.bndry_nbrs[j,2]:
+                    k_SW = (j-1)*n + i-1
+                    dpsi_bc += -1 * psi_mirr[k_SW]
+                    
+            # possible exterior nbrs east
+            if i == tri.apex + di:
 
-            #SouthEast
-            k_SE = (j-1)*n + i+1
-            if not tri.is_interior(i+1, j-1): 
-                dpsi_bc += -1 * psi_mirr[k_SE]
+                if tri.bndry_nbrs[j,3]:
+                    k_SE = (j-1)*n + i+1
+                    dpsi_bc += -1 * psi_mirr[k_SE]
+                
+                if tri.bndry_nbrs[j,4]:    
+                    dpsi_bc += 8 * psi_mirr[k_E]
+                    
+                if tri.bndry_nbrs[j,5]:
+                    k_NE = (j+1)*n + i+1
+                    dpsi_bc += -1 * psi_mirr[k_NE]
 
-            #SouthWest
-            k_SW = (j-1)*n + i-1
-            if not tri.is_interior(i-1, j-1): 
-                dpsi_bc += -1 * psi_mirr[k_SW]
 
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)

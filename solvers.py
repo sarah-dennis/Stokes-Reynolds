@@ -13,8 +13,8 @@ class P_Solver: #TODO rename Reyn_Solver
         self.solve = solveFun # returns ps #TODO: return velocity??
         self.p_str = p_str
         
-class StokesSolver:
-    def __init__(self, height, flux, solveFun):
-        self.height = height
-        self.Q = flux
-        self.solve = solveFun #returns psis, us, vs
+# class StokesSolver:
+#     def __init__(self, height, flux, solveFun):
+#         self.height = height
+#         self.Q = flux
+#         self.solve = solveFun #returns psis, us, vs

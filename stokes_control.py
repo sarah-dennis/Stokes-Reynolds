@@ -16,9 +16,11 @@ from scipy.interpolate import interpn
 
 import graphics
 from stokes_solver_helpers import unmirror_boundary
+
 import stokes_readwrite as rw
 from stokes_solver_spLU import run_spLU
-from stokes_solver_bcg import run_bicgstab
+# from stokes_solver_BFS_spLU import run_spLU 
+# from stokes_solver_bcg import run_bicgstab
 
 bicgstab_rtol = 1e-8
 
@@ -31,7 +33,7 @@ import stokes_examples as examples
 def new_run(N, iters):
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
-
+    # tri = examples.bfsEx(N)
     nm = tri.Nx * tri.Ny
 
     u_init = np.zeros(nm)
@@ -41,11 +43,12 @@ def new_run(N, iters):
 
     # u, v, psi = run_bicgstab(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
     u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
-    psi_unmirr = unmirror_boundary(tri, psi)
-    rw.write_solution(tri, u, v, psi_unmirr, iters)
+    # psi = unmirror_boundary(tri, psi)
+    rw.write_solution(tri, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     tri = examples.biswasEx(N)
+    # tri = examples.bfsEx(N)
     # tri = examples.zeroReynEx(N)
 
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
@@ -53,9 +56,9 @@ def load_run(N, iters):
     # u, v, psi = run(tri, u, v, psi, iters, past_iters)
     u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters, error_mod, write_mod)
     
-    psi_unmirr= unmirror_boundary(tri, psi)
-    rw.write_solution(tri, u, v, psi_unmirr, iters+past_iters)
+    # psi= unmirror_boundary(tri, psi)
 
+    rw.write_solution(tri, u, v, psi, iters+past_iters)
 
 def load_scale(N_load, N_new):
     tri_load = examples.biswasEx(N_load)
@@ -85,6 +88,7 @@ def load_scale(N_load, N_new):
 def load_plot(N):
     tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
+    # tri = examples.bfsEx(N)
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     n = tri.Nx
