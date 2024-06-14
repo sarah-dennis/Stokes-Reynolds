@@ -7,7 +7,6 @@ Created on Fri May 24 08:49:45 2024
 import numpy as np
 import time
 import stokes_readwrite as rw
-from stokes_solver_BFS_helpers import uv_approx
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 
@@ -16,19 +15,19 @@ def run_spLU(tri, u, v, old_psi, iters, past_iters, error_mod, write_mod):
     
     M = Dpsi_cscmatrixBuild(tri)
     LU = splu(M)
-    rhs = update_rhs(tri, u, v, old_psi)
-    
+
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(tri.N, t_k0-t0))
-     
+    
     for k in range(iters): 
         t_ki = time.time()
+        
+        u, v = uv_approx(tri, u, v, old_psi) 
+        
+        rhs = update_rhs(tri, u, v)
     
         psi = LU.solve(rhs)
 
-        u, v = uv_approx(tri, u, v, psi)
-        
-        rhs = update_rhs(tri, u, v, psi)
         t_kj = time.time()
         
         if k % error_mod == 0: 
@@ -72,7 +71,7 @@ def Dpsi_cscmatrixBuild(tri):
         
         # k = j*n + i
         
-        # exterior & boundry points --> identity row
+        # exterior & boundry points --> identity row, set by rhs
         if not tri.is_interior(i, j):
     
             mat.append(k, k, 1)
@@ -81,38 +80,32 @@ def Dpsi_cscmatrixBuild(tri):
         # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
         else: 
             mat.append(k, k, 28)
-            # if a nbr is exterior... adjust on rhs each iteration
+            
+            # if a nbr is on the boundary... nothing changes, the boundary is solved with identity rows
+            # with rect-lin shape nbrs don't fall in the exterior
+            
             mat.append(k, j*n + i-1, -8)
-
             mat.append(k, j*n + i+1, -8)
-            
             mat.append(k, (j-1)*n + i, -8)
-            
             mat.append(k, (j+1)*n + i, -8)
                 
             mat.append(k, (j-1)*n + i-1, 1)  
-
             mat.append(k, (j-1)*n + i+1, 1)
-
             mat.append(k, (j+1)*n + i-1, 1)
-
             mat.append(k, (j+1)*n + i+1, 1)
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-
+            
     csc_mat = csc_matrix((mat.coefs, (mat.row, mat.col)), (m*n, m*n))
 
     return csc_mat
 
 
 # -----------------------------------------------------------------------------
-# rhs = c0*A + c1*(B - C) + Dpsi_bc
-
+# rhs = c0*A + c1*(B - C) 
 # A = u_S - u_N + v_E - v_W
 # B = v_C * (u_E + u_W + u_N + u_S)
 # C = u_C * (v_E + v_W + v_N + v_S)
 
-def update_rhs(tri, u, v, psi_mirr): #
+def update_rhs(tri, u, v): #
     
     n = tri.Nx 
     m = tri.Ny
@@ -126,21 +119,16 @@ def update_rhs(tri, u, v, psi_mirr): #
         i = k % n
         j = k // n
         
-        if j == m-1: # moving surface
+        if j == m-1: # moving upper surface
             rhs[k]= tri.flux
             
-        elif i == 0:#stream inlet
-            y = j*n + i
-            rhs[k] = tri.streamInlet(y)
+        elif i == 0: # inlet
+            rhs[k] = tri.streamInlet(j)
         
-        elif i == n-1:
-            y = j*n + i
-            rhs[k] = tri.streamOutlet(y)
-        
+        elif i == n-1: # outlet
+            rhs[k] = tri.streamOutlet(j)
 
-            
-        #Psi = 0 for exterior
-        if not tri.is_interior(i,j):
+        elif not tri.is_interior(i,j):
             rhs[k] = 0
         
         else: # interior
@@ -174,16 +162,85 @@ def update_rhs(tri, u, v, psi_mirr): #
             B = v_C * (u_E + u_W + u_N + u_S)
             C = u_C * (v_E + v_W + v_N + v_S)
 
-            try:
-                rhs[k] = c0 * A + c1 * (B - C)
-            except:
-                rhs[k]=0
+            rhs[k] = c0 * A + c1 * (B - C)
+
 
 
     return rhs
  
 
-        
+def uv_approx(tri, u, v, psi):
+
+    
+    n = tri.Nx
+    m = tri.Ny
+
+    U = tri.U
+    
+    c2 = 3/(4*tri.dx)
+    c3 = 1/4
+
+    for k in range(n*m):
+        i = k % n
+        j = k // n
+
+        # y=yL moving boundary
+        if j == m-1: 
+            u[k] = U
+            v[k] = 0 
+            
+        elif i == 0: #inlet
+            u[k] = tri.velInlet(j)
+            v[k] = 0 
+            
+        elif i == n-1: #outlet
+
+            u[k] = tri.velOutlet(j)
+            v[k] = 0 
+            
+        # other boundaries & dead zones
+        elif not tri.is_interior(i,j):
+            u[k] = 0
+            v[k] = 0 
+                
+        else: #interior
+            # (u,v) at 4 point stencil
+            if j+1 == m-1:
+                u_N = U
+                psi_N = tri.flux
+            else:
+                k_N = (j+1)*n + i
+                u_N = u[k_N]
+                psi_N = psi[k_N]
+          
+            if tri.is_lowerbndry(i,j):
+                u_S = 0
+                psi_S = 0
+            else:
+                k_S = (j-1)*n + i
+                u_S = u[k_S]
+                psi_S = psi[k_S]    
+            
+            if i+1 == n-1:
+                v_E = 0 
+                psi_E = tri.streamOutlet(j)
+            else:
+                k_E = j*n + i + 1
+                v_E = v[k_E]
+                psi_E = psi[k_E] 
+            
+            if i-1 == 0:
+                v_W = 0
+                psi_W = tri.streamInlet(j)
+            else:
+                k_W = j*n + i - 1
+                v_W = v[k_W]
+                psi_W = psi[k_W]
+
+            u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
+            v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
+    
+    return u, v        
         
         
 

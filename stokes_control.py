@@ -6,20 +6,17 @@ Created on Mon Jan 22 14:59:46 2024
 @author: sarahdennis
 """
 
-import time
 import numpy as np
-
-
 
 from scipy.interpolate import interpn
 
 
 import graphics
-from stokes_solver_helpers import unmirror_boundary
 
 import stokes_readwrite as rw
-from stokes_solver_spLU import run_spLU
-# from stokes_solver_BFS_spLU import run_spLU 
+
+# from stokes_solver_spLU import run_spLU
+from stokes_solver_BFS_spLU import run_spLU 
 # from stokes_solver_bcg import run_bicgstab
 
 bicgstab_rtol = 1e-8
@@ -31,14 +28,16 @@ import stokes_examples as examples
 
 #------------------------------------------------------------------------------
 def new_run(N, iters):
-    tri = examples.biswasEx(N)
+    # tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
-    # tri = examples.bfsEx(N)
-    nm = tri.Nx * tri.Ny
+    tri = examples.bfsEx(N)
+    tri = examples.bfsEx_3(N)
+    
+    # tri = examples.bfs2Ex(N)
 
-    u_init = np.zeros(nm)
-    v_init = np.zeros(nm)
-    psi_init = np.zeros(nm)
+    u_init = np.zeros(tri.Nx * tri.Ny)
+    v_init = np.zeros(tri.Nx * tri.Ny)
+    psi_init = np.zeros(tri.Nx * tri.Ny)
     past_iters = 0
 
     # u, v, psi = run_bicgstab(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
@@ -47,8 +46,10 @@ def new_run(N, iters):
     rw.write_solution(tri, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
-    tri = examples.biswasEx(N)
+    # tri = examples.biswasEx(N)
     # tri = examples.bfsEx(N)
+    tri = examples.bfsEx_3(N)
+    # tri = examples.bfs2Ex(N)
     # tri = examples.zeroReynEx(N)
 
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
@@ -60,8 +61,10 @@ def load_run(N, iters):
 
     rw.write_solution(tri, u, v, psi, iters+past_iters)
 
-def load_scale(N_load, N_new):
+def load_scale(N_load, N_scale):
     tri_load = examples.biswasEx(N_load)
+    tri_scale = examples.biswasEx(N_scale)
+    
     points_load = (tri_load.ys, tri_load.xs)
     
     u_load, v_load, psi_load, past_iters = rw.read_solution(tri_load.filename+".csv", tri_load.Ny*tri_load.Nx)
@@ -69,7 +72,7 @@ def load_scale(N_load, N_new):
     v_load_2D = v_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
     psi_load_2D = psi_load.reshape((tri_load.Ny,tri_load.Nx), order='F')
 
-    tri_scale = examples.biswasEx(N_new)
+
     points_scale = np.meshgrid(tri_scale.ys, tri_scale.xs)
     
     u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale), method='linear')
@@ -81,14 +84,16 @@ def load_scale(N_load, N_new):
     psi_scaled = psi_scaled_2D.ravel()
 
     rw.write_solution(tri_scale, u_scaled, v_scaled, psi_scaled, 0)
-     
+    
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
 def load_plot(N):
-    tri = examples.biswasEx(N)
+    # tri = examples.biswasEx(N)
     # tri = examples.zeroReynEx(N)
     # tri = examples.bfsEx(N)
+    tri = examples.bfsEx_3(N)
+    # tri = examples.bfs2Ex(N)
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     n = tri.Nx

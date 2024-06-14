@@ -140,10 +140,10 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
     stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
-    for art in ax.get_children():
-        if not isinstance(art, patches.FancyArrowPatch):
-            continue
-        art.remove()        
+    # for art in ax.get_children():
+    #     if not isinstance(art, patches.FancyArrowPatch):
+    #         continue
+    #     art.remove()        
     
 
     pp.title(title, fontweight="bold")

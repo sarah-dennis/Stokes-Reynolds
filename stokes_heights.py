@@ -74,94 +74,105 @@ class triangle(Height):
 
 class step(Height):
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step):
-        #y0 = 0, yf=2
-        self.filename = filestr             
+        #y0=hmin, yf=hmax
+        #x0=inlet, xf=outlet
+                    
         Nx = (xf-x0)*N + 1
         
         Ny = (yf - y0)*N + 1
           
         hs = np.zeros(Nx)
         
+        self.filename = filestr 
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
         
-
-        self.step = Nx//x_step
+        #xi where step occurs
+        self.i_step = Nx//x_step
     
-        self.hj_in = Ny//y_step 
-        self.hx_in = self.y0 + self.hj_in*self.dy
+        #yj = h(xi) lower indices at inlet & outlet
+        self.jf_in = Ny//y_step 
+        self.jf_out = y0
         
-        self.hj_out = 0
-        self.hx_out = self.y0 + self.hj_out*self.dy
-
-        self.flux = Q
+        self.hf_in = self.y0 + self.jf_in*self.dy
+        self.hf_out = self.y0 + self.jf_out*self.dy
         
-    
+        self.H_in = self.yf - self.hf_in
+        self.H_out = self.yf - self.hf_out
+        
+        self.flux = Q # = stream(x, hc=yf)
+        self.dp_in =  (self.flux - 0.5*self.U*self.H_in)   * (-12 / self.H_in**3)
+        self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
+        
+        
     def is_interior(self, i, j):
         if i == 0 or j == 0 or i == self.Nx-1 or j == self.Ny-1:
             return False 
    
-        elif  (i <= self.step and j <= self.hj_in):
+        elif  (i <= self.i_step and j <= self.jf_in):
             return False
         
-        elif  (i > self.step and j <= self.hj_out):
+        elif  (i >= self.i_step and j <= self.jf_out):
             return False
 
         else:
             return True
-        
-    def stream(self, y, h0, hx):
-        dp = (self.flux - 0.5*self.U*(h0-hx)) * (-12 * (h0-hx)**-3)
-        
-        v = self.U/(h0-hx) * (0.5*y**2 - hx*y)
-        
-        p = -0.5*dp*((-1/3)*y**3 + (1/2)*(h0+hx)*y**2 - h0*hx*y)
-        
-        return v + p# + self.flux
-            
-    def velocity(self, y, h0, hx):
-        dp = (self.flux - (self.U/2)*(h0-hx))*(-12/(h0-hx)**3)
-        return self.U/(h0-hx) - 0.5*dp*(h0-y)*(y-hx)
     
-    
-    def streamInlet(self, y):
-        h0 = self.yf           #upper boundary moving y=h0
-        hx = self.hx_in        #lower boundary y=h(x0)
+    def is_lowerbndry(self, i, j):
+        if  (i <= self.i_step and j == self.jf_in):
+            return True
         
-        if y > hx:
+        elif  (i >= self.i_step and j == self.jf_out):
+            return True
 
-            return self.stream(y, h0, hx)
+        
+    
+
+            
+    
+    def streamInlet(self, j):
+        
+        if j > self.jf_in:
+            y = self.y0 + j*self.dy
+
+            u_term = self.U* (0.5*y**2 - self.hf_in*y)/self.H_in
+        
+            dp_term = -0.5*self.dp_in*( (-1/3)*y**3 + 0.5*(self.yf+self.hf_in)*y**2 - self.yf*self.hf_in*y )
+            
+            return u_term + dp_term + self.flux
+        
         else:
             return 0
 
    
-    def streamOutlet(self, y):
-        h0 = self.yf            #upper boundary moving y=h0
-        hx = self.hx_out        #lower boundary y=h(xf)
+    def streamOutlet(self, j):
+
+        if j > self.jf_out:
         
-        if y > hx:
+            y = self.y0 + j*self.dy
+                  
+            u_term = self.U* (0.5*y**2 - self.hf_out*y)/self.H_out
+        
+            dp_term = -0.5*self.dp_out*( (-1/3)*y**3 + 0.5*(self.yf+self.hf_out)*y**2 - self.yf*self.hf_out*y )
             
-            return self.stream(y, h0, hx)
+            return u_term + dp_term + self.flux
         else:
             return 0
         
         
-        
-    def velInlet(self,y):
-        h0 = self.yf           #upper boundary moving y=h0
-        hx = self.hx_in        #lower boundary y=h(x0)
-        
-        if y > hx:
+    def velInlet(self,j):
 
-            return self.velocity(y, h0, hx)
+        if j > self.jf_in:
+            y = self.y0 + j*self.dy
+            u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
+            return  u
         else: 
             return 0
         
-    def velOutlet(self,y):
-        h0 = self.yf           #upper boundary moving y=h0
-        hx = self.hx_out        #lower boundary y=h(x0)
-        
-        if y > hx:
-            return self.velocity(y, h0, hx)
-        else: 
+    def velOutlet(self,j):
 
+        if j > self.jf_out:
+            y = self.y0 + j*self.dy
+            u = (self.U/self.H_out - 0.5*self.dp_out*(self.yf-y)) * (y-self.hf_out) 
+            return u
+        else: 
             return 0
