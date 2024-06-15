@@ -25,15 +25,17 @@ write_mod = 250
 error_mod = 250
 
 import stokes_examples as examples
+# example = examples.biswasEx
+# example = examples.zeroReynEx
+# example = examples.bfsEx
+# example = examples.bfsEx2
+example = examples.bfsEx3
+
+
 
 #------------------------------------------------------------------------------
 def new_run(N, iters):
-    # tri = examples.biswasEx(N)
-    # tri = examples.zeroReynEx(N)
-    tri = examples.bfsEx(N)
-    tri = examples.bfsEx_3(N)
-    
-    # tri = examples.bfs2Ex(N)
+    tri = example(N)
 
     u_init = np.zeros(tri.Nx * tri.Ny)
     v_init = np.zeros(tri.Nx * tri.Ny)
@@ -46,11 +48,7 @@ def new_run(N, iters):
     rw.write_solution(tri, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
-    # tri = examples.biswasEx(N)
-    # tri = examples.bfsEx(N)
-    tri = examples.bfsEx_3(N)
-    # tri = examples.bfs2Ex(N)
-    # tri = examples.zeroReynEx(N)
+    tri = example(N)
 
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
@@ -62,8 +60,8 @@ def load_run(N, iters):
     rw.write_solution(tri, u, v, psi, iters+past_iters)
 
 def load_scale(N_load, N_scale):
-    tri_load = examples.biswasEx(N_load)
-    tri_scale = examples.biswasEx(N_scale)
+    tri_load = example(N_load)
+    tri_scale = example(N_scale)
     
     points_load = (tri_load.ys, tri_load.xs)
     
@@ -89,11 +87,7 @@ def load_scale(N_load, N_scale):
 # PLOTTING 
 #------------------------------------------------------------------------------
 def load_plot(N):
-    # tri = examples.biswasEx(N)
-    # tri = examples.zeroReynEx(N)
-    # tri = examples.bfsEx(N)
-    tri = examples.bfsEx_3(N)
-    # tri = examples.bfs2Ex(N)
+    tri = example(N)
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
 
     n = tri.Nx

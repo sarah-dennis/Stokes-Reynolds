@@ -104,58 +104,6 @@ def get_center(tri, psi):
     return center
 
 
-
-
-#------------------------------------------------------------------------------
-
-def get_all_error(N_c, N_f):
-    
-    
-    
-    if N_f % N_c != 0:
-        
-        return Exception("misaligned grid (Course: %d, Fine: %d)"%(N_c, N_f))
-    
-    
-    tri_c = examples.biswasEx(N_c)
-    u_c, v_c, psi_c, past_iters = rw.read_solution(tri_c.filename+".csv", tri_c.Nx * tri_c.Ny)
-    
-    tri_f = examples.biswasEx(N_f)
-    u_f, v_f, psi_f, past_iters = rw.read_solution(tri_f.filename+".csv", tri_f.Nx * tri_f.Ny)
-    
-    
-    
-    stream_c = psi_c.reshape(tri_c.Ny, tri_c.Nx)
-    u_c = u_c.reshape(tri_c.Ny, tri_c.Nx)
-    v_c = v_c.reshape(tri_c.Ny, tri_c.Nx)
-    uv_c = np.dstack((u_c, v_c))
-    
-    stream_f = psi_f.reshape(tri_f.Ny, tri_f.Nx)
-    u_f = u_f.reshape(tri_f.Ny, tri_f.Nx)
-    v_f = v_f.reshape(tri_f.Ny, tri_f.Nx)
-    uv_f = np.dstack((u_f, v_f))   
-    
-    
-    err = np.zeros((tri_c.Ny*tri_c.Nx))
-    
-    # N_f % N_c = 0, 
-
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #------------------------------------------------------------------------------
 
 def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
