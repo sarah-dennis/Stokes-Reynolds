@@ -138,7 +138,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
     norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
 
     stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
-    pp.colorbar(stream_plot.lines, label=ax_labels[0])
+    # pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
     # for art in ax.get_children():
     #     if not isinstance(art, patches.FancyArrowPatch):
@@ -198,9 +198,9 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     n = len(xs)
     h_max = max(ys)
     
-    quiver_density = (10, 150)
-    vx = mask(vx, ys, hs, m, n, quiver_density)
-    vy = mask(vy, ys, hs, m, n, quiver_density)
+
+    vx = quiver_mask(vx, m, n)
+    vy = quiver_mask(vy, m, n)
     
 
     pp.quiver(xs, ys, vx, vy, color='k', width=.001, scale=v_scale, scale_units='x')
@@ -211,19 +211,47 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     ax.set_ylim(0,h_max)
     pp.legend(loc='upper left')
     pp.show()
+    
+def plot_quiver(vx, vy, xs, ys, psi, title, ax_labels):
 
-def mask(grid, ys, hs, m, n, density):
+    pp.rcParams['figure.dpi'] = 500
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    m = len(ys)
+    n = len(xs)
+    ly = max(ys)
+    lx = max(xs)
+    v_scale = 10*np.max(vx)/(lx)
+
+    vx = quiver_mask(vx, m, n, ly, lx)
+    vy = quiver_mask(vy, m, n, ly, lx)
+    
+    # norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
+
+    pp.quiver(xs, ys, vx, vy, scale=v_scale, scale_units='x', width=.001) # color=psi, cmap='Spectral_r', norm=norm_symLog)
+    
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    ax = pp.gca()
+
+    # ax.set_aspect('equal')
+    ax.set_ylim(0,ly)
+    pp.show()
+
+def quiver_mask(grid, m, n, ly, lx):
+    density = (ly*4,lx)
     mask = grid.copy()
     j_mod, i_mod = density
     for j in range(m):
         for i in range(n):
-            if ys[j] > hs[i]:
-                mask[j,i] = None
-            elif i % i_mod != 0 or j%j_mod!= 0:
+            if i % i_mod != 0 or j%j_mod != 0:
                     mask[j,i] = None
     return mask
         
@@ -243,25 +271,10 @@ def plot_contour(zs, xs, ys, title, labels):
     pp.colorbar(contour_plot, label=labels[0])
     
     ax = pp.gca()
-    ax.set_aspect('equal', 'box')
+    ax.set_aspect('equal')
     pp.show()
 
-    
-def plot_heatMap(zs, xs, ys, title, labels):
-    pp.rcParams['figure.dpi'] = 500
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
-    pp.colorbar(color_plot, label=labels[0])
 
-    pp.title(title, fontweight="bold")
-    pp.xlabel(labels[1])
-    pp.ylabel(labels[2])
-    ax = pp.gca()
-
-    ax.set_aspect('equal', 'box')
-    pp.show()
 
 def plot_contour_heat(zs, xs, ys, title, labels):
     pp.rcParams['figure.dpi'] = 500
@@ -273,7 +286,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
 
     color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     
-    pp.colorbar(color_plot, label=labels[0])
+    # pp.colorbar(color_plot, label=labels[0])
     
 
     n_contours = 10
@@ -286,7 +299,7 @@ def plot_contour_heat(zs, xs, ys, title, labels):
     pp.ylabel(labels[2])
     
     ax = pp.gca()
-    # ax.set_aspect('equal', 'box')
+    # ax.set_aspect('equal')
     pp.show()    
 #------------------------------------------------------------------------------   
 

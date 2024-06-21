@@ -120,7 +120,7 @@ def update_rhs(tri, u, v): #
         j = k // n
         
         if j == m-1: # moving upper surface
-            rhs[k]= tri.flux
+            rhs[k] = tri.flux
             
         elif i == 0: # inlet
             rhs[k] = tri.streamInlet(j)
@@ -204,7 +204,7 @@ def uv_approx(tri, u, v, psi):
             v[k] = 0 
                 
         else: #interior
-            # (u,v) at 4 point stencil
+        # (u,v) at 4 point stencil
             if j+1 == m-1:
                 u_N = U
                 psi_N = tri.flux
@@ -213,7 +213,7 @@ def uv_approx(tri, u, v, psi):
                 u_N = u[k_N]
                 psi_N = psi[k_N]
           
-            if tri.is_lowerbndry(i,j):
+            if tri.is_lowerbndry(i,j-1):
                 u_S = 0
                 psi_S = 0
             else:
@@ -236,10 +236,10 @@ def uv_approx(tri, u, v, psi):
                 k_W = j*n + i - 1
                 v_W = v[k_W]
                 psi_W = psi[k_W]
-
+    
             u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
             v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
-    
+        
     return u, v        
         
         

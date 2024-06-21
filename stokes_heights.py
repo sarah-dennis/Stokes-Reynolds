@@ -57,7 +57,7 @@ class triangle(Height):
                 bndry_nbrs[j][1] = not self.is_interior(i_left-1, j)
                 # South West
                 bndry_nbrs[j][2] = not self.is_interior(i_left-1, j-1)  
-                    
+    
 
                 # South East
                 bndry_nbrs[j][3] = not self.is_interior(i_right+1, j-1)
@@ -99,11 +99,12 @@ class step(Height):
         self.H_in = self.yf - self.hf_in
         self.H_out = self.yf - self.hf_out
         
+
         self.flux = Q # = stream(x, hc=yf)
-        self.dp_in =  (self.flux - 0.5*self.U*self.H_in)   * (-12 / self.H_in**3)
+        self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
         self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
         
-        
+#used in update rhs    
     def is_interior(self, i, j):
         if i == 0 or j == 0 or i == self.Nx-1 or j == self.Ny-1:
             return False 
@@ -117,43 +118,43 @@ class step(Height):
         else:
             return True
     
+#used in uv approx
     def is_lowerbndry(self, i, j):
         if  (i <= self.i_step and j == self.jf_in):
             return True
         
         elif  (i >= self.i_step and j == self.jf_out):
             return True
-
         
-    
+        elif (i == self.i_step and j < self.jf_in):
+            return True
+        else:
+            return False
 
-            
     
     def streamInlet(self, j):
         
         if j > self.jf_in:
             y = self.y0 + j*self.dy
-
-            u_term = self.U* (0.5*y**2 - self.hf_in*y)/self.H_in
-        
-            dp_term = -0.5*self.dp_in*( (-1/3)*y**3 + 0.5*(self.yf+self.hf_in)*y**2 - self.yf*self.hf_in*y )
-            
-            return u_term + dp_term + self.flux
+            u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
+            dp_term = -0.5*self.dp_in*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
+            psi = u_term + dp_term + self.flux 
+            return psi
         
         else:
             return 0
-
+        
    
     def streamOutlet(self, j):
 
         if j > self.jf_out:
-        
+                
             y = self.y0 + j*self.dy
-                  
-            u_term = self.U* (0.5*y**2 - self.hf_out*y)/self.H_out
-        
-            dp_term = -0.5*self.dp_out*( (-1/3)*y**3 + 0.5*(self.yf+self.hf_out)*y**2 - self.yf*self.hf_out*y )
             
+            
+            u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_out*(y-self.yf))/self.H_out
+            dp_term = -0.5*self.dp_out*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_out)*(y**2-self.yf**2) - self.yf*self.hf_out*(y-self.yf))
+     
             return u_term + dp_term + self.flux
         else:
             return 0
@@ -163,7 +164,9 @@ class step(Height):
 
         if j > self.jf_in:
             y = self.y0 + j*self.dy
+
             u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
+
             return  u
         else: 
             return 0

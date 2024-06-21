@@ -17,9 +17,6 @@ import stokes_readwrite as rw
 
 # from stokes_solver_spLU import run_spLU
 from stokes_solver_BFS_spLU import run_spLU 
-# from stokes_solver_bcg import run_bicgstab
-
-bicgstab_rtol = 1e-8
 
 write_mod = 250
 error_mod = 250
@@ -27,7 +24,7 @@ error_mod = 250
 import stokes_examples as examples
 # example = examples.biswasEx
 # example = examples.zeroReynEx
-# example = examples.bfsEx
+# example = examples.bfsEx1
 # example = examples.bfsEx2
 example = examples.bfsEx3
 
@@ -42,7 +39,6 @@ def new_run(N, iters):
     psi_init = np.zeros(tri.Nx * tri.Ny)
     past_iters = 0
 
-    # u, v, psi = run_bicgstab(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
     u, v, psi = run_spLU(tri, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
     # psi = unmirror_boundary(tri, psi)
     rw.write_solution(tri, u, v, psi, iters)
@@ -52,11 +48,8 @@ def load_run(N, iters):
 
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx*tri.Ny)
     
-    # u, v, psi = run(tri, u, v, psi, iters, past_iters)
     u, v, psi = run_spLU(tri, u, v, psi, iters, past_iters, error_mod, write_mod)
     
-    # psi= unmirror_boundary(tri, psi)
-
     rw.write_solution(tri, u, v, psi, iters+past_iters)
 
 def load_scale(N_load, N_scale):
@@ -102,16 +95,22 @@ def load_plot(N):
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$)'%(tri.N)
     graphics.plot_contour_heat(stream_2D, xs, ys, title, ax_labels)
-      
+    
+    # graphics.plot_2D(stream_2D[:,0], ys, '$\psi(0,y)$', ["$y$", "$\psi$"]) 
+    # graphics.plot_2D(stream_2D[:,-1], ys, '$\psi(1,y)$', ["$y$", "$\psi$"]) 
+    
 #  Velocity: (U, V)  streamplot
     u_2D = u.reshape((m,n))
     v_2D = v.reshape((m,n))
+    
+    # graphics.plot_2D(u_2D[:,0], ys, '$u(0,y)$', ["$y$", "$u$"])
+    # graphics.plot_2D(u_2D[:,-1], ys, '$u(0,y)$', ["$y$", "$u$"])
     
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
     title = 'Velocity ($N=%d$)'%(tri.N)
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels)
-    # plot_stream(u_2D, v_2D, xs, ys, title, ax_labels)
+    graphics.plot_quiver(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels)
 
 #  Vorticity: w = vx - uy heat & contour
     uy_2D = np.gradient(u_2D, tri.dx, axis=0)
