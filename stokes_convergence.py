@@ -11,6 +11,7 @@ import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
 
 #-------------------------------------------------------------------------------
+# for triangle examples:
 def get_criticals(N):
     tri = examples.biswasEx(N)
     u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
@@ -102,11 +103,44 @@ def get_center(tri, psi):
         center[j] = [x, y, psi[k]]
         
     return center
+#------------------------------------------------------------------------------
 
+# For BFS examples
+
+def get_attatchments(N):
+    example = examples.bfs_biswasLowerRe
+
+    step = example(N)
+    u, v, psi, past_iters = rw.read_solution(step.filename+".csv", step.Nx * step.Ny)
+    
+    psi_2D = psi.reshape((step.Ny,step.Nx))
+    psi_xs_yf = psi_2D[step.jf_out+1] #reattatchment wall 
+    psi_ys_xstep = psi_2D[:,step.i_step+1] # detatchment wall
+    
+    xs_saddle = []
+    sign_ref = 0
+    for i in range(1, step.Nx):
+        sign_new = np.sign(psi_xs_yf[i])
+        if sign_new != sign_ref:
+            sign_ref = sign_new
+            xs_saddle.append(step.xs[i])
+
+    
+    ys_saddle = []
+    sign_ref = 0
+    for j in range(1, step.Ny):
+        sign_new = np.sign(psi_ys_xstep[j])
+        if sign_new != sign_ref:
+            sign_ref = sign_new
+            ys_saddle.append(step.ys[j])
+
+        
+    return xs_saddle, ys_saddle
+    
 
 #------------------------------------------------------------------------------
 
-def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
+def tri_compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
     tru_extrs, tru_left, tru_right = get_criticals(N_max)
     
     M = len(Ns)
@@ -151,8 +185,8 @@ def compare_N(Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
     return err_extrs.T, err_extrs_y.T, err_left.T, err_right.T
    
 # plot_compare_N([120,240,512,1000],2000)     
-def plot_compare_N(Ns, N_max):
-    err_extrs, err_extrs_y, err_left, err_right = compare_N(Ns, N_max)
+def plot_tri_compare_N(Ns, N_max):
+    err_extrs, err_extrs_y, err_left, err_right = tri_compare_N(Ns, N_max)
     
     title_extrs_y = "Error to $N^{*}=$%d in $y$ of vortex center"%N_max
     title_extrs = "Error to $N^{*}=$%d in $\psi$ of vortex center"%N_max
@@ -176,4 +210,60 @@ def plot_compare_N(Ns, N_max):
     
     # graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
     # graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
+
+#------------------------------------------------------------------------------
+
+def bfs_compare_N(Ns, N_max):
+    
+    tru_xs, tru_ys = get_attatchments(N_max)
+    
+    M = len(Ns)
+    a = len(tru_xs)
+    b = len(tru_ys)
+
+    err_xs = np.zeros((M, a)) # error in stream extrema along y=0
+    err_ys = np.zeros((M, b)) # error in stream extrema along x=x_step
+    
+    for i in range(M):
+        N = Ns[i]
+        
+        N_xs, N_ys = get_attatchments(N)
+
+        for j in range(a):
+            if j < len(N_xs): #[0:x, 1:y, 2:psi]                 
+                err_xs[i, j] = np.abs(tru_xs[j] - N_xs[j])
+            else:
+                err_xs[i, j] = None
+                
+        for j in range(b):
+            if j < len(N_ys): #[0:x, 1:y, 2:psi]                 
+                err_ys[i, j] = np.abs(tru_ys[j] - N_ys[j])
+            else:
+                err_ys[i, j] = None
+ 
+        
+    return err_xs.T, err_ys.T
+
+
+
+
+def plot_bfs_compare_N(Ns, N_max):
+    err_xs, err_ys = bfs_compare_N(Ns, N_max)
+    print('reattatch', err_xs) 
+    print('detatch', err_ys)
+    title_xs = "Error to $N^{*}=$%d in reattatchment point"%N_max
+    title_ys = "Error to $N^{*}=$%d in detachment point"%N_max
+    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
+    
+    n_feats = 4
+    
+    labels_stream = np.arange(1, n_feats+1)
+    
+    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_stream)
+    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_stream)
+
+
+
+
+
     

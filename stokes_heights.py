@@ -81,7 +81,7 @@ class step(Height):
         
         Ny = (yf - y0)*N + 1
           
-        hs = np.zeros(Nx)
+        hs = np.zeros(Nx) #update later
         
         self.filename = filestr 
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
@@ -91,18 +91,30 @@ class step(Height):
     
         #yj = h(xi) lower indices at inlet & outlet
         self.jf_in = Ny//y_step 
-        self.jf_out = y0
+        self.jf_out = 0
         
         self.hf_in = self.y0 + self.jf_in*self.dy
         self.hf_out = self.y0 + self.jf_out*self.dy
+        self.hs = self.make_hs()
         
         self.H_in = self.yf - self.hf_in
         self.H_out = self.yf - self.hf_out
-        
 
         self.flux = Q # = stream(x, hc=yf)
         self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
         self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
+        
+ 
+        
+    def make_hs(self):
+        hs = np.zeros(self.Nx)   
+        for i in range(self.Nx):
+            if i <= self.i_step:
+                hs[i] = self.hf_in
+            else:
+                hs[i] = self.hf_out
+        return hs
+        
         
 #used in update rhs    
     def is_interior(self, i, j):

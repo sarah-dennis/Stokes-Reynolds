@@ -10,21 +10,21 @@ import stokes_readwrite as rw
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 
-def run_spLU(tri, u, v, old_psi, iters, past_iters, error_mod, write_mod):
+def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod):
     t0 = time.time()
     
-    M = Dpsi_cscmatrixBuild(tri)
+    M = Dpsi_cscmatrixBuild(ex)
     LU = splu(M)
 
     t_k0 = time.time()
-    print("N=%d constr. t=%.2f"%(tri.N, t_k0-t0))
+    print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
     
     for k in range(iters): 
         t_ki = time.time()
         
-        u, v = uv_approx(tri, u, v, old_psi) 
+        u, v = uv_approx(ex, u, v, old_psi) 
         
-        rhs = update_rhs(tri, u, v)
+        rhs = update_rhs(ex, u, v)
     
         psi = LU.solve(rhs)
 
@@ -37,7 +37,7 @@ def run_spLU(tri, u, v, old_psi, iters, past_iters, error_mod, write_mod):
             print(" k=%d time: %.2f s"%(k, t_kj-t_ki))
 
         if k % write_mod == 0:
-            rw.write_solution(tri, u, v, psi, k+1+past_iters)
+            rw.write_solution(ex, u, v, psi, k+1+past_iters)
             
         old_psi = psi
 
@@ -58,9 +58,9 @@ class DPsi_Mat():
         self.s += 1
         
         
-def Dpsi_cscmatrixBuild(tri):
-    m = tri.Ny
-    n = tri.Nx
+def Dpsi_cscmatrixBuild(ex):
+    m = ex.Ny
+    n = ex.Nx
 
     mat = DPsi_Mat(m, n)
 
@@ -72,7 +72,7 @@ def Dpsi_cscmatrixBuild(tri):
         # k = j*n + i
         
         # exterior & boundry points --> identity row, set by rhs
-        if not tri.is_interior(i, j):
+        if not ex.is_interior(i, j):
     
             mat.append(k, k, 1)
             
@@ -105,30 +105,30 @@ def Dpsi_cscmatrixBuild(tri):
 # B = v_C * (u_E + u_W + u_N + u_S)
 # C = u_C * (v_E + v_W + v_N + v_S)
 
-def update_rhs(tri, u, v): #
+def update_rhs(ex, u, v): #
     
-    n = tri.Nx 
-    m = tri.Ny
+    n = ex.Nx 
+    m = ex.Ny
     
     rhs = np.zeros(n*m)
 
-    c0 = 3 * tri.dx
-    c1 = 0.5 * tri.dx**2 * tri.Re
+    c0 = 3 * ex.dx
+    c1 = 0.5 * ex.dx**2 * ex.Re
     
     for k in range(n*m):
         i = k % n
         j = k // n
         
         if j == m-1: # moving upper surface
-            rhs[k] = tri.flux
+            rhs[k] = ex.flux
             
         elif i == 0: # inlet
-            rhs[k] = tri.streamInlet(j)
+            rhs[k] = ex.streamInlet(j)
         
         elif i == n-1: # outlet
-            rhs[k] = tri.streamOutlet(j)
+            rhs[k] = ex.streamOutlet(j)
 
-        elif not tri.is_interior(i,j):
+        elif not ex.is_interior(i,j):
             rhs[k] = 0
         
         else: # interior
@@ -169,15 +169,15 @@ def update_rhs(tri, u, v): #
     return rhs
  
 
-def uv_approx(tri, u, v, psi):
+def uv_approx(ex, u, v, psi):
 
     
-    n = tri.Nx
-    m = tri.Ny
+    n = ex.Nx
+    m = ex.Ny
 
-    U = tri.U
+    U = ex.U
     
-    c2 = 3/(4*tri.dx)
+    c2 = 3/(4*ex.dx)
     c3 = 1/4
 
     for k in range(n*m):
@@ -190,16 +190,16 @@ def uv_approx(tri, u, v, psi):
             v[k] = 0 
             
         elif i == 0: #inlet
-            u[k] = tri.velInlet(j)
+            u[k] = ex.velInlet(j)
             v[k] = 0 
             
         elif i == n-1: #outlet
 
-            u[k] = tri.velOutlet(j)
+            u[k] = ex.velOutlet(j)
             v[k] = 0 
             
         # other boundaries & dead zones
-        elif not tri.is_interior(i,j):
+        elif not ex.is_interior(i,j):
             u[k] = 0
             v[k] = 0 
                 
@@ -207,13 +207,13 @@ def uv_approx(tri, u, v, psi):
         # (u,v) at 4 point stencil
             if j+1 == m-1:
                 u_N = U
-                psi_N = tri.flux
+                psi_N = ex.flux
             else:
                 k_N = (j+1)*n + i
                 u_N = u[k_N]
                 psi_N = psi[k_N]
           
-            if tri.is_lowerbndry(i,j-1):
+            if ex.is_lowerbndry(i,j-1):
                 u_S = 0
                 psi_S = 0
             else:
@@ -223,7 +223,7 @@ def uv_approx(tri, u, v, psi):
             
             if i+1 == n-1:
                 v_E = 0 
-                psi_E = tri.streamOutlet(j)
+                psi_E = ex.streamOutlet(j)
             else:
                 k_E = j*n + i + 1
                 v_E = v[k_E]
@@ -231,7 +231,7 @@ def uv_approx(tri, u, v, psi):
             
             if i-1 == 0:
                 v_W = 0
-                psi_W = tri.streamInlet(j)
+                psi_W = ex.streamInlet(j)
             else:
                 k_W = j*n + i - 1
                 v_W = v[k_W]
