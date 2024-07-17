@@ -138,7 +138,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
     
     if log_cmap:
     
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.35)
+        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
     else:
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r')
@@ -292,7 +292,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap, linthresh=1e-10, cont
     X, Y = np.meshgrid(xs, ys)
 
     if log_cmap:
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.35)#, vmin=-1, vmax=1)#, clip=True)
+        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
         color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r')
@@ -336,7 +336,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
 
     pp.rcParams["lines.linewidth"] = .8
     for i in range(len(fs)):
-        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
+        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i], marker='o', markevery=1)
     
     
     # reference lines

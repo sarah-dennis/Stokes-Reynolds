@@ -249,21 +249,16 @@ def bfs_compare_N(Ns, N_max):
 
 def plot_bfs_compare_N(Ns, N_max):
     err_xs, err_ys = bfs_compare_N(Ns, N_max)
-    print('reattatch', err_xs) 
-    print('detatch', err_ys)
+    # print('reattatch', err_xs) 
+    # print('detatch', err_ys)
     title_xs = "Error to $N^{*}=$%d in reattatchment point"%N_max
     title_ys = "Error to $N^{*}=$%d in detachment point"%N_max
-    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
+    ax_labels_detach= ["N", "$|y_{N^{*}} - y_{N}|$"]
+    ax_labels_reattach= ["N", "$|x_{N^{*}} - x_{N}|$"]
     
-    n_feats = 4
+    n_feats = 2
     
     labels_stream = np.arange(1, n_feats+1)
     
-    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_stream)
-    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_stream)
-
-
-
-
-
-    
+    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_reattach)
+    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_detach)

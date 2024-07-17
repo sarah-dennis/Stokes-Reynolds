@@ -19,7 +19,7 @@ import stokes_readwrite as rw
 from stokes_solver_BFS_spLU import run_spLU 
 
 write_mod = 250
-error_mod = 250
+error_mod = 100
 
 import stokes_examples as examples
 
@@ -36,8 +36,8 @@ example = examples.bfs_biswasLowerRe
 
 #------------------------------------------------------------------------------
 def new_run(N, iters):
+    
     ex = example(N)
-
     u_init = np.zeros(ex.Nx * ex.Ny)
     v_init = np.zeros(ex.Nx * ex.Ny)
     psi_init = np.zeros(ex.Nx * ex.Ny)

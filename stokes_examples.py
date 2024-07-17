@@ -73,8 +73,7 @@ class bfsEx3(step):
         y_step = 2
         filestr = "stokes_BFS3_N%d_spLU"%(N)
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
-        
-<<<<<<< Updated upstream
+    
 class bfs_biswasLowRe(step):
     def __init__(self, N):
         x0 = 0
@@ -106,29 +105,3 @@ class bfs_biswasLowerRe(step):
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-=======
-class bfsEx4(step):
-    def __init__(self, N):
-        x0 = 0
-        xf = 5
-        y0 = 0
-        yf = 1
-        U = 0
-        Q=10
-        Re = 1
-        x_step = 1.5
-        y_step = 2.5
-        filestr = "stokes_BFS_N%d_spLU"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
->>>>>>> Stashed changes
