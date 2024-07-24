@@ -155,7 +155,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
 
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     ax.set_ylim(0,max(ys)) #min max ys
     pp.show()
 
@@ -221,7 +221,7 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     ax.set_ylim(0,h_max)
     pp.legend(loc='upper left')
     pp.show()
@@ -249,7 +249,7 @@ def plot_quiver(vx, vy, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     ax.set_ylim(0,ly)
     pp.show()
 
@@ -279,8 +279,8 @@ def plot_contour(zs, xs, ys, title, labels):
     pp.ylabel(labels[2])
     pp.colorbar(contour_plot, label=labels[0])
     
-    # ax = pp.gca()
-    # ax.set_aspect('equal')
+    ax = pp.gca()
+    ax.set_aspect('equal')
     pp.show()
 
 
@@ -309,8 +309,8 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap, linthresh=1e-18, cont
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
     
-    # ax = pp.gca()
-    # ax.set_aspect('equal')
+    ax = pp.gca()
+    ax.set_aspect('equal')
     pp.show()    
 #------------------------------------------------------------------------------   
 
@@ -336,15 +336,18 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
 
     pp.rcParams["lines.linewidth"] = .8
     for i in range(len(fs)):
-        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i], marker='o', markevery=1)
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='o', markevery=1)
     
     
     # reference lines
     O_l = 10
-    O_q = 30
-    ax.loglog(xs, [O_l*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
-    ax.loglog(xs, [O_q*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
+    O_q = 50
+    ax.plot(xs, [O_l*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
+    ax.plot(xs, [O_q*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
     
+    ax.set_xscale('log')
+    ax.set_yscale('symlog', linthresh=1e-4)
+    ax.set_ylim(0,1)
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     

@@ -5,8 +5,6 @@ Created on Fri May 24 08:36:17 2024
 @author: sarah
 """
 import numpy as np
-import graphics
-import stokes_examples as examples
 import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
 
@@ -113,8 +111,8 @@ def get_attatchments(ex, N):
     u, v, psi, past_iters = rw.read_solution(step.filename+".csv", step.Nx * step.Ny)
     
     psi_2D = psi.reshape((step.Ny,step.Nx))
-    psi_xs_yf = psi_2D[step.jf_out+1] #reattatchment wall 
-    psi_ys_xstep = psi_2D[:,step.i_step+1] # detatchment wall
+    psi_xs_yf = psi_2D[step.jf_out] #reattatchment wall 
+    psi_ys_xstep = psi_2D[:,step.i_step] # detatchment wall
     
     xs_saddle = []
     sign_ref = 0
@@ -185,32 +183,7 @@ def tri_compare_N(tri, Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
     return err_extrs.T, err_extrs_y.T, err_left.T, err_right.T
    
 # plot_compare_N([120,240,512,1000],2000)     
-def plot_tri_compare_N(Ns, N_max):
-    tri = examples.tri_Re1
-    err_extrs, err_extrs_y, err_left, err_right = tri_compare_N(tri, Ns, N_max)
-    
-    title_extrs_y = "Error to $N^{*}=$%d in $y$ of vortex center"%N_max
-    title_extrs = "Error to $N^{*}=$%d in $\psi$ of vortex center"%N_max
-    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
-    ax_labels_y = ["N", "$|y_{N^{*}} - y_{N}|$"]
-    
-    n_feats = 4
-    
-    labels_stream_extrs = np.arange(1, n_feats+1)
-    
-    # graphics.plot_log_multi(err_extrs_y[:n_feats], Ns, title_extrs_y, labels_stream_extrs, ax_labels_y)
-    graphics.plot_log_multi(err_extrs[:n_feats], Ns, title_extrs, labels_stream_extrs, ax_labels_stream)
 
-    
-    title_left = "Error to $N^{*}=$%d in $y$ of stream-saddle on left boundary"%N_max
-    title_right = "Error to $N^{*}=$%d in $y$ of stream-saddle on right boundary"%N_max
-    ax_labels_saddle = ["N", "$|y_{N^{*}} - y_{N}|$"]
-    
-    labels_stream_left = np.arange(1, n_feats+1)
-    labels_stream_right = np.arange(1, n_feats+1)
-    
-    # graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
-    # graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
 
 #------------------------------------------------------------------------------
 
@@ -248,19 +221,3 @@ def bfs_compare_N(ex, Ns, N_max):
 
 
 
-def plot_bfs_compare_N(Ns, N_max):
-    ex = examples.bfs_Re10neg4
-    err_xs, err_ys = bfs_compare_N(ex, Ns, N_max)
-    print('reattatch', err_xs) 
-    print('detatch', err_ys)
-    title_xs = "Error to $N^{*}=$%d in reattatchment point"%N_max
-    title_ys = "Error to $N^{*}=$%d in detachment point"%N_max
-    ax_labels_detach= ["N", "$|y_{N^{*}} - y_{N}|$"]
-    ax_labels_reattach= ["N", "$|x_{N^{*}} - x_{N}|$"]
-    
-    n_feats = 1
-    
-    labels_stream = np.arange(1, n_feats+1)
-    
-    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_reattach)
-    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_detach)
