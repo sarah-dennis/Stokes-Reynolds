@@ -53,13 +53,13 @@ class FinDiff(ReynoldsExample):
 
 class FinDiff_Ex1(FinDiff):
     def __init__(self):
-        N = 100 
+        N = 50
         p0 = 0 
-        pN = 0 
+        pN = 10
         x0 = 0
         xf = 1
-        h_min = 0.1 
-        h_max = 0.12
+        h_min = 0.75
+        h_max = 1
         height = heights.RandomHeight(x0, xf, N, h_min, h_max)
         super().__init__(height, p0, pN)
 
@@ -67,7 +67,7 @@ class FinDiff_Ex2(FinDiff):
     def __init__(self):
         N = 100 
         p0 = 0 
-        pN = 0 
+        pN = 10
         x0 = 0
         xf = 12                   
         h_avg = .1
@@ -251,5 +251,26 @@ class Sawtooth_Ex2(PWA_Sawtooth):
         # random height
         h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
 
+        height = heights.SawtoothHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
+        super().__init__(height, p0, pN)
+        
+class Sawtooth_Ex3(PWA_Sawtooth):
+    def __init__(self):
+        N = 100
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 10
+        
+        N_regions = 8
+        h_min = 0.1
+        h_max =0.3
+        
+        # uniform width 
+        x_peaks = x0 + np.arange(0, N_regions+1) * (xf - x0)/N_regions
+
+        # random height
+        h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
+        h_peaks[4] = h_peaks[3]
         height = heights.SawtoothHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
         super().__init__(height, p0, pN)

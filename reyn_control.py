@@ -16,8 +16,9 @@ import reyn_examples as rex
 # solution = rex.StepWave_Ex2()
 # solution = rex.Sawtooth_Ex1()
 # solution = rex.Sawtooth_Ex2()
+solution = rex.Sawtooth_Ex3()
 
-solution = rex.StepWave_Ex3()
+# solution = rex.StepWave_Ex3()
 
 #------------------------------------------------------------------------------
 # plotting 

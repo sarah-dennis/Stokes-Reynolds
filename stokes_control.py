@@ -15,32 +15,27 @@ import graphics
 
 import stokes_readwrite as rw
 
-# from stokes_solver_tri_spLU import run_spLU
-from stokes_solver_BFS_spLU import run_spLU 
+# from stokes_solver_tri import run_spLU
+from stokes_solver_BFS import run_spLU 
 
-write_mod = 250
-error_mod = 100
+write_mod = 500
+error_mod = 500
 
 import stokes_examples as examples
 
-# example = examples.biswasEx
-# example = examples.zeroReynEx
+# example = examples.tri_Re1
+example = examples.tri_Re0
 
-# example = examples.bfsEx1
-# example = examples.bfsEx2
-# example = examples.bfsEx3
-
-# example = examples.bfs_biswasLowRe
-example = examples.bfs_biswasLowerRe
-
+# example = examples.bfs_Re10neg4
+# example = examples.bfs_Re0
 
 #------------------------------------------------------------------------------
 def new_run(N, iters):
     
     ex = example(N)
-    u_init = np.zeros(ex.Nx * ex.Ny)
-    v_init = np.zeros(ex.Nx * ex.Ny)
-    psi_init = np.zeros(ex.Nx * ex.Ny)
+    u_init = np.ones(ex.Nx * ex.Ny)
+    v_init = np.ones(ex.Nx * ex.Ny)
+    psi_init = np.ones(ex.Nx * ex.Ny)
     past_iters = 0
 
     u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
@@ -49,7 +44,6 @@ def new_run(N, iters):
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     ex = example(N)
-
     u, v, psi, past_iters = rw.read_solution(ex.filename+".csv", ex.Nx*ex.Ny)
     
     u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, error_mod, write_mod)
@@ -86,43 +80,80 @@ def load_scale(N_load, N_scale):
 def load_plot(N):
     ex = example(N)
     u, v, psi, past_iters = rw.read_solution(ex.filename+".csv", ex.Nx * ex.Ny)
+
+
+
     
-    n = ex.Nx
-    m = ex.Ny
 # Grid domain
     xs = ex.xs
     ys = ex.ys
-
-# Stream:
+    
     stream_2D = psi.reshape((ex.Ny,ex.Nx))
-    ax_labels = ['$\psi(x,y) = \int u dy + \int v dx$', '$x$', '$y$']
-    title = 'Stream ($N=%d$)'%(ex.N)
-    log_cmap = True
-    graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, log_cmap)
-    
-#  Velocity: 
-    u_2D = u.reshape((m,n))
-    v_2D = v.reshape((m,n))
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$)'%(ex.N)
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
-    log_cmap = True
+    u_2D = u.reshape((ex.Ny,ex.Nx))
+    v_2D = v.reshape((ex.Ny,ex.Nx))
 
-    graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, log_cmap)
-    # graphics.plot_quiver_height(u_2D, v_2D, ex.hs, xs, ys, title, ax_labels[1:])
+# zoom
+    x_start = 1
+    x_stop = 1.4
+    y_start = 0
+    y_stop = .5
+
+    xs_zoom = grid_zoom_1D(xs, ex, x_start, x_stop)
+    ys_zoom = grid_zoom_1D(ys, ex, y_start, y_stop)
+    stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start, x_stop, y_start, y_stop)
+    u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
+    v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
+
+# Stream plot:
+
+    ax_labels = ['$\psi(x,y) = \int u dy + \int v dx$', '$x$', '$y$']
+    title = 'Stream ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
+    graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
-#  Vorticity: 
+#  Velocity plot: 
+
+    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
+    title = 'Velocity ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
+    graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
+    # 
+
+    graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
+    
+#  Vorticity plot: 
     uy_2D = np.gradient(u_2D, ex.dx, axis=0)
     vx_2D = np.gradient(v_2D, ex.dx, axis=1)
-    w = np.zeros((m,n))
-    for j in range(m):
-        for i in range(n):   
+    w = np.zeros((ex.Ny,ex.Nx))
+    for j in range(ex.Ny):
+        for i in range(ex.Nx):   
             w[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$)'%(ex.N)
-    log_cmap=False
-    graphics.plot_contour_mesh(w, xs, ys, title, ax_labels, log_cmap)
-    
 
+    ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
+    title = 'Vorticity ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    graphics.plot_contour(w, xs, ys, title, ax_labels)
+                
+    x_start = 0.5
+    x_stop = 1.5   
+    y_start = 0.75
+    y_stop = 1.25
+    w_zoom = grid_zoom_2D(w, ex, x_start, x_stop, y_start, y_stop)     
+    xs_zoom = grid_zoom_1D(xs, ex, x_start, x_stop)
+    ys_zoom = grid_zoom_1D(ys, ex, y_start, y_stop)
+    
+    graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
+
+
+def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    j_0 = int((y_start - ex.y0)/ex.dy)
+    j_f = int((y_stop - ex.y0)/ex.dy)
+    return grid[j_0:j_f,i_0:i_f]
+
+def grid_zoom_1D(grid, ex, x_start, x_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    return grid[i_0:i_f]
     
     

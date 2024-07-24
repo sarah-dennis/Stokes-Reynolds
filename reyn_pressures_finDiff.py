@@ -15,7 +15,7 @@ from solvers import P_Solver
 
 class Solver_finDiff(P_Solver):
     def __init__(self, height, p0, pN):
-        p_str = "Reynolds Finite Difference ($N_x = %d$)"%height.Nx
+        p_str = "Reynolds Finite Difference ($N = %d$)"%(height.Nx-1)
         
         self.rhs = make_rhs(height, p0, pN)
         self.fdMat = make_fdMat(height, p0, pN)

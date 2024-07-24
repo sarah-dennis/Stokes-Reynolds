@@ -127,7 +127,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
         
-def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=1e-10, contour_density=1e-2):
+def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=1e-18, contour_density=1e-2):
     
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
@@ -186,7 +186,7 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
 
     # ax.set_aspect('equal')
-    ax.set_ylim(0,h_max)
+    ax.set_ylim(0,1.1*h_max)
     # pp.legend(loc='upper left')
     pp.show()
 
@@ -221,7 +221,7 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     ax.set_ylim(0,h_max)
     pp.legend(loc='upper left')
     pp.show()
@@ -266,12 +266,12 @@ def quiver_mask(grid, m, n, ly, lx):
 #------------------------------------------------------------------------------       
 
 def plot_contour(zs, xs, ys, title, labels):
-    pp.rcParams['figure.dpi'] = 500
+    pp.rcParams['figure.dpi'] = 1000
     pp.figure()
 
     X, Y = np.meshgrid(xs, ys)
-    n_contours = max(zs.shape)
-
+    n_contours = max(zs.shape)//2
+    pp.rcParams["lines.linewidth"] = .4
     contour_plot = pp.contour(X, Y, zs, n_contours, cmap='Spectral_r')
         
     pp.title(title, fontweight="bold")
@@ -285,8 +285,8 @@ def plot_contour(zs, xs, ys, title, labels):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap, linthresh=1e-10, contour_density=5e-2):
-    pp.rcParams['figure.dpi'] = 500
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap, linthresh=1e-18, contour_density=5e-2):
+    pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)

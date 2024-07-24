@@ -17,18 +17,20 @@ from domain import Height
 class RandomHeight(Height):
     def __init__(self, x0, xf, N, h_min, h_max):
         h_str = "Discrete Height"
+
         
         Nx = (xf-x0)*N + 1
         hs = np.zeros(Nx)
         for i in range (Nx):
-            hs[i] = h_min + (h_max - h_min) * random.random()
+            # hs[i] = h_min + (h_max - h_min) * random.random()
+            hs[i] = h_min + (h_max - h_min) * random.random()/(i+1)
         y0 = 0
         yf = max(hs)
             
         U = 1    
         h_avg = np.mean(hs)
         Re = U*h_avg
-        super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
+        super().__init__(x0, xf, y0, yf, Nx-1, hs, U, Re, h_str)
   
 
 #------------------------------------------------------------------------------   
@@ -57,8 +59,11 @@ class SinsusoidalHeight(Height):
     # def h_fun(self, x):
     #     return self.h_mid * (1 + self.r * np.cos(self.k*x))    
     
+    # def h_fun(self, x):
+    #     return self.h_mid * (1 + self.r * np.cos(self.k*x) + self.r/self.k * np.sin(self.k*2*x))    
+    
     def h_fun(self, x):
-        return self.h_mid * (1 + self.r * np.cos(self.k*x) + self.r/4 * np.sin(self.k*5*x))    
+        return self.h_mid * (1 + 4*self.r * np.cos(self.k*x) + self.r/2*self.k * np.sin(self.k*x))    
 
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):

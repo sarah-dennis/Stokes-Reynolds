@@ -7,8 +7,14 @@ Created on Tue May 21 16:15:37 2024
 
 from stokes_heights import triangle
 from stokes_heights import step
+# example = examples.tri_Re1
+# example = examples.tri_Re0
 
-class biswasEx(triangle):
+# example = examples.bfs_Re1
+# example = examples.bfs_Re10neg4
+
+
+class tri_Re1(triangle):
     def __init__(self, N):
         x0 = 0
         xf = 1
@@ -16,10 +22,10 @@ class biswasEx(triangle):
         yf = 2
         U = 1
         Re = 1
-        filestr = "stokes_tri_N%d_spLU"%(N)
+        filestr = "stokes_tri_Re1_N%d"%(N)
         super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
         
-class zeroReynEx(triangle):
+class tri_Re0(triangle):
     def __init__(self, N):
         x0 = 0
         xf = 1
@@ -27,54 +33,11 @@ class zeroReynEx(triangle):
         yf = 2
         U = 1
         Re = 0
-        filestr = "stokes_tri2_N%d_spLU"%(N)
+        filestr = "stokes_tri_Re0_N%d"%(N)
         super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
         
-        
-class bfsEx1(step):
-    def __init__(self, N):
-        x0 = 0
-        xf = 10
-        y0 = 0
-        yf = 1
-        U = 0
-        Q = 1
-        Re = 0.1
-        x_step = 2
-        y_step = 2
-        filestr = "stokes_BFS1_N%d_spLU"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
-        
-class bfsEx2(step):
-    def __init__(self, N):
-        x0 = 0
-        xf = 10
-        y0 = 0
-        yf = 1
-        U = 0
-        Q = 10
-        Re = 0.1
-        x_step = 2
-        y_step = 2
-        filestr = "stokes_BFS2_N%d_spLU"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
 
-        
-class bfsEx3(step):
-    def __init__(self, N):
-        x0 = 0
-        xf = 10
-        y0 = 0
-        yf = 1
-        U = 5
-        Q = 10
-        Re = 0.1
-        x_step = 5
-        y_step = 2
-        filestr = "stokes_BFS3_N%d_spLU"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
-    
-class bfs_biswasLowRe(step):
+class bfs_Re10neg2(step):
     def __init__(self, N):
         x0 = 0
         xf = 4
@@ -85,11 +48,11 @@ class bfs_biswasLowRe(step):
         Q = Re # * (viscosity / density)
         x_step = 4
         y_step = 2
-        filestr = "stokes_BFS4_N%d_spLU"%N
+        filestr = "stokes_BFS_Re1e-4_N%d"%N
 
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
         
-class bfs_biswasLowerRe(step):
+class bfs_Re10neg4(step):
     def __init__(self, N):
         x0 = 0
         xf = 4
@@ -100,8 +63,21 @@ class bfs_biswasLowerRe(step):
         Q = Re # * (viscosity / density)
         x_step = 4
         y_step = 2
-        filestr = "stokes_BFS5_N%d_spLU"%N
+        filestr = "stokes_BFS_Re1e-4_N%d"%N
 
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
         
-        
+class bfs_Re0(step):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        U = 0
+        Re = 0
+        Q = 1 # * (viscosity / density)
+        x_step = 4
+        y_step = 2
+        filestr = "stokes_BFS_Re0_N%d"%N
+
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)

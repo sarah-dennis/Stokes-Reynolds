@@ -12,63 +12,53 @@ class triangle(Height):
         # N even --> (xL-x0)/2 is triangle vertex
         # slope dividing 2N  --> maximal true boundary points
 
-        self.slope = int(2*yf/xf)
+
+        
         self.filename = filestr
 
-        Nx = (xf-x0)*N + 1
-
-        self.apex = Nx//2
-        hs = np.zeros(Nx) # Reynolds needs this, Stokes its built into dPsi
+         # Reynolds needs this, Stokes its built into dPsi
         # TODO: make hs since it could be helpful to make for plotting
-
+        Nx = int((xf-x0)*N + 1)
+        hs = np.zeros(Nx)
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
-        self.bndry_nbrs = self.boundary_helper()
-        
-    def is_interior(self, i, j):
-        if i == 0 or j == 0 or i == self.Nx-1 or j == self.Ny-1:
-            return False 
-   
-        elif  (i < self.apex and j <= (self.Ny-1) - self.slope*i):
-            return False
-        
-        elif  (i > self.apex and j <= self.slope * (i - self.apex)):
-            return False
-          
-        else:
-            return True
- 
-# used in update_rhs        
-    def boundary_helper(self):
-        bndry_nbrs= np.zeros((self.Ny, 6))
-        
-        for j in range(self.slope, self.Ny): 
-            dj = j % self.slope
-            di = int(j//self.slope) 
-            
-            if dj != 0 : # row j has no true boundary values
-            
-                # i-index of interior points in row j who may have external nbrs
-                i_left = self.apex - di
-                i_right = self.apex + di
-                
-                # North West
-                bndry_nbrs[j][0] = not self.is_interior(i_left-1, j+1) 
-                # West
-                bndry_nbrs[j][1] = not self.is_interior(i_left-1, j)
-                # South West
-                bndry_nbrs[j][2] = not self.is_interior(i_left-1, j-1)  
+        self.slope = int(2*yf/xf)
+        self.apex = self.Nx//2
     
-
-                # South East
-                bndry_nbrs[j][3] = not self.is_interior(i_right+1, j-1)
+        self.space = self.make_space() # space[j,i] = {0: boundary, 1: interior, -1: exterior}
+        
+    def make_space(self):
+        space = np.zeros((self.Ny,self.Nx))
+        
+        for i in range(self.Nx):
+            for j in range(self.Ny):
+                # boundary : 0
+                # interior : 1
+                # exterior : -1
                 
-                #East
-                bndry_nbrs[j][4] = not self.is_interior(i_right+1, j)
-
-                #North East
-                bndry_nbrs[j][5] = not self.is_interior(i_right+1, j+1)
-
-        return bndry_nbrs
+                if j == self.Ny-1: # top boundary (lid-driven)
+                    space[j,i] = 0
+                    
+                elif i < self.apex:
+                    hj = (self.Ny-1) - self.slope*i
+                    if j < hj:
+                        space[j,i] = -1
+                    elif j > hj:
+                        space[j,i] = 1
+                
+                elif i > self.apex:
+                    hj = self.slope * (i - self.apex)
+    
+                    if j < hj:
+                        space[j,i] = -1
+                    elif j > hj:
+                        space[j,i] = 1
+                        
+                elif i == self.apex and j > 0:
+                    space[j,i] = 1
+                
+                #else: 0
+                
+        return space
 
 #------------------------------------------------------------------------------
 
@@ -114,7 +104,8 @@ class step(Height):
             else:
                 hs[i] = self.hf_out
         return hs
-        
+
+# TODO: consolidate into make_space as above
         
 #used in update rhs    
     def is_interior(self, i, j):
@@ -143,37 +134,28 @@ class step(Height):
         else:
             return False
 
-    
+    # Boundary conditions on stream and velocity
     def streamInlet(self, j):
-        
         if j > self.jf_in:
             y = self.y0 + j*self.dy
             u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
             dp_term = -0.5*self.dp_in*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
             psi = u_term + dp_term + self.flux 
             return psi
-        
         else:
             return 0
-        
-   
+    
     def streamOutlet(self, j):
-
         if j > self.jf_out:
-                
             y = self.y0 + j*self.dy
-            
-            
             u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_out*(y-self.yf))/self.H_out
             dp_term = -0.5*self.dp_out*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_out)*(y**2-self.yf**2) - self.yf*self.hf_out*(y-self.yf))
-     
             return u_term + dp_term + self.flux
         else:
             return 0
         
-        
+    
     def velInlet(self,j):
-
         if j > self.jf_in:
             y = self.y0 + j*self.dy
 
@@ -184,7 +166,6 @@ class step(Height):
             return 0
         
     def velOutlet(self,j):
-
         if j > self.jf_out:
             y = self.y0 + j*self.dy
             u = (self.U/self.H_out - 0.5*self.dp_out*(self.yf-y)) * (y-self.hf_out) 
