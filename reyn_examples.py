@@ -11,6 +11,7 @@ import reyn_heights as heights
 
 import reyn_pressures_stepWave as p_stepWave
 import reyn_pressures_sawtooth as p_sawtooth
+import reyn_pressures_pwlinear as p_pwlinear
 import reyn_pressures_finDiff as p_finDiff
 import reyn_pressures_analytic as p_analytic
 
@@ -41,7 +42,7 @@ class ReynoldsExample:
         v_title = "Velocity: \n%s"%(self.pSolver.p_str)
         v_ax_labels =  ['$x$', '$y$']
         graphics.plot_stream_height(self.vel.vx, self.vel.vy, self.pSolver.height.hs, self.pSolver.height.xs, self.pSolver.height.ys, v_title, v_ax_labels)
-        graphics.plot_quiver_height(self.vel.vx, self.vel.vy, self.pSolver.height.hs, self.pSolver.height.xs, self.pSolver.height.ys, v_title, v_ax_labels)
+        # graphics.plot_quiver_height(self.vel.vx, self.vel.vy, self.pSolver.height.hs, self.pSolver.height.xs, self.pSolver.height.ys, v_title, v_ax_labels)
     
 #-------------------------------------------------------------------------
 # I. Finite Difference
@@ -51,7 +52,7 @@ class FinDiff(ReynoldsExample):
         pSolver = p_finDiff.Solver_finDiff(height, p0, pN)
         super().__init__(pSolver)
 
-class FinDiff_Ex1(FinDiff):
+class FinDiff_Rand(FinDiff):
     def __init__(self):
         N = 50
         p0 = 0 
@@ -63,19 +64,13 @@ class FinDiff_Ex1(FinDiff):
         height = heights.RandomHeight(x0, xf, N, h_min, h_max)
         super().__init__(height, p0, pN)
 
-class FinDiff_Ex2(FinDiff):
-    def __init__(self):
-        N = 100 
-        p0 = 0 
-        pN = 10
-        x0 = 0
-        xf = 12                   
-        h_avg = .1
-        r = .09
-        k = 1
-        height = heights.SinsusoidalHeight(x0, xf, N, h_avg, r, k)
-        super().__init__(height, p0, pN)
+class FinDiff_Custom(FinDiff):
+    def __init__(self, example):
+        height = example.height
+        p0 = example.p0
+        pN = example.pN
 
+        super().__init__(height, p0, pN)
 # -----------------------------------------------------------------------------
 # III. Constant Height
 # -----------------------------------------------------------------------------
@@ -208,7 +203,7 @@ class StepWave_Ex3(PWA_StepWave):
 # -----------------------------------------------------------------------------
 # VI. Sawtooth **
 # -----------------------------------------------------------------------------
-#TODO: does PWA_Sawtooth break for an interval of constant height?
+
 class PWA_Sawtooth(ReynoldsExample):
     def __init__(self, height, p0, pN):
         pSolver = p_sawtooth.Solver(height, p0, pN)
@@ -224,10 +219,7 @@ class Sawtooth_Ex1(PWA_Sawtooth):
         
         N_regions = 5
 
-        # uniform width 
         x_peaks = np.array([0, 0.1, 0.5, 0.6, 0.8, 1])
-
-        # random height
 
         h_peaks = np.array([1, 2, 1, 2, 1, 2])
         height = heights.SawtoothHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
@@ -273,4 +265,66 @@ class Sawtooth_Ex3(PWA_Sawtooth):
         h_peaks = np.random.uniform(h_min, h_max, N_regions+1)
         h_peaks[4] = h_peaks[3]
         height = heights.SawtoothHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
+        super().__init__(height, p0, pN)
+        
+     
+# -----------------------------------------------------------------------------
+# VI. Sawtooth **
+# -----------------------------------------------------------------------------
+
+class PWA_Linear(ReynoldsExample):
+    def __init__(self, height, p0, pN):
+        pSolver = p_pwlinear.Solver(height, p0, pN) 
+        self.height=height
+        self.p0 = p0
+        self.pN = pN
+        super().__init__(pSolver)
+
+class PiecewiseLinear_Ex0(PWA_Linear):
+    def __init__(self):
+        N = 500
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        
+        N_regions = 5
+
+        x_peaks = np.array([0, 0.1, 0.5, 0.6, 0.65, 1])
+
+        h_peaks = np.array([[1,1], [2,3], [1,1], [2,2], [1,3], [1,1]])
+        height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
+        super().__init__(height, p0, pN)
+
+class PiecewiseLinear_Ex1(PWA_Linear):
+    def __init__(self):
+        N = 500
+        p0 = 0
+        pN = 0
+        x0 = 0
+        xf = 1
+        
+        N_regions = 5
+
+        x_peaks = np.array([0, 0.1, 0.5, 0.6, 0.8, 1])
+
+        h_peaks = np.array([[1.0,1.0],[2.0,3.0],[1.0,1.0],[1.0,1.5],[1.0,2.0],[3.0,3.0]])
+        height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
+        super().__init__(height, p0, pN)
+
+
+class PiecewiseLinear_Ex2(PWA_Linear):
+    def __init__(self):
+        N = 500
+        p0 = 1
+        pN = 0
+        x0 = 0
+        xf = 1
+        
+        N_regions = 5
+
+        x_peaks = np.array([0, 0.1, 0.4, 0.6, 0.75, 1])
+
+        h_peaks = np.array([[1.0,1.0],[1.0,4.0],[4.0,1.0],[1.0,1.5],[1.0,3.0],[3.0,3.0]])
+        height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
         super().__init__(height, p0, pN)

@@ -15,11 +15,16 @@ import stokes_convergence as cnvg
 import stokes_examples as examples
 
 from stokes_solver_tri import run_spLU
-# example = examples.tri_Re1
-example = examples.tri_Re0
+example = examples.tri_Re1
+#Re 1: plot_compare(60,[120,180,240,300,360,400],480)
+
+# example = examples.tri_Re0
+# Re 0: plot_compare(100,[200,300,400,500],600)
+
 
 # from stokes_solver_BFS import run_spLU 
 # example = examples.bfs_Re10neg4
+# Re 1e-4: plot_compare(25,[50,75,100,125,150],175)
 # example = examples.bfs_Re0
 
 write_mod = 500
@@ -35,12 +40,12 @@ def new_run(N, iters):
     past_iters = 0
 
     u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
-    # psi = unmirror_boundary(ex, psi)
+
     rw.write_solution(ex, u, v, psi, iters)
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     ex = example(N)
-    u, v, psi, past_iters = rw.read_solution(ex.filename+".csv", ex.Nx*ex.Ny)
+    u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
     
     u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, error_mod, write_mod)
     
@@ -52,7 +57,7 @@ def load_scale(N_load, N_scale):
     
     points_load = (ex_load.ys, ex_load.xs)
     
-    u_load, v_load, psi_load, past_iters = rw.read_solution(ex_load.filename+".csv", ex_load.Ny*ex_load.Nx)
+    u_load, v_load, psi_load, past_iters = rw.read_solution(ex_load.filestr+".csv", ex_load.Ny*ex_load.Nx)
     u_load_2D = u_load.reshape((ex_load.Ny,ex_load.Nx))
     v_load_2D = v_load.reshape((ex_load.Ny,ex_load.Nx))
     psi_load_2D = psi_load.reshape((ex_load.Ny,ex_load.Nx))
@@ -84,7 +89,7 @@ def vorticity(ex, u_2D, v_2D):
 #------------------------------------------------------------------------------
 def load_plot(N):
     ex = example(N)
-    u, v, psi, past_iters = rw.read_solution(ex.filename+".csv", ex.Nx * ex.Ny)
+    u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
 
 # Grid domain
     xs = ex.xs
@@ -100,17 +105,17 @@ def load_plot(N):
     y_start_A = 0
     y_stop_A = .6
 
-    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
 
 # Stream plot:
 
     ax_labels = ['$\psi(x,y) = \int u dy + \int v dx$', '$x$', '$y$']
     title = 'Stream ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
     graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
-    graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
+    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
 #  Velocity plot: 
 
@@ -119,7 +124,7 @@ def load_plot(N):
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
 
-    graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
+    # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
     
 #  Vorticity plot: 
     w = vorticity(ex, u_2D, v_2D)
@@ -132,10 +137,10 @@ def load_plot(N):
     x_stop_B = 0.1
     y_start_B = 1.75
     y_stop_B = 2
-    w_zoom = grid_zoom_2D(w, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)     
-    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)
-    
-    graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
+    # w_zoom = grid_zoom_2D(w, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)     
+    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)
+    # 
+    # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)
@@ -164,31 +169,39 @@ def plot_bfs_compare_N(Ns, N_max):
     
     labels_stream = np.arange(1, n_feats+1)
     
-    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_reattach)
-    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_detach)
+    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_reattach, linthresh=1e-4, O1=1, O2=1e2)
+    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_detach, linthresh=1e-4, O1=1, O2=1e2)
 
 def plot_tri_compare_N(Ns, N_max):
     err_extrs, err_extrs_y, err_left, err_right = cnvg.tri_compare_N(example, Ns, N_max)
     
-    title_extrs_y = "Error to $N^{*}=$%d in $y$ of vortex center"%N_max
-    title_extrs = "Error to $N^{*}=$%d in $\psi$ of vortex center"%N_max
-    ax_labels_stream = ["N", "$|\psi_{N^{*}} - \psi_{N}|$"]
-    ax_labels_y = ["N", "$|y_{N^{*}} - y_{N}|$"]
-    
     n_feats = 3
-    
     labels_stream_extrs = np.arange(1, n_feats+1)
-    
-    graphics.plot_log_multi(err_extrs_y[:n_feats], Ns, title_extrs_y, labels_stream_extrs, ax_labels_y)
-    graphics.plot_log_multi(err_extrs[:n_feats], Ns, title_extrs, labels_stream_extrs, ax_labels_stream)
-
-    
-    title_left = "Error to $N^{*}=$%d in $y$ of stream-saddle on left boundary"%N_max
-    title_right = "Error to $N^{*}=$%d in $y$ of stream-saddle on right boundary"%N_max
-    ax_labels_saddle = ["N", "$|y_{N^{*}} - y_{N}|$"]
-    
     labels_stream_left = np.arange(1, n_feats+1)
     labels_stream_right = np.arange(1, n_feats+1)
     
-    graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_saddle)
-    graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_saddle)
+    ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
+    ax_labels_y = ["N", "$|y_{N^{*}} - y_{N}|$"]
+        
+    title_stream_extrs = "Error to $N^{*}=$%d in $\psi$ extrema (center)"%N_max
+    graphics.plot_log_multi(err_extrs[:n_feats], Ns, title_stream_extrs, labels_stream_extrs, ax_labels_stream, linthresh=1e-10, O1=1e-2, O2=1e-2)
+    
+    title_extrs_y = "Error to $N^{*}=$%d in $y$ of vortex center"%N_max
+    graphics.plot_log_multi(err_extrs_y[:n_feats], Ns, title_extrs_y, labels_stream_extrs, ax_labels_y, linthresh=1e-4, O1=1e1, O2=1e2)
+
+    title_left = "Error to $N^{*}=$%d in $y$ of of $\psi$ saddle-point (left)"%N_max
+    graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_y, linthresh=1e-3, O1=1e1, O2=1e2)
+    
+    title_right = "Error to $N^{*}=$%d in $y$ of $\psi$ saddle-point (right)"%N_max
+    graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_y, linthresh=1e-3, O1=1e1, O2=1e2)
+    
+def plot_compare(N_min, Ns, N_max):
+    Ns_ = [N_min]+Ns
+    title = "Error to $N^{*}=%d$ of $\psi$ \n %s"%(N_max, example(N_min).spacestr)
+    ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
+    max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
+    linthresh=1e-5
+    O1=10
+    O2=10
+    graphics.plot_log_multi([max_errs], Ns_, title, ['max'], ax_labels_stream, linthresh, O1, O2)
+    

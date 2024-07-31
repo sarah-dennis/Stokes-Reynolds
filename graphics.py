@@ -285,7 +285,7 @@ def plot_contour(zs, xs, ys, title, labels):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap, linthresh=1e-18, contour_density=5e-2):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18, contour_density=5e-2):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     
@@ -326,7 +326,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, ax_labels):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, O2=1e-3):
     pp.rcParams['figure.dpi'] = 300
     fig = pp.figure()
     
@@ -340,13 +340,11 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels):
     
     
     # reference lines
-    O_l = 10
-    O_q = 50
-    ax.plot(xs, [O_l*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
-    ax.plot(xs, [O_q*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
+    ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
+    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
     
     ax.set_xscale('log')
-    ax.set_yscale('symlog', linthresh=1e-4)
+    ax.set_yscale('symlog', linthresh=linthresh)
     ax.set_ylim(0,1)
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])

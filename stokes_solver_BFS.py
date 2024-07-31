@@ -72,7 +72,7 @@ def Dpsi_cscmatrixBuild(ex):
         # k = j*n + i
         
         # exterior & boundry points --> identity row, set by rhs
-        if not ex.is_interior(i, j):
+        if ex.space[j,i] != 1:
     
             mat.append(k, k, 1)
             
@@ -128,7 +128,7 @@ def update_rhs(ex, u, v): #
         elif i == n-1: # outlet
             rhs[k] = ex.streamOutlet(j)
 
-        elif not ex.is_interior(i,j):
+        elif ex.space[j,i] != 1: #exterior to domain
             rhs[k] = 0
         
         else: # interior
@@ -157,14 +157,11 @@ def update_rhs(ex, u, v): #
             u_W = u[k_W]
             v_W = v[k_W]
         
-    
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)
             C = u_C * (v_E + v_W + v_N + v_S)
 
             rhs[k] = c0 * A + c1 * (B - C)
-
-
 
     return rhs
  
@@ -199,7 +196,7 @@ def uv_approx(ex, u, v, psi):
             v[k] = 0 
             
         # other boundaries & dead zones
-        elif not ex.is_interior(i,j):
+        elif ex.space[j,i] != 1:
             u[k] = 0
             v[k] = 0 
                 
@@ -213,7 +210,7 @@ def uv_approx(ex, u, v, psi):
                 u_N = u[k_N]
                 psi_N = psi[k_N]
           
-            if ex.is_lowerbndry(i,j-1):
+            if ex.space[j-1,i] == 0:
                 u_S = 0
                 psi_S = 0
             else:

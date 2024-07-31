@@ -6,38 +6,40 @@ Created on Mon May 22 15:05:40 2023
 """
 import csv
 import reyn_examples as rex
+import numpy as np
+import graphics
+# solution = rex.FinDiff_Rand()
 
-# solution = rex.FinDiff_Ex1()
-# solution = rex.FinDiff_Ex2()
 # solution = rex.Constant_Ex1()
 # solution = rex.Linear_Ex1()       
 # solution = rex.Step_Ex1()
 # solution = rex.StepWave_Ex1()
 # solution = rex.StepWave_Ex2()
+# solution = rex.StepWave_Ex3()
 # solution = rex.Sawtooth_Ex1()
 # solution = rex.Sawtooth_Ex2()
-solution = rex.Sawtooth_Ex3()
+# solution = rex.Sawtooth_Ex3()
+# solution = rex.PiecewiseLinear_Ex0()
+solution = rex.PiecewiseLinear_Ex1()
+# solution = rex.PiecewiseLinear_Ex2()
 
-# solution = rex.StepWave_Ex3()
-
+fd_solution = rex.FinDiff_Custom(solution)
 #------------------------------------------------------------------------------
 # plotting 
 #------------------------------------------------------------------------------
-# solution.plot_ph()
+
 solution.plot_p()
-# solution.plot_h()
-solution.plot_v()
+fd_solution.plot_p()
+
+fd_solution.plot_v()
 
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
 
-# infNorm_err = np.max(np.abs(al_pressure.ps - fd_pressure.ps))
-# print("Analytic to Numerical Error: %.8f"%infNorm_err)
+infNorm_err = np.max(np.abs(solution.ps - fd_solution.ps))
+print("Analytic to Numerical Error: %.8f"%infNorm_err)
 
-# num_err_title = "Numerical Error for %s"%height.h_str
-# num_err_axis = ["$x$", "Error (Analytic - Numerical)"]
-# graph.plot_2D(al_pressure.ps - fd_pressure.ps, domain.xs, num_err_title, num_err_axis)
 
 #------------------------------------------------------------------------------
 # CSV writing

@@ -26,7 +26,7 @@ def read_solution(filename, nm):
 
 def write_solution(tri, u, v, psi, iters):
     nm = tri.Nx * tri.Ny
-    filename = tri.filename + ".csv"
+    filename = tri.filestr + ".csv"
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
         for i in range(nm):

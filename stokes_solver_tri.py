@@ -75,16 +75,16 @@ def Dpsi_cscmatrixBuild(ex):
         # k = j*n + i
 
             
-        # exterior & boundry points --> identity row
-        # if not ex.is_interior(i, j):
-        if space[j,i] != 1: # not interior (boundary or exterior )
+        # exterior -> identity row = 0
+        # boundary -> identiy row = b.c.
+        if space[j,i] != 1:
             mat.append(k, k, 1)
             
         # interior 
         # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
         else: 
             mat.append(k, k, 28)
-            # if a nbr is exterior... adjust on rhs each iteration
+            # if a nbr is exterior |-> adjust on rhs each iteration
             if j+1 < m and i+1 < n and space[j+1,i+1] == -1: #NE
                 ext_nbrs[j,i,0]=1
             else:
@@ -188,23 +188,23 @@ def update_rhs(ex, u, v, psi, ext_nbrs): #
             dpsi_bc = 0
                                 
             #possible exterior nbrs
-            
+            psi_int = psi[k]
             if ext_nbrs[j,i,0]: #NE:
-                dpsi_bc += -1 * stream_interp_diag(psi[k])
+                dpsi_bc += -1 * stream_interp_diag(psi_int)
             if ext_nbrs[j,i,1]: #N:
-                dpsi_bc += 8 * stream_interp(psi[k])
+                dpsi_bc += 8 * stream_interp(psi_int)
             if ext_nbrs[j,i,2]: #NW:
-                dpsi_bc += -1 * stream_interp_diag(psi[k])
+                dpsi_bc += -1 * stream_interp_diag(psi_int)
             if ext_nbrs[j,i,3]: #E:
-                dpsi_bc += 8 * stream_interp(psi[k])
+                dpsi_bc += 8 * stream_interp(psi_int)
             if ext_nbrs[j,i,4]: #W:
-                dpsi_bc += 8 * stream_interp(psi[k])
+                dpsi_bc += 8 * stream_interp(psi_int)
             if ext_nbrs[j,i,5]: #SE:
-                dpsi_bc += -1 * stream_interp_diag(psi[k])
+                dpsi_bc += -1 * stream_interp_diag(psi_int)
             if ext_nbrs[j,i,6]: #S:
-                dpsi_bc += 8 * stream_interp(psi[k])
+                dpsi_bc += 8 * stream_interp(psi_int)
             if ext_nbrs[j,i,7]: #SW:
-                dpsi_bc += -1 * stream_interp_diag(psi[k])
+                dpsi_bc += -1 * stream_interp_diag(psi_int)
                 
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)
@@ -307,17 +307,22 @@ def uv_approx(tri, u, v, psi, ext_nbrs):
     
     return u, v
 
-def stream_interp(psi_k):
-    return -psi_k
+def stream_interp(psi_int):
+    psi_ext = -psi_int
+    return psi_ext
 
-def stream_interp_diag(psi_k):
-    return -np.sqrt(2) * psi_k 
+def stream_interp_diag(psi_int):
+    psi_ext = -np.sqrt(2) * psi_int
+    return psi_ext
 
 
-# s(x_a) = (psi_k) * (x_a - x_h)/(x_k-x_h)   
-                                                                                                                                                                             
-# s(x) = (psi_k - psi_h) * (x - x_h)/(x_k-x_h) + psi_h        
-        
+# s(x_nbr) = * (x_nbr - x_bdry) * (psi_int - psi_bdry)/(x_int - x_bdry) + psi_bdry 
+
+# b.c: psi_bndry = 0 
+# SIMPLIFYING assumption: 
+# (x_nbr - x_bnry)/(x_int - x_bndry) = -1
+
+
         
         
         

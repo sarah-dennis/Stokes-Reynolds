@@ -5,14 +5,63 @@ Created on Fri May 24 08:36:17 2024
 @author: sarah
 """
 import numpy as np
+import graphics
 import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
+#-------------------------------------------------------------------------------
+
+def compare_Ns(ex, N_min, Ns, N_max):
+    ex_min = ex(N_min)
+
+    ex_max = ex(N_max)
+    u_max, v_max, psi_max, past_iters = rw.read_solution(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
+    psi_max = psi_max.reshape((ex_max.Ny,ex_max.Nx))
+    mult_max = int(N_max/N_min)
+    
+    err = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
+    err_max = np.zeros(len(Ns)+1)
+
+    for n in range(len(Ns)+1):
+        if n == 0:
+            ex_n = ex(N_min)
+            u, v, psi_n, past_iters = rw.read_solution(ex_n.filestr+".csv", ex_n.Nx * ex_n.Ny)
+            psi_n=psi_n.reshape((ex_min.Ny, ex_min.Nx))
+            mult = 1
+        else:
+            ex_n = ex(Ns[n-1])
+            u, v, psi_n, past_iters = rw.read_solution(ex_n.filestr+".csv", ex_n.Nx * ex_n.Ny)
+            psi_n=psi_n.reshape((ex_n.Ny, ex_n.Nx))
+            mult = int(Ns[n-1]/N_min)
+        
+        
+        for k_min in range(ex_min.Ny*ex_min.Nx):
+            i = k_min % ex_min.Nx
+            j = (k_min // ex_min.Nx)
+            
+            i_n = mult * i
+            j_n = mult * j
+
+            
+            i_max = mult_max * i
+            j_max = mult_max * j
+
+            
+            
+            err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
+        
+        err_max[n] = np.max(err[n])
+        # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
+        # graphics.plot_contour_mesh(err[n], ex_min.xs, ex_min.ys, 'title',ax_labels)
+    return err_max
+        
+
 
 #-------------------------------------------------------------------------------
 # for triangle examples:
+#------------------------------------------------------------------------------
 def get_criticals(tri, N):
     tri = tri(N)
-    u, v, psi, past_iters = rw.read_solution(tri.filename+".csv", tri.Nx * tri.Ny)
+    u, v, psi, past_iters = rw.read_solution(tri.filestr+".csv", tri.Nx * tri.Ny)
     
     left, right = get_boundary(tri, psi)
     center = get_center(tri, psi)
@@ -101,39 +150,7 @@ def get_center(tri, psi):
         center[j] = [x, y, psi[k]]
         
     return center
-#------------------------------------------------------------------------------
 
-# For BFS examples
-
-def get_attatchments(ex, N):
-
-    step = ex(N)
-    u, v, psi, past_iters = rw.read_solution(step.filename+".csv", step.Nx * step.Ny)
-    
-    psi_2D = psi.reshape((step.Ny,step.Nx))
-    psi_xs_yf = psi_2D[step.jf_out] #reattatchment wall 
-    psi_ys_xstep = psi_2D[:,step.i_step] # detatchment wall
-    
-    xs_saddle = []
-    sign_ref = 0
-    for i in range(1, step.Nx):
-        sign_new = np.sign(psi_xs_yf[i])
-        if sign_new != sign_ref:
-            sign_ref = sign_new
-            xs_saddle.append(step.xs[i])
-
-    
-    ys_saddle = []
-    sign_ref = 0
-    for j in range(1, step.Ny):
-        sign_new = np.sign(psi_ys_xstep[j])
-        if sign_new != sign_ref:
-            sign_ref = sign_new
-            ys_saddle.append(step.ys[j])
-
-        
-    return xs_saddle, ys_saddle
-    
 
 #------------------------------------------------------------------------------
 
@@ -182,8 +199,38 @@ def tri_compare_N(tri, Ns, N_max): #Ns: [44, 120, 240, 512, 1000]
         
     return err_extrs.T, err_extrs_y.T, err_left.T, err_right.T
    
-# plot_compare_N([120,240,512,1000],2000)     
+#------------------------------------------------------------------------------ 
+# For BFS examples
+#------------------------------------------------------------------------------
+def get_attatchments(ex, N):
 
+    step = ex(N)
+    u, v, psi, past_iters = rw.read_solution(step.filestr+".csv", step.Nx * step.Ny)
+    
+    psi_2D = psi.reshape((step.Ny,step.Nx))
+    psi_xs_yf = psi_2D[step.jf_out] #reattatchment wall 
+    psi_ys_xstep = psi_2D[:,step.i_step] # detatchment wall
+    
+    xs_saddle = []
+    sign_ref = 0
+    for i in range(1, step.Nx):
+        sign_new = np.sign(psi_xs_yf[i])
+        if sign_new != sign_ref:
+            sign_ref = sign_new
+            xs_saddle.append(step.xs[i])
+
+    
+    ys_saddle = []
+    sign_ref = 0
+    for j in range(1, step.Ny):
+        sign_new = np.sign(psi_ys_xstep[j])
+        if sign_new != sign_ref:
+            sign_ref = sign_new
+            ys_saddle.append(step.ys[j])
+
+        
+    return xs_saddle, ys_saddle
+    
 
 #------------------------------------------------------------------------------
 

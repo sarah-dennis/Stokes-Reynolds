@@ -29,7 +29,7 @@ class Domain:
         self.ys = np.linspace(y0, yf, self.Ny)
         
 #------------------------------------------------------------------------------
-# A domain [x0, xf],[y0, yf] with a height function y = h_fun(x) 
+# Domain for Reynolds solver (computes h(x) -> h'(x), h''(x)) 
 class Height(Domain):
 
     def __init__(self, x0, xf, y0, yf, N, hs, U, Re, h_str):
@@ -44,17 +44,26 @@ class Height(Domain):
 
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
-        # self.h_avg = np.mean(self.hs)
         
-        self.U = U   # velocity on to flat lower surface
+        self.U = U   # flat boundary velocity
 
-        self.visc = 1 # dynamic viscosity (6 eta U)
-            
-        # self.dens = 1 # density
-        self.Re = Re
-        # self.Re = self.U * self.h_avg / self.visc
+        self.visc = 1 # dynamic viscosity 
+
+        self.Re = Re # Re = U h / L
  
+# Domain for Stokes solver
+class Space(Domain):
+    def __init__(self, x0, xf, y0, yf, N, U, Re, h_str):
+        super().__init__(x0, xf, y0, yf, N)
+        self.filestr=h_str
+        self.U = U   # flat boundary velocity
 
+        self.visc = 1 # dynamic viscosity 
+
+        self.Re = Re # Re = U h / L
+        
+    def set_space(self, grid):
+        self.space = grid
     
 def center_diff(fs, N, dx):
     D_lower = -1*np.ones(N)

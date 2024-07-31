@@ -5,29 +5,19 @@ Created on Tue May 21 15:15:15 2024
 @author: sarah
 """
 import numpy as np
-from domain import Height
+from domain import Space
 
-class triangle(Height):
+class triangle(Space):
     def __init__(self, x0, xf, y0, yf, N, U, Re, filestr):
-        # N even --> (xL-x0)/2 is triangle vertex
-        # slope dividing 2N  --> maximal true boundary points
 
-
-        
-        self.filename = filestr
-
-         # Reynolds needs this, Stokes its built into dPsi
-        # TODO: make hs since it could be helpful to make for plotting
-        Nx = int((xf-x0)*N + 1)
-        hs = np.zeros(Nx)
-        super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
+        super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
         self.slope = int(2*yf/xf)
         self.apex = self.Nx//2
-    
-        self.space = self.make_space() # space[j,i] = {0: boundary, 1: interior, -1: exterior}
+        self.spacestr = "Triangle-cavity $Re=%.5f$"%Re
+        self.set_space(self.make_space())
         
     def make_space(self):
-        space = np.zeros((self.Ny,self.Nx))
+        grid = np.zeros((self.Ny,self.Nx))
         
         for i in range(self.Nx):
             for j in range(self.Ny):
@@ -36,57 +26,45 @@ class triangle(Height):
                 # exterior : -1
                 
                 if j == self.Ny-1: # top boundary (lid-driven)
-                    space[j,i] = 0
+                    grid[j,i] = 0
                     
                 elif i < self.apex:
                     hj = (self.Ny-1) - self.slope*i
                     if j < hj:
-                        space[j,i] = -1
+                        grid[j,i] = -1
                     elif j > hj:
-                        space[j,i] = 1
+                        grid[j,i] = 1
                 
                 elif i > self.apex:
                     hj = self.slope * (i - self.apex)
     
                     if j < hj:
-                        space[j,i] = -1
+                        grid[j,i] = -1
                     elif j > hj:
-                        space[j,i] = 1
+                        grid[j,i] = 1
                         
                 elif i == self.apex and j > 0:
-                    space[j,i] = 1
+                    grid[j,i] = 1
                 
                 #else: 0
                 
-        return space
+        return grid
 
 #------------------------------------------------------------------------------
 
-class step(Height):
+class step(Space):
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step):
-        #y0=hmin, yf=hmax
-        #x0=inlet, xf=outlet
-                    
-        Nx = (xf-x0)*N + 1
+        super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
         
-        Ny = (yf - y0)*N + 1
-          
-        hs = np.zeros(Nx) #update later
-        
-        self.filename = filestr 
-        super().__init__(x0, xf, y0, yf, N, hs, U, Re, filestr)
-        
-        #xi where step occurs
-        self.i_step = Nx//x_step
-    
-        #yj = h(xi) lower indices at inlet & outlet
-        self.jf_in = Ny//y_step 
+        self.i_step = self.Nx//x_step
+        self.jf_in = self.Ny//y_step 
         self.jf_out = 0
+        self.spacestr = "Backward Facing Step $Re=%.5f$"%Re
+        self.set_space(self.make_space())
         
+        # constants BCs on velocity, stream, flux 
         self.hf_in = self.y0 + self.jf_in*self.dy
         self.hf_out = self.y0 + self.jf_out*self.dy
-        self.hs = self.make_hs()
-        
         self.H_in = self.yf - self.hf_in
         self.H_out = self.yf - self.hf_out
 
@@ -94,45 +72,35 @@ class step(Height):
         self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
         self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
         
- 
-        
-    def make_hs(self):
-        hs = np.zeros(self.Nx)   
-        for i in range(self.Nx):
-            if i <= self.i_step:
-                hs[i] = self.hf_in
-            else:
-                hs[i] = self.hf_out
-        return hs
-
-# TODO: consolidate into make_space as above
-        
-#used in update rhs    
-    def is_interior(self, i, j):
-        if i == 0 or j == 0 or i == self.Nx-1 or j == self.Ny-1:
-            return False 
-   
-        elif  (i <= self.i_step and j <= self.jf_in):
-            return False
-        
-        elif  (i >= self.i_step and j <= self.jf_out):
-            return False
-
-        else:
-            return True
-    
-#used in uv approx
-    def is_lowerbndry(self, i, j):
-        if  (i <= self.i_step and j == self.jf_in):
-            return True
-        
-        elif  (i >= self.i_step and j == self.jf_out):
-            return True
-        
-        elif (i == self.i_step and j < self.jf_in):
-            return True
-        else:
-            return False
+    def make_space(self):
+        grid = np.zeros((self.Ny, self.Nx))
+        for j in range(self.Ny):
+            for i in range(self.Nx):
+                
+                if j == self.Ny-1 or i==self.Nx-1:
+                    grid[j,i] = 0
+                    
+                elif j > self.jf_in:
+                    if i == 0:
+                        grid[j,i] = 0
+                    else:
+                        grid[j,i] = 1
+                elif j == self.jf_in:
+                    if i <= self.i_step:
+                        grid[j,i] = 0
+                    else:
+                        grid[j,i] = 1
+                    
+                else:
+                    if i < self.i_step:
+                        grid[j,i] = -1
+                    elif i == self.i_step or j == 0:
+                        grid[j,i] = 0
+                    else:
+                        grid[j,i] = 1
+                        
+        return grid
+                
 
     # Boundary conditions on stream and velocity
     def streamInlet(self, j):

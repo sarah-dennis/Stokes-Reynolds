@@ -123,7 +123,7 @@ class stLinOp(LinearOperator):
                 mv[i] = v[i-1]-v[i] + cq * (1/hs[i]**3 * widths[i] - 1/(2 * hs[i]**2) * 1/slopes[i-1])
                 
             elif slopes[i] != 0 and slopes[i-1] == 0:
-                mv[i] = v[i-1]-v[i] + cq * (1/(2 * hs[i]**2) * 1/slopes[i] - 1/hs[i]**3 * widths[i])
+                mv[i] = v[i-1]-v[i] + cq * (1/(2 * hs[i]**2) * 1/slopes[i] - 1/hs[i]**3 * widths[i-1])
     
         if slopes[N-1] != 0:
             mv[N] = -v[N-1] + cq * (1/(2 * hs[N]**2)) * 1/slopes[N-1]
