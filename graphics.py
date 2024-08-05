@@ -134,14 +134,14 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
 
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[1,5] #len(ys) = 2 len(xs)
+    stream_density=[1,4] #len(ys) = 2 len(xs)
     
     if log_cmap:
     
         norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='viridis', norm=norm_symLog)
     else:
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r')
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='viridis')
 
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
@@ -151,7 +151,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
         art.remove()        
     
 
-    pp.title(title, fontweight="bold")
+    # pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
 
@@ -161,7 +161,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
 
 def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     
-    pp.rcParams['figure.dpi'] = 500
+    pp.rcParams['figure.dpi'] = 800
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
@@ -179,13 +179,13 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     #         continue
     #     art.remove()        
     
-    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
+    pp.plot(xs, hs, linewidth=0.8, color='k', label='$h(x)$')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
-    # ax.set_aspect('equal')
+    ax.set_aspect(6)
     ax.set_ylim(0,1.1*h_max)
     # pp.legend(loc='upper left')
     pp.show()
@@ -272,7 +272,7 @@ def plot_contour(zs, xs, ys, title, labels):
     X, Y = np.meshgrid(xs, ys)
     n_contours = max(zs.shape)//2
     pp.rcParams["lines.linewidth"] = .4
-    contour_plot = pp.contour(X, Y, zs, n_contours, cmap='Spectral_r')
+    contour_plot = pp.contour(X, Y, zs, n_contours, cmap='plasma')
         
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
@@ -290,7 +290,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18,
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-
+#'Spectral_r'
     if log_cmap:
         norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
         color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)

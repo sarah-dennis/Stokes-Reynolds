@@ -81,9 +81,6 @@ def Dpsi_cscmatrixBuild(ex):
         else: 
             mat.append(k, k, 28)
             
-            # if a nbr is on the boundary... nothing changes, the boundary is solved with identity rows
-            # with rect-lin shape nbrs don't fall in the exterior
-            
             mat.append(k, j*n + i-1, -8)
             mat.append(k, j*n + i+1, -8)
             mat.append(k, (j-1)*n + i, -8)
@@ -119,15 +116,17 @@ def update_rhs(ex, u, v): #
         i = k % n
         j = k // n
         
-        if j == m-1: # moving upper surface
-            rhs[k] = ex.flux
+
             
-        elif i == 0: # inlet
+        if i == 0: # inlet
             rhs[k] = ex.streamInlet(j)
         
         elif i == n-1: # outlet
             rhs[k] = ex.streamOutlet(j)
-
+            
+        elif j == m-1: # moving upper surface
+            rhs[k] = ex.flux
+                
         elif ex.space[j,i] != 1: #exterior to domain
             rhs[k] = 0
         
@@ -202,25 +201,21 @@ def uv_approx(ex, u, v, psi):
                 
         else: #interior
         # (u,v) at 4 point stencil
-            if j+1 == m-1:
+        
+            if j+1 == m-1: 
                 u_N = U
-                psi_N = ex.flux
+                psi_N = ex.flux    
             else:
                 k_N = (j+1)*n + i
                 u_N = u[k_N]
                 psi_N = psi[k_N]
-          
-            if ex.space[j-1,i] == 0:
-                u_S = 0
-                psi_S = 0
-            else:
-                k_S = (j-1)*n + i
-                u_S = u[k_S]
-                psi_S = psi[k_S]    
-            
+
             if i+1 == n-1:
                 v_E = 0 
                 psi_E = ex.streamOutlet(j)
+            elif ex.space[j,i+1] != 1:
+                v_E = 0
+                psi_E = 0
             else:
                 k_E = j*n + i + 1
                 v_E = v[k_E]
@@ -229,11 +224,22 @@ def uv_approx(ex, u, v, psi):
             if i-1 == 0:
                 v_W = 0
                 psi_W = ex.streamInlet(j)
+            elif ex.space[j,i-1] != 1:
+                v_W = 0
+                psi_W = 0
             else:
                 k_W = j*n + i - 1
                 v_W = v[k_W]
                 psi_W = psi[k_W]
-    
+                      
+            if ex.space[j-1,i] != 1:
+                u_S = 0
+                psi_S = 0
+            else:
+                k_S = (j-1)*n + i
+                u_S = u[k_S]
+                psi_S = psi[k_S]    
+            
             u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
             v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
         

@@ -117,18 +117,21 @@ class Linear_Ex1(Analytic_Linear):
 class Analytic_Step(ReynoldsExample):
     def __init__(self, height, p0, pN):
         pSolver = p_analytic.Solver_Step(height, p0, pN)
+        self.height = height
+        self.p0 = p0
+        self.pN = pN
         super().__init__(pSolver)
         
 class Step_Ex1(Analytic_Step):
     def __init__(self):
         N = 100
         p0 = 0
-        pN = 1
+        pN = 0
         x0 = 0
-        xf = 1
-        x_step = (xf - x0) / 3
-        h0 = 0.1
-        h1 = 0.2
+        xf = 4
+        x_step = (xf - x0) / 4
+        h0 = 1
+        h1 = 2
         height = heights.StepHeight(x0, xf, N, h0, h1, x_step)
         super().__init__(height, p0, pN)
 
@@ -319,12 +322,12 @@ class PiecewiseLinear_Ex2(PWA_Linear):
         p0 = 1
         pN = 0
         x0 = 0
-        xf = 1
+        xf = 15
         
-        N_regions = 5
+        N_regions = 10
 
-        x_peaks = np.array([0, 0.1, 0.4, 0.6, 0.75, 1])
+        x_peaks = np.array([0, 1.5, 2.5, 4, 5.2, 7.2, 9, 12, 12.9, 14, 15])
 
-        h_peaks = np.array([[1.0,1.0],[1.0,4.0],[4.0,1.0],[1.0,1.5],[1.0,3.0],[3.0,3.0]])
+        h_peaks = np.array([[0.5,0.5],[0.3, 0.2],[0.5,0.3],[0.8,0.8],[0.5,0.3],[0.3,0.5],[0.5,0.7],[0.7,0.5],[0.5,0.5],[0.35, 0.25],[0.25,0.25]])
         height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks)
         super().__init__(height, p0, pN)

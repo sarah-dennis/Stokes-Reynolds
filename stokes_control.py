@@ -14,18 +14,18 @@ import stokes_convergence as cnvg
 
 import stokes_examples as examples
 
-from stokes_solver_tri import run_spLU
-example = examples.tri_Re1
+# from stokes_solver_tri import run_spLU
+# example = examples.tri_Re1
 #Re 1: plot_compare(60,[120,180,240,300,360,400],480)
 
 # example = examples.tri_Re0
 # Re 0: plot_compare(100,[200,300,400,500],600)
 
 
-# from stokes_solver_BFS import run_spLU 
+from stokes_solver_BFS import run_spLU 
 # example = examples.bfs_Re10neg4
 # Re 1e-4: plot_compare(25,[50,75,100,125,150],175)
-# example = examples.bfs_Re0
+example = examples.bfs_ReHalf
 
 write_mod = 500
 error_mod = 500
@@ -100,37 +100,37 @@ def load_plot(N):
     v_2D = v.reshape((ex.Ny,ex.Nx))
 
 # zoom domain
-    x_start_A = 0.3
-    x_stop_A = 0.7
+    x_start_A = 0.5
+    x_stop_A = 2.8
     y_start_A = 0
-    y_stop_A = .6
+    y_stop_A = 2
 
-    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
 
 # Stream plot:
 
-    ax_labels = ['$\psi(x,y) = \int u dy + \int v dx$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+    title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
-    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
+    graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
 #  Velocity plot: 
 
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    title = 'Velocity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
 
-    # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
+    graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
     
 #  Vorticity plot: 
     w = vorticity(ex, u_2D, v_2D)
 
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, Re$=%.5f$)'%(ex.N, ex.Re)
+    title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     graphics.plot_contour(w, xs, ys, title, ax_labels)
                 
     x_start_B = 0
@@ -201,7 +201,7 @@ def plot_compare(N_min, Ns, N_max):
     ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
     max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
     linthresh=1e-5
-    O1=10
-    O2=10
+    O1=1e-1
+    O2=1
     graphics.plot_log_multi([max_errs], Ns_, title, ['max'], ax_labels_stream, linthresh, O1, O2)
     

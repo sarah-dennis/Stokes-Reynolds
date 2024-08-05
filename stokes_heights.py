@@ -8,10 +8,12 @@ import numpy as np
 from domain import Space
 
 class triangle(Space):
-    def __init__(self, x0, xf, y0, yf, N, U, Re, filestr):
+    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr):
 
-        super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
-        self.slope = int(2*yf/xf)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+        # self.slope = int(2*yf/xf)
+        self.slope_A = -4
+        self.slope_B = 4
         self.apex = self.Nx//2
         self.spacestr = "Triangle-cavity $Re=%.5f$"%Re
         self.set_space(self.make_space())
@@ -28,33 +30,53 @@ class triangle(Space):
                 if j == self.Ny-1: # top boundary (lid-driven)
                     grid[j,i] = 0
                     
-                elif i < self.apex:
-                    hj = (self.Ny-1) - self.slope*i
+                elif i < self.apex: # 
+                    hj = self.slope_A*i + (self.Ny-1) # yj = h(xi)
+
                     if j < hj:
                         grid[j,i] = -1
                     elif j > hj:
                         grid[j,i] = 1
+                    else:
+                        grid[j,i] = 0
                 
                 elif i > self.apex:
-                    hj = self.slope * (i - self.apex)
+                    hj = self.slope_B * (i - self.apex) # yj = h(xi)
     
                     if j < hj:
                         grid[j,i] = -1
                     elif j > hj:
                         grid[j,i] = 1
-                        
+                    else:
+                        grid[j,i] = 0
                 elif i == self.apex and j > 0:
                     grid[j,i] = 1
                 
-                #else: 0
+                else:
+                    grid[j,i] = 0
                 
         return grid
+    
+    def stream_interp_EW(self, j, i, psi_k):
+        if i < self.apex:
+            scale = 1 - (j % self.slope_A)/self.slope_A
+        else:
+            scale = 1 - (j%self.slope_B)/self.slope_B
+        
+        return -scale * psi_k
+
+    def stream_interp_S(self, j, i, psi_k):
+        if i < self.apex:
+            scale = 1 - (i % (1/self.slope_A))*self.slope_A
+        else:
+            scale = 1 - (i % (1/self.slope_B))*self.slope_B
+        return -scale * psi_k
 
 #------------------------------------------------------------------------------
 
 class step(Space):
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step):
-        super().__init__(x0, xf, y0, yf, N, U, Re, filestr)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
         
         self.i_step = self.Nx//x_step
         self.jf_in = self.Ny//y_step 
@@ -67,8 +89,7 @@ class step(Space):
         self.hf_out = self.y0 + self.jf_out*self.dy
         self.H_in = self.yf - self.hf_in
         self.H_out = self.yf - self.hf_out
-
-        self.flux = Q # = stream(x, hc=yf)
+        
         self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
         self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
         

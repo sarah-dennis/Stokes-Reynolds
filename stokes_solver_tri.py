@@ -13,22 +13,21 @@ from scipy.sparse.linalg import splu
 def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod):
     t0 = time.time()
     
-    M, ext_nbrs = Dpsi_cscmatrixBuild(ex)
+    M = Dpsi_cscmatrixBuild(ex)
     LU = splu(M)
-    
-    rhs = update_rhs(ex, u, v, old_psi, ext_nbrs)
     
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
      
     for k in range(iters): 
         t_ki = time.time()
+        
+        u, v = uv_approx(ex, u, v, old_psi)
+        
+        rhs = update_rhs(ex, u, v, old_psi)
     
         psi = LU.solve(rhs)
 
-        u, v = uv_approx(ex, u, v, psi, ext_nbrs)
-        
-        rhs = update_rhs(ex, u, v, psi, ext_nbrs)
         t_kj = time.time()
         
         if k % error_mod == 0: 
@@ -64,15 +63,13 @@ def Dpsi_cscmatrixBuild(ex):
     n = ex.Nx
     space = ex.space
     mat = DPsi_Mat(m, n)
-    
-    ext_nbrs= np.zeros((m,n,8))
 
     for k in range(m*n):
     
         i = k % n
         j = k // n
         
-        # k = j*n + i
+        # k = j*n + i 
 
             
         # exterior -> identity row = 0
@@ -85,51 +82,50 @@ def Dpsi_cscmatrixBuild(ex):
         else: 
             mat.append(k, k, 28)
             # if a nbr is exterior |-> adjust on rhs each iteration
-            if j+1 < m and i+1 < n and space[j+1,i+1] == -1: #NE
-                ext_nbrs[j,i,0]=1
-            else:
-                mat.append(k, (j+1)*n + i+1, 1)
+            # if j+1 < m and i+1 < n and space[j+1,i+1] == -1:
+            #     ext_nbrs[j,i,0]=1
+            # else:
+            mat.append(k, (j+1)*n + i+1, 1) #NE
                 
-            if j+1 < m and space[j+1,i] == -1: #N
-                ext_nbrs[j,i,1]=1
-            else:
-                mat.append(k, (j+1)*n + i, -8)
+            # if j+1 < m and space[j+1,i] == -1:
+            #     ext_nbrs[j,i,1]=1
+            # else:
+            mat.append(k, (j+1)*n + i, -8) #N
                 
-            if j+1 < m and i-1 >0 and space[j+1,i-1] == -1: #NW
-                ext_nbrs[j,i,2]=1
-            else:
-                mat.append(k, (j+1)*n + i-1, 1)
+            # if j+1 < m and i-1 > 0 and space[j+1,i-1] == -1:
+            #     ext_nbrs[j,i,2]=1
+            # else:
+            mat.append(k, (j+1)*n + i-1, 1) #NW
                 
-            if i+1 < n and space[j,i+1] == -1: #E
-                ext_nbrs[j,i,3]=1
-            else:
-                mat.append(k, j*n + i+1, -8)
+            # if i+1 < n and space[j,i+1] == -1:
+            #     ext_nbrs[j,i,3]=1
+            # else:
+            mat.append(k, j*n + i+1, -8) #E
 
-            if i-1 > 0 and space[j,i-1] == -1: #W
-                ext_nbrs[j,i,4]=1
-            else:
-                mat.append(k, j*n + i-1, -8)
+            # if i-1 > 0 and space[j,i-1] == -1: 
+            #     ext_nbrs[j,i,4]=1
+            # else:
+            mat.append(k, j*n + i-1, -8)#W
                 
-            if j-1 > 0 and i+1 < n and space[j-1,i+1] == -1: #SE
-                ext_nbrs[j,i,5]=1
-            else:
-               mat.append(k, (j-1)*n + i+1, 1)
+            # if j-1 > 0 and i+1 < n and space[j-1,i+1] == -1: 
+            #     ext_nbrs[j,i,5]=1
+            # else:
+            mat.append(k, (j-1)*n + i+1, 1)#SE
                
-            if j-1 > 0 and space[j-1,i] == -1: #S
-                ext_nbrs[j,i,6]=1
-            else:
-                mat.append(k, (j-1)*n + i, -8)
+            # if j-1 > 0 and space[j-1,i] == -1:
+            #     ext_nbrs[j,i,6]=1
+            # else:
+            mat.append(k, (j-1)*n + i, -8) #S
                     
-            if j-1 > 0 and i-1 > 0 and space[j-1,i-1] == -1: #SW
-                ext_nbrs[j,i,7]=1
-            else:
-                mat.append(k, (j-1)*n + i-1, 1) 
+            # if j-1 > 0 and i-1 > 0 and space[j-1,i-1] == -1: 
+            #     ext_nbrs[j,i,7]=1
+            # else:
+            mat.append(k, (j-1)*n + i-1, 1) #SW
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-
     csc_mat = csc_matrix((mat.coefs, (mat.row, mat.col)), (m*n, m*n))
 
-    return csc_mat, ext_nbrs
+    return csc_mat
 
 
 # -----------------------------------------------------------------------------
@@ -139,7 +135,7 @@ def Dpsi_cscmatrixBuild(ex):
 # B = v_C * (u_E + u_W + u_N + u_S)
 # C = u_C * (v_E + v_W + v_N + v_S)
 
-def update_rhs(ex, u, v, psi, ext_nbrs): #
+def update_rhs(ex, u, v, psi): #
     
     n = ex.Nx 
     m = ex.Ny
@@ -155,6 +151,9 @@ def update_rhs(ex, u, v, psi, ext_nbrs): #
         
         
         #Psi = 0 for exterior and boundary
+        if j == m-1:
+            rhs[k] = ex.flux
+            
         if space[j,i] != 1:
             rhs[k] = 0
         
@@ -185,27 +184,54 @@ def update_rhs(ex, u, v, psi, ext_nbrs): #
             v_W = v[k_W]
             
 
+            
+            psi_k = psi[k]          
+            
+            #possible exterior nbrs 
             dpsi_bc = 0
-                                
-            #possible exterior nbrs
-            psi_int = psi[k]
-            if ext_nbrs[j,i,0]: #NE:
-                dpsi_bc += -1 * stream_interp_diag(psi_int)
-            if ext_nbrs[j,i,1]: #N:
-                dpsi_bc += 8 * stream_interp(psi_int)
-            if ext_nbrs[j,i,2]: #NW:
-                dpsi_bc += -1 * stream_interp_diag(psi_int)
-            if ext_nbrs[j,i,3]: #E:
-                dpsi_bc += 8 * stream_interp(psi_int)
-            if ext_nbrs[j,i,4]: #W:
-                dpsi_bc += 8 * stream_interp(psi_int)
-            if ext_nbrs[j,i,5]: #SE:
-                dpsi_bc += -1 * stream_interp_diag(psi_int)
-            if ext_nbrs[j,i,6]: #S:
-                dpsi_bc += 8 * stream_interp(psi_int)
-            if ext_nbrs[j,i,7]: #SW:
-                dpsi_bc += -1 * stream_interp_diag(psi_int)
+
+            if ex.space[j+1,i+1] == -1: #NE:
+                dpsi_bc += -1 * ex.stream_interp_EW(j+1, i, psi[(j+1)*n+i])
+
+            if ex.space[j+1,i-1] == -1: #NW:
+                dpsi_bc += -1 * ex.stream_interp_EW(j+1, i, psi[(j+1)*n+i])
+                                                     
+            if ex.space[j,i+1] == -1: #E:
+                dpsi_bc += 8 * ex.stream_interp_EW(j, i, psi_k)
                 
+            if ex.space[j,i-1] == -1: #W:
+                dpsi_bc += 8 * ex.stream_interp_EW(j, i, psi_k)
+                
+            if ex.space[j-1,i] == -1: #S:
+                dpsi_bc += 8 * ex.stream_interp_S(j,i, psi_k)
+                
+            if ex.space[j-1,i+1] == -1: #SE:
+                
+                if i+1 < ex.apex:
+                    slope = ex.slope_A
+                else:
+                    slope = ex.slope_B
+                
+                if abs(slope) < 1:
+                    
+                    dpsi_bc += -1 * ex.stream_interp_S(j, i+1, psi[j*n+i+1])
+                else:
+                    dpsi_bc += -1 * ex.stream_interp_EW(j-1, i, psi[(j-1)*n+i]) 
+
+            if ex.space[j-1,i-1]==-1: #SW:
+                                
+                if i-1 < ex.apex:
+                    slope = ex.slope_A
+                else:
+                    slope = ex.slope_B
+                
+                if abs(slope) < 1:
+                    
+                    dpsi_bc += -1 * ex.stream_interp_S(j, i-1, psi[j*n+i-1])
+                else:
+                    dpsi_bc += -1 * ex.stream_interp_EW(j-1, i, psi[(j-1)*n+i]) 
+                    
+                    
             A = u_S - u_N + v_E - v_W
             B = v_C * (u_E + u_W + u_N + u_S)
             C = u_C * (v_E + v_W + v_N + v_S)
@@ -220,15 +246,15 @@ def update_rhs(ex, u, v, psi, ext_nbrs): #
 # u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
 # v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
 
-def uv_approx(tri, u, v, psi, ext_nbrs):
+def uv_approx(ex, u, v, psi):
   
 
-    n = tri.Nx
-    m = tri.Ny
+    n = ex.Nx
+    m = ex.Ny
 
-    U = tri.U
+    U = ex.U
     
-    c2 = 3/(4*tri.dx)
+    c2 = 3/(4*ex.dx)
     c3 = 1/4
 
     for k in range(n*m):
@@ -240,83 +266,66 @@ def uv_approx(tri, u, v, psi, ext_nbrs):
             u[k] = U
             v[k] = 0 
             
-        # other boundaries & dead zones
-        elif (tri.space[j,i] != 1):
+        # other boundaries & exterior
+        elif (ex.space[j,i] != 1):
             u[k] = 0
             v[k] = 0 
                 
         else: #interior
-            # (u,v) at 4 point stencil
+            # (u,v, psi) at 4 point stencil
             
             # North (i, j+1)
             if j+1 == m-1: 
                 u_N = U
-                psi_N = 0
+                psi_N = ex.flux
             else:
                 k_N = (j+1)*n + i
                 u_N = u[k_N]
-                if ext_nbrs[j,i,1]: #N:
-
-                    psi_N = stream_interp(psi[k])
-                else:
-                    psi_N = psi[k_N]
+                psi_N = psi[k_N]
                 
             # East (i+1, j)
-            if i+1 == n-1 : 
+            if ex.space[j,i+1] == -1: 
                 v_E = 0
-                psi_E = 0 
+                psi_E = ex.stream_interp_EW(j,i,psi[k])
+            elif ex.space[j,i+1] == 0:
+                v_E = 0
+                psi_E = 0
             else:
                 k_E = j*n + i + 1
                 v_E = v[k_E]
-                if ext_nbrs[j,i,3]: #E:
+                psi_E = psi[k_E] 
 
-                    psi_E = stream_interp(psi[k])
-
-                else:
-                    psi_E = psi[k_E] 
-            
-            # South (i, j-1)
-            if j-1 == 0 : 
-                u_S = 0
-                psi_S = 0 
-            else:
-                k_S = (j-1)*n + i
-                u_S = u[k_S]
-                if ext_nbrs[j,i,6]: #S:
-
-                    psi_S = stream_interp(psi[k])
-                else:
-                    psi_S = psi[k_S]
-                
             # West (i-1, j)  
-            if i-1 == 0 :
+            if ex.space[j,i-1] == -1:
+                v_W = 0
+                psi_W = ex.stream_interp_EW(j,i,psi[k])
+            elif ex.space[j,i-1] == 0:
                 v_W = 0
                 psi_W = 0 
             else:
                 k_W = j*n + i - 1
                 v_W = v[k_W]
-                if ext_nbrs[j,i,4]: #W:
-
-                    psi_W = stream_interp(psi[k])
-
-                else:
-                    psi_W = psi[k_W]
+                psi_W = psi[k_W]
    
+            # South (i, j-1)
+            if ex.space[j-1,i] == -1:
+                u_S = 0 
+                psi_S = ex.stream_interp_S(j,i,psi[k])
+            elif ex.space[j-1,i] == 0:
+                u_S = 0
+                psi_S = 0 
+            else:
+                k_S = (j-1)*n + i
+                u_S = u[k_S]
+                psi_S = psi[k_S]
+                
+
             u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
             v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
     
     return u, v
 
-def stream_interp(psi_int):
-    psi_ext = -psi_int
-    return psi_ext
-
-def stream_interp_diag(psi_int):
-    psi_ext = -np.sqrt(2) * psi_int
-    return psi_ext
-
-
-# s(x_nbr) = * (x_nbr - x_bdry) * (psi_int - psi_bdry)/(x_int - x_bdry) + psi_bdry 
+# s(x_nbr) = (x_nbr - x_bdry) * (psi_int - psi_bdry)/(x_int - x_bdry) + psi_bdry 
 
 # b.c: psi_bndry = 0 
 # SIMPLIFYING assumption: 

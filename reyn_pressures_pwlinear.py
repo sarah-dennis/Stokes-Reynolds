@@ -28,9 +28,7 @@ class Solver(P_Solver):
     
 
 def make_ps(height, cs):
-    N = height.N_regions
     slopes = height.slopes
-    widths = height.widths
     hs = height.hs
     x_peaks = height.x_peaks
     xs = height.xs
@@ -125,7 +123,6 @@ class pwlLinOp(LinearOperator):
             elif slopes[i] != 0 and slopes[i-1] == 0:
                 mv[i] = -v[i-1] + v[i] - cq * ( 1/(2* hs[i,1]**2 * slopes[i]) + hs[i,0]**-3 * widths[i-1])
 
-           
             elif slopes[i] == 0 and slopes[i-1] != 0:
                 mv[i] = -v[i-1] + v[i] + cq * (1/(2*hs[i,0]**2 * slopes[i-1]))
                 
