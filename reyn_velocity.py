@@ -44,3 +44,15 @@ class Velocity:
 
         return vx, vy
 
+# U = u(x,h0), Q = psi(x,h0)
+# H = h0 - h(x)
+def flux_to_pressure(Q, U, H):
+    dp = (Q-U*H/2)*(-12/H**3)
+    p0 = 0
+    pN = p0 + dp
+    return p0, pN
+
+def pressure_to_flux(p0, pN, U, H):
+    dp = pN - p0
+    Q = dp*(H**3/-12)+U*H/2
+    return Q

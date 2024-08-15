@@ -14,22 +14,33 @@ import stokes_convergence as cnvg
 
 import stokes_examples as examples
 
-# from stokes_solver_tri import run_spLU
+#------------------------------------------------------------------------------
+from stokes_solver import run_spLU
+
+# Triangle: slope 4 iso
+
 # example = examples.tri_Re1
-#Re 1: plot_compare(60,[120,180,240,300,360,400],480)
+# plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280],300)
 
 # example = examples.tri_Re0
 # Re 0: plot_compare(100,[200,300,400,500],600)
+#------------------------------------------------------------------------------
 
+# from stokes_solver_BFS import run_spLU 
 
-from stokes_solver_BFS import run_spLU 
+# BFS: H/h = 2, L/l = 4
+
+example = examples.bfs_Re1
+
 # example = examples.bfs_Re10neg4
-# Re 1e-4: plot_compare(25,[50,75,100,125,150],175)
-example = examples.bfs_ReHalf
+#plot_compare(25,[50,75,100,125,150,175,200,225,250,275],300)
+# example = examples.bfs_Re0
+
+
 
 write_mod = 500
-error_mod = 500
-
+error_mod = 100
+err_tol = 1.5e-9
 #------------------------------------------------------------------------------
 def new_run(N, iters):
     
@@ -39,15 +50,42 @@ def new_run(N, iters):
     psi_init = np.ones(ex.Nx * ex.Ny)
     past_iters = 0
 
-    u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod)
+    u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod, err_tol)
 
     rw.write_solution(ex, u, v, psi, iters)
+    
+def new_run_many(N_0, dN, many):
+    max_iters = 10000
+    new_run(N_0,max_iters)
+    N_load = N_0
+    for k in range (1, many): 
+        N = N_0 + k*dN
+        load_scale(N_load, N)
+        load_run(N, max_iters)
+        N_load = N
+        
+    
+def load_run_new_many(N_0, dN, many):
+    max_iters = 10000
+    N_load = N_0
+    for k in range (1, many): 
+        N = N_0 + k*dN
+        load_scale(N_load, N)
+        load_run(N, max_iters)
+        N_load = N
+
+def load_run_many(N_0, dN, many):
+    max_iters = 10000
+    for k in range (many): 
+        N = N_0 + k*dN
+        load_run(N, max_iters)
+        N_load = N
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     ex = example(N)
     u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
     
-    u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, error_mod, write_mod)
+    u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, error_mod, write_mod, err_tol)
     
     rw.write_solution(ex, u, v, psi, iters+past_iters)
 
@@ -100,10 +138,10 @@ def load_plot(N):
     v_2D = v.reshape((ex.Ny,ex.Nx))
 
 # zoom domain
-    x_start_A = 0.5
-    x_stop_A = 2.8
+    x_start_A = 1
+    x_stop_A = 1.5
     y_start_A = 0
-    y_stop_A = 2
+    y_stop_A = 0.5
 
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
     stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
@@ -200,8 +238,12 @@ def plot_compare(N_min, Ns, N_max):
     title = "Error to $N^{*}=%d$ of $\psi$ \n %s"%(N_max, example(N_min).spacestr)
     ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
     max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
-    linthresh=1e-5
+    linthresh=1e-8
+    # O1=1e-5
+    # O2=5e-5
     O1=1e-1
-    O2=1
+    O2=2
+    # O1=3e-2
+    # O2=6e-1
     graphics.plot_log_multi([max_errs], Ns_, title, ['max'], ax_labels_stream, linthresh, O1, O2)
     

@@ -15,7 +15,7 @@ from domain import Height
 #------------------------------------------------------------------------------
 
 class RandomHeight(Height):
-    def __init__(self, x0, xf, N, h_min, h_max):
+    def __init__(self, x0, xf, N, h_min, h_max, U):
         h_str = "Discrete Height"
 
         
@@ -26,8 +26,7 @@ class RandomHeight(Height):
             hs[i] = h_min + (h_max - h_min) * random.random()/(i+1)
         y0 = 0
         yf = max(hs)
-            
-        U = 1    
+
         h_avg = np.mean(hs)
         Re = U*h_avg
         super().__init__(x0, xf, y0, yf, Nx-1, hs, U, Re, h_str)
@@ -56,15 +55,9 @@ class SinsusoidalHeight(Height):
         Re = U*h_avg
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
 
-    # def h_fun(self, x):
-    #     return self.h_mid * (1 + self.r * np.cos(self.k*x))    
-    
-    # def h_fun(self, x):
-    #     return self.h_mid * (1 + self.r * np.cos(self.k*x) + self.r/self.k * np.sin(self.k*2*x))    
-    
     def h_fun(self, x):
-        return self.h_mid * (1 + 4*self.r * np.cos(self.k*x) + self.r/2*self.k * np.sin(self.k*x))    
-
+        return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+    
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):
     def __init__(self, x0, xf, N, h0):
@@ -81,7 +74,7 @@ class ConstantHeight(Height):
 #------------------------------------------------------------------------------
 class LinearHeight(Height): #slider bearing
     
-    def __init__(self, x0, xf, N, h0, hf):
+    def __init__(self, x0, xf, N, h0, hf, U):
         self.h0 = h0
         self.hf = hf
         self.x0 = x0
@@ -95,7 +88,6 @@ class LinearHeight(Height): #slider bearing
 
         y0 = 0
         yf = max(h0, hf)
-        U = 1    
         h_avg = np.mean(hs)
         Re = U*h_avg
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
@@ -103,22 +95,20 @@ class LinearHeight(Height): #slider bearing
     def h_fun(self, x):
         return self.h0 + self.m * (x - self.x0)
 
-#------------------------------------------------------------------------------    
-class StepWaveHeight(Height): # uniform width [h1, h2, ..., hN+1]
-
-    def __init__(self, x0, xf, N, N_steps, h_steps):
-        self.N_steps = N_steps
-        self.h_steps = h_steps
-        self.step_width = (xf - x0)/(N_steps+1)
-        h_str = "N=%d Step Height"%N_steps
+#------------------------------------------------------------------------------
+class StepHeight(Height):
+    def __init__(self, x0, xf, N, h0, hf, x_step, U):
+        self.x_step = x_step
+        self.N_steps = 1
+        self.h_steps= [h0, hf]
+        self.step_width = (xf - x0)/2
+        h_str = "Step Height"
         
         y0 = 0
-        yf = max(h_steps)
+        yf = max(self.h_steps)
         Nx = (xf-x0)*N + 1
-        hs = self.make_hs(x0, xf, Nx, N_steps, h_steps, self.step_width)
-        U = 1    
-        h_avg = np.mean(hs)
-        Re = U*h_avg
+        hs = self.make_hs(x0, xf, Nx, self.N_steps, self.h_steps, self.step_width)  
+        Re = U*(hf-h0)
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
 
     def make_hs(self, x0, xf, Nx, n_steps, h_steps, step_width):
@@ -134,61 +124,11 @@ class StepWaveHeight(Height): # uniform width [h1, h2, ..., hN+1]
             hs[i] = h_steps[j]
  
         return hs
-
-class StepHeight(StepWaveHeight):
-    def __init__(self, x0, xf, Nx, h0, hf, x_step):
-        self.x_step = x_step
-        N_steps = 1
-        h_steps = [h0, hf]
-        super().__init__(x0, xf, Nx, N_steps, h_steps)
         
-#-----------------------------------------------------------------------------
-
-class SawtoothHeight(Height):
-    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks):
-        self.h_peaks = h_peaks
-        self.x_peaks = x_peaks
-        self.N_regions = N_regions #=len(hpeaks)-1
-        
-        h_str = "Piecewise Linear"
-        Nx = (xf-x0)*N + 1
-
-        hs, self.slopes, self.widths = self.make_hs(x0, xf, Nx, x_peaks, h_peaks)
-        y0 = 0
-        yf = max(hs)
-        U = 1    
-        h_avg = np.mean(hs)
-        Re = U*h_avg
-        super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
-        
-    def make_hs(self, x0, xf, Nx, x_peaks, h_peaks):
-        slopes = np.zeros(self.N_regions)
-        widths = np.zeros(self.N_regions)
-        
-        for r in range(self.N_regions):            
-
-            slopes[r] = (h_peaks[r+1] - h_peaks[r])/(x_peaks[r+1] - x_peaks[r])
-
-            
-        hs = np.zeros(Nx)
-        dx = (xf - x0)/(Nx-1)
-        r = 0
-        for i in range(Nx):
-            xi = x0 + i*dx
-            
-            if xi > x_peaks[r+1] and r+1 < self.N_regions:
-                r +=1
-                
-            widths[r] = xi - x_peaks[r]
-            hs[i] = h_peaks[r] + slopes[r] * (xi - x_peaks[r])
-
-        return  hs, slopes, widths
-
-    
 #-----------------------------------------------------------------------------
 
 class PiecewiseLinearHeight(Height):
-    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks):
+    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks,U):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
         self.N_regions = N_regions #=len(hpeaks)-1
@@ -198,8 +138,7 @@ class PiecewiseLinearHeight(Height):
 
         hs, self.slopes, self.widths = self.make_hs(x0, xf, Nx, x_peaks, h_peaks)
         y0 = 0
-        yf = max(hs)
-        U = 1     
+        yf = max(hs)  
         Re = U*np.mean(hs)
         super().__init__(x0, xf, y0, yf, N, hs, U, Re, h_str)
         

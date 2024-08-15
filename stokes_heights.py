@@ -72,6 +72,30 @@ class triangle(Space):
             scale = 1 - (i % (1/self.slope_B))*self.slope_B
         return -scale * psi_k
 
+    def streamInlet(self, j):
+        if j == self.Ny-1:
+            return self.flux
+        else:
+            return 0
+    
+    def streamOutlet(self, j):
+        if j == self.Ny-1:
+            return self.flux
+        else:
+            return 0
+        
+    
+    def velInlet(self,j):
+        if j == self.Ny-1:
+            return self.U
+        else:
+            return 0
+        
+    def velOutlet(self,j):
+        if j == self.Ny-1:
+            return self.U
+        else:
+            return 0
 #------------------------------------------------------------------------------
 
 class step(Space):

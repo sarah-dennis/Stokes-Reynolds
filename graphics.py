@@ -122,7 +122,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     ax.set_ylim(0,1.01*h_max)
     pp.show()
     
@@ -185,7 +185,7 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
 
-    ax.set_aspect(6)
+    ax.set_aspect(xs[-1]/ys[-1])
     ax.set_ylim(0,1.1*h_max)
     # pp.legend(loc='upper left')
     pp.show()
@@ -193,8 +193,6 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
 #------------------------------------------------------------------------------
     
 def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
-
-
 
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
@@ -210,8 +208,6 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     
     vx = quiver_mask(vx, m, n, ly, lx)
     vy = quiver_mask(vy, m, n, ly, lx)
-    
-
     
     pp.quiver(xs, ys, vx, vy, color='k', width=.001, scale=v_scale, scale_units='x')
     pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')

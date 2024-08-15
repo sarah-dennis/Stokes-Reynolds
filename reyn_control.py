@@ -8,20 +8,13 @@ import csv
 import reyn_examples as rex
 import numpy as np
 import graphics
-# solution = rex.FinDiff_Rand()
 
+# solution = rex.FinDiff_Rand()
 # solution = rex.Constant_Ex1()
 # solution = rex.Linear_Ex1()       
-# solution = rex.Step_Ex1()
-# solution = rex.StepWave_Ex1()
-# solution = rex.StepWave_Ex2()
-# solution = rex.StepWave_Ex3()
-# solution = rex.Sawtooth_Ex1()
-# solution = rex.Sawtooth_Ex2()
-# solution = rex.Sawtooth_Ex3()
-# solution = rex.PiecewiseLinear_Ex0()
+solution = rex.Step_Ex1()
 # solution = rex.PiecewiseLinear_Ex1()
-solution = rex.PiecewiseLinear_Ex2()
+# solution = rex.PiecewiseLinear_Ex2()
 
 # fd_solution = rex.FinDiff_Custom(solution)
 #------------------------------------------------------------------------------
