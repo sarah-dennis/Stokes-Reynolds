@@ -13,7 +13,20 @@ from stokes_heights import slider
 
 # example = examples.bfs_Re1
 # example = examples.bfs_Re10neg4
-
+class tri_Re1_m3(triangle):
+    def __init__(self, N):
+        x0 = 0
+        xf = 1
+        y0 = 0
+        yf = 3/2
+        slopes = [-3,3]
+        wavelen = 1 * (xf-x0)
+        U = 1 # velocity @ yf
+        Q = 0 # stream @ yf
+        Re = 1 # rhs factor
+        filestr = "stokes_tri_Re1_m3_N%d"%(N)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, slopes, wavelen)
+        
 
 class tri_Re1(triangle):
     def __init__(self, N):
@@ -99,7 +112,7 @@ class slider_Re1(slider):
         Q = 1 
         Re = 1 
         x_peaks = [0, 1, 2]#, 3, 4,5]
-        y_peaks=[[0,1],[0.5,0.5],[1,0]]#,[0.5,0.5],[0.25,0.5],[1,0]]
+        y_peaks=[[0,1],[0.5,1],[3/2,0]]#,[0.5,0.5],[0.25,0.5],[1,0]]
         filestr = "stokes_slider_Re1_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
         

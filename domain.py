@@ -21,7 +21,7 @@ class Domain:
         self.N = N  # scale: number of grid points in [0,1]
         self.Nx = int((xf-x0)*N + 1) #total number of x grid points
         self.Ny = int((yf-y0)*N + 1) #total number of y grid points
-                    # int casting since (yf-y0) may not be integer
+
         self.dx = 1/N
         self.dy = 1/N
         

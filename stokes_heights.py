@@ -5,6 +5,7 @@ Created on Tue May 21 15:15:15 2024
 @author: sarah
 """
 import numpy as np
+import graphics
 from domain import Space
 
 class triangle(Space):
@@ -53,7 +54,8 @@ class triangle(Space):
                 
                 else:
                     grid[j,i] = 0
-                
+        graphics.plot_contour_mesh(grid, self.xs, self.ys, 'space',['space', 'x', 'y'])
+
         return grid
     
     def stream_interp_EW(self, j, i, psi_k):
@@ -186,7 +188,7 @@ class step(Space):
             return 0
         
 #------------------------------------------------------------------------------
-
+#TODO
 class slider(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
     # peak_ys = [(0,h_in),...,(hi_left, hi_right),...,(h_out,0)]
@@ -198,12 +200,14 @@ class slider(Space):
         # self.i_step = self.Nx// (peak_xs[1]-x0)
         self.x_peaks=x_peaks
         self.y_peaks = y_peaks
-        self.jf_in = self.Ny // (y_peaks[0][1]-y0) # ys[jf_in] : inlet j-min
-        self.jf_out = self.Ny // (y_peaks[-1][0]-y0) # ys[jf_out] : outlet j-min
+        
+        #peaks must have integer indices in the grid! 
+        self.jf_in = (y_peaks[0][1]-y0)/ self.dy # ys[jf_in] : inlet j-min
+        self.jf_out =  (y_peaks[-1][0]-y0)/ self.dy # ys[jf_out] : outlet j-min
         
         self.spacestr = "Backward Facing Step $Re=%.5f$"%Re
         self.set_space(self.make_space())
-        
+                                      
         # constants BCs on velocity, stream, flux 
         self.hf_in = y_peaks[0] # hf < h0 measured from y0
         self.hf_out = y_peaks[-1]
@@ -222,13 +226,23 @@ class slider(Space):
             dy = self.y_peaks[k+1][0] - self.y_peaks[k][1]
             dx = self.x_peaks[k+1] - self.x_peaks[k]
             self.slope[k] = dy/dx
+        # print(self.slope)
+        
+        
         grid = np.zeros((self.Ny, self.Nx))
+        
         reg = 0 #pwl region
         i_ref = 0 #left index of region 
+        
         for i in range(self.Nx):
+            
             if self.xs[i] > self.x_peaks[reg+1]:
                 reg += 1
                 i_ref = i
+                
+                
+            hj = self.slope[reg]*(i - i_ref)*self.dx + self.y_peaks[reg][1] # yj = h(xi)
+            # print(hj)
             for j in range(self.Ny):
                 if j == self.Ny-1: #upper boundary
                     grid[j,i] = 0
@@ -238,16 +252,17 @@ class slider(Space):
                     
                 elif i == self.Nx-1 and j>= self.jf_out: # outlet boundary
                     grid[j,i] = 0
-                
                 else:
-                    hj = self.slope[reg] * (i - i_ref) + self.y_peaks[reg][1] # yj = h(xi)
-                    if j < hj:
+                    yj = self.ys[j]
+                    if yj < hj:
                         grid[j,i] = -1
-                    elif j > hj:
+                    elif yj > hj:
                         grid[j,i] = 1
                     else:
                         grid[j,i] = 0
         
+        
+        graphics.plot_contour_mesh(grid, self.xs, self.ys, 'space',['space', 'x', 'y'])
         return grid
 
 
@@ -290,3 +305,19 @@ class slider(Space):
             return u
         else: 
             return 0
+        
+        #TODO: make this region interpreting based on i -- save the i-peaks in preprocess
+    # def stream_interp_EW(self, j, i, psi_k):
+    #     if i < self.apex:
+    #         scale = 1 - (j % self.slope_A)/self.slope_A
+    #     else:
+    #         scale = 1 - (j%self.slope_B)/self.slope_B
+        
+    #     return -scale * psi_k
+
+    # def stream_interp_S(self, j, i, psi_k):
+    #     if i < self.apex:
+    #         scale = 1 - (i % (1/self.slope_A))*self.slope_A
+    #     else:
+    #         scale = 1 - (i % (1/self.slope_B))*self.slope_B
+    #     return -scale * psi_k

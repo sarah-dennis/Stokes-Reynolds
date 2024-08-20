@@ -18,7 +18,7 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 # Triangle: slope 4 iso
-
+# example = examples.tri_Re1_m3
 example = examples.tri_Re1
 # plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280],300)
 
@@ -36,10 +36,10 @@ example = examples.tri_Re1
 #plot_compare(25,[50,75,100,125,150,175,200,225,250,275],300)
 # example = examples.bfs_Re0
 
-example = examples.slider_Re1
+# example = examples.slider_Re1
 
-write_mod = 100
-error_mod = 100
+write_mod = 500
+error_mod = 250
 err_tol = 5e-9
 #------------------------------------------------------------------------------
 def new_run(N, iters):
@@ -138,22 +138,22 @@ def load_plot(N):
     v_2D = v.reshape((ex.Ny,ex.Nx))
 
 # zoom domain
-    x_start_A = 1
-    x_stop_A = 1.5
-    y_start_A = 0
-    y_stop_A = 0.5
+    # x_start_A = 1
+    # x_stop_A = 1.5
+    # y_start_A = 0
+    # y_stop_A = 0.5
 
-    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
 
 # Stream plot:
 
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
-    graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
+    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
 #  Velocity plot: 
 
@@ -162,7 +162,7 @@ def load_plot(N):
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
 
-    graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
+    # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
     
 #  Vorticity plot: 
     w = vorticity(ex, u_2D, v_2D)
@@ -171,13 +171,12 @@ def load_plot(N):
     title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     graphics.plot_contour(w, xs, ys, title, ax_labels)
                 
-    x_start_B = 0
-    x_stop_B = 0.1
-    y_start_B = 1.75
-    y_stop_B = 2
+    # x_start_B = 0
+    # x_stop_B = 0.1
+    # y_start_B = 1.75
+    # y_stop_B = 2
     # w_zoom = grid_zoom_2D(w, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)     
     # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)
-    # 
     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
