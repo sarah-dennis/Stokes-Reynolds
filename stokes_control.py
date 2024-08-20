@@ -19,7 +19,7 @@ from stokes_solver import run_spLU
 
 # Triangle: slope 4 iso
 
-# example = examples.tri_Re1
+example = examples.tri_Re1
 # plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280],300)
 
 # example = examples.tri_Re0
@@ -30,17 +30,17 @@ from stokes_solver import run_spLU
 
 # BFS: H/h = 2, L/l = 4
 
-example = examples.bfs_Re1
+# example = examples.bfs_Re1
 
 # example = examples.bfs_Re10neg4
 #plot_compare(25,[50,75,100,125,150,175,200,225,250,275],300)
 # example = examples.bfs_Re0
 
+example = examples.slider_Re1
 
-
-write_mod = 500
+write_mod = 100
 error_mod = 100
-err_tol = 1.5e-9
+err_tol = 5e-9
 #------------------------------------------------------------------------------
 def new_run(N, iters):
     
@@ -49,6 +49,7 @@ def new_run(N, iters):
     v_init = np.ones(ex.Nx * ex.Ny)
     psi_init = np.ones(ex.Nx * ex.Ny)
     past_iters = 0
+
 
     u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod, err_tol)
 
@@ -79,7 +80,6 @@ def load_run_many(N_0, dN, many):
     for k in range (many): 
         N = N_0 + k*dN
         load_run(N, max_iters)
-        N_load = N
                                                                                                                                                                                                                                                                              
 def load_run(N, iters):
     ex = example(N)
@@ -242,7 +242,7 @@ def plot_compare(N_min, Ns, N_max):
     # O1=1e-5
     # O2=5e-5
     O1=1e-1
-    O2=2
+    O2=5
     # O1=3e-2
     # O2=6e-1
     graphics.plot_log_multi([max_errs], Ns_, title, ['max'], ax_labels_stream, linthresh, O1, O2)

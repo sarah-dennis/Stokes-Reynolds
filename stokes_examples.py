@@ -7,6 +7,7 @@ Created on Tue May 21 16:15:37 2024
 
 from stokes_heights import triangle
 from stokes_heights import step
+from stokes_heights import slider
 # example = examples.tri_Re1
 # example = examples.tri_Re0
 
@@ -20,11 +21,13 @@ class tri_Re1(triangle):
         xf = 1
         y0 = 0
         yf = 2
+        slopes = [-4,4]
+        wavelen = 1 * (xf-x0)
         U = 1 # velocity @ yf
         Q = 0 # stream @ yf
-        Re = 1
+        Re = 1 # rhs factor
         filestr = "stokes_tri_Re1_N%d"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, slopes, wavelen)
         
 class tri_Re0(triangle):
     def __init__(self, N):
@@ -32,11 +35,13 @@ class tri_Re0(triangle):
         xf = 1                       
         y0 = 0
         yf = 2
+        slopes = [-4,4]
+        wavelen = 1 * (xf-x0)
         U = 1 # velocity @ yf
         Q = 0
         Re = 0
         filestr = "stokes_tri_Re0_N%d"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, slopes, wavelen)
 #------------------------------------------------------------------------------
 class bfs_Re1(step):
     def __init__(self, N):
@@ -81,4 +86,20 @@ class bfs_Re10neg4(step):
         filestr = "stokes_BFS_Re1e-4_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_step, y_step)
         
+        
+#------------------------------------------------------------------------------
+
+class slider_Re1(slider):
+    def  __init__(self,N):
+        x0 = 0
+        xf = 2
+        y0 = 0
+        yf = 2
+        U = 0
+        Q = 1 
+        Re = 1 
+        x_peaks = [0, 1, 2]#, 3, 4,5]
+        y_peaks=[[0,1],[0.5,0.5],[1,0]]#,[0.5,0.5],[0.25,0.5],[1,0]]
+        filestr = "stokes_slider_Re1_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
         

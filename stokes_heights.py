@@ -8,13 +8,12 @@ import numpy as np
 from domain import Space
 
 class triangle(Space):
-    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr):
+    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, slopes, wavelen):
 
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
-        # self.slope = int(2*yf/xf)
-        self.slope_A = -4
-        self.slope_B = 4
-        self.apex = self.Nx//2
+        self.slope_A = slopes[0]
+        self.slope_B = slopes[1]
+        self.apex = self.Nx//(wavelen*2)    #prev // = 2
         self.spacestr = "Triangle-cavity $Re=%.5f$"%Re
         self.set_space(self.make_space())
         
@@ -146,6 +145,112 @@ class step(Space):
                         
         return grid
                 
+
+    # Boundary conditions on stream and velocity
+    def streamInlet(self, j):
+        if j > self.jf_in:
+            y = self.y0 + j*self.dy
+            u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
+            dp_term = -0.5*self.dp_in*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
+            psi = u_term + dp_term + self.flux 
+            return psi
+        else:
+            return 0
+    
+    def streamOutlet(self, j):
+        if j > self.jf_out:
+            y = self.y0 + j*self.dy
+            u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_out*(y-self.yf))/self.H_out
+            dp_term = -0.5*self.dp_out*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_out)*(y**2-self.yf**2) - self.yf*self.hf_out*(y-self.yf))
+            return u_term + dp_term + self.flux
+        else:
+            return 0
+        
+    
+    def velInlet(self,j):
+        if j > self.jf_in:
+            y = self.y0 + j*self.dy
+
+            u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
+
+            return  u
+        else: 
+            return 0
+        
+    def velOutlet(self,j):
+        if j > self.jf_out:
+            y = self.y0 + j*self.dy
+            u = (self.U/self.H_out - 0.5*self.dp_out*(self.yf-y)) * (y-self.hf_out) 
+            return u
+        else: 
+            return 0
+        
+#------------------------------------------------------------------------------
+
+class slider(Space):
+    # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
+    # peak_ys = [(0,h_in),...,(hi_left, hi_right),...,(h_out,0)]
+    
+    
+    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+        
+        # self.i_step = self.Nx// (peak_xs[1]-x0)
+        self.x_peaks=x_peaks
+        self.y_peaks = y_peaks
+        self.jf_in = self.Ny // (y_peaks[0][1]-y0) # ys[jf_in] : inlet j-min
+        self.jf_out = self.Ny // (y_peaks[-1][0]-y0) # ys[jf_out] : outlet j-min
+        
+        self.spacestr = "Backward Facing Step $Re=%.5f$"%Re
+        self.set_space(self.make_space())
+        
+        # constants BCs on velocity, stream, flux 
+        self.hf_in = y_peaks[0] # hf < h0 measured from y0
+        self.hf_out = y_peaks[-1]
+        self.H_in = yf - y_peaks[0][1]
+        self.H_out = yf - y_peaks[-1][0]
+        
+        self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
+        self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
+    
+    # 0 : boundary, -1: exterior, 1: interior
+    def make_space(self):
+        N_regions = len(self.x_peaks)-1
+        self.slope = np.zeros(N_regions)
+        
+        for k in range(N_regions):
+            dy = self.y_peaks[k+1][0] - self.y_peaks[k][1]
+            dx = self.x_peaks[k+1] - self.x_peaks[k]
+            self.slope[k] = dy/dx
+        grid = np.zeros((self.Ny, self.Nx))
+        reg = 0 #pwl region
+        i_ref = 0 #left index of region 
+        for i in range(self.Nx):
+            if self.xs[i] > self.x_peaks[reg+1]:
+                reg += 1
+                i_ref = i
+            for j in range(self.Ny):
+                if j == self.Ny-1: #upper boundary
+                    grid[j,i] = 0
+                    
+                elif i == 0 and j >= self.jf_in: #inlet boundary
+                    grid[j,i] = 0
+                    
+                elif i == self.Nx-1 and j>= self.jf_out: # outlet boundary
+                    grid[j,i] = 0
+                
+                else:
+                    hj = self.slope[reg] * (i - i_ref) + self.y_peaks[reg][1] # yj = h(xi)
+                    if j < hj:
+                        grid[j,i] = -1
+                    elif j > hj:
+                        grid[j,i] = 1
+                    else:
+                        grid[j,i] = 0
+        
+        return grid
+
+
 
     # Boundary conditions on stream and velocity
     def streamInlet(self, j):
