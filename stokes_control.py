@@ -18,9 +18,9 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 # Triangle: slope 4 iso
-# example = examples.tri_Re1_m3
-example = examples.tri_Re1
-# plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280],300)
+
+# example = examples.tri_Re1
+# plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280,300, 400], 900)
 
 # example = examples.tri_Re0
 # Re 0: plot_compare(100,[200,300,400,500],600)
@@ -36,11 +36,19 @@ example = examples.tri_Re1
 #plot_compare(25,[50,75,100,125,150,175,200,225,250,275],300)
 # example = examples.bfs_Re0
 
+
+
+
 # example = examples.slider_Re1
+
+# example = examples.slider_tri_Re1
+
+# example =  examples.slider_rectTxt_Re1
+example =  examples.slider_triTxt_Re1
 
 write_mod = 500
 error_mod = 250
-err_tol = 5e-9
+err_tol = 1e-8
 #------------------------------------------------------------------------------
 def new_run(N, iters):
     
@@ -115,13 +123,24 @@ def load_scale(N_load, N_scale):
     
 #------------------------------------------------------------------------------
 def vorticity(ex, u_2D, v_2D):
-    uy_2D = np.gradient(u_2D, ex.dx, axis=0)
+    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
     vx_2D = np.gradient(v_2D, ex.dx, axis=1)
     w_2D = np.zeros((ex.Ny,ex.Nx))
     for j in range(ex.Ny):
         for i in range(ex.Nx):   
             w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
     return w_2D
+
+def pressure(ex, u_2D, v_2D):
+    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
+    uyy_2D = np.gradient(uy_2D, ex.dy, axis=0)
+    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
+    vxx_2D = np.gradient(vx_2D, ex.dx, axis=1)
+    p_2D = np.zeros((ex.Ny,ex.Nx))
+    for j in range(ex.Ny):
+        for i in range(ex.Nx):   
+            p_2D[j,i] = vxx_2D[j,i] - uyy_2D[j,i]
+    return p_2D
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
@@ -136,6 +155,8 @@ def load_plot(N):
     stream_2D = psi.reshape((ex.Ny,ex.Nx))
     u_2D = u.reshape((ex.Ny,ex.Nx))
     v_2D = v.reshape((ex.Ny,ex.Nx))
+
+    # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
 
 # zoom domain
     # x_start_A = 1
@@ -152,7 +173,10 @@ def load_plot(N):
 
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
+    # graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
+    stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
+    graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, True, n_contours=15)
+
     # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
 #  Velocity plot: 
@@ -169,7 +193,9 @@ def load_plot(N):
 
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
     title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    graphics.plot_contour(w, xs, ys, title, ax_labels)
+    # graphics.plot_contour(w, xs, ys, title, ax_labels, False)
+    w_ma = np.ma.masked_where(ex.space==-1, w)
+    graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, False, n_contours=20)
                 
     # x_start_B = 0
     # x_stop_B = 0.1
@@ -193,56 +219,21 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
     j_f = int((y_stop - ex.y0)/ex.dy)
     return grid_x[i_0:i_f], grid_y[j_0:j_f]
     
-#--------------------------
-
-def plot_bfs_compare_N(Ns, N_max):
-    err_xs, err_ys = cnvg.bfs_compare_N(example, Ns, N_max)
-    title_xs = "Error to $N^{*}=$%d in reattatchment point"%N_max
-    title_ys = "Error to $N^{*}=$%d in detachment point"%N_max
-    ax_labels_detach= ["N", "$|y_{N^{*}} - y_{N}|$"]
-    ax_labels_reattach= ["N", "$|x_{N^{*}} - x_{N}|$"]
-    
-    n_feats = 3
-    
-    labels_stream = np.arange(1, n_feats+1)
-    
-    graphics.plot_log_multi(err_xs[:n_feats], Ns, title_xs, labels_stream, ax_labels_reattach, linthresh=1e-4, O1=1, O2=1e2)
-    graphics.plot_log_multi(err_ys[:n_feats], Ns, title_ys, labels_stream, ax_labels_detach, linthresh=1e-4, O1=1, O2=1e2)
-
-def plot_tri_compare_N(Ns, N_max):
-    err_extrs, err_extrs_y, err_left, err_right = cnvg.tri_compare_N(example, Ns, N_max)
-    
-    n_feats = 3
-    labels_stream_extrs = np.arange(1, n_feats+1)
-    labels_stream_left = np.arange(1, n_feats+1)
-    labels_stream_right = np.arange(1, n_feats+1)
-    
-    ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
-    ax_labels_y = ["N", "$|y_{N^{*}} - y_{N}|$"]
-        
-    title_stream_extrs = "Error to $N^{*}=$%d in $\psi$ extrema (center)"%N_max
-    graphics.plot_log_multi(err_extrs[:n_feats], Ns, title_stream_extrs, labels_stream_extrs, ax_labels_stream, linthresh=1e-10, O1=1e-2, O2=1e-2)
-    
-    title_extrs_y = "Error to $N^{*}=$%d in $y$ of vortex center"%N_max
-    graphics.plot_log_multi(err_extrs_y[:n_feats], Ns, title_extrs_y, labels_stream_extrs, ax_labels_y, linthresh=1e-4, O1=1e1, O2=1e2)
-
-    title_left = "Error to $N^{*}=$%d in $y$ of of $\psi$ saddle-point (left)"%N_max
-    graphics.plot_log_multi(err_left[:n_feats], Ns, title_left, labels_stream_left, ax_labels_y, linthresh=1e-3, O1=1e1, O2=1e2)
-    
-    title_right = "Error to $N^{*}=$%d in $y$ of $\psi$ saddle-point (right)"%N_max
-    graphics.plot_log_multi(err_right[:n_feats], Ns, title_right, labels_stream_right, ax_labels_y, linthresh=1e-3, O1=1e1, O2=1e2)
+#-------------------------------------------------------------------------------------------------------
     
 def plot_compare(N_min, Ns, N_max):
     Ns_ = [N_min]+Ns
-    title = "Error to $N^{*}=%d$ of $\psi$ \n %s"%(N_max, example(N_min).spacestr)
-    ax_labels_stream = ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
+    title = "Max error in $\psi$ to $N=%d$ \n %s"%(N_max, example(N_min).spacestr)
+    ax_labels= ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
     max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
-    linthresh=1e-8
+    leg_labels = ['$N_{\min}=%d, N_{\max} = %d$'%(N_min, Ns[-1])]
+    linthresh=1e-7
     # O1=1e-5
     # O2=5e-5
-    O1=1e-1
-    O2=5
+    O1=1e-1 
+    O1half = 8e-1
+    O2= 1.5
     # O1=3e-2
     # O2=6e-1
-    graphics.plot_log_multi([max_errs], Ns_, title, ['max'], ax_labels_stream, linthresh, O1, O2)
+    graphics.plot_log_multi([max_errs], Ns_, title, leg_labels, ax_labels, linthresh, O1, O1half, O2)
     

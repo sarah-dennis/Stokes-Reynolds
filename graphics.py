@@ -134,7 +134,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
 
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[1,4] #len(ys) = 2 len(xs)
+    stream_density=[8*len(ys)/len(xs),1]
     
     if log_cmap:
     
@@ -151,7 +151,7 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
         art.remove()        
     
 
-    # pp.title(title, fontweight="bold")
+    pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
 
@@ -261,14 +261,22 @@ def quiver_mask(grid, m, n, ly, lx):
  
 #------------------------------------------------------------------------------       
 
-def plot_contour(zs, xs, ys, title, labels):
+def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-18):
+    pp.rcParams["lines.linewidth"] = .4
     pp.rcParams['figure.dpi'] = 1000
-    pp.figure()
 
+    pp.figure()
+    
     X, Y = np.meshgrid(xs, ys)
     n_contours = max(zs.shape)//2
-    pp.rcParams["lines.linewidth"] = .4
-    contour_plot = pp.contour(X, Y, zs, n_contours, cmap='plasma')
+
+    if log_cmap:
+        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
+        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma', norm=norm_symLog)
+    else:
+        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma')
+        
+    # contour_plot = pp.contour(X, Y, zs, n_contours, cmap='plasma')
         
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
@@ -276,29 +284,27 @@ def plot_contour(zs, xs, ys, title, labels):
     pp.colorbar(contour_plot, label=labels[0])
     
     ax = pp.gca()
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     pp.show()
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18, contour_density=5e-2):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18, n_contours=20):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
-    
+    # zs = np.ma.masked_where(zs == 0, zs)
     X, Y = np.meshgrid(xs, ys)
 #'Spectral_r'
     if log_cmap:
         norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
-        color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
+        color_plot = pp.pcolor(X, Y, zs, cmap='viridis', norm=norm_symLog)
     else:
-        color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r')
+        color_plot = pp.pcolor(X, Y, zs, cmap='viridis')
     
     pp.colorbar(color_plot, label=labels[0])
     
 
-    n_contours = int(max(zs.shape)*contour_density)
-
-    pp.rcParams["lines.linewidth"] = .15
+    pp.rcParams["lines.linewidth"] = .2
     pp.contour(X, Y, zs, n_contours, colors='white')
     
     pp.title(title, fontweight="bold")
@@ -322,7 +328,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, O2=1e-3):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, O1half=1e-3/2, O2=1e-3):
     pp.rcParams['figure.dpi'] = 300
     fig = pp.figure()
     
@@ -332,12 +338,13 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, 
 
     pp.rcParams["lines.linewidth"] = .8
     for i in range(len(fs)):
-        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='o', markevery=1)
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
     
     
     # reference lines
-    ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='black')    
-    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='grey')
+    ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
+    ax.plot(xs,[O1half*x**-np.sqrt(2) for x in xs], label="$\mathcal{O}(%s^{-\sqrt{2}})$"%ax_labels[0], color='grey')
+    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='lightblue')
     
     ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
@@ -346,7 +353,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, 
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(1.1, 0.7))
+    fig.legend(bbox_to_anchor=(0.5, 0.4))
     
     return fig
 

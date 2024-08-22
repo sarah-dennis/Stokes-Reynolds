@@ -8,25 +8,6 @@ Created on Tue May 21 16:15:37 2024
 from stokes_heights import triangle
 from stokes_heights import step
 from stokes_heights import slider
-# example = examples.tri_Re1
-# example = examples.tri_Re0
-
-# example = examples.bfs_Re1
-# example = examples.bfs_Re10neg4
-class tri_Re1_m3(triangle):
-    def __init__(self, N):
-        x0 = 0
-        xf = 1
-        y0 = 0
-        yf = 3/2
-        slopes = [-3,3]
-        wavelen = 1 * (xf-x0)
-        U = 1 # velocity @ yf
-        Q = 0 # stream @ yf
-        Re = 1 # rhs factor
-        filestr = "stokes_tri_Re1_m3_N%d"%(N)
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, slopes, wavelen)
-        
 
 class tri_Re1(triangle):
     def __init__(self, N):
@@ -111,8 +92,67 @@ class slider_Re1(slider):
         U = 0
         Q = 1 
         Re = 1 
-        x_peaks = [0, 1, 2]#, 3, 4,5]
-        y_peaks=[[0,1],[0.5,1],[3/2,0]]#,[0.5,0.5],[0.25,0.5],[1,0]]
+        x_peaks = [x0, 1, xf]#, 3, 4,5]
+        y_peaks=[[yf,1],[0.5,1],[3/2,yf]]#,[0.5,0.5],[0.25,0.5],[1,0]]
         filestr = "stokes_slider_Re1_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
-        
+
+class slider_tri_Re1(slider):
+    def  __init__(self,N):
+        x0 = 0
+        xf = 1
+        y0 = 0
+        yf = 2
+        U = 1
+        Q = 0 
+        Re = 1 
+        x_peaks = [x0, 0.5, xf]#, 3, 4,5]
+        y_peaks=[[yf,2],[0,0],[2,yf]]
+        filestr = "stokes_slider_tri_Re1_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+
+class slider_rectTxt_Re1(slider):
+    def  __init__(self,N):
+        x0 = 0
+        xf = 10
+        y0 = 0
+        yf = 2
+        U = 1
+        Q = 0 
+        Re = 1 
+        x_peaks = [x0, 2, 2.5, 3.5, 4, 5, 5.5, 6.5, 7, xf]#, 3, 4,5]
+        y_peaks=[[yf,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,yf]]
+        filestr = "stokes_slider_rectTxt_Re1_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+
+class slider_triTxt_Re1(slider):
+    def  __init__(self,N):
+        x0 = 0
+        xf = 10
+        y0 = 0
+        yf = 2
+        U = 1
+        Q = 0 
+        Re = 1 
+        x_peaks = [x0, 2, 3, 4, 5, 6, 7, xf]#, 3, 4,5]
+        y_peaks=[[yf,1],[1,1],[0,0],[1,1],[1,1],[0,0],[1,1],[1,yf]]
+        filestr = "stokes_slider_triTxt_Re1_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

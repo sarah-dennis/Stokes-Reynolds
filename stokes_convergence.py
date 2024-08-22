@@ -112,8 +112,8 @@ def get_boundary(tri, psi):
         
         y = tri.y0 + j*tri.dx
         
-        dj = j % tri.slope
-        di = int(j//tri.slope) 
+        dj = j % tri.slopes[0]
+        di = int(j//tri.slopes[0]) 
         
         if dj == 0: #true boundary points
             k_left = j*n + i_mid - di 
