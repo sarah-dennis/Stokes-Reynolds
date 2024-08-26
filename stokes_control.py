@@ -41,10 +41,10 @@ from stokes_solver import run_spLU
 
 # example = examples.slider_Re1
 
-# example = examples.slider_tri_Re1
+example = examples.slider_tri_Re1
 
 # example =  examples.slider_rectTxt_Re1
-example =  examples.slider_triTxt_Re1
+# example =  examples.slider_triTxt_Re1
 
 write_mod = 500
 error_mod = 250

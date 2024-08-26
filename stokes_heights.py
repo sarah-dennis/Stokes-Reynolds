@@ -62,23 +62,8 @@ class triangle(Space):
 
         return grid
     
-    # def stream_interp_EW(self, j, i, psi_k):
-    #     if i < self.apex:
-    #         scale = 1 - (j % self.slope_A)/self.slope_A
-    #     else:
-    #         scale = 1 - (j%self.slope_B)/self.slope_B
-        
-    #     return -scale * psi_k
-
-    # def stream_interp_S(self, j, i, psi_k):
-    #     if i < self.apex:
-    #         scale = 1 - (i % (1/self.slope_A))*self.slope_A
-    #     else:
-    #         scale = 1 - (i % (1/self.slope_B))*self.slope_B
-    #     return -scale * psi_k
     
-    
-    def stream_interp_E_W(self, t, s, psi_k):
+    def interp_E_W(self, t, s, psi_k):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -89,7 +74,7 @@ class triangle(Space):
         
         return -scale * psi_k
 
-    def stream_interp_S(self, t, s, psi_k):
+    def interp_S(self, t, s, psi_k):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -98,7 +83,7 @@ class triangle(Space):
         scale = 1 - (s % (1/slope))*slope
         return -scale * psi_k
 
-    def stream_interp_NE_NW(self, t, s, psi_N):
+    def interp_NE_NW(self, t, s, psi_N):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -109,7 +94,7 @@ class triangle(Space):
         
         return -scale * psi_N
 
-    def stream_interp_SE_SW(self, t, s, psi_SEW, psi_S):
+    def interp_SE_SW(self, t, s, psi_SEW, psi_S):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -257,7 +242,7 @@ class slider(Space):
         
         #peaks must have integer indices in the grid! 
         # self.jf_in = y_peaks[0][1]/ self.dy # ys[jf_in] : inlet j-min
-        self.jf_out =  y_peaks[-1][0] / self.dy # ys[jf_out] : outlet j-min
+        # self.jf_out =  y_peaks[-1][0] / self.dy # ys[jf_out] : outlet j-min
         
         self.spacestr = "Textured Slider $Re=%.4f$"%Re
         self.set_space(self.make_space())
@@ -396,7 +381,7 @@ class slider(Space):
       
   #x_ij = x_k has exterior nbr x_st
 
-    def stream_interp_E_W(self, t, s, psi_k):
+    def interp_E_W(self, t, s, psi_k):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -409,7 +394,7 @@ class slider(Space):
         
         return -scale * psi_k
 
-    def stream_interp_S(self, t, s, psi_k):
+    def interp_S(self, t, s, psi_k):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -418,7 +403,7 @@ class slider(Space):
         scale = 1 - (s % (1/slope))*slope
         return -scale * psi_k
 
-    def stream_interp_NE_NW(self, t, s, psi_N):
+    def interp_NE_NW(self, t, s, psi_N):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -428,7 +413,7 @@ class slider(Space):
         
         return -scale * psi_N
 
-    def stream_interp_SE_SW(self, t, s, psi_SEW, psi_S):
+    def interp_SE_SW(self, t, s, psi_EW, psi_S):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
@@ -439,7 +424,7 @@ class slider(Space):
         
         elif abs(slope) < 1:    
             scale = 1 - (s%(1/slope))*slope
-            return -scale * psi_SEW
+            return -scale * psi_EW
         
         else:
             scale = 1 - (t % slope)/slope

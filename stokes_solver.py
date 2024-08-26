@@ -132,64 +132,68 @@ def update_rhs(ex, u, v, psi): #
         else: # interior
             # (u,v) at 9 point stencil
 
-            u_C = u[k]
-            v_C = v[k]
+            u_k = u[k]
+            v_k = v[k]
 
+            psi_k = psi[k]          
+                
+            #possible exterior nbrs 
+            dpsi_bc = 0
+            
             # North (i, j+1) 
             k_N = (j+1)*n + i
             u_N = u[k_N]
             v_N = v[k_N]
-                
+            
             # East (i+1, j)                
             k_E = j*n + i + 1
-            u_E = u[k_E]
-            v_E = v[k_E]
-                
-            # South (i, j-1)
-            k_S = (j-1)*n + i
-            u_S = u[k_S]
-            v_S = v[k_S]
+            if ex.space[j,i+1] == -1: #E:
+                dpsi_bc += 8 * ex.interp_E_W(j, i+1, psi_k)
+                u_E = ex.interp_E_W(j, i+1, u_k)
+                v_E = ex.interp_E_W(j, i+1, v_k)
+            else:
+                u_E = u[k_E]
+                v_E = v[k_E]
                 
             # West (i-1, j)          
-            k_W = j*n + i - 1
-            u_W = u[k_W]
-            v_W = v[k_W]
-        
-            psi_k = psi[k]          
+            k_W = j*n + i - 1    
+            if ex.space[j,i-1] == -1: #W:
+                dpsi_bc += 8 * ex.interp_E_W(j, i-1, psi_k)
+                u_W = ex.interp_E_W(j, i-1, u_k)
+                v_W = ex.interp_E_W(j, i-1, v_k)
+            else:
+                u_W = u[k_W]
+                v_W = v[k_W]
+                
+            # South (i, j-1)
+            k_S = (j-1)*n + i     
+            if ex.space[j-1,i] == -1: #S:
+                dpsi_bc += 8 * ex.interp_S(j-1, i, psi_k)
+                u_S = ex.interp_S(j-1, i, u_k)
+                v_S = ex.interp_S(j-1, i, v_k)
+            else:
+                u_S = u[k_S]
+                v_S = v[k_S]
             
-            #possible exterior nbrs 
-            dpsi_bc = 0
-
+            
             if ex.space[j+1,i+1] == -1: #NE:
-                dpsi_bc += -1 * ex.stream_interp_NE_NW(j+1, i+1, psi[(j+1)*n+i])
+                dpsi_bc += -1 * ex.interp_NE_NW(j+1, i+1, psi[k_N])
 
             if ex.space[j+1,i-1] == -1: #NW:
-                dpsi_bc += -1 * ex.stream_interp_NE_NW(j+1, i-1, psi[(j+1)*n+i])
+                dpsi_bc += -1 * ex.interp_NE_NW(j+1, i-1, psi[k_N])
                                                      
-            if ex.space[j,i+1] == -1: #E:
-                dpsi_bc += 8 * ex.stream_interp_E_W(j, i+1, psi_k)
-                
-            if ex.space[j,i-1] == -1: #W:
-                dpsi_bc += 8 * ex.stream_interp_E_W(j, i-1, psi_k)
-                
-            if ex.space[j-1,i] == -1: #S:
-                dpsi_bc += 8 * ex.stream_interp_S(j-1, i, psi_k)
-                
             if ex.space[j-1,i+1] == -1: #SE:
-                dpsi_bc += -1 * ex.stream_interp_SE_SW(j-1, i+1, psi[(j-1)*n+i+1],psi[(j-1)*n+i])
+                dpsi_bc += -1 * ex.interp_SE_SW(j-1, i+1, psi[k_E], psi[k_S])
 
-            if ex.space[j-1,i-1]==-1: #SW:
-                dpsi_bc += -1 * ex.stream_interp_SE_SW(j-1, i-1, psi[(j-1)*n+i-1],psi[(j-1)*n+i])
+            if ex.space[j-1,i-1] == -1: #SW:
+                dpsi_bc += -1 * ex.interp_SE_SW(j-1, i-1, psi[k_W], psi[k_S])
                
-            
-            
             A = u_S - u_N + v_E - v_W
-            B = v_C * (u_E + u_W + u_N + u_S)
-            C = u_C * (v_E + v_W + v_N + v_S)
+            B = v_k * (u_E + u_W + u_N + u_S)
+            C = u_k * (v_E + v_W + v_N + v_S)
 
             rhs[k] = c0 * A + c1 * (B - C) + dpsi_bc
-
-
+                   
     return rhs
  
 # Velocity <-> Stream update
@@ -247,8 +251,8 @@ def uv_approx(ex, u, v, psi):
                 v_E = 0 
                 psi_E = ex.streamOutlet(j)
             elif ex.space[j,i+1] == -1: 
-                v_E = 0
-                psi_E = ex.stream_interp_E_W(j,i+1,psi[k])
+                v_E = ex.interp_E_W(j, i+1, v[k])
+                psi_E = ex.interp_E_W(j, i+1, psi[k])
             elif ex.space[j,i+1] == 0:
                 v_E = 0
                 psi_E = 0
@@ -262,8 +266,8 @@ def uv_approx(ex, u, v, psi):
                 v_W = 0
                 psi_W = ex.streamInlet(j)
             elif ex.space[j,i-1] == -1:
-                v_W = 0
-                psi_W = ex.stream_interp_E_W(j,i-1,psi[k])
+                v_W = ex.interp_E_W(j, i-1, v[k])
+                psi_W = ex.interp_E_W(j, i-1, psi[k])
             elif ex.space[j,i-1] == 0:
                 v_W = 0
                 psi_W = 0 
@@ -277,8 +281,8 @@ def uv_approx(ex, u, v, psi):
                 u_S = 0
                 psi_S = 0
             elif ex.space[j-1,i] == -1:
-                u_S = 0 
-                psi_S = ex.stream_interp_S(j-1, i, psi[k])
+                u_S = ex.interp_S(j-1, i, u[k]) 
+                psi_S = ex.interp_S(j-1, i, psi[k])
             else:
                 k_S = (j-1)*n + i
                 u_S = u[k_S]

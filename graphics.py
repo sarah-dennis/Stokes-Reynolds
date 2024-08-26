@@ -343,7 +343,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, 
     
     # reference lines
     ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
-    ax.plot(xs,[O1half*x**-np.sqrt(2) for x in xs], label="$\mathcal{O}(%s^{-\sqrt{2}})$"%ax_labels[0], color='grey')
+    # ax.plot(xs,[O1half*x**-np.sqrt(2) for x in xs], label="$\mathcal{O}(%s^{-\sqrt{2}})$"%ax_labels[0], color='grey')
     ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='lightblue')
     
     ax.set_xscale('log')
