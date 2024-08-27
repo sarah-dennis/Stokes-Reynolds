@@ -17,27 +17,6 @@ import stokes_examples as examples
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
-# Triangle: slope 4 iso
-
-# example = examples.tri_Re1
-# plot_compare(20,[40,60,80,100,120,140,160,180,200,220,240,260,280,300, 400], 900)
-
-# example = examples.tri_Re0
-# Re 0: plot_compare(100,[200,300,400,500],600)
-#------------------------------------------------------------------------------
-
-# from stokes_solver_BFS import run_spLU 
-
-# BFS: H/h = 2, L/l = 4
-
-# example = examples.bfs_Re1
-
-# example = examples.bfs_Re10neg4
-#plot_compare(25,[50,75,100,125,150,175,200,225,250,275],300)
-# example = examples.bfs_Re0
-
-
-
 
 # example = examples.slider_Re1
 
@@ -46,8 +25,8 @@ example = examples.slider_tri_Re1
 # example =  examples.slider_rectTxt_Re1
 # example =  examples.slider_triTxt_Re1
 
-write_mod = 500
-error_mod = 250
+write_mod = 200
+error_mod = 200
 err_tol = 1e-8
 #------------------------------------------------------------------------------
 def new_run(N, iters):
@@ -222,18 +201,18 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
 #-------------------------------------------------------------------------------------------------------
     
 def plot_compare(N_min, Ns, N_max):
-    Ns_ = [N_min]+Ns
+    # Ns_ = [N_min]+Ns 
     title = "Max error in $\psi$ to $N=%d$ \n %s"%(N_max, example(N_min).spacestr)
     ax_labels= ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
     max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
-    leg_labels = ['$N_{\min}=%d, N_{\max} = %d$'%(N_min, Ns[-1])]
+    leg_labels = ['$N_{grid}=%d, N_{\max} = %d$'%(N_min, Ns[-1])]
     linthresh=1e-7
     # O1=1e-5
     # O2=5e-5
-    O1=1e-1 
-    O1half = 8e-1
-    O2= 1.5
+    O1=6e-2
+    O1half = 8.1e-1
+    O2= 3
     # O1=3e-2
     # O2=6e-1
-    graphics.plot_log_multi([max_errs], Ns_, title, leg_labels, ax_labels, linthresh, O1, O1half, O2)
+    graphics.plot_log_multi([max_errs[1:]], Ns, title, leg_labels, ax_labels, linthresh, O1, O1half, O2)
     

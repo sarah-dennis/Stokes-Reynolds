@@ -18,7 +18,6 @@ class RandomHeight(Height):
     def __init__(self, x0, xf, N, h_min, h_max, U):
         h_str = "Discrete Height"
 
-        
         Nx = (xf-x0)*N + 1
         hs = np.zeros(Nx)
         for i in range (Nx):

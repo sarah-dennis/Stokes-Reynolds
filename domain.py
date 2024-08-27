@@ -39,7 +39,7 @@ class Height(Domain):
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
         self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
-        self.h_str = h_str
+        self.filestr = h_str
         self.h_eq = "h(x)"
 
         self.h_max = max(self.hs)

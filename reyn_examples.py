@@ -16,40 +16,41 @@ import reyn_pressures_analytic as p_analytic
 import reyn_velocity 
 import graphics
 
+# solver is specifc to example      
 class ReynoldsExample:
-    def __init__(self, pSolver):
-        self.pSolver = pSolver
-        self.ps = pSolver.solve()
-        self.vel = reyn_velocity.Velocity(self.pSolver.height, self.ps)
+    def __init__(self, solver):
+        self.solver = solver
+        self.ps = solver.solve()
+        self.vel = reyn_velocity.Velocity(self.solver.height, self.ps)
         
     def plot_p(self):
-        p_title = "Pressure: \n %s"%(self.pSolver.p_str)
+        p_title = "Pressure: \n %s"%(self.solver.filestr)
         p_labels = ["$x$", "Pressure $p(x)$"]
-        graphics.plot_2D(self.ps, self.pSolver.height.xs, p_title, p_labels, color='r')
+        graphics.plot_2D(self.ps, self.solver.height.xs, p_title, p_labels, color='r')
 
     def plot_h(self):
-        h_title = "Height: \n %s"%(self.pSolver.height.h_str)
+        h_title = "Height: \n %s"%(self.solver.height.filestr)
         h_labels = ["$x", "Height $h(x)$"]
-        graphics.plot_2D(self.pSolver.height.hs, self.pSolver.height.xs, h_title, h_labels, color='r')
+        graphics.plot_2D(self.solver.height.hs, self.solver.height.xs, h_title, h_labels, color='r')
     def plot_ph(self):
-        ph_title = "Pressure & Height: \n %s"%(self.pSolver.p_str)
+        ph_title = "Pressure & Height: \n %s"%(self.solver.filestr)
         ph_labels = ["Pressure $p(x)$", "Height $h(x)$", "$x$"]
-        graphics.plot_2D_twin(self.ps, self.pSolver.height.hs, self.pSolver.height.xs, ph_title, ph_labels)
+        graphics.plot_2D_twin(self.ps, self.solver.height.hs, self.solver.height.xs, ph_title, ph_labels)
 
     def plot_v(self):
-        v_title = "Velocity: \n%s"%(self.pSolver.p_str)
+        v_title = "Velocity: \n%s"%(self.solver.filestr)
         v_ax_labels =  ['$x$', '$y$']
-        graphics.plot_stream_height(self.vel.vx, self.vel.vy, self.pSolver.height.hs, self.pSolver.height.xs, self.pSolver.height.ys, v_title, v_ax_labels)
+        graphics.plot_stream_height(self.vel.vx, self.vel.vy, self.solver.height.hs, self.solver.height.xs, self.solver.height.ys, v_title, v_ax_labels)
         
 #-------------------------------------------------------------------------
-# I. Finite Difference
+# I. Discrete (finite difference)
 #-------------------------------------------------------------------------
-class FinDiff(ReynoldsExample):
+class Discrete(ReynoldsExample):
     def __init__(self, height, p0, pN):
-        pSolver = p_finDiff.Solver_finDiff(height, p0, pN)
-        super().__init__(pSolver)
+        solver = p_finDiff.Solver_finDiff(height, p0, pN)
+        super().__init__(solver)
 
-class FinDiff_Rand(FinDiff):
+class FinDiff_Rand(Discrete):
     def __init__(self):
         N = 50
         p0 = 0 
@@ -62,20 +63,21 @@ class FinDiff_Rand(FinDiff):
         height = heights.RandomHeight(x0, xf, N, h_min, h_max, U)
         super().__init__(height, p0, pN)
 
-class FinDiff_Custom(FinDiff):
+class FinDiff_Custom(Discrete): # use height from another example
     def __init__(self, example):
-        height = example.pSolver.height
-        p0 = example.pSolver.p0
-        pN = example.pSolver.pN
+        height = example.solver.height
+        p0 = example.solver.p0
+        pN = example.solver.pN
 
         super().__init__(height, p0, pN)
+        
 # -----------------------------------------------------------------------------
 # III. Constant Height
 # -----------------------------------------------------------------------------
 class Analytic_Constant(ReynoldsExample):
     def __init__(self, height, p0, pN):
-        pSolver = p_analytic.Solver_Constant(height, p0, pN)
-        super().__init__(pSolver)
+        solver = p_analytic.Solver_Constant(height, p0, pN)
+        super().__init__(solver)
         
 class Constant_Ex1(Analytic_Constant):
     def __init__(self):
@@ -93,8 +95,8 @@ class Constant_Ex1(Analytic_Constant):
 # -----------------------------------------------------------------------------
 class Analytic_Linear(ReynoldsExample):
     def __init__(self, height, p0, pN):
-        pSolver = p_analytic.Solver_Linear(height, p0, pN)
-        super().__init__(pSolver)
+        solver = p_analytic.Solver_Linear(height, p0, pN)
+        super().__init__(solver)
         
 class Linear_Ex1(Analytic_Linear):
     def __init__(self):
@@ -115,10 +117,9 @@ class Linear_Ex1(Analytic_Linear):
 # -----------------------------------------------------------------------------
 class Analytic_Step(ReynoldsExample):
     def __init__(self, height, p0, pN):
-        pSolver = p_analytic.Solver_Step(height, p0, pN)
-        super().__init__(pSolver)
-      
-        #TODO testing against Stokes   
+        solver = p_analytic.Solver_Step(height, p0, pN)
+        super().__init__(solver)
+
 class Step_Ex1(Analytic_Step):
     def __init__(self):
         N = 10
@@ -141,8 +142,8 @@ class Step_Ex1(Analytic_Step):
 
 class PWA_Linear(ReynoldsExample):
     def __init__(self, height, p0, pN):
-        pSolver = p_pwlinear.Solver(height, p0, pN) 
-        super().__init__(pSolver)
+        solver = p_pwlinear.Solver(height, p0, pN) 
+        super().__init__(solver)
 
 class PiecewiseLinear_Ex1(PWA_Linear):
     def __init__(self):

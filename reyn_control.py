@@ -9,14 +9,16 @@ import reyn_examples as rex
 import numpy as np
 import graphics
 
-# solution = rex.FinDiff_Rand()
+# -- solver called on initialization: self.ps = *.solve()
+
+# solution = rex.Discrete_Rand()
 # solution = rex.Constant_Ex1()
 # solution = rex.Linear_Ex1()       
 solution = rex.Step_Ex1()
 # solution = rex.PiecewiseLinear_Ex1()
 # solution = rex.PiecewiseLinear_Ex2()
 
-# fd_solution = rex.FinDiff_Custom(solution)
+# fd_solution = rex.Discrete_Custom(solution) # use hs from another solution
 #------------------------------------------------------------------------------
 # plotting 
 #------------------------------------------------------------------------------
