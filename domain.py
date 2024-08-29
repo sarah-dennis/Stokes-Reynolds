@@ -7,7 +7,6 @@ Created on Wed Jan 25 17:33:35 2023
 """
 import numpy as np
 #------------------------------------------------------------------------------
-
 # Domain: 2D grid on [x0, xf] and [y0, yf] on Nx and Ny grid points
 
 class Domain:

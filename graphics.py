@@ -271,7 +271,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-18):
     n_contours = max(zs.shape)//2
 
     if log_cmap:
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
+        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25)#, vmin=-1, vmax=1, clip=True)
         contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma', norm=norm_symLog)
     else:
         contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma')
@@ -296,7 +296,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18,
     X, Y = np.meshgrid(xs, ys)
 #'Spectral_r'
     if log_cmap:
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
+        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25)#, vmin=-1, vmax=1, clip=True)
         color_plot = pp.pcolor(X, Y, zs, cmap='viridis', norm=norm_symLog)
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap='viridis')

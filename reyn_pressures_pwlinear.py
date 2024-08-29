@@ -11,10 +11,10 @@ from scipy.sparse.linalg import LinearOperator
 from scipy.sparse.linalg import gmres
 
 
-from solvers import P_Solver
+from solvers import Reynolds_Solver
 
 
-class Solver(P_Solver):   
+class Solver(Reynolds_Solver):   
     def __init__(self, height, p0, pN):
         p_str = "Reynolds Piecewise Analytic"
         self.rhs = make_rhs(height, p0, pN)
@@ -83,7 +83,7 @@ def make_rhs(height, p0, pN):
         else: 
             rhs[i] = c * hs[i,0]**-2 * widths[i-1]
             
-    if slopes[N-1] != 0:   
+    if slopes[N-1] != 0:
         rhs[N] = c / (hs[N,0]*slopes[N-1]) +pN
     else:
         rhs[N] = -c * hs[N,0]**-2 * widths[N-1]+ pN

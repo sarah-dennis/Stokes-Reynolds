@@ -7,13 +7,13 @@ Created on Tue Jun 21 09:43:24 2022
 """
 import numpy as np
 
-from solvers import P_Solver
+from solvers import Reynolds_Solver
 
 #------------------------------------------------------------------------------
 # Numerical solution
 #------------------------------------------------------------------------------
 
-class Solver_finDiff(P_Solver):
+class Solver_finDiff(Reynolds_Solver):
     def __init__(self, height, p0, pN):
         p_str = "Reynolds Finite Difference ($N = %d$)"%(height.Nx-1)
         

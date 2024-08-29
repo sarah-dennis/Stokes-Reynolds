@@ -11,17 +11,18 @@ from scipy.interpolate import interpn
 import graphics
 import stokes_readwrite as rw
 import stokes_convergence as cnvg
-
+import stokes_pressure as translator
 import stokes_examples as examples
 
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
 
-# example = examples.slider_Re1
+# example = examples.BFS_standard 
 
-example = examples.slider_tri_Re1
+# example = examples.Tri_standard
 
+example = examples.rectSlider_standard
 # example =  examples.slider_rectTxt_Re1
 # example =  examples.slider_triTxt_Re1
 
@@ -68,7 +69,7 @@ def load_run_many(N_0, dN, many):
         N = N_0 + k*dN
         load_run(N, max_iters)
                                                                                                                                                                                                                                                                              
-def load_run(N, iters):
+def load_run(N, iters):                                
     ex = example(N)
     u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
     
@@ -101,25 +102,7 @@ def load_scale(N_load, N_scale):
     rw.write_solution(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
     
 #------------------------------------------------------------------------------
-def vorticity(ex, u_2D, v_2D):
-    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
-    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
-    w_2D = np.zeros((ex.Ny,ex.Nx))
-    for j in range(ex.Ny):
-        for i in range(ex.Nx):   
-            w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    return w_2D
 
-def pressure(ex, u_2D, v_2D):
-    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
-    uyy_2D = np.gradient(uy_2D, ex.dy, axis=0)
-    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
-    vxx_2D = np.gradient(vx_2D, ex.dx, axis=1)
-    p_2D = np.zeros((ex.Ny,ex.Nx))
-    for j in range(ex.Ny):
-        for i in range(ex.Nx):   
-            p_2D[j,i] = vxx_2D[j,i] - uyy_2D[j,i]
-    return p_2D
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
@@ -138,24 +121,22 @@ def load_plot(N):
     # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
 
 # zoom domain
-    # x_start_A = 1
-    # x_stop_A = 1.5
-    # y_start_A = 0
-    # y_stop_A = 0.5
+    # x_start = 1
+    # x_stop= 1.5
+    # y_start = 0
+    # y_stop = 0.5
 
-    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
-    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start_A, x_stop_A, y_start_A, y_stop_A)
+    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
 # Stream plot:
 
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
     title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    # graphics.plot_contour_mesh(stream_2D, xs, ys, title, ax_labels, True)
+    
     stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
     graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, True, n_contours=15)
 
+    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start, x_stop, y_start, y_stop)
     # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
 #  Velocity plot: 
@@ -165,24 +146,38 @@ def load_plot(N):
     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
 
+    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
+    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
     # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
     
 #  Vorticity plot: 
-    w = vorticity(ex, u_2D, v_2D)
+    w = translator.vorticity(ex, u_2D, v_2D)
 
     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
     title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    # graphics.plot_contour(w, xs, ys, title, ax_labels, False)
     w_ma = np.ma.masked_where(ex.space==-1, w)
     graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, False, n_contours=20)
-                
-    # x_start_B = 0
-    # x_stop_B = 0.1
-    # y_start_B = 1.75
-    # y_stop_B = 2
-    # w_zoom = grid_zoom_2D(w, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)     
-    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start_B, x_stop_B, y_start_B, y_stop_B)
+
+    # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
+    
+# #  Pressure plot: 
+#     px, py = translator.pressure_gradient(ex, u_2D, v_2D)
+
+#     ax_labels_px = ['$p_x(x,y) = u_{xx} + u_{yy}$', '$x$', '$y$']
+#     ax_labels_py = ['$p_y(x,y) = v_{xx} + v_{yy}$', '$x$', '$y$']
+
+#     title_px = 'Pressure $P_x$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+#     title_py = 'Pressure $P_y$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+
+#     px_ma = np.ma.masked_where(ex.space==-1, px)
+#     py_ma = np.ma.masked_where(ex.space==-1, py)
+
+#     graphics.plot_contour_mesh(px_ma, xs, ys, title_px, ax_labels_px, False, n_contours=20)
+#     graphics.plot_contour_mesh(py_ma, xs, ys, title_py, ax_labels_py, False, n_contours=20)
+
+#     # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+#     # graphics.plot_contour(p_zoom, xs_zoom, ys_zoom, title, ax_labels)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)
@@ -209,9 +204,9 @@ def plot_compare(N_min, Ns, N_max):
     linthresh=1e-7
     # O1=1e-5
     # O2=5e-5
-    O1=6e-2
+    O1=1e-2
     O1half = 8.1e-1
-    O2= 3
+    O2= 5e-1
     # O1=3e-2
     # O2=6e-1
     graphics.plot_log_multi([max_errs[1:]], Ns, title, leg_labels, ax_labels, linthresh, O1, O1half, O2)

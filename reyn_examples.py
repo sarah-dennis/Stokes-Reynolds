@@ -50,7 +50,7 @@ class Discrete(ReynoldsExample):
         solver = p_finDiff.Solver_finDiff(height, p0, pN)
         super().__init__(solver)
 
-class FinDiff_Rand(Discrete):
+class Random(Discrete):
     def __init__(self):
         N = 50
         p0 = 0 
@@ -63,7 +63,7 @@ class FinDiff_Rand(Discrete):
         height = heights.RandomHeight(x0, xf, N, h_min, h_max, U)
         super().__init__(height, p0, pN)
 
-class FinDiff_Custom(Discrete): # use height from another example
+class Custom(Discrete): # use height from another example
     def __init__(self, example):
         height = example.solver.height
         p0 = example.solver.p0
@@ -133,7 +133,8 @@ class Step_Ex1(Analytic_Step):
         height = heights.StepHeight(x0, xf, N, h0, h1, x_step, U)
         flux = 1
         H = h1-h0
-        p0, pN = reyn_velocity.flux_to_pressure(flux, U,H)
+        p0 = 1 
+        pN = 0
         super().__init__(height, p0, pN)
 
 # -----------------------------------------------------------------------------
@@ -160,7 +161,8 @@ class PiecewiseLinear_Ex1(PWA_Linear):
         height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks,U)
         flux = 1
         H = h_peaks[0]
-        p0, pN = reyn_velocity.flux_to_pressure(flux, U, H)
+        p0 = 1 
+        pN = 0
         super().__init__(height, p0, pN)
 
 
@@ -179,5 +181,6 @@ class PiecewiseLinear_Ex2(PWA_Linear):
         height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks,U)
         flux = 1
         H = h_peaks[0]
-        p0, pN = reyn_velocity.flux_to_pressure(flux, U, H)
+        p0 = 4
+        pN = 6
         super().__init__(height, p0, pN)

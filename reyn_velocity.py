@@ -10,7 +10,7 @@ import domain
 class Velocity:
     
     def __init__(self, height, ps):
-        self.vel_str = "Velocity for %s "%(height.h_str)
+        self.vel_str = "Velocity for %s "%(height.filestr)
         self.vx, self.vy = self.make_velocity(height, ps)
     
     # 2D velocity field from 1D pressure 
@@ -44,15 +44,3 @@ class Velocity:
 
         return vx, vy
 
-# U = u(x,h0), Q = psi(x,h0)
-# H = h0 - h(x)
-def flux_to_pressure(Q, U, H):
-    dp = (Q-U*H/2)*(-12/H**3)
-    p0 = 0
-    pN = p0 + dp
-    return p0, pN
-
-def pressure_to_flux(p0, pN, U, H):
-    dp = pN - p0
-    Q = dp*(H**3/-12)+U*H/2
-    return Q

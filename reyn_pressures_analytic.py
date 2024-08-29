@@ -7,10 +7,10 @@ Created on Thu May  9 11:59:05 2024
 
 import numpy as np
 
-from solvers import P_Solver
+from solvers import Reynolds_Solver
 
 
-class Solver_Sinusoidal(P_Solver):
+class Solver_Sinusoidal(Reynolds_Solver):
     def __init__(self, height, p0, pN):        
         p_str = "Reynolds Analytic"
         super().__init__(height, p0, pN, self.solve, p_str)
@@ -34,7 +34,7 @@ class Solver_Sinusoidal(P_Solver):
             ps[i] = -etaU * (h + h_mid) * h**2 / (hx * (k*h_mid)**2 * (2 + r**2)) 
         return ps
     
-class Solver_Constant(P_Solver):
+class Solver_Constant(Reynolds_Solver):
     def __init__(self, height, p0, pN):
         p_str = "Reynolds Analytic"
         super().__init__(height, p0, pN, self.solve, p_str)
@@ -59,7 +59,7 @@ class Solver_Constant(P_Solver):
             ps[i] = (cq * dx / h0**3) + (etaU * dx / h0**2) + p0
         return ps
 
-class Solver_Linear(P_Solver):
+class Solver_Linear(Reynolds_Solver):
     def __init__(self, height, p0, pN):
         p_str = "Reynolds Analytic"
         super().__init__(height, p0, pN, self.solve, p_str)
@@ -86,7 +86,7 @@ class Solver_Linear(P_Solver):
         return ps
 
     
-class Solver_Step(P_Solver):
+class Solver_Step(Reynolds_Solver):
     def __init__(self, height, p0, pN):
         p_str = "Reynolds Analytic"
         super().__init__(height, p0, pN, self.solve, p_str)

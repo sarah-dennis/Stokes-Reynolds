@@ -5,27 +5,22 @@ Created on Tue May 21 15:15:15 2024
 @author: sarah
 """
 import numpy as np
-import graphics
 import math
 from domain import Space
 
 #------------------------------------------------------------------------------
-#TODO
-class slider(Space):
+class PWLinear(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
     # peak_ys = [(0,h_in),...,(hi_left, hi_right),...,(h_out,0)]
     
-    
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
-        
-        # self.i_step = self.Nx// (peak_xs[1]-x0)
+
         self.x_peaks=x_peaks
         self.y_peaks = y_peaks
-        
-        #peaks must have integer indices in the grid! 
-        # self.jf_in = y_peaks[0][1]/ self.dy # ys[jf_in] : inlet j-min
-        # self.jf_out =  y_peaks[-1][0] / self.dy # ys[jf_out] : outlet j-min
+
+        # peaks must fall on the grid
+
         
         self.spacestr = "Textured Slider $Re=%.4f$"%Re
         self.set_space(self.make_space())
@@ -171,20 +166,21 @@ class slider(Space):
                 slope = self.slopes[k]
 
         if slope == 0:
-            scale = 0
+            return 0
         else:
             scale = 1 - (t%slope)/slope
-        
-        return -scale * psi_k
+            return -scale * psi_k
 
     def interp_S(self, t, s, psi_k):
         x = self.xs[s]
         for k in range(self.N_regions):
             if x >= self.x_peaks[k]:
                 slope = self.slopes[k]
-
-        scale = 1 - (s % (1/slope))*slope
-        return -scale * psi_k
+        if slope == 0:
+            return 0
+        else: 
+            scale = 1 - (s % (1/slope))*slope
+            return -scale * psi_k
 
     def interp_NE_NW(self, t, s, psi_N):
         x = self.xs[s]
