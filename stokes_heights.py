@@ -169,6 +169,7 @@ class PWLinear(Space):
             return 0
         else:
             scale = 1 - (t%slope)/slope
+
             return -scale * psi_k
 
     def interp_S(self, t, s, psi_k):
@@ -189,7 +190,7 @@ class PWLinear(Space):
                 slope = self.slopes[k]
 
         scale = 1 - (t%slope)/slope
-        
+        print(slope, s)
         return -scale * psi_N
 
     def interp_SE_SW(self, t, s, psi_EW, psi_S):
@@ -207,6 +208,7 @@ class PWLinear(Space):
         
         else:
             scale = 1 - (t % slope)/slope
+            
             return -scale * psi_S
 
     

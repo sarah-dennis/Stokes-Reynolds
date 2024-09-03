@@ -22,12 +22,14 @@ class BFS(PWLinear):
 
 class BFS_standard(BFS):
     def __init__(self, N):
-        Re = 0
-        U = 1
-        Q = 1
+
+     
         L = 5
         H = 2
-        h = 1
+        h = 1   
+        U = 1
+        Re = U*h/L
+        Q = U*h
         super().__init__(L, H, h, U, Q, Re, N)
 
 #------------------------------------------------------------------------------
@@ -38,8 +40,8 @@ class TriCavity(PWLinear):
         xf = L
         y0 = 0
         yf = H
-        x_peaks = [x0, L/2, xf]#, 3, 4,5]
-        y_peaks = [[yf,H],[0,0],[H,yf]]
+        x_peaks = [x0, x0 + L/2, xf]
+        y_peaks = [[yf,yf],[y0,y0],[yf,yf]]
         filestr = "stokes_slider_tri_Re1_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
         
@@ -53,28 +55,28 @@ class Tri_standard(TriCavity):
         super().__init__(L, H, U, Q, Re, N)
 
 #------------------------------------------------------------------------------
-class RectTexturedSlider(PWLinear):
+class RectTexturedSlider(PWLinear): 
     def __init__(self, L, l1, l2, H, h, U, Q, Re, N):
         x0 = 0
-        xf = L
+        xf = L #+x0
         y0 = 0
-        yf = H
+        yf = H #+y0
         N_texts = L//(l1 + l2)
         x_peaks = np.zeros(2*N_texts+2)
         y_peaks = np.zeros((2*N_texts+2, 2))      
         x_peaks[0] = x0
-        y_peaks[0] = [yf,H-h]
+        y_peaks[0] = [yf,yf-h]
         x_peaks[1] = l1/2
-        y_peaks[1] = [H-h, y0]
+        y_peaks[1] = [yf-h, y0]
         x_peaks[-1] = xf
-        y_peaks[-1] = [H-h, yf]
+        y_peaks[-1] = [yf-h, yf]
         for i in range(2, 2*N_texts+1):
             if i % 2 == 1:
                 x_peaks[i] = x_peaks[i-1] + l1
-                y_peaks[i] = [H-h, y0]
+                y_peaks[i] = [yf-h, y0]
             else:
                 x_peaks[i] = x_peaks[i-1] + l2
-                y_peaks[i] = [y0, H-h]
+                y_peaks[i] = [y0, yf-h]
         filestr = "stokes_slider_rectTxt_Re1_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 

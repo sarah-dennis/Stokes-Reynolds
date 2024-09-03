@@ -18,11 +18,11 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-# example = examples.BFS_standard 
+example = examples.BFS_standard 
 
-# example = examples.Tri_standard
+example = examples.Tri_standard
 
-example = examples.rectSlider_standard
+# example = examples.rectSlider_standard
 # example =  examples.slider_rectTxt_Re1
 # example =  examples.slider_triTxt_Re1
 
@@ -37,7 +37,6 @@ def new_run(N, iters):
     v_init = np.ones(ex.Nx * ex.Ny)
     psi_init = np.ones(ex.Nx * ex.Ny)
     past_iters = 0
-
 
     u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod, err_tol)
 
@@ -121,12 +120,12 @@ def load_plot(N):
     # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
 
 # zoom domain
-    # x_start = 1
-    # x_stop= 1.5
-    # y_start = 0
-    # y_stop = 0.5
+    x_start = 0.5
+    x_stop= 1.5
+    y_start = 0.5
+    y_stop = 1.5
 
-    # xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
 # Stream plot:
 
@@ -161,23 +160,20 @@ def load_plot(N):
     # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
     
-# #  Pressure plot: 
-#     px, py = translator.pressure_gradient(ex, u_2D, v_2D)
+#  Pressure plot: 
+    p = translator.pressure(ex, u, v)
+    p_2D = p.reshape((ex.Ny,ex.Nx))
 
-#     ax_labels_px = ['$p_x(x,y) = u_{xx} + u_{yy}$', '$x$', '$y$']
-#     ax_labels_py = ['$p_y(x,y) = v_{xx} + v_{yy}$', '$x$', '$y$']
+    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-#     title_px = 'Pressure $P_x$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-#     title_py = 'Pressure $P_y$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+    title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
 
-#     px_ma = np.ma.masked_where(ex.space==-1, px)
-#     py_ma = np.ma.masked_where(ex.space==-1, py)
+    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
-#     graphics.plot_contour_mesh(px_ma, xs, ys, title_px, ax_labels_px, False, n_contours=20)
-#     graphics.plot_contour_mesh(py_ma, xs, ys, title_py, ax_labels_py, False, n_contours=20)
+    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, True , n_contours=100)
 
-#     # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-#     # graphics.plot_contour(p_zoom, xs_zoom, ys_zoom, title, ax_labels)
+    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, True, n_contours=100)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)
@@ -196,18 +192,16 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
 #-------------------------------------------------------------------------------------------------------
     
 def plot_compare(N_min, Ns, N_max):
-    # Ns_ = [N_min]+Ns 
-    title = "Max error in $\psi$ to $N=%d$ \n %s"%(N_max, example(N_min).spacestr)
-    ax_labels= ["N", "$|\psi _{N^{*}} - \psi_{N}|$"]
-    max_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
-    leg_labels = ['$N_{grid}=%d, N_{\max} = %d$'%(N_min, Ns[-1])]
-    linthresh=1e-7
+    title = "Error in $\psi$ to $N^{*}=%d$ \n %s"%(N_max, example(N_min).spacestr)
+    ax_labels= ["N", "$||\psi _{N^{*}} - \psi_{N}||$"]
+    max_errs, l1_errs, l2_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
+    leg_labels = ['inf', 'l1', 'l2']
+    linthresh=1e-8
     # O1=1e-5
     # O2=5e-5
     O1=1e-2
-    O1half = 8.1e-1
     O2= 5e-1
     # O1=3e-2
     # O2=6e-1
-    graphics.plot_log_multi([max_errs[1:]], Ns, title, leg_labels, ax_labels, linthresh, O1, O1half, O2)
+    graphics.plot_log_multi([max_errs, l1_errs, l2_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
     

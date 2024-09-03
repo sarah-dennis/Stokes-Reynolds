@@ -19,6 +19,8 @@ def compare_Ns(ex, N_min, Ns, N_max):
     
     err = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
     err_max = np.zeros(len(Ns)+1)
+    err_l1 = np.zeros(len(Ns)+1)
+    err_l2 = np.zeros(len(Ns)+1)
 
     for n in range(len(Ns)+1):
         if n == 0:
@@ -47,10 +49,14 @@ def compare_Ns(ex, N_min, Ns, N_max):
             
             
             err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
-        
+            err_l1[n] += err[n,j,i]
+            err_l2[n] += err[n,j,i]**2
+            
         err_max[n] = np.max(err[n])
+        err_l2[n] = np.sqrt(err_l2[n])
         
-    return err_max
+    
+    return err_max, err_l1,  err_l2 
         
 
 

@@ -11,6 +11,9 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
+# colour_map = 'viridis' ./,M';K[]JI'''''4
+
+colour_map = 'Spectral_r'
 #------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
             
@@ -20,7 +23,7 @@ def plot_3D(f_2D, xs, zs, title):
     
     pp.figure()
     ax = pp.axes(projection='3d')
-    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1, cmap='viridis')
+    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1, cmap=colour_map)
     pp.title(title)
     pp.xlabel('x')
     pp.ylabel('z')
@@ -139,9 +142,9 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
     if log_cmap:
     
         norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='viridis', norm=norm_symLog)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap=colour_map, norm=norm_symLog)
     else:
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='viridis')
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap=colour_map)
 
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
@@ -289,7 +292,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-18):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18, n_contours=20):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-6, n_contours=20):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     # zs = np.ma.masked_where(zs == 0, zs)
@@ -297,9 +300,9 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-18,
 #'Spectral_r'
     if log_cmap:
         norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25)#, vmin=-1, vmax=1, clip=True)
-        color_plot = pp.pcolor(X, Y, zs, cmap='viridis', norm=norm_symLog)
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map, norm=norm_symLog)
     else:
-        color_plot = pp.pcolor(X, Y, zs, cmap='viridis')
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map)
     
     pp.colorbar(color_plot, label=labels[0])
     
@@ -328,7 +331,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2, O1half=1e-3/2, O2=1e-3):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2,O2=1e-3):
     pp.rcParams['figure.dpi'] = 300
     fig = pp.figure()
     
