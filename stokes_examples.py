@@ -17,7 +17,7 @@ class BFS(PWLinear):
         yf = H
         x_peaks = [x0, L/5, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
-        filestr = "stokes_BFS_H%d_Re%d_N%d"%(H, Re, N)
+        filestr = "stokes_BFS_H%d_Re%d_new_N%d"%(H, Re, N)
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
 class BFS_standard(BFS):
@@ -42,7 +42,7 @@ class TriCavity(PWLinear):
         yf = H
         x_peaks = [x0, x0 + L/2, xf]
         y_peaks = [[yf,yf],[y0,y0],[yf,yf]]
-        filestr = "stokes_slider_tri_Re1_N%d"%N
+        filestr = "stokes_slider_tri_Re1_new_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
         
 class Tri_standard(TriCavity):

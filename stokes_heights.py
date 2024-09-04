@@ -59,7 +59,7 @@ class PWLinear(Space):
                 h_right = self.y_peaks[reg][1] 
                 i_ref = i
                 reg +=1
-                hs[i] = h_left # choice for 1D
+                hs[i] = h_right # choice for 1D
             else:
                 h = slopes[reg-1]*(i - i_ref)*self.dx + self.y_peaks[reg-1][1]
                 hs[i] = h
@@ -167,85 +167,129 @@ class PWLinear(Space):
       
 # Interior (x_i,y_j) = x_k has exterior nbr (x_s,y_t)
 
-    def interp_E_W(self, t, s, psi_k):
-        x = self.xs[s]
-        for k in range(self.N_regions):
-            if x >= self.x_peaks[k]:
-                slope = self.slopes[k]
+    # def interp_E_W(self, t, s, psi_k):
+    #     x = self.xs[s]
+    #     for k in range(self.N_regions):
+    #         if x >= self.x_peaks[k]:
+    #             slope = self.slopes[k]
 
-        if slope == 0:
-            return 0
-        else:
-            scale = 1 - (t%slope)/slope
+    #     if slope == 0:
+    #         return 0
+    #     else:
+    #         scale = 1 - (t%slope)/slope
 
-            return -scale * psi_k
+    #         return -scale * psi_k
 
-    def interp_S(self, t, s, psi_k):
-        x = self.xs[s]
-        for k in range(self.N_regions):
-            if x >= self.x_peaks[k]:
-                slope = self.slopes[k]
-        if slope == 0:
-            return 0
-        else: 
-            scale = 1 - (s % (1/slope))*slope
-            return -scale * psi_k
+    # def interp_S(self, t, s, psi_k):
+    #     x = self.xs[s]
+    #     for k in range(self.N_regions):
+    #         if x >= self.x_peaks[k]:
+    #             slope = self.slopes[k]
+    #     if slope == 0:
+    #         return 0
+    #     else: 
+    #         scale = 1 - (s % (1/slope))*slope
+    #         return -scale * psi_k
 
-    def interp_NE_NW(self, t, s, psi_N):
-        x = self.xs[s]
-        for k in range(self.N_regions):
-            if x >= self.x_peaks[k]:
-                slope = self.slopes[k]
+    # def interp_NE_NW(self, t, s, psi_N):
+    #     x = self.xs[s]
+    #     for k in range(self.N_regions):
+    #         if x >= self.x_peaks[k]:
+    #             slope = self.slopes[k]
 
-        scale = 1 - (t%slope)/slope
-        print(slope, s)
-        return -scale * psi_N
+    #     scale = 1 - (t%slope)/slope
+    #     print(slope, s)
+    #     return -scale * psi_N
 
-    def interp_SE_SW(self, t, s, psi_EW, psi_S):
-        x = self.xs[s]
-        for k in range(self.N_regions):
-            if x >= self.x_peaks[k]:
-                slope = self.slopes[k]
+    # def interp_SE_SW(self, t, s, psi_EW, psi_S):
+    #     x = self.xs[s]
+    #     for k in range(self.N_regions):
+    #         if x >= self.x_peaks[k]:
+    #             slope = self.slopes[k]
 
-        if slope == 0:
-            return 0
+    #     if slope == 0:
+    #         return 0
         
-        elif abs(slope) < 1:    
-            scale = 1 - (s%(1/slope))*slope
-            return -scale * psi_EW
+    #     elif abs(slope) < 1:    
+    #         scale = 1 - (s%(1/slope))*slope
+    #         return -scale * psi_EW
         
-        else:
-            scale = 1 - (t % slope)/slope
+    #     else:
+    #         scale = 1 - (t % slope)/slope
             
-            return -scale * psi_S
+    #         return -scale * psi_S
 
 #------------------------------------------------------------------------------
     
 
 
 #ij interior, st exterior
-def interp_EW(self, i,j, s,t, v_ij, v_bdry=0):
-
-    slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+    def interp_E_W(self, i,j, s,t, v_ij, v_bdry=0):
     
-    x_bdry = self.xs[s] - self.hs[s]/slope
- 
-    # y_bdry = self.ys[t] # = j (east-west)
-    
-    v1 = self.xs[s]-self.xs[i] # dy=0 (east-west)
-    v2 = x_bdry - self.xs[i]
-    scale = v1 / v2
+        slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
         
-    v_st = v_ij + (v_bdry-v_ij) * scale
-
-    return v_st
-
-def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0):
-    slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+        x_bdry = self.xs[i] + (self.ys[j]-self.hs[i])/slope
+        # print(x_bdry, self.ys[j])
+        # y_bdry = self.ys[j] # = j (east-west)
+        
+        v1 = self.xs[s]-self.xs[i] # dy=0 (east-west)
+        v2 = x_bdry - self.xs[i]
+        
+        scale = v2 / v1
+        
+        
+        
+        v_st = v_ij + (v_bdry-v_ij) * scale
+        # print(v_st, v_ij)
+        if v_ij > 100:
+            print(self.xs[i],self.ys[j], self.xs[s], self.ys[t])
+            print(scale)
+        return v_st
     
-    x_bdry = (self.hs[s] - self.xs[s] * slope)/(1-slope)
-    y_bdry = x_bdry
+    def interp_S(self, i,j, s,t, v_ij, v_bdry=0):
+        
+        y_bdry = self.hs[i] # = j (east-west)
+        
+        v1 = self.ys[t]-self.ys[j] #dx=0 S
+        v2 = y_bdry - self.ys[j]
+        scale = v2 / v1
+            
+        v_st = v_ij + (v_bdry-v_ij) * scale
+        # print(v_st, 's')
+        return v_st
+
+    def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0):
+        slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+        
+        x_bdry = (self.ys[j] - self.hs[i])/(slope-1)  + self.xs[i]
+        
+        
+        y_bdry = (x_bdry - self.xs[i]) + self.ys[j] 
+        
+        v1 = np.sqrt((self.xs[s]-self.xs[i])**2 + (self.ys[t]-self.ys[j])**2)
+        v2 = np.sqrt((x_bdry-self.xs[i])**2 + (y_bdry-self.ys[j])**2)
+        
+        scale = v2/v1
+        
+        v_st = v_ij + (v_bdry-v_ij) * scale
+        # print(v_st, 'nesw')
+        return v_st
     
+    def interp_NW_SE(self, i,j, s,t, v_ij, v_bdry=0):
+        slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+        
+        x_bdry = (self.ys[j] - self.hs[i])/(1+slope) +self.xs[i]
+        y_bdry = -(x_bdry - self.xs[i]) + self.ys[j] 
+
+        v1 = np.sqrt((self.xs[s]-self.xs[i])**2 + (self.ys[t]-self.ys[j])**2)
+        v2 = np.sqrt((x_bdry-self.xs[i])**2 + (y_bdry-self.ys[j])**2)
+        
+        scale = v2/v1
+        
+        v_st = v_ij + (v_bdry-v_ij) * scale
+        return v_st
+
+
 
 
 

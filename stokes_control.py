@@ -20,7 +20,7 @@ from stokes_solver import run_spLU
 
 example = examples.BFS_standard 
 
-example = examples.Tri_standard
+# example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
 # example =  examples.slider_rectTxt_Re1
