@@ -11,20 +11,19 @@ from domain import Space
 #------------------------------------------------------------------------------
 class PWLinear(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
-    # peak_ys = [(0,h_in),...,(hi_left, hi_right),...,(h_out,0)]
+    # peak_ys = [(yf,h_in),...,(hi_left, hi_right),...,(h_out,yf)]
     
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
 
-        self.x_peaks=x_peaks
+        self.x_peaks = x_peaks
         self.y_peaks = y_peaks
-
+        self.N_regions = len(self.x_peaks)-1
+            
         # peaks must fall on the grid
-
-        
-        self.spacestr = "Textured Slider $Re=%.4f$"%Re
-        self.set_space(self.make_space())
-                                      
+        self.make_space()
+        self.spacestr = "Textured Slider $Re=%.4f$"%Re  
+                            
         # constants BCs on velocity, stream, flux 
         self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
         self.hf_out = y_peaks[-1][0]
@@ -40,13 +39,15 @@ class PWLinear(Space):
     
     # 0 : boundary, -1: exterior, 1: interior
     def make_space(self):
-        
-        self.N_regions = len(self.x_peaks)-1
-        self.slopes = np.zeros(self.N_regions)
+
+        slopes = np.zeros(self.N_regions) #TODO: try to get rid 
+
         for k in range(self.N_regions):
-            dy = self.y_peaks[k+1][0] - self.y_peaks[k][1]
+            dh = self.y_peaks[k+1][0] - self.y_peaks[k][1]
             dx = self.x_peaks[k+1] - self.x_peaks[k]
-            self.slopes[k] = dy/dx
+            slopes[k] = dh/dx
+    
+        hs = np.zeros(self.Nx)
         
         grid = np.zeros((self.Ny, self.Nx))
     
@@ -58,10 +59,11 @@ class PWLinear(Space):
                 h_right = self.y_peaks[reg][1] 
                 i_ref = i
                 reg +=1
-                
+                hs[i] = h_left # choice for 1D
             else:
-                h = self.slopes[reg-1]*(i - i_ref)*self.dx + self.y_peaks[reg-1][1]
-
+                h = slopes[reg-1]*(i - i_ref)*self.dx + self.y_peaks[reg-1][1]
+                hs[i] = h
+            
             for j in range(self.Ny):
                 y = self.ys[j]
                 if j == self.Ny-1: #upper boundary
@@ -71,13 +73,13 @@ class PWLinear(Space):
                     if y >= self.y_peaks[0][1]: 
                         grid[j,i] = 0
                     else:
-                        grid[j,i]=-1
+                        grid[j,i] = -1
                     
                 elif i == self.Nx-1:# outlet boundary
                     if y >= self.y_peaks[-1][0]: 
                         grid[j,i] = 0
                     else:
-                        grid[j,i]=-1
+                        grid[j,i] = -1
                 
                 elif i == i_ref: # pwl region change              
                     
@@ -88,7 +90,7 @@ class PWLinear(Space):
                         if h_left < y and y < h_right: # x=h(y) boundary
                             grid[j,i] = 0
                         elif y > h_right:
-                            grid[j,i]=1
+                            grid[j,i] = 1
                         else:
                             grid[j,i] = -1
                     
@@ -110,11 +112,14 @@ class PWLinear(Space):
         
         
         # graphics.plot_contour_mesh(grid, self.xs, self.ys, 'space',['space', 'x', 'y'])
-        return grid
+        self.space = grid
+        self.slopes = slopes
+        self.hs = hs
 
-
-
-    # Boundary conditions on stream and velocity
+#------------------------------------------------------------------------------
+# # Boundary conditions on stream and velocity
+#------------------------------------------------------------------------------
+   
     def streamInlet(self, j):
         y = self.y0 + j*self.dy
         if y >= self.y_peaks[0][1]:
@@ -156,8 +161,11 @@ class PWLinear(Space):
             return u
         else: 
             return 0
+#------------------------------------------------------------------------------
+# Boundary interpolation
+#------------------------------------------------------------------------------
       
-# Interior x_ij = x_k has exterior nbr x_st
+# Interior (x_i,y_j) = x_k has exterior nbr (x_s,y_t)
 
     def interp_E_W(self, t, s, psi_k):
         x = self.xs[s]
@@ -211,5 +219,56 @@ class PWLinear(Space):
             
             return -scale * psi_S
 
+#------------------------------------------------------------------------------
     
+
+
+#ij interior, st exterior
+def interp_EW(self, i,j, s,t, v_ij, v_bdry=0):
+
+    slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+    
+    x_bdry = self.xs[s] - self.hs[s]/slope
+ 
+    # y_bdry = self.ys[t] # = j (east-west)
+    
+    v1 = self.xs[s]-self.xs[i] # dy=0 (east-west)
+    v2 = x_bdry - self.xs[i]
+    scale = v1 / v2
+        
+    v_st = v_ij + (v_bdry-v_ij) * scale
+
+    return v_st
+
+def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0):
+    slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+    
+    x_bdry = (self.hs[s] - self.xs[s] * slope)/(1-slope)
+    y_bdry = x_bdry
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

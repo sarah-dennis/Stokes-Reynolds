@@ -61,9 +61,7 @@ class Space(Domain):
         self.p_ambient = 1000
         self.Re = Re # Re = U h / L
         
-    def set_space(self, grid):
-        self.space = grid
-        
+
 #------------------------------------------------------------------------------
 def center_diff(fs, N, dx):
     D_lower = -1*np.ones(N)
