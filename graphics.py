@@ -264,7 +264,7 @@ def quiver_mask(grid, m, n, ly, lx):
  
 #------------------------------------------------------------------------------       
 
-def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-18):
+def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
     pp.rcParams["lines.linewidth"] = .4
     pp.rcParams['figure.dpi'] = 1000
 
@@ -292,7 +292,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-18):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-6, n_contours=20):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-8, n_contours=20):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     # zs = np.ma.masked_where(zs == 0, zs)
@@ -331,7 +331,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
     
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2,O2=1e-3):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,O2=1e-3):
     pp.rcParams['figure.dpi'] = 300
     fig = pp.figure()
     
@@ -347,7 +347,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2,O
     # reference lines
     ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
     # ax.plot(xs,[O1half*x**-np.sqrt(2) for x in xs], label="$\mathcal{O}(%s^{-\sqrt{2}})$"%ax_labels[0], color='grey')
-    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='blue')
+    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
     
     ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
@@ -356,7 +356,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-6, O1=1e-2,O
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(0.5, 0.4))
+    fig.legend(bbox_to_anchor=(0.32, 0.45))
     
     return fig
 

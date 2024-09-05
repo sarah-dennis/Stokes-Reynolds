@@ -35,7 +35,7 @@ def pressure(ex, u, v):
     while j >=0:
         for i in range(n):
             k=j*n + i
-            p[k] = p[(j-1)*n+i] - py[k]* dy 
+            p[k] = p[(j+1)*n+i] - py[k]*dy 
         j-=1    
        
     return p
@@ -58,37 +58,58 @@ def fishfun(ex, u, v):
         if space[j,i] == -1: # exterior
             continue
         
+        elif i == 0:
+            px[k] = ex.dp_in 
+            py[k] = 0
+        elif i == n-1:
+            px[k] = ex.dp_out
+            py[k] = 0
         else:
             u_k = u[k]
             v_k = v[k]
             
             # uxx & vxx <--| E:i+1 & W:i-1 
+
+            if space[j,i-1]==-1:
+                u_W = ex.interp_E_W(i,j, i-1,j, u_k)
+                v_W = ex.interp_E_W(i,j, i-1,j, v_k)
+            else:
+                u_W = u[j*n + i-1]
+                v_W = v[j*n + i-1]
             
-            if i==n-1 or space[j,i+1]==-1:# backward diff
-                uxx_k = (2*u_k - 5*u[j*n+i-1] + 4*u[j*n+i-2] - u[j*n+i-3])/ex.dx**3
-                vxx_k = (2*v_k - 5*v[j*n+i-1] + 4*v[j*n+i-2] - v[j*n+i-3])/ex.dx**3            
-            elif i == 0 or space[j,i-1]==-1:# forward diff
+            if space[j,i+1]==-1:
+                u_E = ex.interp_E_W(i,j, i+1,j, u_k)
+                v_E = ex.interp_E_W(i,j, i+1,j, v_k)
+            else:
+                u_E = u[j*n + i+1]
+                v_E = v[j*n + i+1]
                 
-                uxx_k = (2*u_k - 5*u[j*n+i+1] + 4*u[j*n+i+2] - u[j*n+i+3])/ex.dx**3
-                vxx_k = (2*v_k - 5*v[j*n+i+1] + 4*v[j*n+i+2] - v[j*n+i+3])/ex.dx**3           
-            else: #center diff
-                uxx_k = (u[j*n + i+1] -2*u_k + u[j*n + i-1])/ex.dx**2
-                vxx_k = (v[j*n + i+1] -2*v_k + v[j*n + i-1])/ex.dx**2
+            uxx_k = (u_E -2*u_k + u_W)/ex.dx**2
+            vxx_k = (v_E -2*v_k + v_W)/ex.dx**2
 
             px[k] = uxx_k + vxx_k
             
             # uyy & vyy <--| N:j+1 & S:j-1
-            if j == m-1: # backward diff
-                uyy_k = (2*u_k - 5*u[(j-1)*n+i] + 4*u[(j-2)*n+i] - u[(j-3)*n+i])/ex.dy**3
-                vyy_k = (2*v_k - 5*v[(j-1)*n+i] + 4*v[(j-2)*n+i] - v[(j-3)*n+i])/ex.dy**3
-                
-            elif j == 0 or space[j-1,i]==-1: # forward diff
-                uyy_k = (2*u_k - 5*u[(j+1)*n+i] + 4*u[(j+2)*n+i] - u[(j+3)*n+i])/ex.dy**3
-                vyy_k = (2*v_k - 5*v[(j+1)*n+i] + 4*v[(j+2)*n+i] - v[(j+3)*n+i])/ex.dy**3
-
-            else:#center diff
-                uyy_k = (u[(j+1)*n + i] -2*u_k + u[(j-1)*n + i])/ex.dy**2
-                vyy_k = (v[(j+1)*n + i] -2*v_k + v[(j-1)*n + i])/ex.dy**2
+            #TODO 
+            if j==0:
+                u_S =0
+                v_S = 0
+            elif space[j-1,i]==-1:
+                u_S = ex.interp_S(i,j, i,j-1, u_k)
+                v_S = ex.interp_S(i,j, i,j-1, v_k)
+            else:
+                u_S = u[(j-1)*n + i]
+                v_S = v[(j-1)*n + i]
+            
+            if j==m-1:
+                u_N = 0
+                v_N = 0
+            else:
+                u_N = u[(j+1)*n + i]
+                v_N = v[(j+1)*n + i]
+            
+            uyy_k = (u_N -2*u_k + u_S)/ex.dy**2
+            vyy_k = (v_N -2*v_k + v_S)/ex.dy**2
 
             py[k] = uyy_k + vyy_k
     return px, py
