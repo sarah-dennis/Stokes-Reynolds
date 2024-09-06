@@ -58,7 +58,7 @@ class Space(Domain):
         self.U = U   # flat boundary velocity
         self.flux = Q
         self.visc = 1 # dynamic viscosity 
-        self.p_ambient = 1000
+        self.p_ambient = 0
         self.Re = Re # Re = U h / L
         
 

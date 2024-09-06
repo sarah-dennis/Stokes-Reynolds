@@ -292,7 +292,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-8, n_contours=20):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     # zs = np.ma.masked_where(zs == 0, zs)

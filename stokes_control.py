@@ -18,13 +18,12 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-# example = examples.BFS_standard 
+example = examples.BFS_standard 
 # 
-example = examples.Tri_standard
+# example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
-# example =  examples.slider_rectTxt_Re1
-# example =  examples.slider_triTxt_Re1
+
 
 write_mod = 200
 error_mod = 200
@@ -122,7 +121,7 @@ def load_plot(N):
 # zoom domain
     x_start = 0.5
     x_stop= 1.5
-    y_start = 0.5
+    y_start = 0
     y_stop = 1.5
 
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
@@ -161,19 +160,19 @@ def load_plot(N):
     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
     
 #  Pressure plot: 
-    # p = translator.pressure(ex, u, v)
-    # p_2D = p.reshape((ex.Ny,ex.Nx))
+    p = translator.pressure(ex, u, v)
+    p_2D = p.reshape((ex.Ny,ex.Nx))
 
-    # ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    # title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+    title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
 
-    # p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
-    # graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, True , n_contours=100)
+    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, False , n_contours=20)
 
-    # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, True, n_contours=100)
+    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, False, n_contours=50)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)
@@ -196,11 +195,11 @@ def plot_compare(N_min, Ns, N_max):
     ax_labels= ["N", "$||\psi _{N^{*}} - \psi_{N}||$"]
     max_errs, l1_errs, l2_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
     leg_labels = ['inf', 'l1', 'l2']
-    linthresh=1e-5
+    linthresh=1e-8
     # O1=1e-5
     # O2=5e-5
-    O1=1e-1
-    O2= 1e2
+    O1=1
+    O2= 1e1
     # O1=3e-2
     # O2=6e-1
     graphics.plot_log_multi([max_errs, l1_errs, l2_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)

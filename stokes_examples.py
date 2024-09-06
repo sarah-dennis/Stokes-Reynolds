@@ -28,7 +28,7 @@ class BFS_standard(BFS):
         H = 2
         h = 1   
         U = 1
-        Re = U*h/L
+        Re = 1#U*h/L
         Q = U*h
         super().__init__(L, H, h, U, Q, Re, N)
 

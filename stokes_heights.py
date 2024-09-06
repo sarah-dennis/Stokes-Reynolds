@@ -164,62 +164,7 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
 # Boundary interpolation
 #------------------------------------------------------------------------------
-      
-# Interior (x_i,y_j) = x_k has exterior nbr (x_s,y_t)
-
-    # def interp_E_W(self, t, s, psi_k):
-    #     x = self.xs[s]
-    #     for k in range(self.N_regions):
-    #         if x >= self.x_peaks[k]:
-    #             slope = self.slopes[k]
-
-    #     if slope == 0:
-    #         return 0
-    #     else:
-    #         scale = 1 - (t%slope)/slope
-
-    #         return -scale * psi_k
-
-    # def interp_S(self, t, s, psi_k):
-    #     x = self.xs[s]
-    #     for k in range(self.N_regions):
-    #         if x >= self.x_peaks[k]:
-    #             slope = self.slopes[k]
-    #     if slope == 0:
-    #         return 0
-    #     else: 
-    #         scale = 1 - (s % (1/slope))*slope
-    #         return -scale * psi_k
-
-    # def interp_NE_NW(self, t, s, psi_N):
-    #     x = self.xs[s]
-    #     for k in range(self.N_regions):
-    #         if x >= self.x_peaks[k]:
-    #             slope = self.slopes[k]
-
-    #     scale = 1 - (t%slope)/slope
-    #     print(slope, s)
-    #     return -scale * psi_N
-
-    # def interp_SE_SW(self, t, s, psi_EW, psi_S):
-    #     x = self.xs[s]
-    #     for k in range(self.N_regions):
-    #         if x >= self.x_peaks[k]:
-    #             slope = self.slopes[k]
-
-    #     if slope == 0:
-    #         return 0
-        
-    #     elif abs(slope) < 1:    
-    #         scale = 1 - (s%(1/slope))*slope
-    #         return -scale * psi_EW
-        
-    #     else:
-    #         scale = 1 - (t % slope)/slope
-            
-    #         return -scale * psi_S
-
-#------------------------------------------------------------------------------
+ 
 # x_ij interior node
 # x_st exterior nbr node 
 
