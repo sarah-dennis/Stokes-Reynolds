@@ -149,7 +149,6 @@ def update_rhs(ex, u, v, psi): #
             k_E = j*n + i + 1
             if ex.space[j,i+1] == -1: #E:
                 dpsi_bc += 8 * ex.interp_E_W(i,j, i+1,j, psi_k)
-                # print(dpsi_bc, 'e')
                 u_E = ex.interp_E_W(i,j, i+1,j, u_k)
                 v_E = ex.interp_E_W(i,j, i+1,j, v_k)
             else:
@@ -160,7 +159,6 @@ def update_rhs(ex, u, v, psi): #
             k_W = j*n + i - 1    
             if ex.space[j,i-1] == -1: #W:
                 dpsi_bc += 8 * ex.interp_E_W(i,j, i-1,j, psi_k)
-                # print(dpsi_bc, 'w')
                 u_W = ex.interp_E_W(i,j, i-1,j, u_k)
                 v_W = ex.interp_E_W(i,j, i-1,j, v_k)
             else:
@@ -171,7 +169,6 @@ def update_rhs(ex, u, v, psi): #
             k_S = (j-1)*n + i     
             if ex.space[j-1,i] == -1: #S:
                 dpsi_bc += 8 * ex.interp_S(i,j, i,j-1, psi_k)
-                # print(dpsi_bc, 's')
                 u_S = ex.interp_S(i,j, i,j-1, u_k)
                 v_S = ex.interp_S(i,j, i,j-1, v_k)
             else:
@@ -181,19 +178,15 @@ def update_rhs(ex, u, v, psi): #
             
             if ex.space[j+1,i+1] == -1: #NE:
                 dpsi_bc += -1 * ex.interp_NE(i,j, i+1,j+1, psi_k)
-                # print(dpsi_bc, 'ne')
 
             if ex.space[j+1,i-1] == -1: #NW:
                 dpsi_bc += -1 * ex.interp_NW(i,j, i-1,j+1, psi_k)
-                # print(dpsi_bc, 'nw')
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
                 dpsi_bc += -1 * ex.interp_SE(i,j, i+1,j-1, psi_k)
-                # print(dpsi_bc, 'se')
 
             if ex.space[j-1,i-1] == -1: #SW:
                 dpsi_bc += -1 * ex.interp_SW(i,j, i-1,j-1, psi_k)
-                # print(dpsi_bc, 'sw')
                
             A = u_S - u_N + v_E - v_W
             B = v_k * (u_E + u_W + u_N + u_S)
@@ -264,7 +257,7 @@ def uv_approx(ex, u, v, psi):
                 v_E = 0
                 psi_E = 0
             else:
-                k_E = j*n + i + 1
+                k_E = j*n + i+1
                 v_E = v[k_E]
                 psi_E = psi[k_E] 
 
@@ -279,7 +272,7 @@ def uv_approx(ex, u, v, psi):
                 v_W = 0
                 psi_W = 0 
             else:
-                k_W = j*n + i - 1
+                k_W = j*n + i-1
                 v_W = v[k_W]
                 psi_W = psi[k_W]
    

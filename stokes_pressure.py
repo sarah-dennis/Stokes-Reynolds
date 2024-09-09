@@ -24,10 +24,10 @@ def pressure(ex, u, v):
     shape = n*m
     p = np.zeros(shape)
 
-    # set the ambient pressure top-interior i=0
+    # set the ambient pressure at first interior pint (i=0
     p[(m-2)*n] = ex.p_ambient    
     
-    # contour the top-interior row using px
+    # contour the first interior row using px
     for i in range(1,n):
         k =   (m-2)*n + i
         k_W = (m-2)*n + i-1

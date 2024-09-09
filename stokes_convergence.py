@@ -18,10 +18,10 @@ def compare_Ns(ex, N_min, Ns, N_max):
     mult_max = int(N_max/N_min)
     
     err = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
-    err_max = np.zeros(len(Ns)+1)
+    err_inf = np.zeros(len(Ns)+1)
     err_l1 = np.zeros(len(Ns)+1)
     err_l2 = np.zeros(len(Ns)+1)
-
+    
     for n in range(len(Ns)+1):
         if n == 0:
             ex_n = ex(N_min)
@@ -34,33 +34,44 @@ def compare_Ns(ex, N_min, Ns, N_max):
             psi_n=psi_n.reshape((ex_n.Ny, ex_n.Nx))
             mult = int(Ns[n-1]/N_min)
         
-        
         for k_min in range(ex_min.Ny*ex_min.Nx):
+        # all indices (i,j) on grid N_min
             i = k_min % ex_min.Nx
             j = (k_min // ex_min.Nx)
             
+            # -> indices on grid N || N_min
             i_n = mult * i
             j_n = mult * j
 
-            
+            # -> indices on grid N_max || N_min
             i_max = mult_max * i
             j_max = mult_max * j
-
             
             
             err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
             err_l1[n] += err[n,j,i]
             err_l2[n] += err[n,j,i]**2
             
-        err_max[n] = np.max(err[n])
+        err_inf[n] = np.max(err[n])
         err_l2[n] = np.sqrt(err_l2[n])
         
-    
-    return err_max, err_l1,  err_l2 
+    l1_rate = convg_rate(err_l1)
+    l2_rate = convg_rate(err_l2)
+    inf_rate = convg_rate(err_inf)
+
+    print(f"{np.array2string(l1_rate, precision=2)}")
+    print(f"{np.array2string(l2_rate, precision=2)}")
+    print(f"{np.array2string(inf_rate, precision=2)}")
+
+    return err_l1, err_l2, err_inf
         
-
-
-#-------------------------------------------------------------------------------
+def convg_rate(errs, order=2):
+    n = len(errs)
+    rates = np.zeros(n-1)
+    for k in range(n-1):
+        rates[k]=errs[k+1]/(errs[k]**2)
+    return rates
+#------------------------------------------------------------------------------
 # for triangle examples:
 #------------------------------------------------------------------------------
 def get_criticals(tri, N):
