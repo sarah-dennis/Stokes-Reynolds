@@ -18,9 +18,9 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-example = examples.BFS_standard 
+# example = examples.BFS_standard 
 # 
-# example = examples.Tri_standard
+example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
 
@@ -55,6 +55,7 @@ def new_run_many(N_0, dN, many):
 def load_run_new_many(N_0, dN, many):
     max_iters = 10000
     N_load = N_0
+    load_run(N_load, max_iters)
     for k in range (1, many): 
         N = N_0 + k*dN
         load_scale(N_load, N)
@@ -160,19 +161,19 @@ def load_plot(N):
     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
     
 #  Pressure plot: 
-    p = translator.pressure(ex, u, v)
-    p_2D = p.reshape((ex.Ny,ex.Nx))
+    # p = translator.pressure(ex, u, v)
+    # p_2D = p.reshape((ex.Ny,ex.Nx))
 
-    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    # ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+    # title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
 
-    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+    # p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
-    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, False , n_contours=20)
+    # graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, False , n_contours=20)
 
-    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, False, n_contours=50)
+    # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, False, n_contours=50)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)
@@ -192,15 +193,15 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
     
 def plot_compare(N_min, Ns, N_max):
     title = "Error in $\psi$ to $N^{*}=%d$ \n %s"%(N_max, example(N_min).spacestr)
-    ax_labels= ["N", "$||\psi _{N^{*}} - \psi_{N}||$"]
+    ax_labels= ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
     max_errs, l1_errs, l2_errs= cnvg.compare_Ns(example, N_min, Ns, N_max)
-    leg_labels = ['inf', 'l1', 'l2']
+    leg_labels = ['$L^\inf$', '$L^1$', '$L^2$']
     linthresh=1e-8
     # O1=1e-5
     # O2=5e-5
     O1=1
-    O2= 1e1
+    O2= 1e2
     # O1=3e-2
     # O2=6e-1
-    graphics.plot_log_multi([max_errs, l1_errs, l2_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
+    graphics.plot_log_multi([max_errs[1:], l1_errs[1:], l2_errs[1:]], Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
     

@@ -178,9 +178,9 @@ class PWLinear(Space):
         v1 = self.xs[s]-self.xs[i]
         v2 = x_bdry-self.xs[i]
     
-        scale = v2 / v1
-        
-        v_st = v_ij + (v_bdry-v_ij) * scale
+        scale =  v2/v1
+  
+        v_st = v_bdry - v_ij*scale      
 
         return v_st
     
@@ -193,13 +193,14 @@ class PWLinear(Space):
         v1 = self.ys[t]-self.ys[j] 
         v2 = y_bdry-self.ys[j]
         
-        scale = v2 / v1
+        scale = v1/v2 -1
 
-        v_st = v_ij + (v_bdry-v_ij) * scale
+        v_st = v_bdry-v_ij * scale
+
 
         return v_st
 
-    def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0): 
+    def interp_NE(self, i,j, s,t, v_ij, v_bdry=0): 
         
         slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
         
@@ -207,28 +208,64 @@ class PWLinear(Space):
         
         y_bdry = (x_bdry-self.xs[i]) +self.ys[j] 
         
+        #NE : s > bndry > i, t > bndry > j
         v1 = np.sqrt((self.xs[s]-self.xs[i])**2 + (self.ys[t]-self.ys[j])**2)
         v2 = np.sqrt((x_bdry-self.xs[i])**2 + (y_bdry-self.ys[j])**2)
         
-        scale = v2/v1
+        scale = v1/v2 -1
         
-        v_st = v_ij + (v_bdry-v_ij) * scale
+        v_st = v_bdry -v_ij * scale
+        return v_st
+    
+    def interp_SW(self, i,j, s,t, v_ij, v_bdry=0): 
+        
+        slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+        
+        x_bdry = (self.ys[j]-self.hs[i])/(slope-1)  +self.xs[i]
+        
+        y_bdry = (x_bdry-self.xs[i]) +self.ys[j] 
+        
+        #NE : s < bndry < i, t < bndry < j
+        v1 = np.sqrt((self.xs[i]-self.xs[s])**2 + (self.ys[j]-self.ys[t])**2)
+        v2 = np.sqrt((self.xs[i]-x_bdry)**2 + (self.ys[j]-y_bdry)**2)
+        
+        scale = v1/v2 -1
+        
+        v_st = v_bdry-v_ij * scale
         return v_st
     
     
-    def interp_NW_SE(self, i,j, s,t, v_ij, v_bdry=0): 
+    def interp_NW(self, i,j, s,t, v_ij, v_bdry=0): 
+
+        slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
+        
+        x_bdry = (self.ys[j]-self.hs[i])/(slope+1) +self.xs[i]
+        y_bdry = -(x_bdry - self.xs[i]) + self.ys[j] 
+        
+        # NW: s < bndry < i : t > bndry > j 
+
+        v1 = np.sqrt((self.xs[i]-self.xs[s])**2 + (self.ys[t]-self.ys[j])**2)
+        v2 = np.sqrt((self.xs[i]-x_bdry)**2 + (y_bdry-self.ys[j])**2)
+        
+        scale = v1/v2 -1
+        
+        v_st = v_bdry-v_ij * scale
+        return v_st
+    
+    def interp_SE(self, i,j, s,t, v_ij, v_bdry=0): 
 
         slope = (self.hs[i]-self.hs[s])/(self.xs[i]-self.xs[s])
         
         x_bdry = (self.ys[j]-self.hs[i])/(slope+1) +self.xs[i]
         y_bdry = -(x_bdry - self.xs[i]) + self.ys[j] 
 
-        v1 = np.sqrt((self.xs[s]-self.xs[i])**2 + (self.ys[t]-self.ys[j])**2)
-        v2 = np.sqrt((x_bdry-self.xs[i])**2 + (y_bdry-self.ys[j])**2)
+        #SE : s > bndry > i : t < bndry < j
+        v1 = np.sqrt((self.xs[s]-self.xs[i])**2 + (self.ys[j]-self.ys[t])**2)
+        v2 = np.sqrt((x_bdry-self.xs[i])**2 + (self.ys[j]-y_bdry)**2)
         
-        scale = v2/v1
+        scale = v1/v2 -1
         
-        v_st = v_ij + (v_bdry-v_ij) * scale
+        v_st = v_bdry -v_ij * scale
         return v_st
 
 

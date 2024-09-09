@@ -180,26 +180,26 @@ def update_rhs(ex, u, v, psi): #
             
             
             if ex.space[j+1,i+1] == -1: #NE:
-                dpsi_bc += -1 * ex.interp_NE_SW(i,j, i+1,j+1, psi_k)
+                dpsi_bc += -1 * ex.interp_NE(i,j, i+1,j+1, psi_k)
                 # print(dpsi_bc, 'ne')
 
             if ex.space[j+1,i-1] == -1: #NW:
-                dpsi_bc += -1 * ex.interp_NW_SE(i,j, i-1,j+1, psi_k)
+                dpsi_bc += -1 * ex.interp_NW(i,j, i-1,j+1, psi_k)
                 # print(dpsi_bc, 'nw')
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
-                dpsi_bc += -1 * ex.interp_NW_SE(i,j, i+1,j-1, psi_k)
+                dpsi_bc += -1 * ex.interp_SE(i,j, i+1,j-1, psi_k)
                 # print(dpsi_bc, 'se')
 
             if ex.space[j-1,i-1] == -1: #SW:
-                dpsi_bc += -1 * ex.interp_NE_SW(i,j, i-1,j-1, psi_k)
+                dpsi_bc += -1 * ex.interp_SW(i,j, i-1,j-1, psi_k)
                 # print(dpsi_bc, 'sw')
                
             A = u_S - u_N + v_E - v_W
             B = v_k * (u_E + u_W + u_N + u_S)
             C = u_k * (v_E + v_W + v_N + v_S)
 
-            rhs[k] = c0 * A + c1 * (B - C) + dpsi_bc
+            rhs[k] = c0 * A + c1 * (B - C) +  dpsi_bc
                    
     return rhs
  
