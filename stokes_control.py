@@ -18,9 +18,9 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-# example = examples.BFS_standard 
+example = examples.BFS_standard 
 # 
-example = examples.Tri_standard
+# example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
 
@@ -122,58 +122,58 @@ def load_plot(N):
 # zoom domain
     x_start = 0.5
     x_stop= 1.5
-    y_start = 0
+    y_start = 0.5
     y_stop = 1.5
 
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
-# Stream plot:
+# # Stream plot:
 
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
-    title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+#     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+#     title = 'Stream ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
     
-    stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
-    graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, True, n_contours=25)
+#     stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
+#     graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, True, n_contours=25)
 
-    # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start, x_stop, y_start, y_stop)
-    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
+#     # stream_2D_zoom = grid_zoom_2D(stream_2D, ex, x_start, x_stop, y_start, y_stop)
+#     # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True)
     
-#  Velocity plot: 
+# #  Velocity plot: 
 
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
-    graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
+#     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
+#     title = 'Velocity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+#     ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$','$x$', '$y$']
+#     graphics.plot_stream_heat(u_2D, v_2D, xs, ys, stream_2D, title, ax_labels, True) 
 
-    # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
-    # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
-    # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
+#     # u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
+#     # v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
+#     # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, stream_2D_zoom, title, ax_labels, True)
     
-#  Vorticity plot: 
-    w = translator.vorticity(ex, u_2D, v_2D)
+# #  Vorticity plot: 
+#     w = translator.vorticity(ex, u_2D, v_2D)
 
-    ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-    w_ma = np.ma.masked_where(ex.space==-1, w)
-    graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, False, n_contours=20)
+#     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
+#     title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+#     w_ma = np.ma.masked_where(ex.space==-1, w)
+#     graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, False, n_contours=20)
 
-    # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
-    # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
+#     # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
+#     # graphics.plot_contour(w_zoom, xs_zoom, ys_zoom, title, ax_labels)
     
-#  Pressure plot: 
-    # p = translator.pressure(ex, u, v)
-    # p_2D = p.reshape((ex.Ny,ex.Nx))
+  # Pressure plot: 
+    p = translator.pressure(ex, u, v)
+    p_2D = p.reshape((ex.Ny,ex.Nx))
 
-    # ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    # title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+    title_p = 'Pressure $P(x,y)$ ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
 
-    # p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
-    # graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, False , n_contours=20)
+    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, False , n_contours=100)
 
-    # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, False, n_contours=50)
+    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, False, n_contours=50)
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)

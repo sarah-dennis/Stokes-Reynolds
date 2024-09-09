@@ -11,7 +11,7 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-# colour_map = 'viridis' ./,M';K[]JI'''''4
+# colour_map = 'viridis' 
 
 colour_map = 'Spectral_r'
 #------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16,
     
 
     pp.rcParams["lines.linewidth"] = .2
-    pp.contour(X, Y, zs, n_contours, colors='white')
+    pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])

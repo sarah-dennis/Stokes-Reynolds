@@ -23,21 +23,61 @@ def pressure(ex, u, v):
     dx = ex.dx
     shape = n*m
     p = np.zeros(shape)
+
+    # set the ambient pressure top-interior i=0
+    p[(m-2)*n] = ex.p_ambient    
     
-    k0 = (m-1)*n
-    p[k0] = ex.p_ambient
-    
+    # contour the top-interior row using px
     for i in range(1,n):
-        k=(m-1)*n + i
-        p[k] = p[k-1]+ px[k]* dx
-        
-    j= m-2
-    while j >=0:
-        for i in range(n):
-            k=j*n + i
-            p[k] = p[(j+1)*n+i] - py[k]*dy 
-        j-=1    
-       
+        k =   (m-2)*n + i
+        k_W = (m-2)*n + i-1
+        p[k] = p[k_W]+ px[k]*dx
+     
+    # set the top boundary using dy from interior row
+    p[(m-1)*n] = ex.p_ambient
+    for i in range(1,n):
+        k   = (m-1)*n + i
+        k_S = (m-2)*n + i
+        p[k] = p[k_S] + py[k_S]*dy
+    
+
+    for i in range(n):
+        j=m-3
+        while j >= 0:
+            k = j*n + i
+            if ex.space[j,i]==1:
+                k_N = (j+1)*n + i
+                p[k] = p[k_N] - py[k_N]*dy
+            j-=1    
+    
+    for i in range(n):
+        j=m-3
+        while j >= 0:
+            k = j*n + i
+            if ex.space[j,i]==0:
+                if ex.space[j+1,i]==1:
+                    k_N = (j+1)*n + i
+                    p[k] = p[k_N] - py[k_N]*dy
+                    
+                elif i < n-1 and ex.space[j,i+1] == 1:
+                    k_E = j*n +i+1
+                    p[k] = p[k_E] - px[k_E]*dx
+                    
+                elif i > 0 and ex.space[j,i-1]==1:
+                    k_W = j*n+i-1
+                    p[k] = p[k_W] + px[k_W]*dx
+                    
+                elif i < n-1 and ex.space[j+1,i+1]==1:
+                    k_NE = (j+1)*n+i+1
+                    p[k] = p[k_NE] - px[k_NE]*dx -py[k_NE]*dy
+                    
+                elif i > 0 and ex.space[j+1,i-1]==1:
+                    k_NW = (j+1)*n+i-1
+                    p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
+                else:
+                    print(i,j)
+            j-=1    
+    
     return p
             
     
@@ -55,7 +95,7 @@ def fishfun(ex, u, v):
         i = k % n
         j = k // n
         
-        if space[j,i] != -1: # exterior & boundary
+        if space[j,i] != 1: # exterior & boundary
             continue
         else:
             
@@ -76,8 +116,6 @@ def fishfun(ex, u, v):
             else:
                 u_W = u[j*n + i-1]
                 v_W = v[j*n + i-1]
-                
-                
                 
                 
             uxx_k = (u_E -2*u_k + u_W)/ex.dx**2
