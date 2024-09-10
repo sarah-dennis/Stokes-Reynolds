@@ -5,6 +5,7 @@ Created on Fri May 24 08:36:17 2024
 @author: sarah
 """
 import numpy as np
+import graphics
 import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
 #-------------------------------------------------------------------------------
@@ -48,10 +49,15 @@ def compare_Ns(ex, N_min, Ns, N_max):
             j_max = mult_max * j
             
             
+            norm =  abs(psi_max[j_max,i_max])
             err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
+            
+            if not np.isclose(norm,0) :
+                err[n,j,i] /= norm
+
             err_l1[n] += err[n,j,i]
             err_l2[n] += err[n,j,i]**2
-            
+        # graphics.plot_contour_mesh(err[n], ex_min.xs, ex_min.ys, "err", ['x', 'y', 'err'], True)   
         err_inf[n] = np.max(err[n])
         err_l2[n] = np.sqrt(err_l2[n])
         
