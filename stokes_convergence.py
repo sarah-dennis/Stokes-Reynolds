@@ -69,7 +69,7 @@ def convg_rate(errs, order=2):
     n = len(errs)
     rates = np.zeros(n-1)
     for k in range(n-1):
-        rates[k]=errs[k+1]/(errs[k]**2)
+        rates[k]=errs[k+1]/(errs[k]**order)
     return rates
 #------------------------------------------------------------------------------
 # for triangle examples:

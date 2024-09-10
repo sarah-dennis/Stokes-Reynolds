@@ -18,9 +18,9 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-# example = examples.BFS_standard 
+example = examples.BFS_standard 
 
-example = examples.Tri_standard
+# example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
 
@@ -63,7 +63,7 @@ def load_run_new_many(N_0, dN, many):
         N_load = N
 
 def load_run_many(N_0, dN, many):
-    max_iters = 10000
+    max_iters = 50000
     for k in range (many): 
         N = N_0 + k*dN
         load_run(N, max_iters)

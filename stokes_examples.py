@@ -17,7 +17,7 @@ class BFS(PWLinear):
         yf = H
         x_peaks = [x0, L/5, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
-        filestr = "stokes_BFS_H%d_Re%d_N%d"%(H, Re, N)
+        filestr = "stokes_BFS_H%d_Re%d_N%d_test"%(H, Re, N)
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
 class BFS_standard(BFS):
@@ -28,7 +28,7 @@ class BFS_standard(BFS):
         H = 2
         h = 1   
         U = 1
-        Re = 1#U*h/L
+        Re = U*h/L
         Q = U*h
         super().__init__(L, H, h, U, Q, Re, N)
 
