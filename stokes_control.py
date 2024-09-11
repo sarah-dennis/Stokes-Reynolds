@@ -18,12 +18,13 @@ import stokes_examples as examples
 from stokes_solver import run_spLU
 
 
-example = examples.BFS_standard 
+# example = examples.BFS_H2L5_Re02
+# example = examples.BFS_H2L5_Re1
 
 # example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
-
+example = examples.slider_triTxt_Re1
 
 write_mod = 200
 error_mod = 200
@@ -32,9 +33,9 @@ err_tol = 1e-8
 def new_run(N, iters):
     
     ex = example(N)
-    u_init = np.ones(ex.Nx * ex.Ny)
-    v_init = np.ones(ex.Nx * ex.Ny)
-    psi_init = np.ones(ex.Nx * ex.Ny)
+    u_init = np.zeros(ex.Nx * ex.Ny)
+    v_init = np.zeros(ex.Nx * ex.Ny)
+    psi_init = np.zeros(ex.Nx * ex.Ny)
     past_iters = 0
 
     u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, error_mod, write_mod, err_tol)
@@ -46,28 +47,29 @@ def new_run_many(N_0, dN, many):
     new_run(N_0,max_iters)
     N_load = N_0
     for k in range (1, many): 
-        N = N_0 + k*dN
+        N = N_load*dN
         load_scale(N_load, N)
-        load_run(N, max_iters)
+        load_run(N_load, max_iters)
         N_load = N
-        
+
     
 def load_run_new_many(N_0, dN, many):
     max_iters = 10000
     N_load = N_0
     load_run(N_load, max_iters)
     for k in range (1, many): 
-        N = N_0 + k*dN
+        N = N_load*dN
         load_scale(N_load, N)
         load_run(N, max_iters)
         N_load = N
 
 def load_run_many(N_0, dN, many):
     max_iters = 50000
+    N = N_0
     for k in range (many): 
-        N = N_0 + k*dN
         load_run(N, max_iters)
-                                                                                                                                                                                                                                                                             
+        N *= dN 
+                                                                                                                                                                                                                                                                   
 def load_run(N, iters):                                
     ex = example(N)
     u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)

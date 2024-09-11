@@ -52,8 +52,8 @@ def compare_Ns(ex, N_min, Ns, N_max):
             norm =  abs(psi_max[j_max,i_max])
             err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
             
-            if not np.isclose(norm,0) :
-                err[n,j,i] /= norm
+            # if not np.isclose(norm,0) :
+            #     err[n,j,i] /= norm
 
             err_l1[n] += err[n,j,i]
             err_l2[n] += err[n,j,i]**2

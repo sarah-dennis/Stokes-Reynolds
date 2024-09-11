@@ -9,7 +9,7 @@ from stokes_heights import PWLinear
 import numpy as np
 #------------------------------------------------------------------------------
 class BFS(PWLinear):
-    def __init__ (self, L, H, h, U, Q, Re, N):
+    def __init__ (self, L, H, h, U, Q, Re, N, filestr):
 
         x0 = 0
         xf = L
@@ -17,21 +17,30 @@ class BFS(PWLinear):
         yf = H
         x_peaks = [x0, L/5, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
-        filestr = "stokes_BFS_H%d_Re%d_N%d"%(H, Re, N)
+
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
-class BFS_standard(BFS):
+class BFS_H2L5_Re1(BFS):
     def __init__(self, N):
-
-     
         L = 5
         H = 2
         h = 1   
         U = 1
         Re = 1# U*(h**2)/L
         Q = U*h
-        super().__init__(L, H, h, U, Q, Re, N)
+        filestr = "stokes_BFS_H%d_Re%d_N%d"%(H, Re, N)
+        super().__init__(L, H, h, U, Q, Re, N, filestr)
 
+class BFS_H2L5_Re02(BFS):
+    def __init__(self, N):
+        L = 5
+        H = 2
+        h = 1   
+        U = 1
+        Re = U*(h**2)/L
+        Q = U*h
+        filestr = "stokes_BFS_H%d_Re02_N%d"%(H, N)
+        super().__init__(L, H, h, U, Q, Re, N, filestr)
 #------------------------------------------------------------------------------
 
 class TriCavity(PWLinear):
@@ -92,20 +101,6 @@ class rectSlider_standard(RectTexturedSlider):
         Q = 1
         Re = 1
         super().__init__(L, l1, l2, H, h, U, Q, Re, N)
-    
-class slider_rectTxt_Re1(PWLinear):
-    def  __init__(self,N):
-        x0 = 0
-        xf = 10
-        y0 = 0
-        yf = 2
-        U = 1
-        Q = 0 
-        Re = 1 
-        x_peaks = [x0, 2, 2.5, 3.5, 4, 5, 5.5, 6.5, 7, xf]#, 3, 4,5]
-        y_peaks=[[yf,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,0],[0,1],[1,yf]]
-        filestr = "stokes_slider_rectTxt_Re1_N%d"%N
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
 class slider_triTxt_Re1(PWLinear):
     def  __init__(self,N):
