@@ -177,6 +177,10 @@ def load_plot(N):
   # Pressure plot: 
     p = translator.pressure(ex, u, v)
     p_2D = p.reshape((ex.Ny,ex.Nx))
+    r = translator.resistance(ex, p)
+    print('resistance: %.2f'%r)
+    
+
 
     v_max = np.max(p)
     v_min = np.min(p)
@@ -213,7 +217,7 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
 def compare(N_min, Ns, N_max):
     title = "Error in $\psi$ to $N^{*}=%d$ \n %s"%(N_max, example(N_min).spacestr)
     ax_labels= ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
-    l1_errs, l2_errs, inf_errs, res_errs = cnvg.compare_Ns(example, N_min, Ns, N_max)
+    l1_errs, l2_errs, inf_errs = cnvg.compare_Ns(example, N_min, Ns, N_max)
     leg_labels = ['$L^1$', '$L^2$','$L^\infty$', 'res_err']
     linthresh=1e-8
     # O1=1e-5
@@ -222,5 +226,5 @@ def compare(N_min, Ns, N_max):
     O2= 1
     # O1=3e-2
     # O2=6e-1
-    graphics.plot_log_multi([l1_errs, l2_errs, inf_errs, res_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
+    graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
     

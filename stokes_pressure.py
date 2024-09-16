@@ -6,6 +6,7 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 
+#TODO: bcs??
 def vorticity(ex, u_2D, v_2D):
     uy_2D = np.gradient(u_2D, ex.dy, axis=0)
     vx_2D = np.gradient(v_2D, ex.dx, axis=1)
@@ -14,6 +15,18 @@ def vorticity(ex, u_2D, v_2D):
         for i in range(ex.Nx):   
             w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
     return w_2D
+
+def resistance(ex, p):
+    j_in = int((ex.yf - ex.H_in/2)/ex.dy)
+    j_out =int((ex.yf - ex.H_out/2)/ex.dy)
+    
+    dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in+ex.Nx]
+    
+    if ex.flux!=0:
+        R = dp/ex.flux
+        return R
+    else:
+        return dp
 
 def pressure(ex, u, v):
     px, py = fishfun(ex, u, v)

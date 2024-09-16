@@ -8,7 +8,6 @@ import numpy as np
 import graphics
 import stokes_readwrite as rw
 from scipy.signal import argrelextrema as relEx
-import stokes_pressure as translator
 #-------------------------------------------------------------------------------
 
 def compare_Ns(ex, N_min, Ns, N_max):
@@ -18,13 +17,10 @@ def compare_Ns(ex, N_min, Ns, N_max):
     u_max, v_max, psi_max, past_iters = rw.read_solution(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
     psi_max = psi_max.reshape((ex_max.Ny,ex_max.Nx))
     mult_max = int(N_max/N_min)
-    p = translator.pressure(ex_max, u_max, v_max)
-    r_max = resistance(ex_max, p)
     err = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
     err_inf = np.zeros(len(Ns)+1)
     err_l1 = np.zeros(len(Ns)+1)
     err_l2 = np.zeros(len(Ns)+1)
-    err_res = np.zeros(len(Ns)+1)
     
     for n in range(len(Ns)+1):
         if n == 0:
@@ -39,9 +35,7 @@ def compare_Ns(ex, N_min, Ns, N_max):
             u, v, psi_n, past_iters = rw.read_solution(ex_n.filestr+".csv", ex_n.Nx * ex_n.Ny)
             psi_n=psi_n.reshape((ex_n.Ny, ex_n.Nx))
             mult = int(Ns[n-1]/N_min)
-        p = translator.pressure(ex_n, u, v)
-        r = resistance(ex_n, p)
-        err_res[n]= abs(r_max-r)
+
         for k_min in range(ex_min.Ny*ex_min.Nx):
         # all indices (i,j) on grid N_min
             i = k_min % ex_min.Nx
@@ -66,14 +60,11 @@ def compare_Ns(ex, N_min, Ns, N_max):
     l1_rate = convg_rate(err_l1)
     l2_rate = convg_rate(err_l2)
     inf_rate = convg_rate(err_inf)
-    res_rate = convg_rate(err_res)
-
     print(f"{np.array2string(l1_rate, precision=2)}")
     print(f"{np.array2string(l2_rate, precision=2)}")
     print(f"{np.array2string(inf_rate, precision=2)}")
-    print(f"{np.array2string(res_rate, precision=2)}")
 
-    return err_l1, err_l2, err_inf, err_res
+    return err_l1, err_l2, err_inf
         
 def convg_rate(errs):
     n = len(errs)
@@ -85,19 +76,7 @@ def convg_rate(errs):
 
 
 
-def resistance(ex, p):
-    j_in = int((ex.yf - ex.H_in/2)/ex.dy)
-    j_out =int((ex.yf - ex.H_out/2)/ex.dy)
-    
-    dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in+ex.Nx]
-    
-    if ex.flux!=0:
-        R = dp/ex.flux
-        print('resistance: %.2f'%R)
-        return R
-    else:
-        print('pressure drop: %.8f'%dp)
-        return dp
+
 #------------------------------------------------------------------------------
 # for triangle examples:
 #------------------------------------------------------------------------------
