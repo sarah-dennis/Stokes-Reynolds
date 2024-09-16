@@ -17,8 +17,8 @@ import stokes_examples as examples
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
-example = examples.BFS_H2L4_Re0
-# example = examples.BFS_H2L4_Re05
+# example = examples.BFS_H2L4_Re0
+example = examples.BFS_H2L4_Re05
 # example = examples.BFS_H2L4_Re1
 
 # example = examples.Tri_standard

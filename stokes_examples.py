@@ -49,7 +49,7 @@ class BFS_H2L4_Re0(BFS):
         h = 1   
         U = 1
         Re = 0
-        Q = U*h # dp/dx = -6
+        Q = U*h/2 # --> dp/dx = 0 at inlet 
         filestr = "stokes_BFS_H%dL%d_Re0_N%d"%(H,L, N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
 #------------------------------------------------------------------------------
