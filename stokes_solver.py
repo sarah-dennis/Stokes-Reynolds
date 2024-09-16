@@ -35,6 +35,7 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
             print(" k=%d max error: %.4e psi"%(k, max_err))
             print(" k=%d time: %.2f s"%(k, t_kj-t_ki))
             if max_err < err_tol:
+                # rw.write_solution(ex, u, v, psi, k+1+past_iters)
                 break
         if k % write_mod == 0:
             rw.write_solution(ex, u, v, psi, k+1+past_iters)
@@ -164,6 +165,7 @@ def update_rhs(ex, u, v, psi): #
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
+
                 
             # South (i, j-1)
             k_S = (j-1)*n + i     
@@ -171,11 +173,11 @@ def update_rhs(ex, u, v, psi): #
                 dpsi_bc += 8 * ex.interp_S(i,j, i,j-1, psi_k)
                 u_S = ex.interp_S(i,j, i,j-1, u_k)
                 v_S = ex.interp_S(i,j, i,j-1, v_k)
+
             else:
                 u_S = u[k_S]
                 v_S = v[k_S]
-            
-            
+
             if ex.space[j+1,i+1] == -1: #NE:
                 dpsi_bc += -1 * ex.interp_NE_SW(i,j, i+1,j+1, psi_k)
 
@@ -188,8 +190,9 @@ def update_rhs(ex, u, v, psi): #
             if ex.space[j-1,i-1] == -1: #SW:
                 dpsi_bc += -1 * ex.interp_NE_SW(i,j, i-1,j-1, psi_k)
 
-            
+                
             A = u_S - u_N + v_E - v_W
+
             B = v_k * (u_E + u_W + u_N + u_S)
             C = u_k * (v_E + v_W + v_N + v_S)
 
@@ -239,7 +242,7 @@ def uv_approx(ex, u, v, psi):
             # (u,v, psi) at 4 point stencil
             
             # North (i, j+1)
-            if j+1 == m-1: 
+            if j+1 == m-1: #
                 u_N = U
                 psi_N = ex.flux
             else:
@@ -251,12 +254,12 @@ def uv_approx(ex, u, v, psi):
             if i+1 == n-1 and ex.space[j,i+1] == 0:
                 v_E = 0 
                 psi_E = ex.streamOutlet(j)
-            elif ex.space[j,i+1] == -1: 
-                v_E = ex.interp_E_W(i,j, i+1,j, v[k])
-                psi_E = ex.interp_E_W(i,j, i+1,j, psi[k])
             elif ex.space[j,i+1] == 0:
                 v_E = 0
                 psi_E = 0
+            elif ex.space[j,i+1] == -1: 
+                v_E = ex.interp_E_W(i,j, i+1,j, v[k])
+                psi_E = ex.interp_E_W(i,j, i+1,j, psi[k])
             else:
                 k_E = j*n + i+1
                 v_E = v[k_E]
@@ -266,12 +269,12 @@ def uv_approx(ex, u, v, psi):
             if i-1 == 0 and ex.space[j,i-1] == 0:
                 v_W = 0
                 psi_W = ex.streamInlet(j)
-            elif ex.space[j,i-1] == -1:
-                v_W = ex.interp_E_W(i,j, i-1,j, v[k])
-                psi_W = ex.interp_E_W(i,j, i-1,j, psi[k])
             elif ex.space[j,i-1] == 0:
                 v_W = 0
                 psi_W = 0 
+            elif ex.space[j,i-1] == -1:
+                v_W = ex.interp_E_W(i,j, i-1,j, v[k])
+                psi_W = ex.interp_E_W(i,j, i-1,j, psi[k])
             else:
                 k_W = j*n + i-1
                 v_W = v[k_W]

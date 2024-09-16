@@ -11,9 +11,10 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-# colour_map = 'viridis' 
+# colour_map_stream = 'viridis' 
+colour_map_stream = 'Spectral_r' 
 
-colour_map = 'Spectral_r'
+colour_map_mesh = 'Spectral_r'
 #------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
             
@@ -23,7 +24,7 @@ def plot_3D(f_2D, xs, zs, title):
     
     pp.figure()
     ax = pp.axes(projection='3d')
-    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1, cmap=colour_map)
+    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1, cmap=colour_map_mesh)
     pp.title(title)
     pp.xlabel('x')
     pp.ylabel('z')
@@ -130,7 +131,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
         
-def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=1e-18, contour_density=1e-2):
+def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False, linthresh=1e-18, contour_density=1e-2,vmin=0, vmax=1 ):
     
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
@@ -141,10 +142,11 @@ def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels, log_cmap, linthresh=
     
     if log_cmap:
     
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25, vmin=-1, vmax=1, clip=True)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap=colour_map, norm=norm_symLog)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     else:
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap=colour_map)
+        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=True)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
@@ -182,7 +184,7 @@ def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
     #         continue
     #     art.remove()        
     
-    pp.plot(xs, hs, linewidth=0.8, color='k', label='$h(x)$')
+    pp.plot(xs, hs, linewidth=0.5, color='k', label='$h(x)$')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
@@ -265,7 +267,7 @@ def quiver_mask(grid, m, n, ly, lx):
 #------------------------------------------------------------------------------       
 
 def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
-    pp.rcParams["lines.linewidth"] = .4
+    pp.rcParams["lines.linewidth"] = .5
     pp.rcParams['figure.dpi'] = 1000
 
     pp.figure()
@@ -274,7 +276,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
     n_contours = max(zs.shape)//2
 
     if log_cmap:
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25)#, vmin=-1, vmax=1, clip=True)
+        norm_symLog = colors.AsinhNorm(linthresh)#, vmin=-1, vmax=1, clip=True)
         contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma', norm=norm_symLog)
     else:
         contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma')
@@ -292,22 +294,22 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20):
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20, vmin=None, vmax=None):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     # zs = np.ma.masked_where(zs == 0, zs)
     X, Y = np.meshgrid(xs, ys)
 #'Spectral_r'
     if log_cmap:
-        norm_symLog = colors.SymLogNorm(linthresh, linscale=0.25)#, vmin=-1, vmax=1, clip=True)
-        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map, norm=norm_symLog)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
     else:
-        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map)
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh,vmin=vmin, vmax=vmax)
     
     pp.colorbar(color_plot, label=labels[0])
     
 
-    pp.rcParams["lines.linewidth"] = .2
+    pp.rcParams["lines.linewidth"] = .5
     pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")

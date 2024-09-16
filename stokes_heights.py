@@ -146,7 +146,6 @@ class PWLinear(Space):
         y = self.y0 + j*self.dy
         if y >= self.y_peaks[0][1]:
             
-
             u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
 
             return  u

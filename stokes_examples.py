@@ -15,31 +15,42 @@ class BFS(PWLinear):
         xf = L
         y0 = 0
         yf = H
-        x_peaks = [x0, L/5, xf]
+        x_peaks = [x0, 1, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
 
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
-class BFS_H2L5_Re1(BFS):
+class BFS_H2L4_Re1(BFS):
     def __init__(self, N):
-        L = 5
+        L = 4
         H = 2
         h = 1   
         U = 1
-        Re = 1# U*(h**2)/L
+        Re = 1
         Q = U*h
-        filestr = "stokes_BFS_H%d_Re%d_N%d"%(H, Re, N)
+        filestr = "stokes_BFS_H%dL%d_Re1_N%d"%(H, L, N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
 
-class BFS_H2L5_Re02(BFS):
+class BFS_H2L4_Re05(BFS):
     def __init__(self, N):
-        L = 5
+        L = 4
         H = 2
         h = 1   
         U = 1
-        Re = U*(h**2)/L
+        Re = 0.5
         Q = U*h
-        filestr = "stokes_BFS_H%d_Re02_N%d"%(H, N)
+        filestr = "stokes_BFS_H%dL%d_Re05_N%d"%(H,L,N)
+        super().__init__(L, H, h, U, Q, Re, N, filestr)
+        
+class BFS_H2L4_Re0(BFS):
+    def __init__(self, N):
+        L = 4
+        H = 2
+        h = 1   
+        U = 1
+        Re = 0
+        Q = U*h # dp/dx = -6
+        filestr = "stokes_BFS_H%dL%d_Re0_N%d"%(H,L, N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
 #------------------------------------------------------------------------------
 
