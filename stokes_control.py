@@ -28,7 +28,7 @@ from stokes_solver import run_spLU
 # example = examples.Tri_standard
 
 # example = examples.rectSlider_standard
-# example = examples.slider_triTxt_Re1 
+example = examples.slider_triTxt_Re1 
 
 # example = examples.slider_triTxt_Re05
 
