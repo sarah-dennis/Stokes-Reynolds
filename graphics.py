@@ -312,7 +312,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16,
     
 
     pp.rcParams["lines.linewidth"] = .5
-    pp.contour(X, Y, zs, n_contours, colors='black')
+    # pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])

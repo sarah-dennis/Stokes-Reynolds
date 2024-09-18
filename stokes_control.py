@@ -22,15 +22,17 @@ from stokes_solver import run_spLU
 # example = examples.BFS_H2L4_Re0_Q3
 
 # example = examples.BFS_H2L4_Re05_Q2
+
 # example = examples.BFS_H2L4_Re1
 
-# example = examples.BFS_shenEx
-# example = examples.Tri_standard
 
-# example = examples.rectSlider_standard
-example = examples.slider_triTxt_Re1 
+
+# example = examples.rectSlider_Re0_Q2
+example = examples.trapSlider_Re0_Q2
 
 # example = examples.slider_triTxt_Re05
+# example = examples.slider_triTxt_Re1
+
 
 write_mod = 250
 error_mod = 250
@@ -120,7 +122,7 @@ def load_plot(N):
 # Grid domain
     xs = ex.xs
     ys = ex.ys
-    # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
+    graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
 
     # stream_2D = psi.reshape((ex.Ny,ex.Nx))
     u_2D = u.reshape((ex.Ny,ex.Nx))
