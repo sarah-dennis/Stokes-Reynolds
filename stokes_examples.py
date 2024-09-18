@@ -20,29 +20,29 @@ class BFS(PWLinear):
 
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
-class BFS_H2L4_Re1(BFS):
+class BFS_H2L4_Re1_Q2(BFS):
     def __init__(self, N):
         L = 4
         H = 2
         h = 1   
         U = 1
         Re = 1
-        Q = U*h
-        filestr = "stokes_BFS_H%dL%d_Re1_N%d"%(H, L, N)
+        Q = 2*U*h/2
+        filestr = "stokes_BFS_H%dL%d_Re1_Q2_N%d"%(H, L, N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
 
-class BFS_H2L4_Re05(BFS):
+class BFS_H2L4_Re05_Q2(BFS):
     def __init__(self, N):
         L = 4
         H = 2
         h = 1   
         U = 1
         Re = 0.5
-        Q = U*h
+        Q = 2*U*h/2
         filestr = "stokes_BFS_H%dL%d_Re05_N%d"%(H,L,N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
         
-class BFS_H2L4_Re0(BFS):
+class BFS_H2L4_Re0_Q1(BFS):
     def __init__(self, N):
         L = 4
         H = 2
@@ -52,6 +52,54 @@ class BFS_H2L4_Re0(BFS):
         Q = U*h/2 # --> dp/dx = 0 at inlet 
         filestr = "stokes_BFS_H%dL%d_Re0_N%d"%(H,L, N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
+
+class BFS_H2L4_Re0_Q2(BFS):
+    def __init__(self, N):
+        L = 4
+        H = 2
+        h = 1   
+        U = 1
+        Re = 0
+        Q = 2*U*h/2 
+        filestr = "stokes_BFS_H%dL%d_Re0_Q2_N%d"%(H,L, N)
+        super().__init__(L, H, h, U, Q, Re, N, filestr)
+        
+class BFS_H2L4_Re0_Q3(BFS):
+    def __init__(self, N):
+        L = 4
+        H = 2
+        h = 1   
+        U = 1
+        Re = 0
+        Q = 3*U*h/2
+        filestr = "stokes_BFS_H%dL%d_Re0_Q3_N%d"%(H,L, N)
+        super().__init__(L, H, h, U, Q, Re, N, filestr)
+
+# BFS implemented so U>0 from inlet h < outlet H      
+# for inlet H < outlet h set U = -U  
+
+class BFS_shenEx(PWLinear):
+    def __init__ (self, N):
+        L = 100
+        l = 60
+        x0 = 0
+        xf = L
+
+        h = 1
+        H=2
+                
+        y0 = 0
+        yf = H
+        x_peaks = [x0, l, xf]
+        y_peaks=[[yf,0],[0,yf-h],[yf-h,yf]]
+        U=1
+        dens_rho=850 #kg m^3
+        visc_mu=0.188
+        visc_eta=dens_rho/visc_mu
+        Re= U*(h**2)/(visc_eta*L)
+        Q = U*H/2 # --> dp/dx = 0 at inlet 
+        filestr = "stokes_BFS_ShenEx_N%d"%(N)
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 #------------------------------------------------------------------------------
 
 class TriCavity(PWLinear):
@@ -122,13 +170,26 @@ class slider_triTxt_Re1(PWLinear):
         U = 1
         Q = 0 
         Re = 1 
-        x_peaks = [x0, 2, 3, 4, 5, 6, 7, xf]#, 3, 4,5]
+        x_peaks = [x0, 2, 3, 4, 5, 6, 7, xf]
         y_peaks=[[yf,1],[1,1],[0,0],[1,1],[1,1],[0,0],[1,1],[1,yf]]
         filestr = "stokes_slider_triTxt_Re1_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
 
-    
+class slider_triTxt_Re05(PWLinear):
+    def  __init__(self,N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        U = 1
+        Q = 1
+        Re = 0.5 
+        x_peaks = [x0, 1, 2, 3, xf]
+        y_peaks=[[yf,1],[1,1],[0,0],[1,1],[1,yf]]
+        filestr = "stokes_slider_triTxt_Re05_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+  
     
     
     

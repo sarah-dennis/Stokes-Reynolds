@@ -12,9 +12,11 @@ from matplotlib import colors
 from matplotlib import patches
 
 # colour_map_stream = 'viridis' 
-colour_map_stream = 'Spectral_r' 
+# colour_map_stream = 'Spectral_r' 
+colour_map_stream = 'plasma' 
 
-colour_map_mesh = 'Spectral_r'
+colour_map_mesh = 'plasma'
+# colour_map_mesh = 'Spectral_r'
 #------------------------------------------------------------------------------
 def plot_3D(f_2D, xs, zs, title):
             
@@ -154,7 +156,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
         if not isinstance(art, patches.FancyArrowPatch):
             continue
         art.remove()        
-    
+    # ax.set_facecolor('black')
 
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
@@ -318,6 +320,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16,
     
     ax = pp.gca()
     ax.set_aspect('equal')
+    # ax.set_facecolor('dimgrey')
     pp.show()    
 #------------------------------------------------------------------------------   
 

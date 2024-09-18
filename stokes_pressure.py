@@ -20,8 +20,8 @@ def resistance(ex, p):
     j_in = int((ex.yf - ex.H_in/2)/ex.dy)
     j_out =int((ex.yf - ex.H_out/2)/ex.dy)
     
-    dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in+ex.Nx]
-    
+    dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in*ex.Nx+1]
+    print(ex.flux, dp)
     if ex.flux!=0:
         R = dp/ex.flux
         return R
@@ -88,7 +88,7 @@ def pressure(ex, u, v):
                     k_NW = (j+1)*n+i-1
                     p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
                 else:
-                    print(i,j)
+                    print(i,j) #off grid boundary error
             j-=1    
     
     return p
