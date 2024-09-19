@@ -46,7 +46,7 @@ class BFS_H2L4_Re05_Q2(BFS):
         U = 1
         Re = 0.5
         Q = 2*U*h/2
-        filestr = "stokes_BFS_H%dL%d_Re05_N%d"%(H,L,N)
+        filestr = "stokes_BFS_H%dL%d_Re05_Q2_N%d"%(H,L,N)
         super().__init__(L, H, h, U, Q, Re, N, filestr)
 #------------------------------------------------------------------------------
 # BFS Re=0
@@ -125,38 +125,15 @@ class RectSlider_H2L4_Re0_Q2(RectSlider):
         U = 1
         Q = U*h
         Re = 0
-        filestr = "stokes_rectSlider_rect_Re0_N%d"%N
+        filestr = "stokes_slider_rect_Re0_N%d"%N
         super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)   
 
-
-
-
-
-# class TriCavity(PWLinear):
-#     def  __init__(self,L, H, U, Q, Re, N):
-#         x0 = 0
-#         xf = L
-#         y0 = 0
-#         yf = H
-#         x_peaks = [x0, x0 + L/2, xf]
-#         y_peaks = [[yf,yf],[y0,y0],[yf,yf]]
-#         filestr = "stokes_slider_tri_Re1_N%d"%N
-#         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
-        
-        
-        
-# class Tri_standard(TriCavity):
-#     def __init__(self,N):
-#         Re = 1
-#         U = 1
-#         Q = 0
-#         L = 1
-#         H = 2
-#         filestr = "stokes_slider_rectTxt_Re1_N%d"%N
-#         super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)
+#------------------------------------------------------------------------------
+# <<====== Trap slider =======>>
+#------------------------------------------------------------------------------
 
         
-class trapSlider_Re0_Q2(PWLinear):
+class TrapSlider_Re0_Q2(PWLinear):
     def __init__(self, N):
         x0 = 0
         xf = 4
@@ -170,6 +147,37 @@ class trapSlider_Re0_Q2(PWLinear):
         Re = 0
         filestr = "stokes_slider_trap_Re0_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+
+
+class TriSlider_Re0_Q2(PWLinear):
+    def  __init__(self,N):
+        L=4
+        l=1
+        H=2
+        h=1
+        x0 = 0
+        xf = L
+        y0 = 0
+        yf = H
+        Re=0
+        U=1 
+        Q=U*h
+        x_peaks = [x0, x0 + l, x0 + 2*l, x0 +3*l, xf]
+        y_peaks = [[yf,yf-h],[yf-h,yf-h],[y0,y0],[yf-h,yf-h],[yf-h,yf]]
+        filestr = "stokes_slider_tri_Re0_Q2_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+        
+        
+        
+# class Tri_standard(TriCavity):
+#     def __init__(self,N):
+#         Re = 1
+#         U = 1
+#         Q = 0
+#         L = 1
+#         H = 2
+#         filestr = "stokes_slider_rectTxt_Re1_N%d"%N
+#         super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)
 
 # class slider_triTxt_Re1(PWLinear):
 #     def  __init__(self,N):

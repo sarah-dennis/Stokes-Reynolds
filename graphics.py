@@ -311,8 +311,8 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16,
     pp.colorbar(color_plot, label=labels[0])
     
 
-    pp.rcParams["lines.linewidth"] = .5
-    # pp.contour(X, Y, zs, n_contours, colors='black')
+    pp.rcParams["lines.linewidth"] = .25
+    pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
@@ -351,7 +351,6 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     
     # reference lines
     ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
-    # ax.plot(xs,[O1half*x**-np.sqrt(2) for x in xs], label="$\mathcal{O}(%s^{-\sqrt{2}})$"%ax_labels[0], color='grey')
     ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
     
     ax.set_xscale('log')

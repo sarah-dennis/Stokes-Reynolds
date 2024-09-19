@@ -23,16 +23,14 @@ from stokes_solver import run_spLU
 
 # example = examples.BFS_H2L4_Re05_Q2
 
-# example = examples.BFS_H2L4_Re1
+# example = examples.BFS_H2L4_Re1_Q2
 
 
+# example = examples.RectSlider_H2L4_Re0_Q2
 
-# example = examples.rectSlider_Re0_Q2
-example = examples.trapSlider_Re0_Q2
-
-# example = examples.slider_triTxt_Re05
-# example = examples.slider_triTxt_Re1
-
+# example = examples.TrapSlider_Re0_Q2
+    
+example = examples.TriSlider_Re0_Q2
 
 write_mod = 250
 error_mod = 250
@@ -122,7 +120,7 @@ def load_plot(N):
 # Grid domain
     xs = ex.xs
     ys = ex.ys
-    graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
+    # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
 
     # stream_2D = psi.reshape((ex.Ny,ex.Nx))
     u_2D = u.reshape((ex.Ny,ex.Nx))
@@ -133,9 +131,9 @@ def load_plot(N):
 
 # zoom domain for velocity & stream
     x_start = 1
-    x_stop= 1.5
+    x_stop= 2
     y_start = 0
-    y_stop = .5
+    y_stop = 1
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
 # Stream plot:
@@ -165,9 +163,9 @@ def load_plot(N):
     
     
 # zoom domain for vorticity & pressure
-    x_start = 0
-    x_stop= 2
-    y_start = 0
+    x_start = 0.5
+    x_stop= 1.5
+    y_start = 0.5
     y_stop = 2
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -184,27 +182,27 @@ def load_plot(N):
     # graphics.plot_contour_mesh(w_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=False, n_contours=20)
     
   # Pressure plot: 
-    p = translator.pressure(ex, u, v)
-    p_2D = p.reshape((ex.Ny,ex.Nx))
-    r = translator.resistance(ex, p)
-    print('resistance: %.2f'%r)
+    # p = translator.pressure(ex, u, v)
+    # p_2D = p.reshape((ex.Ny,ex.Nx))
+    # r = translator.resistance(ex, p)
+    # print('resistance: %.2f'%r)
     
 
 
-    v_max = np.max(p)
-    v_min = np.min(p)
+    # v_max = np.max(p)
+    # v_min = np.min(p)
 
-    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    # ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    title_p = 'Pressure $p(x,y)$  Re$=%.2f$'%(ex.Re)
+    # title_p = 'Pressure $p(x,y)$  Re$=%.2f$'%(ex.Re)
 
-    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+    # p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
 
-    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
+    # graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
 
-    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20)#, vmax=v_max, vmin=v_min)
+    # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20)#, vmax=v_max, vmin=v_min)
 
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
