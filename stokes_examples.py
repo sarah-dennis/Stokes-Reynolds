@@ -127,6 +127,19 @@ class RectSlider_H2L4_Re0_Q2(RectSlider):
         Re = 0
         filestr = "stokes_slider_rect_Re0_N%d"%N
         super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)   
+        
+class RectSlider_H2L4_Re05_Q2(RectSlider):
+    def __init__(self, N):
+        L = 4
+        l1 = 2
+        l2 = 2
+        H = 2
+        h = 1
+        U = 1
+        Q = U*h
+        Re = 0.5
+        filestr = "stokes_slider_rect_Re0_N%d"%N
+        super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)   
 
 #------------------------------------------------------------------------------
 # <<====== Trap slider =======>>
