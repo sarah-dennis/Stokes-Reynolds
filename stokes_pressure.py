@@ -155,15 +155,3 @@ def fishfun(ex, u, v):
             py[k] = vxx_k + vyy_k
             
     return px, py
-
-
-
-
-
-
-
-
-
-
-
-

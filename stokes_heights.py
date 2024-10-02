@@ -30,6 +30,9 @@ class PWLinear(Space):
         self.H_in = yf - y_peaks[0][1]
         self.H_out = yf - y_peaks[-1][0]
         
+        self.p_in = 0
+        self.p_out = 0 
+        
         if self.H_in == 0 and self.H_out == 0:
             self.dp_in = 0
             self.dp_out = 0 
@@ -171,8 +174,10 @@ class PWLinear(Space):
         y_nbr = self.ys[t]
         y_bdry = self.hs[i][0]
         
-        v_nbr = + v_bdry + (v_ij-v_bdry) * (y_nbr-y_bdry)/(y_ij-y_bdry) 
-        # print('s',self.xs[i],y_bdry,v_nbr,v_ij)
+        l1 = (y_nbr-y_bdry)
+        l2= -(y_ij-y_bdry) 
+        v_nbr = v_bdry + (v_ij-v_bdry) * l1/l2
+
         return v_nbr
 
     def interp_E_W(self, i,j, s,t, v_ij, v_bdry=0):
@@ -188,7 +193,10 @@ class PWLinear(Space):
 
         y_bdry = self.ys[j]
         x_bdry = x_ij + (x_nbr-x_ij) * (y_bdry-h_ij)/(h_nbr-h_ij)
-        v_nbr = v_bdry +(v_ij-v_bdry) * (x_ij-x_bdry)/(x_nbr-x_bdry)
+        l1 = (x_nbr-x_bdry)
+        l2= -(x_ij-x_bdry)
+        v_nbr = v_bdry +(v_ij-v_bdry) * l1/l2
+
         return v_nbr
 
     def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0): 
@@ -212,6 +220,7 @@ class PWLinear(Space):
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
         v_nbr = v_bdry + (v_ij-v_bdry)*l1/l2
         # print('nesw',x_bdry,y_bdry,v_nbr,v_ij)
+
         return v_nbr
 
     

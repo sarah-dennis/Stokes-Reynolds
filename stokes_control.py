@@ -28,13 +28,14 @@ from stokes_solver import run_spLU
 
 # example = examples.RectSlider_H2L4_Re0_Q2
 
-# example = examples.TrapSlider_Re0_Q2
+example = examples.TrapSlider_Re0_Q2
     
-example = examples.TriSlider_Re0_Q2
+# example = examples.TriSlider_Re0_Q2
 
-write_mod = 250
-error_mod = 250
+write_mod = 500
+error_mod = 500
 err_tol = 1e-8
+
 #------------------------------------------------------------------------------
 def new_run(N, iters):
     ex = example(N)
@@ -98,9 +99,9 @@ def load_scale(N_load, N_scale):
 
     points_scale = np.meshgrid(ex_scale.ys, ex_scale.xs)
     
-    u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale), method='cubic')
-    v_scaled_2D = interpn(points_load, v_load_2D, tuple(points_scale), method='cubic')
-    psi_scaled_2D = interpn(points_load, psi_load_2D, tuple(points_scale), method='cubic')
+    u_scaled_2D = interpn(points_load, u_load_2D, tuple(points_scale))
+    v_scaled_2D = interpn(points_load, v_load_2D, tuple(points_scale))
+    psi_scaled_2D = interpn(points_load, psi_load_2D, tuple(points_scale))
 
     u_scaled = u_scaled_2D.ravel(order='F')
     v_scaled = v_scaled_2D.ravel(order='F')
