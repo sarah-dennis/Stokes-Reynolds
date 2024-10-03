@@ -28,9 +28,12 @@ from stokes_solver import run_spLU
 
 # example = examples.RectSlider_H2L4_Re0_Q2
 
-example = examples.TrapSlider_Re0_Q2
+# example = examples.TrapSlider_Re0_Q2
+example = examples.HexSlider_Re05_Q2
     
 # example = examples.TriSlider_Re0_Q2
+
+# example = None #assigned in control_run
 
 write_mod = 500
 error_mod = 500

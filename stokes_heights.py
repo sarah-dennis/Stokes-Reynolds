@@ -22,7 +22,7 @@ class PWLinear(Space):
             
         # peaks must fall on the grid
         self.make_space()
-        self.spacestr = "Textured Slider $Re=%.4f$"%Re  
+        self.spacestr = "Textured Slider $Re=%.2f$"%Re  
                             
         # constants BCs on velocity, stream, flux 
         self.hf_in = y_peaks[0][1] # hf < h0 measured from y0

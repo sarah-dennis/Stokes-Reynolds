@@ -142,10 +142,8 @@ class RectSlider_H2L4_Re05_Q2(RectSlider):
         super().__init__(L, l1, l2, H, h, U, Q, Re, N, filestr)   
 
 #------------------------------------------------------------------------------
-# <<====== Trap slider =======>>
+# <<====== Trapezoid slider =======>>
 #------------------------------------------------------------------------------
-
-        
 class TrapSlider_Re0_Q2(PWLinear):
     def __init__(self, N):
         x0 = 0
@@ -160,8 +158,25 @@ class TrapSlider_Re0_Q2(PWLinear):
         Re = 0
         filestr = "stokes_slider_trap_Re0_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
+        
+class HexSlider_Re05_Q2(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf=2
+        x_peaks=[x0,1,2,3,xf]
+        y_peaks = [[yf,1],[1,0.5],[0,0],[0.5,1],[1,yf]]
+        h = 1
+        U = 1
+        Q = U*h
+        Re = 0.5
+        filestr = "stokes_slider_hex_Re05_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks)
 
-
+#------------------------------------------------------------------------------
+# <<====== Triangle slider =======>>
+#------------------------------------------------------------------------------
 class TriSlider_Re0_Q2(PWLinear):
     def  __init__(self,N):
         L=4
