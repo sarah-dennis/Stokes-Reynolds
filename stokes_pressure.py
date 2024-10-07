@@ -6,7 +6,7 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 
-#TODO: bcs??
+#TODO: bcs....more fish
 def vorticity(ex, u_2D, v_2D):
     uy_2D = np.gradient(u_2D, ex.dy, axis=0)
     vx_2D = np.gradient(v_2D, ex.dx, axis=1)
@@ -16,17 +16,19 @@ def vorticity(ex, u_2D, v_2D):
             w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
     return w_2D
 
+
 def resistance(ex, p):
     j_in = int((ex.yf - ex.H_in/2)/ex.dy)
     j_out =int((ex.yf - ex.H_out/2)/ex.dy)
     
     dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in*ex.Nx+1]
-    print(ex.flux, dp)
+
     if ex.flux!=0:
-        R = dp/ex.flux
-        return R
+        r= dp/ex.flux
+        return dp, r
     else:
-        return dp
+        return dp, 0
+
 
 def pressure(ex, u, v):
     px, py = fishfun(ex, u, v)
@@ -37,22 +39,24 @@ def pressure(ex, u, v):
     shape = n*m
     p = np.zeros(shape)
 
-    # set the ambient pressure at first interior pint (i=0
-    p[(m-2)*n] = ex.p_ambient    
-    
-    # contour the first interior row using px
-    for i in range(1,n):
+    # set the ambient pressure at outlet 
+    p[(m-2)*n + n-1] = ex.p_ambient    
+    # contour the first interior row (backwards) using px
+    i=n-2
+    while i >= 0:
         k =   (m-2)*n + i
-        k_W = (m-2)*n + i-1
-        p[k] = p[k_W]+ px[k]*dx
+        k_E = (m-2)*n + i+1
+        p[k] = p[k_E]-px[k]*dx
+        i-=1
      
     # set the top boundary using dy from interior row
-    p[(m-1)*n] = ex.p_ambient
-    for i in range(1,n):
+    # p[(m-1)*n-1] = ex.p_ambient
+    i = n-1
+    while i >=0:
         k   = (m-1)*n + i
         k_S = (m-2)*n + i
         p[k] = p[k_S] + py[k_S]*dy
-    
+        i-=1
 
     for i in range(n):
         j=m-3
@@ -135,7 +139,6 @@ def fishfun(ex, u, v):
             vxx_k = (v_E -2*v_k + v_W)/ex.dx**2
 
 
-            
             # uyy & vyy <--| N:j+1 & S:j-1
 
             u_N = u[(j+1)*n + i]                    

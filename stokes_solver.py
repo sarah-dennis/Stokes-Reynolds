@@ -14,7 +14,7 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
     t0 = time.time() 
     M = Dpsi_cscmatrixBuild(ex)
     LU = splu(M)
-    
+    max_err = 1
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
      
@@ -41,7 +41,7 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
             rw.write_solution(ex, u, v, psi, k+1+past_iters)
             
         old_psi = psi
-
+        
     return u, v, psi
 
 class DPsi_Mat():
@@ -125,7 +125,7 @@ def update_rhs(ex, u, v, psi): #
             rhs[k] = ex.streamInlet(j)
         
         elif i == n-1 and space[j,i] == 0: # outlet
-            rhs[k] = ex.streamOutlet(j)
+            rhs[k] = psi[j*n + i-1] #ex.streamOutlet(j)
             
         elif space[j,i] != 1:
             rhs[k] = 0
@@ -230,7 +230,7 @@ def uv_approx(ex, u, v, psi):
                 v[k] = 0 
                 
         elif i == n-1: #outlet
-                u[k] = ex.velOutlet(j)
+                u[k] = u[j*n+i-1]#ex.velOutlet(j)
                 v[k] = 0 
                     
         # other boundaries & exterior
@@ -253,7 +253,7 @@ def uv_approx(ex, u, v, psi):
             # East (i+1, j)
             if i+1 == n-1 and ex.space[j,i+1] == 0:
                 v_E = 0 
-                psi_E = ex.streamOutlet(j)
+                psi_E = psi[k] #ex.streamOutlet(j)
             elif ex.space[j,i+1] == 0:
                 v_E = 0
                 psi_E = 0

@@ -60,9 +60,10 @@ def compare_Ns(ex, N_min, Ns, N_max):
     l1_rate = convg_rate(err_l1)
     l2_rate = convg_rate(err_l2)
     inf_rate = convg_rate(err_inf)
-    print(f"{np.array2string(l1_rate, precision=2)}")
-    print(f"{np.array2string(l2_rate, precision=2)}")
-    print(f"{np.array2string(inf_rate, precision=2)}")
+    print("cnvg rates")
+    print("l1: " + f"{np.array2string(l1_rate, precision=2)}")
+    print("l2: " +f"{np.array2string(l2_rate, precision=2)}")
+    print("linf: " +f"{np.array2string(inf_rate, precision=2)}")
 
     return err_l1, err_l2, err_inf
         

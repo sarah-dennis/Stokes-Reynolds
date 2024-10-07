@@ -13,8 +13,8 @@ class PWLinear(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
     # peak_ys = [(yf,h_in),...,(hi_left, hi_right),...,(h_out,yf)]
     
-    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr, x_peaks, y_peaks):
+        super().__init__(x0, xf, y0, yf, N, U, flux, Re, p0, filestr)
 
         self.x_peaks = x_peaks
         self.y_peaks = y_peaks
@@ -27,23 +27,22 @@ class PWLinear(Space):
         # constants BCs on velocity, stream, flux 
         self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
         self.hf_out = y_peaks[-1][0]
-        self.H_in = yf - y_peaks[0][1]
-        self.H_out = yf - y_peaks[-1][0]
         
-        self.p_in = 0
-        self.p_out = 0 
+        self.H_in = yf - self.hf_in
+        self.H_out = yf - self.hf_out
         
-        if self.H_in == 0 and self.H_out == 0:
+        if self.H_in == 0: #and self.H_out == 0: # closed cavity Q=0
             self.dp_in = 0
-            self.dp_out = 0 
+            # self.dp_out = 0 
         else:
-            self.dp_in =  (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
-            self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
+            self.dp_in = (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
+
+            # self.dp_out = (self.flux - 0.5*self.U*self.H_out) * (-12 / self.H_out**3)
     
     # 0 : boundary, -1: exterior, 1: interior
     def make_space(self):
 
-        slopes = np.zeros(self.N_regions) #TODO: try to get rid 
+        slopes = np.zeros(self.N_regions)
 
         for k in range(self.N_regions):
             dh = self.y_peaks[k+1][0] - self.y_peaks[k][1]
@@ -134,15 +133,15 @@ class PWLinear(Space):
         else:
             return 0
     
-    def streamOutlet(self, j):
-        y = self.y0 + j*self.dy
-        if y >= self.y_peaks[-1][0]:
-            y = self.y0 + j*self.dy
-            u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_out*(y-self.yf))/self.H_out
-            dp_term = -0.5*self.dp_out*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_out)*(y**2-self.yf**2) - self.yf*self.hf_out*(y-self.yf))
-            return u_term + dp_term + self.flux
-        else:
-            return 0
+    # def streamOutlet(self, j):
+    #     y = self.y0 + j*self.dy
+    #     if y >= self.y_peaks[-1][0]:
+    #         y = self.y0 + j*self.dy
+    #         u_term = self.U* (0.5*(y**2 - self.yf**2) - self.hf_out*(y-self.yf))/self.H_out
+    #         dp_term = -0.5*self.dp_out*( (-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_out)*(y**2-self.yf**2) - self.yf*self.hf_out*(y-self.yf))
+    #         return u_term + dp_term + self.flux
+    #     else:
+    #         return 0
         
     
     def velInlet(self,j):
@@ -155,14 +154,14 @@ class PWLinear(Space):
         else: 
             return 0
         
-    def velOutlet(self,j):
-        y = self.y0 + j*self.dy
-        if y >= self.y_peaks[-1][0]:
+    # def velOutlet(self,j):
+    #     y = self.y0 + j*self.dy
+    #     if y >= self.y_peaks[-1][0]:
 
-            u = (self.U/self.H_out - 0.5*self.dp_out*(self.yf-y)) * (y-self.hf_out) 
-            return u
-        else: 
-            return 0
+    #         u = (self.U/self.H_out - 0.5*self.dp_out*(self.yf-y)) * (y-self.hf_out) 
+    #         return u
+    #     else: 
+    #         return 0
 #------------------------------------------------------------------------------
 # Boundary interpolation
 #------------------------------------------------------------------------------
@@ -248,10 +247,33 @@ class PWLinear(Space):
         # print('nwse',x_bdry,y_bdry,v_nbr,v_ij)
         return v_nbr
 
+#------------------------------------------------------------------------------
+    def get_flux(self, delta_p):
+        int_h_sqr,int_h_cube = self.integrate_h_flux()
+        flux = ((-1/12)*delta_p - (1/2)*self.U*int_h_sqr )/int_h_cube
+        return flux
+    
+    def integrate_h_flux(self):
+        int_h_sqr = 0
+        int_h_cube = 0
+        for i in range(self.Nx-1):
+            
+            hi = self.hs[i][1]
+            hj = self.hs[i+1][0]
+            dh = hj - hi
+            
+            a = self.yf - 2*hi + hj
+            b = self.yf - hi
+            if dh == 0:
+                int_h_cube += self.dx/b**3
+                int_h_sqr += self.dx/b**2
+            else:
+                int_h_cube += -0.5*self.dx/dh * (1/a**2 - 1/b**2) 
+                int_h_sqr += -self.dx/dh *(1/a - 1/b) 
+        return int_h_sqr, int_h_cube
 
 
-
-
+      
 
 
 

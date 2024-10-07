@@ -25,13 +25,11 @@ from stokes_solver import run_spLU
 
 # example = examples.BFS_H2L4_Re1_Q2
 
-
 # example = examples.RectSlider_H2L4_Re0_Q2
 
-# example = examples.TrapSlider_Re0_Q2
 example = examples.HexSlider_Re05_Q2
-    
-# example = examples.TriSlider_Re0_Q2
+
+# example = examples.TriSlider_Re0_Q1
 
 # example = None #assigned in control_run
 
@@ -67,7 +65,7 @@ def load_run_new_many(N_0, dN, many):
     max_iters = 10000
     N_load = N_0
     load_run(N_load, max_iters)
-    for k in range (1, many): 
+    for k in range (many): 
         N = N_load*dN
         load_scale(N_load, N)
         load_run(N, max_iters)
@@ -87,6 +85,7 @@ def load_run(N, iters):
     u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, error_mod, write_mod, err_tol)
     
     rw.write_solution(ex, u, v, psi, iters+past_iters)
+    
 
 def load_scale(N_load, N_scale):
     ex_load = example(N_load)
@@ -175,38 +174,40 @@ def load_plot(N):
 
 
 #  Vorticity plot: 
-#     w = translator.vorticity(ex, u_2D, v_2D)
-
-#     ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-#     title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
-#     w_ma = np.ma.masked_where(ex.space==-1, w)
-#     graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20)
-# # 
+    
+    # w = translator.vorticity(ex, u_2D, v_2D)
+    # ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
+    # title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+   
+    # w_ma = np.ma.masked_where(ex.space==-1, w)
+    # graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20)
+ 
     # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
     # graphics.plot_contour_mesh(w_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=False, n_contours=20)
     
   # Pressure plot: 
-    # p = translator.pressure(ex, u, v)
-    # p_2D = p.reshape((ex.Ny,ex.Nx))
-    # r = translator.resistance(ex, p)
-    # print('resistance: %.2f'%r)
-    
+    p = translator.pressure(ex, u, v)
+    p_2D = p.reshape((ex.Ny,ex.Nx))
+    dp_stokes, r_stokes = translator.resistance(ex, p)
+    print('flux: %.2f'%ex.flux)
+    print('pressure drop stokes: %.2f'%dp_stokes)
+    print('resistance stokes: %.2f'%r_stokes)
 
 
-    # v_max = np.max(p)
-    # v_min = np.min(p)
+    v_max = np.max(p)
+    v_min = np.min(p)
 
-    # ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    # title_p = 'Pressure $p(x,y)$  Re$=%.2f$'%(ex.Re)
+    title_p = 'Pressure $p(x,y)$  Re$=%.2f$'%(ex.Re)
 
-    # p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
 
 
-    # graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
+    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
 
-    # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20)#, vmax=v_max, vmin=v_min)
+    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20)#, vmax=v_max, vmin=v_min)
 
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):

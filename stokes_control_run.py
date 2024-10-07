@@ -10,4 +10,4 @@ import stokes_control
 import stokes_examples as examples
 
 stokes_control.example = examples.HexSlider_Re05_Q2
-stokes_control.new_run_many(10,2,6)
+stokes_control.load_run_new_many(160, 2, 2)
