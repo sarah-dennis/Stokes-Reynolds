@@ -21,10 +21,19 @@ class BFS(PWLinear):
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
 #------------------------------------------------------------------------------
-# BFS Re=1
-#------------------------------------------------------------------------------
+        
+class BFS_H2L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        H = 2
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        filestr = "./examples/stokes_BFS_H%dL%d_Re1_Q2_U0_N%d"%(H, L, N)
+        super().__init__(L, H, h, U, q, Re, N, filestr)
 
-class BFS_H2L4_Re1_Q2(BFS):
+class BFS_H2L4_Re1_Q2_U1(BFS):
     def __init__(self, N):
         L = 4
         H = 2
@@ -32,12 +41,22 @@ class BFS_H2L4_Re1_Q2(BFS):
         U = 1
         Re = 1
         q = 2
-        filestr = "stokes_BFS_H%dL%d_Re1_Q2_N%d"%(H, L, N)
+        filestr = "./examples/stokes_BFS_H%dL%d_Re1_Q2_U1_N%d"%(H, L, N)
         super().__init__(L, H, h, U, q, Re, N, filestr)
-#------------------------------------------------------------------------------
-# BFS Re=1/2
-#------------------------------------------------------------------------------
-class BFS_H2L4_Re05_Q2(BFS):
+        
+        
+class BFS_H2L4_Re05_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        H = 2
+        h = 1   
+        U = 0
+        Re = 0.5
+        q = 2
+        filestr = "./examples/stokes_BFS_H%dL%d_Re05_Q2_U0_N%d"%(H, L, N)
+        super().__init__(L, H, h, U, q, Re, N, filestr)
+
+class BFS_H2L4_Re05_Q2_U1(BFS):
     def __init__(self, N):
         L = 4
         H = 2
@@ -45,23 +64,22 @@ class BFS_H2L4_Re05_Q2(BFS):
         U = 1
         Re = 0.5
         q = 2
-        filestr = "./examples/stokes_BFS_H%dL%d_Re05_Q2_N%d"%(H,L,N)
+        
+        filestr = "./examples/stokes_BFS_H%dL%d_Re05_Q2_U1_N%d"%(H,L,N)
         super().__init__(L, H, h, U, q, Re, N, filestr)
-#------------------------------------------------------------------------------
-# BFS Re=0
-#------------------------------------------------------------------------------       
-class BFS_H2L4_Re0_Q1(BFS):
+        
+class BFS_H2L4_Re0_Q2_U0(BFS):
     def __init__(self, N):
         L = 4
         H = 2
         h = 1   
-        U = 1
+        U = 0
         Re = 0
-        q = 1 
-        filestr = "./examples/stokes_BFS_H%dL%d_Re0_Q1_N%d"%(H,L, N)
+        q = 2
+        filestr = "./examples/stokes_BFS_H%dL%d_Re0_Q2_U0_N%d"%(H, L, N)
         super().__init__(L, H, h, U, q, Re, N, filestr)
-
-class BFS_H2L4_Re0_Q2(BFS):
+         
+class BFS_H2L4_Re0_Q2_U1(BFS):
     def __init__(self, N):
         L = 4
         H = 2
@@ -69,13 +87,13 @@ class BFS_H2L4_Re0_Q2(BFS):
         U = 1
         Re = 0
         q = 2
-        filestr = "stokes_BFS_H%dL%d_Re0_Q2_N%d"%(H,L, N)
+        filestr = "./examples/stokes_BFS_H%dL%d_Re0_Q2_U1_N%d"%(H,L, N)
         super().__init__(L, H, h, U, q, Re, N, filestr)
         
 
         
 #------------------------------------------------------------------------------
-# <<====== Rect slider =======>>
+# <<====== Rectangular textured slider =======>>
 #------------------------------------------------------------------------------
 
 class RectSlider(PWLinear): 
@@ -106,7 +124,7 @@ class RectSlider(PWLinear):
 
 
         
-class RectSlider_H2L4_Re0_Q2(RectSlider):
+class RectSlider_H2L4_Re0_Q2_U1(RectSlider):
     def __init__(self, N):
         L = 4
         l1 = 2
@@ -116,10 +134,10 @@ class RectSlider_H2L4_Re0_Q2(RectSlider):
         U = 1
         q = 2
         Re = 0
-        filestr = "stokes_slider_rect_Re0_N%d"%N
+        filestr = "stokes_slider_rect_Re0_U1_N%d"%N
         super().__init__(L, l1, l2, H, h, U, q, Re, N, filestr)   
         
-class RectSlider_H2L4_Re05_Q2(RectSlider):
+class RectSlider_H2L4_Re05_Q2_U1(RectSlider):
     def __init__(self, N):
         L = 4
         l1 = 2
@@ -129,14 +147,14 @@ class RectSlider_H2L4_Re05_Q2(RectSlider):
         U = 1
         q = 2
         Re = 0.5
-        filestr = "stokes_slider_rect_Re0_N%d"%N
+        filestr = "stokes_slider_rect_Re0_U1_N%d"%N
         super().__init__(L, l1, l2, H, h, U, q, Re, N, filestr)   
 
 #------------------------------------------------------------------------------
-# <<====== Trapezoid slider =======>>
+# <<====== Hexagon textured slider =======>>
 #------------------------------------------------------------------------------
 
-class HexSlider_Re05_Q2(PWLinear):
+class HexSlider_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
         x0 = 0
         xf = 4
@@ -146,16 +164,46 @@ class HexSlider_Re05_Q2(PWLinear):
         y_peaks = [[yf,1],[1,0.5],[0,0],[0.5,1],[1,yf]]
         U = 0
         q = 2
-        p0 = 10
-        Re = 0.5
-        filestr = "./examples/stokes_slider_hex_Re05_Q2_N%d"%N
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
-      
+        p_amb = 0
+        Re = 0
+        filestr = "./examples/stokes_HexSlider_Re0_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
 
+
+class HexSlider_Re05_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        x_peaks = [x0,1,2,3,xf]
+        y_peaks = [[yf,1],[1,0.5],[0,0],[0.5,1],[1,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 0.5
+        filestr = "./examples/stokes_HexSlider_Re05_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
+        
+class HexSlider_Re1_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        x_peaks = [x0,1,2,3,xf]
+        y_peaks = [[yf,1],[1,0.5],[0,0],[0.5,1],[1,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 1
+        filestr = "./examples/stokes_HexSlider_Re1_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
+     
 #------------------------------------------------------------------------------
 # <<====== Triangle slider =======>>
 #------------------------------------------------------------------------------
-class TriSlider_Re05_Q1(PWLinear):
+class TriSlider_Re05_Q1_U05(PWLinear):
     def  __init__(self,N):
         L=4
         l=1
@@ -171,11 +219,27 @@ class TriSlider_Re05_Q1(PWLinear):
         p0=0
         x_peaks = [x0, x0 + l, x0 + 2*l, x0 +3*l, xf]
         y_peaks = [[yf,yf-h],[yf-h,yf-h],[y0,y0],[yf-h,yf-h],[yf-h,yf]]
-        filestr = "stokes_slider_tri_Re0_Q2_N%d"%N
+        filestr = "stokes_TriSlider_Re0_Q1_U05_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
         
+#------------------------------------------------------------------------------
+# <<====== Smoothed BFS =======>>
+#------------------------------------------------------------------------------
+class BFS_smooth_Re0_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        x_peaks = [x0,1,1.5,xf]
+        y_peaks = [[yf,1],[1,0.5],[0,0],[0,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 0
+        filestr = "./examples/stokes_BFS_smooth_Re0_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
         
-    
     
     
     

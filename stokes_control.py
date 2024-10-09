@@ -17,24 +17,25 @@ import stokes_examples as examples
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
-# example = examples.BFS_H2L4_Re0_Q1
-# example = examples.BFS_H2L4_Re0_Q2
-# example = examples.BFS_H2L4_Re0_Q3
 
-# example = examples.BFS_H2L4_Re05_Q2
+example = examples.BFS_H2L4_Re0_Q2_U0
+# example = examples.BFS_H2L4_Re0_Q2_U1
 
-# example = examples.BFS_H2L4_Re1_Q2
+# example = examples.BFS_H2L4_Re05_Q2_U0
+# example = examples.BFS_H2L4_Re05_Q2_U1
 
-# example = examples.RectSlider_H2L4_Re0_Q2
+# example = examples.BFS_smooth_Re0_Q2_U0
 
-example = examples.HexSlider_Re05_Q2
-
-# example = examples.TriSlider_Re0_Q1
+# example = examples.HexSlider_Re0_Q2_U0
+# example = examples.HexSlider_Re05_Q2_U0
+# example = examples.HexSlider_Re1_Q2_U0
 
 # example = None #assigned in control_run
 
-write_mod = 500
-error_mod = 500
+
+max_iters = 50000
+write_mod = 200
+error_mod = 200
 err_tol = 1e-8
 
 #------------------------------------------------------------------------------
@@ -51,7 +52,7 @@ def new_run(N, iters):
     rw.write_solution(ex, u, v, psi, iters)
     
 def new_run_many(N_0, dN, many):
-    max_iters = 10000
+    
     new_run(N_0,max_iters)
     N_load = N_0
     for k in range (1, many): 
@@ -62,7 +63,6 @@ def new_run_many(N_0, dN, many):
 
     
 def load_run_new_many(N_0, dN, many):
-    max_iters = 10000
     N_load = N_0
     load_run(N_load, max_iters)
     for k in range (many): 
@@ -72,7 +72,6 @@ def load_run_new_many(N_0, dN, many):
         N_load = N
 
 def load_run_many(N_0, dN, many):
-    max_iters = 50000
     N = N_0
     for k in range (many): 
         load_run(N, max_iters)
@@ -153,7 +152,7 @@ def load_plot(N):
 #  Velocity plot: 
 
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity $(u,v)$  Re$=%.2f$)'%(ex.Re)
+    title = 'Velocity $(u,v)$ \n' + ex.spacestr
     ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
     u_2D_ma = np.ma.masked_where(ex.space==-1,u_2D)
     v_2D_ma = np.ma.masked_where(ex.space==-1,v_2D)
@@ -166,10 +165,10 @@ def load_plot(N):
     
     
 # zoom domain for vorticity & pressure
-    x_start = 0.5
-    x_stop= 1.5
-    y_start = 0.5
-    y_stop = 2
+    x_start = 0.9
+    x_stop= 1.1
+    y_start = 0.9
+    y_stop = 1.1
     xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
 
@@ -177,7 +176,7 @@ def load_plot(N):
     
     # w = translator.vorticity(ex, u_2D, v_2D)
     # ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    # title = 'Vorticity ($N=%d$, Re$=%.3f$)'%(ex.N, ex.Re)
+    # title = 'Vorticity $\omega$ \n' + ex.spacestr
    
     # w_ma = np.ma.masked_where(ex.space==-1, w)
     # graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20)
@@ -188,10 +187,11 @@ def load_plot(N):
   # Pressure plot: 
     p = translator.pressure(ex, u, v)
     p_2D = p.reshape((ex.Ny,ex.Nx))
-    dp_stokes, r_stokes = translator.resistance(ex, p)
+    dp_stokes, r_stokes = translator.resistance(ex, p) 
     print('flux: %.2f'%ex.flux)
-    print('pressure drop stokes: %.2f'%dp_stokes)
-    print('resistance stokes: %.2f'%r_stokes)
+    print('pressure drop: %.2f'%dp_stokes)
+    print('pressure range: [%.2f, %.2f]'%(np.min(p),np.max(p)))
+    # print('reyn flux for dP: %.2f'%ex.get_flux(dp_stokes))
 
 
     v_max = np.max(p)
@@ -199,10 +199,9 @@ def load_plot(N):
 
     ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
 
-    title_p = 'Pressure $p(x,y)$  Re$=%.2f$'%(ex.Re)
+    title_p = 'Pressure $p(x,y)$ \n' + ex.spacestr
 
     p_ma = np.ma.masked_where(ex.space==-1, p_2D)
-
 
     graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
 

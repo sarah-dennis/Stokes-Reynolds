@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=guest
 #SBATCH --partition=guest-compute
-#SBATCH --job-name=hex-tri-test
+#SBATCH --job-name=hex-Re0-Re1
 #SBATCH --output=_log_%j.txt
 #SBATCH --ntasks=1
 

@@ -147,7 +147,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     else:
-        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=True)
+        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=False)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
@@ -164,37 +164,6 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
 
     ax.set_aspect('equal')
     ax.set_ylim(0,max(ys)) #min max ys
-    pp.show()
-
-def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
-    
-    pp.rcParams['figure.dpi'] = 800
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    
-    # m = len(ys)/len(xs)
-    h_max = max(ys)
-    # stream_density_unbroken=[1,.6*m] 
-    
-    
-    pp.streamplot(xs, ys, vx, vy, linewidth=0.5, color='k', broken_streamlines=False)
-    
-    ax = pp.gca()
-    # for art in ax.get_children():
-    #     if not isinstance(art, patches.FancyArrowPatch):
-    #         continue
-    #     art.remove()        
-    
-    pp.plot(xs, hs, linewidth=0.5, color='k', label='$h(x)$')
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-
-    ax.set_aspect(xs[-1]/ys[-1])
-    ax.set_ylim(0,1.1*h_max)
-    # pp.legend(loc='upper left')
     pp.show()
 
 #------------------------------------------------------------------------------

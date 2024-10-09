@@ -6,7 +6,7 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 
-#TODO: bcs....more fish
+#TODO: bcs... (although w is just plotted)
 def vorticity(ex, u_2D, v_2D):
     uy_2D = np.gradient(u_2D, ex.dy, axis=0)
     vx_2D = np.gradient(v_2D, ex.dx, axis=1)

@@ -121,18 +121,17 @@ def update_rhs(ex, u, v, psi): #
         if j == m-1:
             rhs[k] = ex.flux
             
-        elif i == 0 and space[j,i] == 0: # inlet
+        elif i == 0 and space[j,i] == 0: # inlet=: psi(y,x0) ~ Q
             rhs[k] = ex.streamInlet(j)
         
-        elif i == n-1 and space[j,i] == 0: # outlet
-            rhs[k] = psi[j*n + i-1] #ex.streamOutlet(j)
+        elif i == n-1 and space[j,i] == 0: # outlet: dx{psi(y,x)} = 0
+            rhs[k] = psi[j*n + i-1]   
             
         elif space[j,i] != 1:
             rhs[k] = 0
         
         else: # interior
             # (u,v) at 9 point stencil
-
             u_k = u[k]
             v_k = v[k]
 
@@ -225,15 +224,15 @@ def uv_approx(ex, u, v, psi):
             u[k] = U
             v[k] = 0 
             
-        elif i == 0: #inlet
-                u[k] = ex.velInlet(j)
-                v[k] = 0 
+        elif i == 0: #inlet: u(x,y) ~ Q,U
+            u[k] = ex.velInlet(j)
+            v[k] = 0 
                 
-        elif i == n-1: #outlet
-                u[k] = u[j*n+i-1]#ex.velOutlet(j)
-                v[k] = 0 
+        elif i == n-1: #outlet: dx{u(dx)} = 0
+            u[k] = u[j*n+i-1]
+            v[k] = 0 
                     
-        # other boundaries & exterior
+        # y=h(x) fixed boundary & exterior
         elif (ex.space[j,i] != 1):
             u[k] = 0
             v[k] = 0 
@@ -253,7 +252,7 @@ def uv_approx(ex, u, v, psi):
             # East (i+1, j)
             if i+1 == n-1 and ex.space[j,i+1] == 0:
                 v_E = 0 
-                psi_E = psi[k] #ex.streamOutlet(j)
+                psi_E = psi[k] # outlet
             elif ex.space[j,i+1] == 0:
                 v_E = 0
                 psi_E = 0
