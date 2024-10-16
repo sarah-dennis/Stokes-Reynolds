@@ -41,7 +41,6 @@ class PWLinear(Space):
             dh = self.y_peaks[k+1][0] - self.y_peaks[k][1]
             dx = self.x_peaks[k+1] - self.x_peaks[k]
             slopes[k] = dh/dx
-    
         hs = np.zeros((self.Nx,2))
         
         grid = np.zeros((self.Ny, self.Nx))
@@ -49,7 +48,7 @@ class PWLinear(Space):
         reg = 0        
         i_ref = 0
         for i in range(self.Nx):
-            if self.xs[i] == self.x_peaks[reg]:
+            if math.isclose(self.xs[i],self.x_peaks[reg]):
                 h_left = self.y_peaks[reg][0]
                 h_right = self.y_peaks[reg][1] 
                 i_ref = i
@@ -58,7 +57,6 @@ class PWLinear(Space):
             else:
                 h = slopes[reg-1]*(i - i_ref)*self.dx + self.y_peaks[reg-1][1]
                 hs[i] = [h,h]
-            
             for j in range(self.Ny):
                 y = self.ys[j]
                 if j == self.Ny-1: #upper boundary
@@ -97,7 +95,9 @@ class PWLinear(Space):
                             grid[j,i] = -1
 
                 else:
-                    if math.isclose(y, h): # ~true boundary point ( rational slope*dx)
+                    # if math.isclose(y, h): # ~true boundary point
+                    #     grid[j,i] = 0
+                    if y + self.dy/2 > h and y - self.dy/2 < h:
                         grid[j,i] = 0
                     elif y > h:
                         grid[j,i] = 1

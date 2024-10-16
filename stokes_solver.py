@@ -17,7 +17,6 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
     max_err = 1
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
-     
     for k in range(iters): 
         t_ki = time.time()
         
@@ -62,6 +61,7 @@ class DPsi_Mat():
 def Dpsi_cscmatrixBuild(ex):
     m = ex.Ny
     n = ex.Nx
+
     space = ex.space
     mat = DPsi_Mat(m, n)
 
@@ -69,8 +69,6 @@ def Dpsi_cscmatrixBuild(ex):
     
         i = k % n
         j = k // n
-        
-        # k = j*n + i 
             
         # exterior -> identity row = 0
         # boundary -> identiy row = b.c.

@@ -93,6 +93,23 @@ class BFS(PWL_PWA):
         pN = 0
         super().__init__(height, p0, pN)
 
+class BFS_smooth(PWL_PWA):
+    def __init__(self, U, dP, H, L, xL, yL):
+        N = 500
+
+        x0 = 0
+        xf = L
+        x_reattatch=1 +xL
+        y_reattatch=H -yL
+        N_regions = 3
+        x_peaks = np.asarray([x0, 1, x_reattatch, xf],float)
+        h_peaks = np.asarray([[1,1],[1,y_reattatch],[y_reattatch,H],[H,H]],float)
+        height = heights.PiecewiseLinearHeight(x0, xf, N, N_regions, x_peaks, h_peaks,U)
+
+        p0 = -dP
+        pN = 0
+        super().__init__(height, p0, pN)
+
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 class HexSlider(PWL_PWA):

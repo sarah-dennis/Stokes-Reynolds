@@ -11,32 +11,33 @@ from scipy.interpolate import interpn
 import graphics
 import stokes_readwrite as rw
 import stokes_convergence as cnvg
-import stokes_pressure as translator
+import stokes_pressure as pressure
 import stokes_examples as examples
 
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
 
-example = examples.BFS_H2L4_Re0_Q2_U0
+# example = examples.BFS_H2L4_Re0_Q2_U0
 # example = examples.BFS_H2L4_Re0_Q2_U1
 
 # example = examples.BFS_H2L4_Re05_Q2_U0
 # example = examples.BFS_H2L4_Re05_Q2_U1
-
-# example = examples.BFS_smooth_Re0_Q2_U0
+# example = examples.BFS_noStep_Re0_Q2_U0
+# example = examples.BFS_noEddy_Re0_Q2_U0
+# example = examples.BFS_twostep02_Re0_Q2_U0
 
 # example = examples.HexSlider_Re0_Q2_U0
 # example = examples.HexSlider_Re05_Q2_U0
 # example = examples.HexSlider_Re1_Q2_U0
 
-# example = None #assigned in control_run
+example = None #assigned in control_run
 
 
 max_iters = 50000
-write_mod = 200
-error_mod = 200
-err_tol = 1e-8
+write_mod = 100
+error_mod = 100
+err_tol = 1e-9
 
 #------------------------------------------------------------------------------
 def new_run(N, iters):
@@ -122,38 +123,56 @@ def load_plot(N):
 # Grid domain
     xs = ex.xs
     ys = ex.ys
-    # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'])
+    # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
 
-    # stream_2D = psi.reshape((ex.Ny,ex.Nx))
+
+
+
+# zoom domain for vorticity & pressure
+    x_start = 0.9
+    x_stop= 1.1
+    y_start = 0.9
+    y_stop = 1.1
+    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+
+# Pressure plot: 
+    p = pressure.pressure(ex, u, v)
+    p_2D = p.reshape((ex.Ny,ex.Nx))
+    dp, res = pressure.resistance(ex, p) 
+    dp_str = ', $\Delta P =%.2f$'%dp
+
+    p_max = np.max(p)
+    p_min = np.min(p)
+
+    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+    title_p = 'Pressure $p(x,y)$ \n' + ex.spacestr + dp_str
+
+    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
+
+    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=p_max, vmin=p_min)
+
+    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
+
+# zoom domain for velocity & stream
+    x_start = 1
+    x_stop= 1.5
+    y_start = 0
+    y_stop = 0.5
+    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+
+#  Velocity plot: 
+
+    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
+    title = 'Velocity $(u,v)$ \n' + ex.spacestr + dp_str
+    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
+    
     u_2D = u.reshape((ex.Ny,ex.Nx))
     v_2D = v.reshape((ex.Ny,ex.Nx))
 
     uv_mag = np.sqrt(u_2D**2 + v_2D**2)
     uv_mag_max = np.max(uv_mag)
-
-# zoom domain for velocity & stream
-    x_start = 1
-    x_stop= 2
-    y_start = 0
-    y_stop = 1
-    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
-
-# Stream plot:
-
-    # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
-    # title = 'Stream $\psi(x,y)$  Re$=%.3f$)'%(ex.Re)
     
-    # stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
-    # graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=True, n_contours=20, vmin=None, vmax=ex.flux)
-
-    # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
-    
-#  Velocity plot: 
-
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-    title = 'Velocity $(u,v)$ \n' + ex.spacestr
-    ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
     u_2D_ma = np.ma.masked_where(ex.space==-1,u_2D)
     v_2D_ma = np.ma.masked_where(ex.space==-1,v_2D)
     graphics.plot_stream_heat(u_2D_ma, v_2D_ma, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
@@ -162,52 +181,18 @@ def load_plot(N):
     v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
     uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
     graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
+
+# Stream plot:
+
+    # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+    # title = 'Stream $\psi(x,y)$ \n' + ex.spacestr + dp_str
+    # stream_2D = psi.reshape((ex.Ny,ex.Nx))
+    # stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
+    # graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=True, n_contours=20, vmin=None, vmax=ex.flux)
+
+    # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+    # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
     
-    
-# zoom domain for vorticity & pressure
-    x_start = 0.9
-    x_stop= 1.1
-    y_start = 0.9
-    y_stop = 1.1
-    xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
-
-
-#  Vorticity plot: 
-    
-    # w = translator.vorticity(ex, u_2D, v_2D)
-    # ax_labels = ['$\omega(x,y) = -( \psi_{xx} + \psi_{yy})$', '$x$', '$y$']
-    # title = 'Vorticity $\omega$ \n' + ex.spacestr
-   
-    # w_ma = np.ma.masked_where(ex.space==-1, w)
-    # graphics.plot_contour_mesh(w_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20)
- 
-    # w_zoom = grid_zoom_2D(w_ma, ex, x_start, x_stop, y_start, y_stop)     
-    # graphics.plot_contour_mesh(w_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=False, n_contours=20)
-    
-  # Pressure plot: 
-    p = translator.pressure(ex, u, v)
-    p_2D = p.reshape((ex.Ny,ex.Nx))
-    dp_stokes, r_stokes = translator.resistance(ex, p) 
-    print('flux: %.2f'%ex.flux)
-    print('pressure drop: %.2f'%dp_stokes)
-    print('pressure range: [%.2f, %.2f]'%(np.min(p),np.max(p)))
-    # print('reyn flux for dP: %.2f'%ex.get_flux(dp_stokes))
-
-
-    v_max = np.max(p)
-    v_min = np.min(p)
-
-    ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
-
-    title_p = 'Pressure $p(x,y)$ \n' + ex.spacestr
-
-    p_ma = np.ma.masked_where(ex.space==-1, p_2D)
-
-    graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=v_max, vmin=v_min)
-
-    p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-    graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20)#, vmax=v_max, vmin=v_min)
-
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)

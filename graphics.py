@@ -164,6 +164,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
 
     ax.set_aspect('equal')
     ax.set_ylim(0,max(ys)) #min max ys
+    pp.minorticks_on()
     pp.show()
 
 #------------------------------------------------------------------------------

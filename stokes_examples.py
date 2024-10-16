@@ -225,23 +225,57 @@ class TriSlider_Re05_Q1_U05(PWLinear):
 #------------------------------------------------------------------------------
 # <<====== Smoothed BFS =======>>
 #------------------------------------------------------------------------------
-class BFS_smooth_Re0_Q2_U0(PWLinear):
+
+class BFS_noEddy_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
         x0 = 0
         xf = 4
         y0 = 0
         yf = 2
-        x_peaks = [x0,1,1.5,xf]
-        y_peaks = [[yf,1],[1,0.5],[0,0],[0,yf]]
+        y_detatch = 0.4
+        x_detatch = 1.35
+        x_peaks = [x0,1,x_detatch,xf]
+        y_peaks = [[yf,1],[1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
         p0 = 0
         Re = 0
-        filestr = "./examples/stokes_BFS_smooth_Re0_Q2_U0_N%d"%N
+        filestr = "./examples/stokes_BFS_noEddy_Re0_Q2_U0_N%d"%N
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
         
-    
-    
+class BFS_noStep_Re0_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        y_detatch = 1
+        x_detatch = 2
+        x_peaks = [x0,1,x_detatch,xf]
+        y_peaks = [[yf,1],[1,y_detatch],[0,0],[0,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 0
+        filestr = "./examples/stokes_BFS_noStep_Re0_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
+
+class BFS_twostep02_Re0_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2
+        xL = 0.2
+        yL = 0.2
+        x_peaks = [x0,1,1+xL,xf]
+        y_peaks = [[yf,1],[1,yL],[yL,0],[0,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 0
+        filestr = "./examples/stokes_BFS_twostep02_Re0_Q2_U0_N%d"%N
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)   
     
     
     

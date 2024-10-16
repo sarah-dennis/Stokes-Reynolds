@@ -8,13 +8,14 @@ import reyn_examples as exs
 import numpy as np
 
 # -- solver called on initialization: self.ps = *.solve()
-U=1
-dP=-30.16
+U=0
+dP=-42.98
 
-example = exs.BFS(U,dP,H=2,L=4)
+# example = exs.BFS(U,dP,H=2,L=4)
+example = exs.BFS_smooth(U,dP,H=2,L=4, xL=0.35, yL=0.4)
 # example = exs.HexSlider(U, dP)
 
-fd_solution = exs.Discrete_FinDiff(example) # use hs from another example
+# fd_solution = exs.Discrete_FinDiff(example) # use hs from another example
 #------------------------------------------------------------------------------
 # plotting 
 #------------------------------------------------------------------------------
@@ -27,8 +28,8 @@ example.plot_v()
 # Error
 #------------------------------------------------------------------------------
 
-infNorm_err = np.max(np.abs(example.ps - fd_solution.ps))
-print("Analytic to Numerical Error: %.8f"%infNorm_err)
+# infNorm_err = np.max(np.abs(example.ps - fd_solution.ps))
+# print("Analytic to Numerical Error: %.8f"%infNorm_err)
 
 #------------------------------------------------------------------------------
 # CSV writing
