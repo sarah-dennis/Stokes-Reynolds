@@ -17,6 +17,7 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
     max_err = 1
     t_k0 = time.time()
     print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
+
     for k in range(iters): 
         t_ki = time.time()
         
@@ -34,8 +35,9 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
             print(" k=%d max error: %.4e psi"%(k, max_err))
             print(" k=%d time: %.2f s"%(k, t_kj-t_ki))
             if max_err < err_tol:
-                # rw.write_solution(ex, u, v, psi, k+1+past_iters)
                 break
+            elif k + 2*error_mod > iters:
+                iters += 10*error_mod
         if k % write_mod == 0:
             rw.write_solution(ex, u, v, psi, k+1+past_iters)
             

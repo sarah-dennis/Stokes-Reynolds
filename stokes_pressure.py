@@ -92,7 +92,7 @@ def pressure(ex, u, v):
                     k_NW = (j+1)*n+i-1
                     p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
                 else:
-                    print(i,j) #off grid boundary error
+                    None # print(i,j) #off grid boundary error
             j-=1    
     
     return p

@@ -12,3 +12,4 @@ class Reynolds_Solver:
         self.pN = pN
         self.solve = solveFun # solveFun(): height -> ps
         self.filestr = p_str
+

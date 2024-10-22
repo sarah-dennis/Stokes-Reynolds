@@ -20,11 +20,11 @@ def read_solution(filename, nm):
             u[i] = float(ui)
             v[i] = float(vi)
             psi[i] = float(psii)
-        past_iters = int(next(reader)[0])
+        err = int(next(reader)[0])
         file.close()
-    return u, v, psi, past_iters
+    return u, v, psi, err
 
-def write_solution(tri, u, v, psi, iters):
+def write_solution(tri, u, v, psi, err):
     nm = tri.Nx * tri.Ny
     filename = tri.filestr + ".csv"
     with open(filename, 'w', newline='') as file:
@@ -32,6 +32,6 @@ def write_solution(tri, u, v, psi, iters):
         for i in range(nm):
             writer.writerow([u[i], v[i], psi[i]])
         
-        writer.writerow([iters])
+        writer.writerow([err])
         print("  saved N=%d"%tri.N)
         file.close()    

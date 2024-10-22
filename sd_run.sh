@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=guest
 #SBATCH --partition=guest-compute
-#SBATCH --job-name=hex-Re05-N640
+#SBATCH --job-name=hex-Re05
 #SBATCH --ntasks=1
 #SBATCH --output=_log_%j.txt
 

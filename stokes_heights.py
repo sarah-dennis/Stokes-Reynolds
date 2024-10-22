@@ -15,7 +15,6 @@ class PWLinear(Space):
     
     def __init__(self, x0, xf, y0, yf, N, U, Q, Re, p_amb, filestr, x_peaks, y_peaks):
         super().__init__(x0, xf, y0, yf, N, U, Q, Re, p_amb, filestr)
-
         # peaks must fall on the grid
         self.x_peaks = x_peaks
         self.y_peaks = y_peaks
@@ -48,7 +47,7 @@ class PWLinear(Space):
         reg = 0        
         i_ref = 0
         for i in range(self.Nx):
-            if math.isclose(self.xs[i],self.x_peaks[reg]):
+            if math.isclose(self.xs[i], self.x_peaks[reg]):
                 h_left = self.y_peaks[reg][0]
                 h_right = self.y_peaks[reg][1] 
                 i_ref = i
@@ -95,9 +94,8 @@ class PWLinear(Space):
                             grid[j,i] = -1
 
                 else:
-                    # if math.isclose(y, h): # ~true boundary point
-                    #     grid[j,i] = 0
-                    if y + self.dy/2 > h and y - self.dy/2 < h:
+                    #TODO
+                    if math.isclose(y, h): 
                         grid[j,i] = 0
                     elif y > h:
                         grid[j,i] = 1
@@ -146,7 +144,7 @@ class PWLinear(Space):
         l1 = (y_nbr-y_bdry)
         l2 = -(y_ij-y_bdry) 
         
-        v_nbr = v_bdry + (v_ij-v_bdry) * l1/l2
+        v_nbr = v_bdry + (v_ij-v_bdry) * (l1/l2)
         return v_nbr
 
     def interp_E_W(self, i,j, s,t, v_ij, v_bdry=0):
@@ -165,7 +163,7 @@ class PWLinear(Space):
         l1 = (x_nbr-x_bdry)
         l2 = -(x_ij-x_bdry)
         
-        v_nbr = v_bdry +(v_ij-v_bdry) * l1/l2
+        v_nbr = v_bdry +(v_ij-v_bdry) * (l1/l2)
         return v_nbr
 
     def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0): 
@@ -183,11 +181,12 @@ class PWLinear(Space):
         slope = (h_nbr-h_ij)/(x_nbr-x_ij)
         x_bdry = (y_ij-h_ij)/(slope-1) + x_ij
         y_bdry = (x_bdry-x_ij) + y_ij
-        
+
         l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
         
-        v_nbr = v_bdry + (v_ij-v_bdry)*l1/l2
+        v_nbr = v_bdry + (v_ij-v_bdry)* (l1/l2)
+        
         return v_nbr
 
     
@@ -202,7 +201,7 @@ class PWLinear(Space):
             h_nbr = self.hs[s][0]
         else: #west
             h_nbr = self.hs[s][1]
-            
+
         slope = (h_nbr-h_ij)/(x_nbr-x_ij)
         x_bdry = (y_ij-h_ij)/(slope+1) + x_ij
         y_bdry = -(x_bdry-x_ij) + y_ij
@@ -210,7 +209,7 @@ class PWLinear(Space):
         l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
 
-        v_nbr = v_bdry + (v_ij-v_bdry)*l1/l2
+        v_nbr = v_bdry + (v_ij-v_bdry)*(l1/l2)
         return v_nbr
 
 #------------------------------------------------------------------------------
