@@ -74,36 +74,33 @@ class PWLinear(Space):
                         grid[j,i] = -1
                 
                 elif i == i_ref: # pwl region change              
-                    if y == h_left or y == h_right: # true boundary point
+                    if math.isclose(y, h_left) or math.isclose(y, h_right): # true boundary point at region change
                         grid[j,i] = 0
                         
                     elif h_left < h_right:
-                        if h_left < y and y < h_right: # x=h(y) boundary
+                        if h_left < y and y < h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
-                        elif y > h_right:
+                        elif y > h_right: # above vert boundary (interior)
                             grid[j,i] = 1
-                        else:
+                        else:             # below vert boundary(exterior)
                             grid[j,i] = -1
                 
                     else:
-                        if h_left > y and y > h_right: # x=h(y) boundary
+                        if h_left > y and y > h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
-                        elif y > h_left:
-                            grid[j,i]=1
-                        else:
+                        elif y > h_left: # above vert boundary (interior)
+                            grid[j,i] = 1
+                        else:              # below vert boundary (exterior)
                             grid[j,i] = -1
 
                 else:
-                    #TODO
-                    if math.isclose(y, h): 
+                    if math.isclose(y, h): # true boundary point not at region change (from dx | slope)
                         grid[j,i] = 0
-                    elif y > h:
+                    elif y > h:            # above boundary (interior)
                         grid[j,i] = 1
-                    else:
+                    else:                   # below boundary (exterior)
                         grid[j,i] = -1
         
-        
-        # graphics.plot_contour_mesh(grid, self.xs, self.ys, 'space',['space', 'x', 'y'])
         self.space = grid
         self.slopes = slopes
         self.hs = hs
