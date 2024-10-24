@@ -8,23 +8,6 @@ Created on Tue Jul 30 15:17:44 2024
 import numpy as np
         
 from scipy.sparse.linalg import LinearOperator 
-from scipy.sparse.linalg import gmres
-
-
-from reyn_solver import Reynolds_Solver
-
-
-class Solver(Reynolds_Solver):   
-    def __init__(self, height, p0, pN):
-        p_str = "Reynolds Piecewise Analytic"
-        self.rhs = make_rhs(height, p0, pN)
-        self.linOp = pwlLinOp(height)
-        super().__init__(height, p0, pN, self.solve, p_str)
-    
-    def solve(self, tol=1e-12):
-        cs, exit_code = gmres(self.linOp, self.rhs, tol=tol)
-        ps, q = make_ps(self.height, cs)
-        return ps, q
     
 
 def make_ps(height, cs):
@@ -38,7 +21,6 @@ def make_ps(height, cs):
     
     cq = cs[-1]
     flux = cq/(-12*height.visc)
-    print('flux: %.3f'%flux)
     cu = 6 * height.visc * height.U
     
     for i in range(height.Nx):
@@ -57,8 +39,10 @@ def make_ps(height, cs):
     return ps, flux
 
 
-def make_rhs(height, p0, pN):
+def make_rhs(height):
     N = height.N_regions
+    p0 = height.p0
+    pN = height.pN
     hs = height.h_peaks
     slopes = height.slopes
     widths = height.widths

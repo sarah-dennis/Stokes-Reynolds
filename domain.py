@@ -31,7 +31,7 @@ class Domain:
 # Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, U, Re, h_str):
+    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, h_str):
         super().__init__(x0, xf, y0, yf, N) # -> {dx, dy, xs, ys}
         
         self.hs = hs
@@ -45,10 +45,11 @@ class Height(Domain):
         self.h_min = min(self.hs)
         
         self.U = U   # flat boundary velocity
-
+        self.dP = dP
         self.visc = 1 # dynamic viscosity 
-
-        self.Re = Re # Re = U h / L
+        self.p0 = 0 
+        self.pN = -dP
+        self.Re = 0
  
 # Domain for Stokes solver
 class Space(Domain):
@@ -59,7 +60,7 @@ class Space(Domain):
         self.visc = 1 # dynamic viscosity 
         self.p_ambient = p0   
         self.flux=flux
-        self.Re = Re # Re = U h / L
+        self.Re = Re #
         
 
 #------------------------------------------------------------------------------

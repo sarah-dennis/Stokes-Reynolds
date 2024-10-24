@@ -61,53 +61,96 @@ class BFS_H2L4_Re0_Q2_U0(BFS):
 # <<====== Smoothed BFS =======>>
 #------------------------------------------------------------------------------
 class BFS_deltaSmooth(PWLinear):
-    def __init__ (self, L, H, h, delta, U, q, Re, N, filestr):
+    def __init__ (self, L, l,H, h, delta, U, q, Re, N, filestr):
         p_amb = 0
         x0 = 0
         xf = L
         y0 = 0
         yf = H
         
-        x_peaks = [x0, 1-delta, 1, 1+delta, xf]
+        x_peaks = [x0, l-delta, l, l+delta, xf]
         y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-3*h/2,yf-3*h/2],[0,0],[0,yf]]
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
 
-
-class BFS_smoothd05(BFS_deltaSmooth):
+class BFS_delta0p75(BFS_deltaSmooth):
     def __init__ (self, N):
         L=4
+        l=2
+        H= 2 
+        h=1 
+        delta=0.75
+        U=0
+        q=2
+        Re=0
+        filestr="./examples/stokes_BFS_delta0p75_Re0_Q2_U0_N%d"%N
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
+
+class BFS_delta1p5(BFS_deltaSmooth):
+    def __init__ (self, N):
+        L=4
+        l=2
+        H= 2 
+        h=1 
+        delta=1.5
+        U=0
+        q=2
+        Re=0
+        filestr="./examples/stokes_BFS_delta1p0_Re0_Q2_U0_N%d"%N
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
+
+class BFS_delta1p0(BFS_deltaSmooth):
+    def __init__ (self, N):
+        L=4
+        l=2
+        H= 2 
+        h=1 
+        delta=1
+        U=0
+        q=2
+        Re=0
+        filestr="./examples/stokes_BFS_delta1p5_Re0_Q2_U0_N%d"%N
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
+class BFS_delta0p5(BFS_deltaSmooth):
+    def __init__ (self, N):
+        L=4
+        l=2
         H= 2 
         h=1 
         delta=0.5
         U=0
         q=2 
         Re=0
-        filestr="./examples/stokes_BFS_smoothd05_Re0_Q2_U0_N%d"%N
-        super().__init__(L, H, h, delta, U, q, Re, N, filestr)
+        filestr="./examples/stokes_BFS_delta0p5_Re0_Q2_U0_N%d"%N
+        super().__init__(L,l, H, h, delta, U, q, Re, N, filestr)
 
-class BFS_smoothd025(BFS_deltaSmooth):
+class BFS_delta0p25(BFS_deltaSmooth):
     def __init__ (self, N):
         L=4
+        l=2
         H= 2 
         h=1 
         delta=0.25
         U=0
         q=2 
         Re=0
-        filestr="./examples/stokes_BFS_smoothd025_Re0_Q2_U0_N%d"%N
-        super().__init__(L, H, h, delta, U, q, Re, N, filestr)
+        filestr="./examples/stokes_BFS_delta0p25_Re0_Q2_U0_N%d"%N
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
-class BFS_smoothd0125(BFS_deltaSmooth):
+class BFS_smoothd02(BFS_deltaSmooth):
     def __init__ (self, N):
         L=4
+        l=2
         H=2 
         h=1 
-        delta=0.125
+        delta=0.8
         U=0
         q=2 
         Re=0
-        filestr="./examples/stokes_BFS_smoothd0125_Re0_Q2_U0_N%d"%N
-        super().__init__(L, H, h, delta, U, q, Re, N, filestr)
+        filestr="./examples/stokes_BFS_smoothd02_Re0_Q2_U0_N%d"%N
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
 
 

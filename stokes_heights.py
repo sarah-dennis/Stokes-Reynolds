@@ -56,6 +56,7 @@ class PWLinear(Space):
             else:
                 h = slopes[reg-1]*(i - i_ref)*self.dx + self.y_peaks[reg-1][1]
                 hs[i] = [h,h]
+                
             for j in range(self.Ny):
                 y = self.ys[j]
                 if j == self.Ny-1: #upper boundary
@@ -94,9 +95,12 @@ class PWLinear(Space):
                             grid[j,i] = -1
 
                 else:
-                    if math.isclose(y, h): # true boundary point not at region change (from dx | slope)
+                    if math.isclose(y,h): # true boundary point not at region change (from dx | slope)
                         grid[j,i] = 0
                     elif y > h:            # above boundary (interior)
+                        # if grid[j-1,i] == -1:
+                        #     grid[j,i] = 0
+    
                         grid[j,i] = 1
                     else:                   # below boundary (exterior)
                         grid[j,i] = -1
@@ -130,24 +134,31 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
 # Boundary interpolation
 #------------------------------------------------------------------------------
- 
+
 # x_ij interior node
 # x_st exterior nbr node 
     def interp_S(self, i,j, s,t, v_ij, v_bdry=0):
+        if np.isclose(v_ij,v_bdry):
+            return v_bdry
+        
         y_ij = self.ys[j]
         y_nbr = self.ys[t]
-        y_bdry = self.hs[i][0]
+        y_bdry = self.hs[i][0] #arbitrary (South lookup not at x-peaks)
         
         l1 = (y_nbr-y_bdry)
-        l2 = -(y_ij-y_bdry) 
-        
-        v_nbr = v_bdry + (v_ij-v_bdry) * (l1/l2)
+        # TODO: previously l2 = -(y_ij-y_bdry) 
+        l2 = (y_ij-y_bdry) 
+        v_nbr = v_bdry + (v_ij-v_bdry) * (l1/l2)        
+        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
+        #     print('S: i:%d,j%d'%(i,j))
         return v_nbr
 
     def interp_E_W(self, i,j, s,t, v_ij, v_bdry=0):
+        if np.isclose(v_ij,v_bdry):
+            return v_bdry
+        
         x_ij = self.xs[i]
         h_ij = self.hs[i][0]
-    
         x_nbr = self.xs[s]
         if s == i + 1: #east
             h_nbr = self.hs[s][0]
@@ -158,18 +169,23 @@ class PWLinear(Space):
         x_bdry = x_ij + (x_nbr-x_ij) * (y_bdry-h_ij)/(h_nbr-h_ij)
         
         l1 = (x_nbr-x_bdry)
-        l2 = -(x_ij-x_bdry)
-        
+        l2 = (x_ij-x_bdry)
+        # TODO: previously l2 = -(x_ij-x_bdry)
         v_nbr = v_bdry +(v_ij-v_bdry) * (l1/l2)
+        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
+        #     print('E-W: i:%d,j%d'%(i,j))
         return v_nbr
 
     def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0): 
+        if np.isclose(v_ij,v_bdry):
+            return v_bdry
         x_ij = self.xs[i]
         y_ij = self.ys[j]
         h_ij = self.hs[i][0]
         
         x_nbr = self.xs[s]
         y_nbr = self.ys[t]
+
         if s == i + 1: #east
             h_nbr = self.hs[s][0]
         else: #west
@@ -178,16 +194,19 @@ class PWLinear(Space):
         slope = (h_nbr-h_ij)/(x_nbr-x_ij)
         x_bdry = (y_ij-h_ij)/(slope-1) + x_ij
         y_bdry = (x_bdry-x_ij) + y_ij
-
         l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
         
         v_nbr = v_bdry + (v_ij-v_bdry)* (l1/l2)
-        
+        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
+        #     print('NE-SW: i:%d,j%d'%(i,j))
         return v_nbr
 
     
     def interp_NW_SE(self, i,j, s,t, v_ij, v_bdry=0): 
+        if np.isclose(v_ij,v_bdry):
+            return v_bdry
+        
         x_ij = self.xs[i]
         y_ij = self.ys[j]
         h_ij = self.hs[i][0]
@@ -207,6 +226,8 @@ class PWLinear(Space):
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
 
         v_nbr = v_bdry + (v_ij-v_bdry)*(l1/l2)
+        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
+        #     print('NW-SE: i:%d,j%d'%(i,j))
         return v_nbr
 
 #------------------------------------------------------------------------------

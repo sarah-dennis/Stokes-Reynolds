@@ -158,7 +158,7 @@ def update_rhs(ex, u, v, psi): #
             # West (i-1, j)          
             k_W = j*n + i - 1    
             if ex.space[j,i-1] == -1: #W:
-                dpsi_bc += 8 * ex.interp_E_W(i,j, i-1,j, psi_k)
+                dpsi_bc += -8 * ex.interp_E_W(i,j, i-1,j, psi_k)
                 u_W = ex.interp_E_W(i,j, i-1,j, u_k)
                 v_W = ex.interp_E_W(i,j, i-1,j, v_k)
             else:
@@ -169,7 +169,7 @@ def update_rhs(ex, u, v, psi): #
             # South (i, j-1)
             k_S = (j-1)*n + i     
             if ex.space[j-1,i] == -1: #S:
-                dpsi_bc += 8 * ex.interp_S(i,j, i,j-1, psi_k)
+                dpsi_bc += -8 * ex.interp_S(i,j, i,j-1, psi_k)
                 u_S = ex.interp_S(i,j, i,j-1, u_k)
                 v_S = ex.interp_S(i,j, i,j-1, v_k)
 
@@ -177,17 +177,17 @@ def update_rhs(ex, u, v, psi): #
                 u_S = u[k_S]
                 v_S = v[k_S]
 
-            if ex.space[j+1,i+1] == -1: #NE:
-                dpsi_bc += -1 * ex.interp_NE_SW(i,j, i+1,j+1, psi_k)
+            if ex.space[j+1,i+1] == -1 : #NE:
+                dpsi_bc += ex.interp_NE_SW(i,j, i+1,j+1, psi_k)
 
             if ex.space[j+1,i-1] == -1: #NW:
-                dpsi_bc += -1 * ex.interp_NW_SE(i,j, i-1,j+1, psi_k)
+                dpsi_bc += ex.interp_NW_SE(i,j, i-1,j+1, psi_k)
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
-                dpsi_bc += -1 * ex.interp_NW_SE(i,j, i+1,j-1, psi_k)
+                dpsi_bc += ex.interp_NW_SE(i,j, i+1,j-1, psi_k)
 
             if ex.space[j-1,i-1] == -1: #SW:
-                dpsi_bc += -1 * ex.interp_NE_SW(i,j, i-1,j-1, psi_k)
+                dpsi_bc += ex.interp_NE_SW(i,j, i-1,j-1, psi_k)
 
                 
             A = u_S - u_N + v_E - v_W
@@ -195,7 +195,7 @@ def update_rhs(ex, u, v, psi): #
             B = v_k * (u_E + u_W + u_N + u_S)
             C = u_k * (v_E + v_W + v_N + v_S)
 
-            rhs[k] = c0 * A + c1 * (B - C) +  dpsi_bc
+            rhs[k] = c0 * A + c1 * (B - C) + dpsi_bc
                    
     return rhs
  

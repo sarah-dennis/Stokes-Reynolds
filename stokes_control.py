@@ -20,8 +20,8 @@ class Stokes_Solver:
     def __init__(self, example, max_iters=50000):
         self.example = example
         self.max_iters = max_iters
-        self.write_mod = 200
-        self.error_mod = 200
+        self.write_mod = 100
+        self.error_mod = 100
         self.err_tol = 1e-8
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
@@ -124,9 +124,7 @@ class Stokes_Solver:
         ys = ex.ys
         graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
     
-    
-    
-    
+
     # zoom domain for vorticity & pressure
         x_start = 0.9
         x_stop= 1.1
@@ -150,8 +148,8 @@ class Stokes_Solver:
     
         graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=p_max, vmin=p_min)
     
-        p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-        graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
+        # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+        # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
     
     # zoom domain for velocity & stream
         x_start = 1
@@ -176,10 +174,10 @@ class Stokes_Solver:
         v_2D_ma = np.ma.masked_where(ex.space==-1,v_2D)
         graphics.plot_stream_heat(u_2D_ma, v_2D_ma, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
         
-        u_2D_zoom = grid_zoom_2D(u_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
-        graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
+        # u_2D_zoom = grid_zoom_2D(u_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+        # v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+        # uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
+        # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
     
     # Stream plot:
     
