@@ -9,14 +9,16 @@ import reyn_control as control
 import reyn_examples as examples
 
 # example = examples.BFS
-example = examples.BFS_deltaSmooth
+Example = examples.BFS_deltaSmooth
 # example = examples.TriSlider
 # example = examples.BFS_noEddy
 # example = examples.HexSlider
 
-U = 2
-dP = -1
-N = 100
-solver = control.Reynolds_Solver(example, U, dP)
-solver.solve_plot(N)
-# solver.cnvg(N,2,6)
+U = 0
+dP = -60
+N = 400
+
+solver = control.Reynolds_Solver(Example, U, dP)
+solver.solve_and_plot(N)
+
+control.convg_pwl_fd(Example, U, dP, N0=10, dN=2, k=5)

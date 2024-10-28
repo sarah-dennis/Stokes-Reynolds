@@ -13,30 +13,26 @@ class BFS(PWL_Height):
     def __init__(self, U, dP, N):
         H=2
         L=4
-        
+        h=1
+        l=2
         x0 = 0
         xf = L
         N_regions = 2
-        x_peaks = np.asarray([x0, 1, xf],float)
-        h_peaks = np.asarray([[1,1],[1,H],[H,H]],float)
-        
-        
-        
+        x_peaks = np.asarray([x0, l, xf],float)
+        h_peaks = np.asarray([[h,h],[h,H],[H,H]],float)
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks,U,dP)
         
 class BFS_deltaSmooth(PWL_Height):
-    def __init__ (self,  U, dP, N):
+    def __init__ (self, U, dP, N):
         x0 = 0
         xf = 4
         l=2
         H=2
         h=1
-        delta = 0.75
+        delta = 0.125
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf],float)
-        
         h_peaks=np.asarray([[h,h],[h,h],[3*h/2,3*h/2],[H,H],[H,H]],float)
-        
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks,U,dP)
 
 class BFS_noEddy(PWL_Height):
@@ -62,11 +58,8 @@ class HexSlider(PWL_Height):
     def __init__(self, U, dP,N):
         x0 = 0
         xf = 4
-
         N_regions = 4
-        
         x_peaks = np.asarray([x0, 1, 2, 3, xf],float)
-        
         h_peaks = np.asarray(([[1,1],[1,1.5],[2,2],[1.5,1],[1,1]]),float)
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks,U,dP)
         
@@ -76,7 +69,6 @@ class TriSlider(PWL_Height):
     def __init__(self, U, dP,N):
         x0 = 0
         xf = 4
-
         N_regions = 4
         
         x_peaks = np.asarray([x0, 1, 2, 3, xf],float)

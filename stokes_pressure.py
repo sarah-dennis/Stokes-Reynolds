@@ -6,17 +6,6 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 
-#TODO: bcs... (although w is just plotted)
-def vorticity(ex, u_2D, v_2D):
-    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
-    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
-    w_2D = np.zeros((ex.Ny,ex.Nx))
-    for j in range(ex.Ny):
-        for i in range(ex.Nx):   
-            w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    return w_2D
-
-
 def resistance(ex, p):
     j_in = int((ex.yf - ex.H_in/2)/ex.dy)
     j_out =int((ex.yf - ex.H_out/2)/ex.dy)
@@ -92,9 +81,9 @@ def pressure(ex, u, v):
                     k_NW = (j+1)*n+i-1
                     p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
                 else:
-                    None # print(i,j) #off grid boundary error
+                    return Exception("Grid misalignment")
+                
             j-=1    
-    
     return p
             
     
@@ -158,3 +147,15 @@ def fishfun(ex, u, v):
             py[k] = vxx_k + vyy_k
             
     return px, py
+
+
+#TODO: bcs... (although w is just plotted)
+def vorticity(ex, u_2D, v_2D):
+    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
+    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
+    w_2D = np.zeros((ex.Ny,ex.Nx))
+    for j in range(ex.Ny):
+        for i in range(ex.Nx):   
+            w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
+    return w_2D
+

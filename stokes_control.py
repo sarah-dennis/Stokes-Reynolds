@@ -17,15 +17,15 @@ import stokes_pressure as pressure
 from stokes_solver import run_spLU
 
 class Stokes_Solver:
-    def __init__(self, example, max_iters=50000):
-        self.example = example
+    def __init__(self, Example, max_iters=50000):
+        self.Example = Example
         self.max_iters = max_iters
-        self.write_mod = 100
-        self.error_mod = 100
+        self.write_mod = 400
+        self.error_mod = 400
         self.err_tol = 1e-8
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
-        ex = self.example(N)
+        ex = self.Example(N)
         
         u_init = np.zeros(ex.Nx * ex.Ny)
         v_init = np.zeros(ex.Nx * ex.Ny)
@@ -63,7 +63,7 @@ class Stokes_Solver:
             N *= dN 
                                                                                                                                                                                                                                                                        
     def load_run(self, N, iters):                                
-        ex = self.example(N)
+        ex = self.Example(N)
         u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
         
         u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
@@ -72,8 +72,8 @@ class Stokes_Solver:
     
 
     def load_scale(self, N_load, N_scale):
-        ex_load = self.example(N_load)
-        ex_scale = self.example(N_scale)
+        ex_load = self.Example(N_load)
+        ex_scale = self.Example(N_scale)
         
         points_load = (ex_load.ys, ex_load.xs)
         
@@ -98,44 +98,48 @@ class Stokes_Solver:
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-    def compare(self, N_min, Ns, N_max):
-        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.compare_Ns(self.example, N_min, Ns, N_max)
+    def compare(self,N_min, Ns, N_max,p_err=False):
+        
+        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.compare_Ns(self.Example, N_min, Ns, N_max,p_err)
         title = "Error in $\psi$ to $N^{*}=%d$ \n %s"%(N_max, ex_min.spacestr)
         ax_labels = ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
-        leg_labels = ['$L^1$', '$L^2$','$L^\infty$', 'res_err']
+        leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
         linthresh = 1e-8
         O1 = 1
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
-        print("cnvg rates")
-        print("l1: " + np.array2string(cnvg_rates[0]))
-        print("l2: " + np.array2string(cnvg_rates[1]))
-        print("linf" + np.array2string(cnvg_rates[2]))
+
     
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
-    def load_plot(self, N):
-        ex = self.example(N)
+    def load_plot(self, N,zoom=False):
+        ex = self.Example(N)
         u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
     
     # Grid domain
         xs = ex.xs
         ys = ex.ys
-        graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
+        
+    # Space plot (xi,yj: boundary/interior/exterior)
+        # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
     
 
     # zoom domain for vorticity & pressure
-        x_start = 0.9
-        x_stop= 1.1
-        y_start = 0.9
-        y_stop = 1.1
-        xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+        if zoom:
+            lenx = 0.5
+            leny = lenx
+            x_start = 1
+            x_stop= x_start + lenx
+            y_start = ex.y0
+            y_stop = y_start + leny
+            xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
     # Pressure plot: 
         p = pressure.pressure(ex, u, v)
-        p_2D = p.reshape((ex.Ny,ex.Nx))
         dp, res = pressure.resistance(ex, p) 
+        
+        p_2D = p.reshape((ex.Ny,ex.Nx))
         dp_str = ', $\Delta P =%.2f$'%dp
     
         p_max = np.max(p)
@@ -148,15 +152,19 @@ class Stokes_Solver:
     
         graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=p_max, vmin=p_min)
     
-        # p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-        # graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
+        if zoom:
+            p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
     
     # zoom domain for velocity & stream
-        x_start = 1
-        x_stop= 1.5
-        y_start = 0
-        y_stop = 0.5
-        xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+        if zoom:
+            lenx = 0.5
+            leny = lenx
+            x_start = 1
+            x_stop= x_start + lenx
+            y_start = 0
+            y_stop = y_start + leny
+            xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
     
     #  Velocity plot: 
     
@@ -174,11 +182,12 @@ class Stokes_Solver:
         v_2D_ma = np.ma.masked_where(ex.space==-1,v_2D)
         graphics.plot_stream_heat(u_2D_ma, v_2D_ma, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
         
-        # u_2D_zoom = grid_zoom_2D(u_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        # v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        # uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
-        # graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
-    
+        if zoom:
+            u_2D_zoom = grid_zoom_2D(u_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+            v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+            uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
+            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
+        
     # Stream plot:
     
         # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
@@ -186,9 +195,9 @@ class Stokes_Solver:
         # stream_2D = psi.reshape((ex.Ny,ex.Nx))
         # stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
         # graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=True, n_contours=20, vmin=None, vmax=ex.flux)
-    
-        # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
+        # if zoom:
+            # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+            # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
     
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
