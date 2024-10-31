@@ -11,7 +11,7 @@ import numpy as np
 
 class Domain:
 
-    def __init__(self, x0, xf, y0, yf, N):
+    def __init__(self, x0, xf, y0, yf, N, filestr):
         self.x0 = x0            # left boundary x = x0
         self.xf = xf            # right boundary x = xf
         self.y0 = y0            # lower surface y = y0 
@@ -20,25 +20,24 @@ class Domain:
         self.N = N  # scale: number of grid points in [0,1]
         self.Nx = int((xf-x0)*N + 1) #total number of x grid points
         self.Ny = int((yf-y0)*N + 1) #total number of y grid points
-
+        
         self.dx = 1/N
         self.dy = 1/N
         
         self.xs = np.linspace(x0, xf, self.Nx)
         self.ys = np.linspace(y0, yf, self.Ny)
-        
+        self.filestr=filestr
 #------------------------------------------------------------------------------
 # Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, h_str):
-        super().__init__(x0, xf, y0, yf, N) # -> {dx, dy, xs, ys}
+    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, filestr):
+        super().__init__(x0, xf, y0, yf, N, filestr) # -> {dx, dy, xs, ys}
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
         self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
-        self.filestr = h_str
         self.h_eq = "h(x)"
 
         self.h_max = max(self.hs)
@@ -53,9 +52,8 @@ class Height(Domain):
  
 # Domain for Stokes solver
 class Space(Domain):
-    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, h_str):
-        super().__init__(x0, xf, y0, yf, N)
-        self.filestr=h_str
+    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr):
+        super().__init__(x0, xf, y0, yf, N, filestr)
         self.U = U   # flat boundary velocity
         self.visc = 1 # dynamic viscosity 
         self.p_ambient = p0   

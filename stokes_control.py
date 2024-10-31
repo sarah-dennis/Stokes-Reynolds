@@ -20,8 +20,8 @@ class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         self.Example = Example
         self.max_iters = max_iters
-        self.write_mod = 400
-        self.error_mod = 400
+        self.write_mod = 500
+        self.error_mod = 500
         self.err_tol = 1e-8
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
@@ -125,13 +125,13 @@ class Stokes_Solver:
         # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
     
 
-    # zoom domain for vorticity & pressure
+    # zoom domain for pressure
         if zoom:
-            lenx = 0.5
+            lenx = 1
             leny = lenx
-            x_start = 1
+            x_start = 0.5
             x_stop= x_start + lenx
-            y_start = ex.y0
+            y_start = 0
             y_stop = y_start + leny
             xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -158,7 +158,7 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.5
+            lenx = 0.25
             leny = lenx
             x_start = 1
             x_stop= x_start + lenx

@@ -98,9 +98,7 @@ class PWLinear(Space):
                     if math.isclose(y,h): # true boundary point not at region change (from dx | slope)
                         grid[j,i] = 0
                     elif y > h:            # above boundary (interior)
-                        # if grid[j-1,i] == -1:
-                        #     grid[j,i] = 0
-    
+
                         grid[j,i] = 1
                     else:                   # below boundary (exterior)
                         grid[j,i] = -1
@@ -143,14 +141,12 @@ class PWLinear(Space):
         
         y_ij = self.ys[j]
         y_nbr = self.ys[t]
-        y_bdry = self.hs[i][0] #arbitrary (South lookup not at x-peaks)
+        y_bdry = self.hs[i][0] #arbitrary -- South lookup not at x-peaks
         
         l1 = (y_nbr-y_bdry)
-        # TODO: previously l2 = -(y_ij-y_bdry) 
         l2 = (y_ij-y_bdry) 
         v_nbr = v_bdry + (v_ij-v_bdry) * (l1/l2)        
-        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
-        #     print('S: i:%d,j%d'%(i,j))
+        assert v_nbr == 0 or np.sign(v_nbr) != np.sign(v_ij), "s"
         return v_nbr
 
     def interp_E_W(self, i,j, s,t, v_ij, v_bdry=0):
@@ -170,10 +166,8 @@ class PWLinear(Space):
         
         l1 = (x_nbr-x_bdry)
         l2 = (x_ij-x_bdry)
-        # TODO: previously l2 = -(x_ij-x_bdry)
-        v_nbr = v_bdry +(v_ij-v_bdry) * (l1/l2)
-        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
-        #     print('E-W: i:%d,j%d'%(i,j))
+        v_nbr = v_bdry + (v_ij-v_bdry) * (l1/l2)
+        assert v_nbr == 0 or np.sign(v_nbr) != np.sign(v_ij), "e-w"
         return v_nbr
 
     def interp_NE_SW(self, i,j, s,t, v_ij, v_bdry=0): 
@@ -198,8 +192,7 @@ class PWLinear(Space):
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
         
         v_nbr = v_bdry + (v_ij-v_bdry)* (l1/l2)
-        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
-        #     print('NE-SW: i:%d,j%d'%(i,j))
+        assert v_nbr == 0 or np.sign(v_nbr) != np.sign(v_ij), "ne-sw"
         return v_nbr
 
     
@@ -226,8 +219,7 @@ class PWLinear(Space):
         l2 = -np.sqrt((x_ij-x_bdry)**2 + (y_ij-y_bdry)**2)
 
         v_nbr = v_bdry + (v_ij-v_bdry)*(l1/l2)
-        # if v_ij!=0 and np.sign(v_nbr) == np.sign(v_ij):
-        #     print('NW-SE: i:%d,j%d'%(i,j))
+        assert v_nbr == 0 or np.sign(v_nbr) != np.sign(v_ij), "nw-se"
         return v_nbr
 
 #------------------------------------------------------------------------------
@@ -255,11 +247,6 @@ class PWLinear(Space):
                 int_h_cube += -0.5*self.dx/dh * (1/a**2 - 1/b**2) 
                 int_h_sqr += -self.dx/dh *(1/a - 1/b) 
         return int_h_sqr, int_h_cube
-
-
-      
-
-
 
 
 

@@ -24,14 +24,13 @@ def read_solution(filename, nm):
         file.close()
     return u, v, psi, err
 
-def write_solution(tri, u, v, psi, err):
-    nm = tri.Nx * tri.Ny
-    filename = tri.filestr + ".csv"
+def write_solution(ex, u, v, psi, err):
+    nm = ex.Nx * ex.Ny
+    filename = ex.filestr + ".csv"
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=' ')
         for i in range(nm):
             writer.writerow([u[i], v[i], psi[i]])
         
         writer.writerow([err])
-        print("  saved N=%d"%tri.N)
         file.close()    

@@ -26,7 +26,9 @@ class Reynolds_Solver:
         ex = self.Example(self.U, self.dP, N)
         rhs = pwl.make_rhs(ex)
         linOp = pwl.pwlLinOp(ex)
-        coefs, exit_code = sp_gmres(linOp, rhs, tol=1e-16)
+        coefs, exit_code = sp_gmres(linOp, rhs, tol=1e-10)
+        if exit_code != 0:
+            print('gmres did not converge')
         ps, flux = pwl.make_ps(ex, coefs)
         vel = Velocity(ex, ps)
         return ps, flux, vel
@@ -40,12 +42,13 @@ class Reynolds_Solver:
     
     def solve_and_plot(self, N):
         pwl_ps, flux, vel = self.pwl_solve(N)
+        # fd_ps = self.fd_solve(N)
         ex = self.Example(self.U, self.dP, N)
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
         p_title = "Pressure $p(x)$: \n" + paramstr
         p_labels = ["$x$", "Pressure $p(x)$"]
         graphics.plot_2D(pwl_ps, ex.xs, p_title, p_labels, color='r')
-        # graphics.plot_2D(fd_ps, ex.xs, "Fin-Diff " + p_title, p_labels, color='r')
+        # graphics.plot_2D(fd_ps, ex.xs, "fin-diff " + p_title, p_labels, color='r')
         
         #y-axis reverse
         vy=np.flip(vel.vy, 0)

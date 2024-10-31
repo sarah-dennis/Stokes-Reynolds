@@ -11,38 +11,34 @@ from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 
 def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol):
+    print("file: %s"%ex.filestr)
     t0 = time.time() 
     M = Dpsi_cscmatrixBuild(ex)
     LU = splu(M)
-    max_err = 1
     t_k0 = time.time()
-    print("N=%d constr. t=%.2f"%(ex.N, t_k0-t0))
-
+    print("N=%d  build-time %.2fs"%(ex.N, t_k0-t0))
+    max_err = 1
     for k in range(iters): 
-        t_ki = time.time()
-        
+
         u, v = uv_approx(ex, u, v, old_psi)
         
         rhs = update_rhs(ex, u, v, old_psi)
     
         psi = LU.solve(rhs)
 
-        t_kj = time.time()
-        
-        if k % error_mod == 0: 
 
+        if k % error_mod == 0: 
             max_err = np.max(np.abs(old_psi - psi))
-            print(" k=%d max error: %.4e psi"%(k, max_err))
-            print(" k=%d time: %.2f s"%(k, t_kj-t_ki))
+            print("    k=%d  error: %.2e"%(k, max_err))
             if max_err < err_tol:
                 break
-            elif k + 2*error_mod > iters:
-                iters += 10*error_mod
+
         if k % write_mod == 0:
             rw.write_solution(ex, u, v, psi, k+1+past_iters)
             
         old_psi = psi
-        
+    t_kf = time.time()
+    print("N=%d  cnvg-error:%.2e   avg-iter-time:%.2fs"%(ex.N, max_err, (t_kf-t_k0)/(k+1)))
     return u, v, psi
 
 class DPsi_Mat():
@@ -79,7 +75,7 @@ def Dpsi_cscmatrixBuild(ex):
             
         # interior 
         # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
-        else: 
+        else: #append(row:k, col:nbr(k), coef)
             mat.append(k, k, 28)
 
             mat.append(k, j*n + i-1, -8)
@@ -148,7 +144,7 @@ def update_rhs(ex, u, v, psi): #
             # East (i+1, j)                
             k_E = j*n + i + 1
             if ex.space[j,i+1] == -1: #E:
-                dpsi_bc += 8 * ex.interp_E_W(i,j, i+1,j, psi_k)
+                dpsi_bc += -8 * ex.interp_E_W(i,j, i+1,j, psi_k)
                 u_E = ex.interp_E_W(i,j, i+1,j, u_k)
                 v_E = ex.interp_E_W(i,j, i+1,j, v_k)
             else:
@@ -195,7 +191,7 @@ def update_rhs(ex, u, v, psi): #
             B = v_k * (u_E + u_W + u_N + u_S)
             C = u_k * (v_E + v_W + v_N + v_S)
 
-            rhs[k] = c0 * A + c1 * (B - C) + dpsi_bc
+            rhs[k] = c0 * A + c1 * (B - C) - dpsi_bc
                    
     return rhs
  

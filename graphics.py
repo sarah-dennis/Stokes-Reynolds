@@ -17,24 +17,11 @@ colour_map_stream = 'plasma'
 
 colour_map_mesh = 'plasma'
 # colour_map_mesh = 'Spectral_r'
-#------------------------------------------------------------------------------
-def plot_3D(f_2D, xs, zs, title):
-            
-    theta = 30
-    phi = 30
-    X, Z = np.meshgrid(xs, zs)
-    
-    pp.figure()
-    ax = pp.axes(projection='3d')
-    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1, cmap=colour_map_mesh)
-    pp.title(title)
-    pp.xlabel('x')
-    pp.ylabel('z')
-    ax.view_init(theta, phi)
-    
+
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='b'):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     pp.plot(xs, fs, color='b', linewidth=.8)
 
     pp.title(title, fontweight="bold")
@@ -62,12 +49,13 @@ def scatter_2D(fs, xs, title, axis):
 
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     ax = fig.add_subplot()
     colors = ['red', 'blue', 'orange', 'green', 'magenta']
 
     for i in range(len(fs)):
         
-        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i])
+        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8)
     
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
@@ -168,37 +156,6 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
     pp.show()
 
 #------------------------------------------------------------------------------
-    
-def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
-
-    pp.rcParams['figure.dpi'] = 500
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    
-    m = len(ys)
-    n = len(xs)
-    h_max = max(ys)
-    ly = max(ys)
-    lx = max(xs)
-    v_scale = 20*np.max(vx)/(lx)
-    
-    vx = quiver_mask(vx, m, n, ly, lx)
-    vy = quiver_mask(vy, m, n, ly, lx)
-    
-    pp.quiver(xs, ys, vx, vy, color='k', width=.001, scale=v_scale, scale_units='x')
-    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-    ax = pp.gca()
-
-    ax.set_aspect('equal')
-    ax.set_ylim(0,h_max)
-    pp.legend(loc='upper left')
-    pp.show()
-    
 def plot_quiver(vx, vy, xs, ys, title, ax_labels):
 
     pp.rcParams['figure.dpi'] = 500
@@ -269,9 +226,8 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
 def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20, vmin=None, vmax=None):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
-    # zs = np.ma.masked_where(zs == 0, zs)
     X, Y = np.meshgrid(xs, ys)
-#'Spectral_r'
+
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
@@ -290,18 +246,39 @@ def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16,
     
     ax = pp.gca()
     ax.set_aspect('equal')
-    # ax.set_facecolor('dimgrey')
+    # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     pp.loglog(xs, fs, color='b')   
 
     pp.title(title)
     
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
+    
+    return fig
+
+def plot_log_x_multi(fs, xs, title, f_labels,ax_labels):
+    fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
+    pp.xscale('log')
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    ax = fig.gca()
+    for i in range(len(fs)):
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
+    
+    pp.title(title)
+    
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    
+    pp.title(title,  fontweight ="bold")
+    fig.legend()
+    
     
     return fig
 
