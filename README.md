@@ -58,7 +58,8 @@ Appropriate for lubrication flows in 2D piecewise linear domains
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 3: 
-Additional/Shared:
+Additional/Shared methods
+
 -- domain.py: inhereted by both reyn_heights and stokes_heights
 
 -- graphics.py: All basic graphing methods. Referenced by *_control and *_convergence
