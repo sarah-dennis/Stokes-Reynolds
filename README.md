@@ -7,8 +7,8 @@ PhD research at Brandeis University, Dept of Mathematics
 Comparison of Stokes and Reynolds models of low reynolds number fluids in cornered domains
 
 
-
 WORK IN PROGRESS (Nov 2024) 
+
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
