@@ -7,6 +7,7 @@ Comparison of Stokes and Reynolds models of low reynolds number fluids in corner
 WORK IN PROGRESS (Nov 2024) 
 email me: sarahdennis@brandeis.edu, sarahdennis98@gmail.com
 
+#---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
 Methods for Biharmonic Navier Stokes equations
@@ -27,7 +28,7 @@ Appropriate for low Reynolds number flows in 2D piecewise linear domains
 
 -- stokes_convergence: grid convergence tests
 
--- /examples:  saved stream function solutions to specific examples, load_run and load_plot methods in stokes_control 
+-- ./examples:  saved stream function solutions to specific examples, load_run and load_plot methods in stokes_control 
 
 #---------------------------------------------------------------------------------------------------------------------
 
