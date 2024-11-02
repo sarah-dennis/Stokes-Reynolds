@@ -7,6 +7,7 @@ Comparison of Stokes and Reynolds models of low reynolds number fluids in corner
 WORK IN PROGRESS (Nov 2024) 
 email me: sarahdennis@brandeis.edu, sarahdennis98@gmail.com
 
+
 Part 1:
 Methods for Biharmonic Navier Stokes equations
 
@@ -28,6 +29,8 @@ Appropriate for low Reynolds number flows in 2D piecewise linear domains
 
 -- /examples:  saved stream function solutions to specific examples, load_run and load_plot methods in stokes_control 
 
+#---------------------------------------------------------------------------------------------------------------------
+
 Part 2:
 Methods for Reynolds equation
 
@@ -48,6 +51,8 @@ Appropriate for lubrication flows in 2D piecewise linear domains
 -- reyn_velocity: double integration for Reynolds pressure-velocity equation
 
 -- reyn_convergence: grid convergence tests
+
+#---------------------------------------------------------------------------------------------------------------------
 
 Part 3: 
 Additional/Shared:
