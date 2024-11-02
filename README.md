@@ -1,12 +1,14 @@
 Sarah Dennis
 
+email me: sarahdennis@brandeis.edu, sarahdennis98@gmail.com
+
 PhD research at Brandeis University, Dept of Mathematics
 
 Comparison of Stokes and Reynolds models of low reynolds number fluids in cornered domains
 
-WORK IN PROGRESS (Nov 2024) 
-email me: sarahdennis@brandeis.edu, sarahdennis98@gmail.com
 
+
+WORK IN PROGRESS (Nov 2024) 
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
