@@ -10,7 +10,7 @@ import numpy as np
 import scipy.sparse.linalg as spl
 from time import perf_counter
 from matplotlib import pyplot as pp
-import _graphics as graph
+import graphics as graph
 
 # figs = [0: none, 1: numerical & exact pressure, 2: error]
 # BCs = [0: periodic, 1: fixed pressure, 2: fixed x & periodic z]
@@ -140,7 +140,7 @@ def f(x, z):
 
 BCs_txt = ['x & z periodic', 'x & z prescribed', 'x prescribed, z periodic']
 
-def solve(Nx=100, Nz=100, fig_type=1, BC=1):
+def solve(Nx=100, Nz=100, fig_type=1, BC=2):
     
     start = perf_counter()
     err = 1

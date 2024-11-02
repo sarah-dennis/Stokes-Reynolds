@@ -11,31 +11,24 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
+# colour_map_stream = 'viridis' 
+# colour_map_stream = 'Spectral_r' 
+colour_map_stream = 'plasma' 
+
+colour_map_mesh = 'plasma'
+# colour_map_mesh = 'Spectral_r'
+
 #------------------------------------------------------------------------------
-def plot_3D(f_2D, xs, zs, title):
-            
-    theta = 30
-    phi = 30
-    X, Z = np.meshgrid(xs, zs)
-    
-    pp.figure()
-    ax = pp.axes(projection='3d')
-    ax.plot_surface(X.T, Z.T, f_2D, rstride=1, cstride=1,cmap='viridis')
-    pp.title(title)
-    pp.xlabel('x')
-    pp.ylabel('z')
-    ax.view_init(theta, phi)
-    
-#------------------------------------------------------------------------------
-def plot_2D(fs, xs, title, axis):
+def plot_2D(fs, xs, title, axis_labels, color='b'):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     pp.plot(xs, fs, color='b', linewidth=.8)
 
     pp.title(title, fontweight="bold")
     
-    pp.xlabel(axis[0])
+    pp.xlabel(axis_labels[0])
     
-    pp.ylabel(axis[1])
+    pp.ylabel(axis_labels[1])
     # pp.ylim(0, 1.1*max(fs))
     
     return fig
@@ -56,12 +49,13 @@ def scatter_2D(fs, xs, title, axis):
 
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'orange', 'purple']
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
 
     for i in range(len(fs)):
         
-        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i])
+        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8)
     
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
@@ -72,7 +66,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     fig.legend()
     return fig
 
-#------------------------------------------------------------------------------
+
 def plot_2D_twin(fs, gs, xs, title, ax_labels):
     pp.rcParams['figure.dpi'] = 300
     # Creating plot with dataset_1
@@ -96,6 +90,7 @@ def plot_2D_twin(fs, gs, xs, title, ax_labels):
      
     pp.show()
 
+#------------------------------------------------------------------------------
 
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
@@ -126,67 +121,43 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
         
-def plot_stream_heat(vx, vy, xs, ys, psi, title, ax_labels):
+def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False, linthresh=1e-18, contour_density=1e-2,vmin=0, vmax=1 ):
     
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
 
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[1,2] #len(ys) = 2 len(xs)
+    stream_density=[8*len(ys)/len(xs),1]
     
-    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
+    if log_cmap:
+    
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+    else:
+        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=False)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
-    stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=psi, cmap='Spectral_r', norm=norm_symLog)
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     ax = pp.gca()
     for art in ax.get_children():
         if not isinstance(art, patches.FancyArrowPatch):
             continue
         art.remove()        
-    
+    # ax.set_facecolor('black')
 
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
 
     ax.set_aspect('equal')
-    ax.set_ylim(0,2) #min max ys
+    ax.set_ylim(0,max(ys)) #min max ys
+    pp.minorticks_on()
     pp.show()
 
-def plot_stream_height(vx, vy, hs, xs, ys, title, ax_labels):
-    
-    pp.rcParams['figure.dpi'] = 500
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    
-    m = len(ys)/len(xs)
-    h_max = max(ys)
-    stream_density_unbroken=[1,.6*m] 
-    
-    
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
-    
-    ax = pp.gca()
-    for art in ax.get_children():
-        if not isinstance(art, patches.FancyArrowPatch):
-            continue
-        art.remove()        
-    
-    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
+#------------------------------------------------------------------------------
+def plot_quiver(vx, vy, xs, ys, title, ax_labels):
 
-    ax.set_aspect('equal')
-    ax.set_ylim(0,h_max)
-    # pp.legend(loc='upper left')
-    pp.show()
-    
-def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
-    
     pp.rcParams['figure.dpi'] = 500
     pp.figure()
     
@@ -194,101 +165,94 @@ def plot_quiver_height(vx, vy, hs, xs, ys, title, ax_labels):
     
     m = len(ys)
     n = len(xs)
-    h_max = max(ys)
-    
-    quiver_density = 50
-    vx = mask(vx, ys, hs, m, n, quiver_density)
-    vy = mask(vy, ys, hs, m, n, quiver_density)
-    
-    pp.quiver(xs, ys, vx, vy, color='k', scale=8, scale_units='x')
-    pp.plot(xs, hs, linewidth=0.8, color='r', label='$h(x)$')
+    ly = max(ys)
+    lx = max(xs)
+    v_scale = 20*np.max(vx)/(lx)
+
+    vx = quiver_mask(vx, m, n, ly, lx)
+    vy = quiver_mask(vy, m, n, ly, lx)
+
+    pp.quiver(xs, ys, vx, vy, scale=v_scale, scale_units='x', width=.001, color='k')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
     pp.ylabel(ax_labels[1])
     ax = pp.gca()
 
-    # ax.set_aspect('equal')
-    ax.set_ylim(0,1.25*h_max)
-    pp.legend(loc='upper left')
+    ax.set_aspect('equal')
+    ax.set_ylim(0,ly)
     pp.show()
 
-def mask(grid, ys, hs, m, n, density):
+def quiver_mask(grid, m, n, ly, lx):
+    density = (ly*4,lx)
     mask = grid.copy()
-    
+    j_mod, i_mod = density
     for j in range(m):
         for i in range(n):
-            if ys[j] > hs[i]:
-                mask[j,i] = None
-            elif i % density != 0 or j%density != 0:
+            if i % i_mod != 0 or j%j_mod != 0:
                     mask[j,i] = None
     return mask
-        
+ 
+#------------------------------------------------------------------------------       
 
-def plot_contour(zs, xs, ys, title, labels):
-    pp.rcParams['figure.dpi'] = 500
+def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
+    pp.rcParams["lines.linewidth"] = .5
+    pp.rcParams['figure.dpi'] = 1000
+
     pp.figure()
-
+    
     X, Y = np.meshgrid(xs, ys)
-    n_contours = max(zs.shape)
-    
-    contour_plot = pp.contour(X, Y, zs, n_contours, cmap='Spectral_r')
-    
+    n_contours = max(zs.shape)//2
+
+    if log_cmap:
+        norm_symLog = colors.AsinhNorm(linthresh)#, vmin=-1, vmax=1, clip=True)
+        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma', norm=norm_symLog)
+    else:
+        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma')
+        
+    # contour_plot = pp.contour(X, Y, zs, n_contours, cmap='plasma')
+        
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
     pp.colorbar(contour_plot, label=labels[0])
     
     ax = pp.gca()
-    ax.set_aspect('equal', 'box')
+    # ax.set_aspect('equal')
     pp.show()
 
-    
-def plot_heatMap(zs, xs, ys, title, labels):
-    pp.rcParams['figure.dpi'] = 500
+
+
+def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20, vmin=None, vmax=None):
+    pp.rcParams['figure.dpi'] = 1000
     pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=colors.SymLogNorm(linthresh=1e-8, linscale=0.25))
-    pp.colorbar(color_plot, label=labels[0])
-
-    pp.title(title, fontweight="bold")
-    pp.xlabel(labels[1])
-    pp.ylabel(labels[2])
-    ax = pp.gca()
-
-    ax.set_aspect('equal', 'box')
-    pp.show()
-
-def plot_contour_heat(zs, xs, ys, title, labels):
-    pp.rcParams['figure.dpi'] = 500
-    pp.figure()
-    
     X, Y = np.meshgrid(xs, ys)
 
-    norm_symLog = colors.SymLogNorm(linthresh=1e-12, linscale=0.35, vmin=-1, vmax=1, clip=True)
-
-    color_plot = pp.pcolor(X, Y, zs, cmap='Spectral_r', norm=norm_symLog)
+    if log_cmap:
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
+    else:
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh,vmin=vmin, vmax=vmax)
     
     pp.colorbar(color_plot, label=labels[0])
     
 
-    n_contours = 10
-
-    pp.rcParams["lines.linewidth"] = .15
-    pp.contour(X, Y, zs, n_contours, colors='white')
+    pp.rcParams["lines.linewidth"] = .25
+    # pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
     
     ax = pp.gca()
-    ax.set_aspect('equal', 'box')
+    ax.set_aspect('equal')
+    # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   
 
 def plot_log(fs, xs, title, ax_labels):
     fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
     pp.loglog(xs, fs, color='b')   
 
     pp.title(title)
@@ -298,30 +262,52 @@ def plot_log(fs, xs, title, ax_labels):
     
     return fig
 
+def plot_log_x_multi(fs, xs, title, f_labels,ax_labels):
+    fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
+    pp.xscale('log')
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    ax = fig.gca()
+    for i in range(len(fs)):
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
     
-def plot_log_multi(fs, xs, title, f_labels, ax_labels):
+    pp.title(title)
+    
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    
+    pp.title(title,  fontweight ="bold")
+    fig.legend()
+    
+    
+    return fig
+
+    
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,O2=1e-3):
     pp.rcParams['figure.dpi'] = 300
     fig = pp.figure()
     
     
     ax = fig.add_subplot()
-    colors = ['r', 'b', 'g', 'orange', 'purple']
-    pp.rcParams["lines.linewidth"] = .5
+    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+
+    pp.rcParams["lines.linewidth"] = .8
     for i in range(len(fs)):
-        ax.loglog(xs, fs[i], label=f_labels[i], color=colors[i])
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
     
     
     # reference lines
-    O_l = 10
-    O_q = 30
-    ax.loglog(xs, [O_l*x**-1 for x in xs], label="$O(%s)$"%ax_labels[0], color='black')    
-    ax.loglog(xs, [O_q*x**-2 for x in xs], label="$O(%s^2)$"%ax_labels[0], color='grey')
+    ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
+    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
     
+    ax.set_xscale('log')
+    ax.set_yscale('symlog', linthresh=linthresh)
+    ax.set_ylim(0)
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(1.1, 0.7))
+    fig.legend(bbox_to_anchor=(0.32, 0.45))
     
     return fig
 

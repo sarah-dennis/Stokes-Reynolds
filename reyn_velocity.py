@@ -10,14 +10,13 @@ import domain
 class Velocity:
     
     def __init__(self, height, ps):
-        self.vel_str = "Velocity for %s "%(height.h_str)
+        self.vel_str = "Velocity for %s "%(height.filestr)
         self.vx, self.vy = self.make_velocity(height, ps)
     
-    # 2D velocity field from 1D pressure under Reynolds assumptions
+    # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
         visc = height.visc
-
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
@@ -42,6 +41,4 @@ class Velocity:
                                 
                     vy[j,i] = 0
         
-
         return vx, vy
-

@@ -1,59 +1,95 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 22 15:05:40 2023
-@author: sarahdennis
+Created on Tue May 21 16:05:05 2024
+
+@author: sarah
 """
-import csv
+import numpy as np
+import graphics
+import error
+import reyn_pressures_pwlinear as pwl
+from scipy.sparse.linalg import gmres as sp_gmres
 
-import reyn_examples as rex
+import reyn_pressures_finDiff as fd
+from numpy.linalg import solve as np_solve
 
-solution = rex.FinDiff_Ex1()
-# solution = rex.Sinusoidal_Ex1() #TODO ignores boundary pressures
-# solution = rex.Constant_Ex1()
-# solution = rex.Linear_Ex1()       #TODO ignores boundary pressures
-# solution = rex.Step_Ex1()
-# solution = rex.StepWave_Ex1()
-# solution = rex.StepWave_Ex2()
-# solution = rex.Sawtooth_Ex1()
+from reyn_velocity import Velocity
 
-#------------------------------------------------------------------------------
-# plotting 
-#------------------------------------------------------------------------------
-solution.plot_ph()
-solution.plot_v()
-
-#------------------------------------------------------------------------------
-# Error
-#------------------------------------------------------------------------------
-
-# infNorm_err = np.max(np.abs(al_pressure.ps - fd_pressure.ps))
-# print("Analytic to Numerical Error: %.8f"%infNorm_err)
-
-# num_err_title = "Numerical Error for %s"%height.h_str
-# num_err_axis = ["$x$", "Error (Analytic - Numerical)"]
-# graph.plot_2D(al_pressure.ps - fd_pressure.ps, domain.xs, num_err_title, num_err_axis)
-
-#------------------------------------------------------------------------------
-# CSV writing
-#------------------------------------------------------------------------------
-
-def write_solution(filename, length, fd_ps, al_ps, N, err):
-
-    with open(filename, 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=' ')
-        writer.writerow(["N=%d"%N])
-        writer.writerow(["err:", err])
-        writer.writerow(["finDiff", "analytic"])
+class Reynolds_Solver: 
+    def __init__(self, Example, U, dP):
+        self.Example = Example
         
-        for i in range(length):
-            writer.writerow([fd_ps[i], al_ps[i]])
+        self.U = U
+        self.dP = dP
         
-        print("  saved csv")
-        file.close()
+    def pwl_solve(self,N):
+        ex = self.Example(self.U, self.dP, N)
+        rhs = pwl.make_rhs(ex)
+        linOp = pwl.pwlLinOp(ex)
+        coefs, exit_code = sp_gmres(linOp, rhs, tol=1e-10)
+        if exit_code != 0:
+            print('gmres did not converge')
+        ps, flux = pwl.make_ps(ex, coefs)
+        vel = Velocity(ex, ps)
+        return ps, flux, vel
+    
+    def fd_solve(self, N):
+        ex = self.Example(self.U, self.dP, N)
+        rhs = fd.make_rhs(ex)
+        mat = fd.make_mat(ex)
+        ps = np_solve(mat, rhs)
+        return ps
+    
+    def solve_and_plot(self, N):
+        pwl_ps, flux, vel = self.pwl_solve(N)
+        # fd_ps = self.fd_solve(N)
+        ex = self.Example(self.U, self.dP, N)
+        paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
+        p_title = "Pressure $p(x)$: \n" + paramstr
+        p_labels = ["$x$", "Pressure $p(x)$"]
+        graphics.plot_2D(pwl_ps, ex.xs, p_title, p_labels, color='r')
+        # graphics.plot_2D(fd_ps, ex.xs, "fin-diff " + p_title, p_labels, color='r')
+        
+        #y-axis reverse
+        vy=np.flip(vel.vy, 0)
+        vx=np.flip(vel.vx, 0)
+        v_title = "Velocity $(u,v)$: \n" + paramstr
+        v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
+        uv_mag = np.sqrt(vx**2 + vy**2)
+        vmax = 2.5*np.median(uv_mag) #TODO velocity explodes at vertical edges
+        graphics.plot_stream_heat(vx, vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vmax)
+
+def convg_pwl_fd(Example, U, dP, N0, dN, many):
+    inf_errs = np.zeros(many)
+    l1_errs = np.zeros(many)
+    l2_errs = np.zeros(many)
+    Ns = np.zeros(many)
+    N=N0
+    
+    solver = Reynolds_Solver(Example, U, dP)
+    for k in range(many):
+        Ns[k] = N
+        pwl_ps, flux, vel = solver.pwl_solve(N)
+        fd_ps = solver.fd_solve(N)
+        
+        errs = np.abs(pwl_ps - fd_ps)
+        inf_errs[k] = np.max(errs)
+        l1_errs[k] = np.sum(errs)
+        l2_errs[k] = np.sqrt(np.sum(errs**2))
+        N*=2
+    title = 'error FD to PWL Reynolds'
+    ax_labels=['N',  'err']
+    fun_labels=['l1', 'l2', 'inf']
+    graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,linthresh=1e-8)
+    
+    l1_rate = error.convg_rate(l1_errs)
+    l2_rate = error.convg_rate(l2_errs)
+    inf_rate = error.convg_rate(inf_errs)
+    
+    print("cnvg rates")
+    print("l1: " + np.array2string(l1_rate))
+    print("l2: " + np.array2string(l2_rate))
+    print("linf" + np.array2string(inf_rate))
 
 
-# filename = "%d_linear_pressure_%d"%(n, N)
-
-# write_solution(filename, domain.Nx, fd_pressure.ps, al_pressure.ps, N, infNorm_err)
-
+        

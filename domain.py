@@ -7,12 +7,11 @@ Created on Wed Jan 25 17:33:35 2023
 """
 import numpy as np
 #------------------------------------------------------------------------------
-
 # Domain: 2D grid on [x0, xf] and [y0, yf] on Nx and Ny grid points
 
 class Domain:
 
-    def __init__(self, x0, xf, y0, yf, N):
+    def __init__(self, x0, xf, y0, yf, N, filestr):
         self.x0 = x0            # left boundary x = x0
         self.xf = xf            # right boundary x = xf
         self.y0 = y0            # lower surface y = y0 
@@ -21,41 +20,48 @@ class Domain:
         self.N = N  # scale: number of grid points in [0,1]
         self.Nx = int((xf-x0)*N + 1) #total number of x grid points
         self.Ny = int((yf-y0)*N + 1) #total number of y grid points
-                    # int casting since (yf-y0) may not be integer
+        
         self.dx = 1/N
         self.dy = 1/N
         
         self.xs = np.linspace(x0, xf, self.Nx)
         self.ys = np.linspace(y0, yf, self.Ny)
-        
+        self.filestr=filestr
 #------------------------------------------------------------------------------
-# A domain [x0, xf],[y0, yf] with a height function y = h_fun(x) 
+# Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, U, Re, h_str):
-        super().__init__(x0, xf, y0, yf, N) # -> {dx, dy, xs, ys}
+    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, filestr):
+        super().__init__(x0, xf, y0, yf, N, filestr) # -> {dx, dy, xs, ys}
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
-        self.hxs = center_second_diff(self.hs, self.Nx, self.dx)
+        self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
-        self.h_str = h_str
         self.h_eq = "h(x)"
 
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
-        # self.h_avg = np.mean(self.hs)
         
-        self.U = U   # velocity on to flat lower surface
-
-        self.visc = 1 # dynamic viscosity (6 eta U)
-            
-        # self.dens = 1 # density
-        self.Re = Re
-        # self.Re = self.U * self.h_avg / self.visc
+        self.U = U   # flat boundary velocity
+        self.dP = dP
+        self.visc = 1 # dynamic viscosity 
+        self.p0 = 0 
+        self.pN = -dP
+        self.Re = 0
  
+# Domain for Stokes solver
+class Space(Domain):
+    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr):
+        super().__init__(x0, xf, y0, yf, N, filestr)
+        self.U = U   # flat boundary velocity
+        self.visc = 1 # dynamic viscosity 
+        self.p_ambient = p0   
+        self.flux=flux
+        self.Re = Re #
+        
 
-    
+#------------------------------------------------------------------------------
 def center_diff(fs, N, dx):
     D_lower = -1*np.ones(N)
     D_upper = np.ones(N)
