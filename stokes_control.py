@@ -127,7 +127,7 @@ class Stokes_Solver:
 
     # zoom domain for pressure
         if zoom:
-            lenx = 1
+            lenx = 1.5
             leny = lenx
             x_start = 0.5
             x_stop= x_start + lenx
@@ -150,7 +150,7 @@ class Stokes_Solver:
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
     
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=40, vmax=p_max, vmin=p_min)
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=10, vmax=p_max, vmin=p_min)
     
         if zoom:
             p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
@@ -158,7 +158,7 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.25
+            lenx = 0.6
             leny = lenx
             x_start = 1
             x_stop= x_start + lenx

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jan 25 17:33:35 2023
@@ -43,20 +43,22 @@ class Height(Domain):
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
         
-        self.U = U   # flat boundary velocity
+        self.U = U    # velocity at flat boundary 
         self.dP = dP
-        self.visc = 1 # dynamic viscosity 
-        self.p0 = 0 
-        self.pN = -dP
+        self.visc = 1 # dynamic viscosity (mu or eta)
+        self.p_ambient = 0 #10^5 Pa  
+        self.p0 = -dP
+        self.pN = self.p_ambient
         self.Re = 0
  
 # Domain for Stokes solver
 class Space(Domain):
     def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr):
         super().__init__(x0, xf, y0, yf, N, filestr)
-        self.U = U   # flat boundary velocity
-        self.visc = 1 # dynamic viscosity 
-        self.p_ambient = p0   
+        self.U = U    # velocity at flat boundary 
+        self.visc = 0.188  # dynamic viscosity (mu or eta: Pa s)
+        self.dens = 850 # density (rho: kg/m^3)
+        self.p_ambient = 0 #10^5 Pa   
         self.flux=flux
         self.Re = Re #
         

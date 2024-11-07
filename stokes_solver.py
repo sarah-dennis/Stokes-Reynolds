@@ -77,7 +77,7 @@ def Dpsi_cscmatrixBuild(ex):
         # [... 1 -8  1 ... -8  28 -8 ... 1 -8  1 ...]
         else: #append(row:k, col:nbr(k), coef)
             mat.append(k, k, 28)
-
+            
             mat.append(k, j*n + i-1, -8)
             mat.append(k, j*n + i+1, -8)
             mat.append(k, (j-1)*n + i, -8)
@@ -135,62 +135,67 @@ def update_rhs(ex, u, v, psi): #
                 
             #possible exterior nbrs 
             dpsi_bc = 0
+            k_N = (j+1)*n + i
+            k_E = j*n + i+1
+            k_W = j*n + i-1 
+            k_S = (j-1)*n + i 
+            k_NW = (j+1)*n + i-1
+            k_NE = (j+1)*n + i+1
+            k_SW = (j-1)*n + i-1
+            k_SE = (j-1)*n + i+1
             
             # North (i, j+1) 
-            k_N = (j+1)*n + i
             u_N = u[k_N]
             v_N = v[k_N]
             
             # East (i+1, j)                
-            k_E = j*n + i + 1
             if ex.space[j,i+1] == -1: #E:
-                dpsi_bc += -8 * ex.interp_E_W(i,j, i+1,j, psi_k)
-                u_E = ex.interp_E_W(i,j, i+1,j, u_k)
-                v_E = ex.interp_E_W(i,j, i+1,j, v_k)
+                dpsi_bc += -8 * ex.interp_E(i,j, psi[k_W])
+                u_E = ex.interp_E(i,j, u[k_W])
+                v_E = ex.interp_E(i,j, v[k_W])
             else:
                 u_E = u[k_E]
                 v_E = v[k_E]
                 
             # West (i-1, j)          
-            k_W = j*n + i - 1    
             if ex.space[j,i-1] == -1: #W:
-                dpsi_bc += -8 * ex.interp_E_W(i,j, i-1,j, psi_k)
-                u_W = ex.interp_E_W(i,j, i-1,j, u_k)
-                v_W = ex.interp_E_W(i,j, i-1,j, v_k)
+                dpsi_bc += -8 * ex.interp_W(i,j, psi[k_E])
+                u_W = ex.interp_W(i,j, u[k_E])
+                v_W = ex.interp_W(i,j, v[k_E])
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
 
                 
             # South (i, j-1)
-            k_S = (j-1)*n + i     
             if ex.space[j-1,i] == -1: #S:
-                dpsi_bc += -8 * ex.interp_S(i,j, i,j-1, psi_k)
-                u_S = ex.interp_S(i,j, i,j-1, u_k)
-                v_S = ex.interp_S(i,j, i,j-1, v_k)
+                dpsi_bc += -8 * ex.interp_S(i,j, psi[k_N])
+                u_S = ex.interp_S(i,j, u[k_N])
+                v_S = ex.interp_S(i,j,v[k_N])
 
             else:
                 u_S = u[k_S]
                 v_S = v[k_S]
 
             if ex.space[j+1,i+1] == -1 : #NE:
-                dpsi_bc += ex.interp_NE_SW(i,j, i+1,j+1, psi_k)
+                dpsi_bc += ex.interp_NE(i,j, psi[k_SW])
 
             if ex.space[j+1,i-1] == -1: #NW:
-                dpsi_bc += ex.interp_NW_SE(i,j, i-1,j+1, psi_k)
+                dpsi_bc += ex.interp_NW(i,j, psi[k_SE])
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
-                dpsi_bc += ex.interp_NW_SE(i,j, i+1,j-1, psi_k)
+                dpsi_bc += ex.interp_SE(i,j, psi[k_NW])
 
             if ex.space[j-1,i-1] == -1: #SW:
-                dpsi_bc += ex.interp_NE_SW(i,j, i-1,j-1, psi_k)
+                dpsi_bc += ex.interp_SW(i,j, psi[k_NE])
 
-                
             A = u_S - u_N + v_E - v_W
-
+            
             B = v_k * (u_E + u_W + u_N + u_S)
+            
             C = u_k * (v_E + v_W + v_N + v_S)
-
+ 
+    
             rhs[k] = c0 * A + c1 * (B - C) - dpsi_bc
                    
     return rhs
@@ -235,13 +240,15 @@ def uv_approx(ex, u, v, psi):
                 
         else: #interior
             # (u,v, psi) at 4 point stencil
-            
-            # North (i, j+1)
+            k_E = j*n + i+1
+            k_W = j*n + i-1
+            k_S = (j-1)*n + i
+            k_N = (j+1)*n + i
+                
             if j+1 == m-1: #
                 u_N = U
                 psi_N = ex.flux
             else:
-                k_N = (j+1)*n + i
                 u_N = u[k_N]
                 psi_N = psi[k_N]
                 
@@ -253,10 +260,9 @@ def uv_approx(ex, u, v, psi):
                 v_E = 0
                 psi_E = 0
             elif ex.space[j,i+1] == -1: 
-                v_E = ex.interp_E_W(i,j, i+1,j, v[k])
-                psi_E = ex.interp_E_W(i,j, i+1,j, psi[k])
+                v_E = ex.interp_E(i,j, v[k_W])
+                psi_E = ex.interp_E(i,j, psi[k_W])
             else:
-                k_E = j*n + i+1
                 v_E = v[k_E]
                 psi_E = psi[k_E] 
 
@@ -268,10 +274,9 @@ def uv_approx(ex, u, v, psi):
                 v_W = 0
                 psi_W = 0 
             elif ex.space[j,i-1] == -1:
-                v_W = ex.interp_E_W(i,j, i-1,j, v[k])
-                psi_W = ex.interp_E_W(i,j, i-1,j, psi[k])
+                v_W = ex.interp_W(i,j, v[k_E])
+                psi_W = ex.interp_W(i,j, psi[k_E])
             else:
-                k_W = j*n + i-1
                 v_W = v[k_W]
                 psi_W = psi[k_W]
    
@@ -280,14 +285,14 @@ def uv_approx(ex, u, v, psi):
                 u_S = 0
                 psi_S = 0
             elif ex.space[j-1,i] == -1:
-                u_S = ex.interp_S(i,j, i,j-1, u[k]) 
-                psi_S = ex.interp_S(i,j, i,j-1, psi[k])
+                u_S = ex.interp_S(i,j, u[k_N]) 
+                psi_S = ex.interp_S(i,j, psi[k_N])
             else:
-                k_S = (j-1)*n + i
+
                 u_S = u[k_S]
                 psi_S = psi[k_S]
-                
-
+            
+            
             u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
             v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)
 

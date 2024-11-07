@@ -16,7 +16,7 @@ def resistance(ex, p):
         r= dp/ex.flux
         return dp, r
     else:
-        return dp, 0
+        return dp, np.inf
 
 
 def pressure(ex, u, v):
@@ -80,10 +80,12 @@ def pressure(ex, u, v):
                 elif i > 0 and ex.space[j+1,i-1]==1:
                     k_NW = (j+1)*n+i-1
                     p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
-                else:
-                    return Exception("Grid misalignment")
+                else:        
+                    assert False, "Grid misalignment - check x_peaks for dx=1/N"
                 
             j-=1    
+    
+    # note: if stream-velocity has not converged, pressure will not be continuous
     return p
             
     
@@ -107,55 +109,53 @@ def fishfun(ex, u, v):
             
             u_k = u[k]
             v_k = v[k]
-    
+            k_W=j*n + i-1
+            k_E=j*n + i+1
             # uxx & vxx <--| E:i+1 & W:i-1 
             if space[j,i+1]==-1:
-                u_E = ex.interp_E_W(i,j, i+1,j, u_k)
-                v_E = ex.interp_E_W(i,j, i+1,j, v_k)
+                u_E = ex.interp_E(i,j, u[k_W])
+                v_E = ex.interp_E(i,j, v[k_W])
             else:
-                u_E = u[j*n + i+1]
-                v_E = v[j*n + i+1]
+                u_E = u[k_E]
+                v_E = v[k_E]
                 
             if space[j,i-1] ==-1:
-                u_W = ex.interp_E_W(i,j, i-1,j, u_k)
-                v_W = ex.interp_E_W(i,j, i-1,j, v_k)
+                u_W = ex.interp_W(i,j,  u[k_E])
+                v_W = ex.interp_W(i,j,  v[k_E])
             else:
-                u_W = u[j*n + i-1]
-                v_W = v[j*n + i-1]
+                u_W = u[k_W]
+                v_W = v[k_W]
                 
                 
             uxx_k = (u_E -2*u_k + u_W)/ex.dx**2
             vxx_k = (v_E -2*v_k + v_W)/ex.dx**2
+            
+            ux_k = (u_E - u_W)/(2*ex.dx)
+            vx_k = (v_E - v_W)/(2*ex.dx)
 
 
             # uyy & vyy <--| N:j+1 & S:j-1
-
-            u_N = u[(j+1)*n + i]                    
-            v_N = v[(j+1)*n + i]
+            k_N=(j+1)*n + i
+            k_S=(j-1)*n + i
+            
+            u_N = u[k_N]                    
+            v_N = v[k_N]
             
             if space[j-1,i] == -1:
-                u_S = ex.interp_S(i,j, i,j-1,u_k)
-                v_S = ex.interp_S(i,j, i,j-1,v_k)
+                u_S = ex.interp_S(i,j, u[k_N])
+                v_S = ex.interp_S(i,j, v[k_N])
             else: 
-                u_S = u[(j-1)*n + i]
-                v_S = v[(j-1)*n + i]
+                u_S = u[k_S]
+                v_S = v[k_S]
 
-            uyy_k = (u_N -2*u_k + u_S)/ex.dy**2
-            vyy_k = (v_N -2*v_k + v_S)/ex.dy**2
-                
-            px[k] = uxx_k + uyy_k
-            py[k] = vxx_k + vyy_k
+            uyy_k = (u_N -2*u_k + u_S)/ex.dx**2
+            vyy_k = (v_N -2*v_k + v_S)/ex.dx**2
+            
+            uy_k= (u_N - u_S)/(2*ex.dx)
+            vy_k= (v_N - v_S)/(2*ex.dx)
+
+            px[k] = ex.visc*(uxx_k + uyy_k) - ex.dens*(u_k*ux_k + v_k*uy_k)
+            py[k] = ex.visc*(vxx_k + vyy_k) - ex.dens*(u_k*vx_k + v_k*vy_k)
             
     return px, py
-
-
-#TODO: bcs... (although w is just plotted)
-def vorticity(ex, u_2D, v_2D):
-    uy_2D = np.gradient(u_2D, ex.dy, axis=0)
-    vx_2D = np.gradient(v_2D, ex.dx, axis=1)
-    w_2D = np.zeros((ex.Ny,ex.Nx))
-    for j in range(ex.Ny):
-        for i in range(ex.Nx):   
-            w_2D[j,i] = vx_2D[j,i] - uy_2D[j,i]
-    return w_2D
 

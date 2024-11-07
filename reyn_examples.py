@@ -11,7 +11,7 @@ from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N):
-        H=1.125
+        H=1.25
         L=4
         h=1
         l=1
@@ -39,8 +39,8 @@ class BFS_noEddy(PWL_Height):
     def __init__(self, U, dP,N):
         H=2
         L=4
-        xL=0.35
-        yL=0.4
+        xL=0.43
+        yL=0.46
         x0 = 0
         xf = L
         x_reattatch=1 +xL

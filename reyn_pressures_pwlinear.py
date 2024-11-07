@@ -19,7 +19,7 @@ def make_ps(height, cs):
     ps = np.zeros(height.Nx)
     k = 0
     cq = cs[-1]
-    flux = cq/(12*height.visc)
+    flux = -cq/(12*height.visc)
     cu = 6 * height.visc * height.U
     
     for i in range(height.Nx):

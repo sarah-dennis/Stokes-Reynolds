@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=guest
 #SBATCH --partition=guest-compute
-#SBATCH --job-name=dBFS_H1p5L4_d0p125_Re0_Q2_U0
+#SBATCH --job-name=BFS_noEddy_Re0_Q2_U0
 #SBATCH --ntasks=1
 #SBATCH --output=_log_%j.txt
 

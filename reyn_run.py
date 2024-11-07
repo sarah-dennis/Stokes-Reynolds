@@ -11,11 +11,11 @@ import reyn_examples as examples
 Example = examples.BFS
 # Example = examples.BFS_deltaSmooth
 # example = examples.TriSlider
-# example = examples.BFS_noEddy
+# Example = examples.BFS_noEddy
 # example = examples.HexSlider
 
 U = 0
-dP = -76.09
+dP = -31.82
 N = 100
 
 solver = control.Reynolds_Solver(Example, U, dP)
