@@ -443,6 +443,25 @@ class BFS_H2p5L4_delta0(BFS):
 # <<====== Corner Removal =======>>
 #------------------------------------------------------------------------------
 
+class BFS_H2p75L4_noEddy_Re0_Q2_U0(PWLinear):
+    def __init__(self, N):
+        x0 = 0
+        xf = 4
+        y0 = 0
+        yf = 2.75
+        y_detatch = 0.51
+        x_detatch = 1.47
+        x_peaks = [x0,1,x_detatch,xf]
+        y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
+        U = 0
+        q = 2
+        p0 = 0
+        Re = 0
+        name_str = "BFS_H2p75L4_noEddy_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
+
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)
+        
 
 class BFS_H2p5L4_noEddy_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
@@ -450,7 +469,7 @@ class BFS_H2p5L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2.5
-        y_detatch = 0.46
+        y_detatch = 0.48
         x_detatch = 1.43
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
@@ -470,8 +489,8 @@ class BFS_H2p25L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2.25
-        y_detatch = 0.44
-        x_detatch = 1.39
+        y_detatch = 0.45
+        x_detatch = 1.4
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
@@ -489,8 +508,8 @@ class BFS_H2L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2
-        y_detatch = 0.42
-        x_detatch = 1.36
+        y_detatch = 0.41
+        x_detatch = 1.35
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
@@ -528,7 +547,7 @@ class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 1.25
-        y_detatch = 0.18
+        y_detatch = 0.17
         x_detatch = 1.15
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]

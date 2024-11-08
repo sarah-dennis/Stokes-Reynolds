@@ -20,7 +20,7 @@ def resistance(ex, p):
 
 
 def pressure(ex, u, v):
-    px, py = fishfun(ex, u, v)
+    px, py = px_py(ex, u, v)
     n = ex.Nx
     m = ex.Ny
     dy = ex.dy
@@ -85,12 +85,11 @@ def pressure(ex, u, v):
                 
             j-=1    
     
-    # note: if stream-velocity has not converged, pressure will not be continuous
     return p
             
     
-# {uxx, uyy, vxx, vyy}
-def fishfun(ex, u, v):
+# {uxx, uyy, vxx, vyy,}
+def px_py(ex, u, v):
 # u[k] = u[jn + i] = u(xi, yj)
     n = ex.Nx
     m = ex.Ny
@@ -109,9 +108,10 @@ def fishfun(ex, u, v):
             
             u_k = u[k]
             v_k = v[k]
+            
             k_W=j*n + i-1
             k_E=j*n + i+1
-            # uxx & vxx <--| E:i+1 & W:i-1 
+            
             if space[j,i+1]==-1:
                 u_E = ex.interp_E(i,j, u[k_W])
                 v_E = ex.interp_E(i,j, v[k_W])
@@ -125,14 +125,12 @@ def fishfun(ex, u, v):
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
-                
-                
+                 
             uxx_k = (u_E -2*u_k + u_W)/ex.dx**2
             vxx_k = (v_E -2*v_k + v_W)/ex.dx**2
             
             ux_k = (u_E - u_W)/(2*ex.dx)
             vx_k = (v_E - v_W)/(2*ex.dx)
-
 
             # uyy & vyy <--| N:j+1 & S:j-1
             k_N=(j+1)*n + i
@@ -151,13 +149,10 @@ def fishfun(ex, u, v):
             uyy_k = (u_N -2*u_k + u_S)/ex.dx**2
             vyy_k = (v_N -2*v_k + v_S)/ex.dx**2
             
-            uy_k= (u_N - u_S)/(2*ex.dx)
-            vy_k= (v_N - v_S)/(2*ex.dx)
+            uy_k = (u_N - u_S)/(2*ex.dx)
+            vy_k = (v_N - v_S)/(2*ex.dx)
 
-            # px[k] = ex.visc*(uxx_k + uyy_k) - ex.dens*(u_k*ux_k + v_k*uy_k)
-            # py[k] = ex.visc*(vxx_k + vyy_k) - ex.dens*(u_k*vx_k + v_k*vy_k)
             px[k] = (uxx_k + uyy_k) - (u_k*ux_k + v_k*uy_k)
-
             py[k] = (vxx_k + vyy_k) - (u_k*vx_k + v_k*vy_k)
             
     return px, py

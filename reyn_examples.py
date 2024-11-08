@@ -27,9 +27,9 @@ class BFS_deltaSmooth(PWL_Height):
         x0 = 0
         xf = 4
         l=2
-        H=1.5
+        H=2
         h=1
-        delta = 0.25
+        delta = 1
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf],float)
         h_peaks=np.asarray([[h,h],[h,h],[h+(H-h)/2,h+(H-h)/2],[H,H],[H,H]],float)
