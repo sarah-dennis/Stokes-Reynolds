@@ -22,13 +22,12 @@ import numpy as np
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2L4_delta1p5 
 # example = examples.BFS_H2L4_delta1p25 
-example = examples.BFS_H2L4_delta1
+# example = examples.BFS_H2L4_delta1
 # example = examples.BFS_H2L4_delta0p75 
 # example = examples.BFS_H2L4_delta0p5 
 # example = examples.BFS_H2L4_delta0p25
-# example = examples.BFS_H2L4_delta0p25
 # example = examples.BFS_H2L4_delta0p125
-# example = examples.BFS_H2L4_delta0
+example = examples.BFS_H2L4_delta0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H1p5L4_delta0p75
 # example = examples.BFS_H1p5L4_delta0p5 
@@ -61,7 +60,7 @@ N = 40
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(example)
 solver.load_run(N,solver.max_iters)
-solver.load_scale(N,2*N) 
-solver.load_run(2*N,solver.max_iters)
-solver.load_plot (N, zoom=False)
+# solver.load_scale(N,2*N) 
+# solver.load_run(2*N,solver.max_iters)
+solver.load_plot (N, zoom=True)
 # ------------------------------------------------------------------------------

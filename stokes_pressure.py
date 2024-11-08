@@ -154,8 +154,11 @@ def fishfun(ex, u, v):
             uy_k= (u_N - u_S)/(2*ex.dx)
             vy_k= (v_N - v_S)/(2*ex.dx)
 
-            px[k] = ex.visc*(uxx_k + uyy_k) - ex.dens*(u_k*ux_k + v_k*uy_k)
-            py[k] = ex.visc*(vxx_k + vyy_k) - ex.dens*(u_k*vx_k + v_k*vy_k)
+            # px[k] = ex.visc*(uxx_k + uyy_k) - ex.dens*(u_k*ux_k + v_k*uy_k)
+            # py[k] = ex.visc*(vxx_k + vyy_k) - ex.dens*(u_k*vx_k + v_k*vy_k)
+            px[k] = (uxx_k + uyy_k) - (u_k*ux_k + v_k*uy_k)
+
+            py[k] = (vxx_k + vyy_k) - (u_k*vx_k + v_k*vy_k)
             
     return px, py
 

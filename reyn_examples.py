@@ -11,7 +11,7 @@ from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N):
-        H=1.25
+        H=1.125
         L=4
         h=1
         l=1

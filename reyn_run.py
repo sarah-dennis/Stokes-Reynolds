@@ -15,7 +15,7 @@ Example = examples.BFS
 # example = examples.HexSlider
 
 U = 0
-dP = -31.82
+dP = -75.91
 N = 100
 
 solver = control.Reynolds_Solver(Example, U, dP)
