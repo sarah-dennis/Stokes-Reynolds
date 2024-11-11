@@ -29,7 +29,7 @@ class BFS_deltaSmooth(PWL_Height):
         l=2
         H=2
         h=1
-        delta = 1
+        delta = 0.75
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf],float)
         h_peaks=np.asarray([[h,h],[h,h],[h+(H-h)/2,h+(H-h)/2],[H,H],[H,H]],float)
@@ -39,8 +39,8 @@ class BFS_noEddy(PWL_Height):
     def __init__(self, U, dP,N):
         H=2
         L=4
-        xL=0.43
-        yL=0.46
+        xL=0.35
+        yL=0.41
         x0 = 0
         xf = L
         x_reattatch=1 +xL
