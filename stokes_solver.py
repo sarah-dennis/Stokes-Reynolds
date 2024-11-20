@@ -130,9 +130,7 @@ def update_rhs(ex, u, v, psi): #
             # (u,v) at 9 point stencil
             u_k = u[k]
             v_k = v[k]
-
-            psi_k = psi[k]          
-                
+                   
             #possible exterior nbrs 
             dpsi_bc = 0
             k_N = (j+1)*n + i
@@ -150,18 +148,20 @@ def update_rhs(ex, u, v, psi): #
             
             # East (i+1, j)                
             if ex.space[j,i+1] == -1: #E:
-                dpsi_bc += -8 * ex.interp_E(i,j, psi[k_W])
-                u_E = ex.interp_E(i,j, u[k_W])
-                v_E = ex.interp_E(i,j, v[k_W])
+                scale_E = ex.scale_E(i,j)
+                dpsi_bc += -8 * ex.interp(scale_E, psi[k_W])
+                u_E = ex.interp(scale_E, u[k_W])
+                v_E = ex.interp(scale_E, v[k_W])
             else:
                 u_E = u[k_E]
                 v_E = v[k_E]
                 
             # West (i-1, j)          
             if ex.space[j,i-1] == -1: #W:
-                dpsi_bc += -8 * ex.interp_W(i,j, psi[k_E])
-                u_W = ex.interp_W(i,j, u[k_E])
-                v_W = ex.interp_W(i,j, v[k_E])
+                scale_W = ex.scale_W(i,j)
+                dpsi_bc += -8 * ex.interp(scale_W, psi[k_E])
+                u_W = ex.interp(scale_W, u[k_E])
+                v_W = ex.interp(scale_W, v[k_E])
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
@@ -169,25 +169,30 @@ def update_rhs(ex, u, v, psi): #
                 
             # South (i, j-1)
             if ex.space[j-1,i] == -1: #S:
-                dpsi_bc += -8 * ex.interp_S(i,j, psi[k_N])
-                u_S = ex.interp_S(i,j, u[k_N])
-                v_S = ex.interp_S(i,j,v[k_N])
+                scale_S = ex.scale_S(i,j)
+                dpsi_bc += -8 * ex.interp(scale_S, psi[k_N])
+                u_S = ex.interp(scale_S, u[k_N])
+                v_S = ex.interp(scale_S, v[k_N])
 
             else:
                 u_S = u[k_S]
                 v_S = v[k_S]
 
             if ex.space[j+1,i+1] == -1 : #NE:
-                dpsi_bc += ex.interp_NE(i,j, psi[k_SW])
+                scale_NE = ex.scale_NE(i,j)
+                dpsi_bc += ex.interp(scale_NE, psi[k_SW])
 
             if ex.space[j+1,i-1] == -1: #NW:
-                dpsi_bc += ex.interp_NW(i,j, psi[k_SE])
+                scale_NW = ex.scale_NW(i,j)
+                dpsi_bc += ex.interp(scale_NW, psi[k_SE])
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
-                dpsi_bc += ex.interp_SE(i,j, psi[k_NW])
+                scale_SE = ex.scale_SE(i,j)
+                dpsi_bc += ex.interp(scale_SE, psi[k_NW])
 
             if ex.space[j-1,i-1] == -1: #SW:
-                dpsi_bc += ex.interp_SW(i,j, psi[k_NE])
+                scale_SW = ex.scale_SW(i,j)
+                dpsi_bc += ex.interp(scale_SW, psi[k_NE])
 
             A = u_S - u_N + v_E - v_W
             
@@ -260,8 +265,9 @@ def uv_approx(ex, u, v, psi):
                 v_E = 0
                 psi_E = 0
             elif ex.space[j,i+1] == -1: 
-                v_E = ex.interp_E(i,j, v[k_W])
-                psi_E = ex.interp_E(i,j, psi[k_W])
+                scale_E = ex.scale_E(i,j)
+                v_E = ex.interp(scale_E, v[k_W])
+                psi_E = ex.interp(scale_E, psi[k_W])
             else:
                 v_E = v[k_E]
                 psi_E = psi[k_E] 
@@ -274,8 +280,9 @@ def uv_approx(ex, u, v, psi):
                 v_W = 0
                 psi_W = 0 
             elif ex.space[j,i-1] == -1:
-                v_W = ex.interp_W(i,j, v[k_E])
-                psi_W = ex.interp_W(i,j, psi[k_E])
+                scale_W = ex.scale_W(i,j)
+                v_W = ex.interp(scale_W, v[k_E])
+                psi_W = ex.interp(scale_W, psi[k_E])
             else:
                 v_W = v[k_W]
                 psi_W = psi[k_W]
@@ -285,8 +292,9 @@ def uv_approx(ex, u, v, psi):
                 u_S = 0
                 psi_S = 0
             elif ex.space[j-1,i] == -1:
-                u_S = ex.interp_S(i,j, u[k_N]) 
-                psi_S = ex.interp_S(i,j, psi[k_N])
+                scale_S = ex.scale_S(i,j)
+                u_S = ex.interp(scale_S, u[k_N]) 
+                psi_S = ex.interp(scale_S, psi[k_N])
             else:
 
                 u_S = u[k_S]

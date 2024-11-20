@@ -40,5 +40,4 @@ class Velocity:
                     vx[j,i] = 0
                                 
                     vy[j,i] = 0
-        
         return vx, vy

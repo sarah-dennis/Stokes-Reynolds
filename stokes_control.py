@@ -20,8 +20,8 @@ class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         self.Example = Example
         self.max_iters = max_iters
-        self.write_mod = 500
-        self.error_mod = 500
+        self.write_mod = 1000
+        self.error_mod = 1000
         self.err_tol = 1e-8
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
@@ -127,9 +127,9 @@ class Stokes_Solver:
 
     # zoom domain for pressure
         if zoom:
-            lenx = 1.5
-            leny = lenx
-            x_start = 0.5
+            lenx = 0.5
+            leny = 0.5
+            x_start = 1.5
             x_stop= x_start + lenx
             y_start = 0
             y_stop = y_start + leny
@@ -140,7 +140,7 @@ class Stokes_Solver:
         dp, res = pressure.resistance(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta P =%.2f$'%dp
+        dp_str = ', $\Delta P =%.1f$'%dp
     
         p_max = np.max(p)
         p_min = np.min(p)
@@ -158,8 +158,8 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.6
-            leny = lenx
+            lenx = 0.5
+            leny = 0.5
             x_start = 1
             x_stop= x_start + lenx
             y_start = 0

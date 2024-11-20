@@ -113,15 +113,17 @@ def px_py(ex, u, v):
             k_E=j*n + i+1
             
             if space[j,i+1]==-1:
-                u_E = ex.interp_E(i,j, u[k_W])
-                v_E = ex.interp_E(i,j, v[k_W])
+                scale_E = ex.scale_E(i,j)
+                u_E = ex.interp(scale_E, u[k_W])
+                v_E = ex.interp(scale_E, v[k_W])
             else:
                 u_E = u[k_E]
                 v_E = v[k_E]
                 
             if space[j,i-1] ==-1:
-                u_W = ex.interp_W(i,j,  u[k_E])
-                v_W = ex.interp_W(i,j,  v[k_E])
+                scale_W = ex.scale_W(i,j)
+                u_W = ex.interp(scale_W, u[k_E])
+                v_W = ex.interp(scale_W, v[k_E])
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
@@ -140,8 +142,9 @@ def px_py(ex, u, v):
             v_N = v[k_N]
             
             if space[j-1,i] == -1:
-                u_S = ex.interp_S(i,j, u[k_N])
-                v_S = ex.interp_S(i,j, v[k_N])
+                scale_S = ex.scale_S(i,j)
+                u_S = ex.interp(scale_S, u[k_N])
+                v_S = ex.interp(scale_S, v[k_N])
             else: 
                 u_S = u[k_S]
                 v_S = v[k_S]

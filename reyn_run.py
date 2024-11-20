@@ -8,15 +8,15 @@ Created on Thu Oct 24 13:23:27 2024
 import reyn_control as control
 import reyn_examples as examples
 
-# Example = examples.BFS
+Example = examples.BFS
 # Example = examples.BFS_deltaSmooth
 # example = examples.TriSlider
-Example = examples.BFS_noEddy
+# Example = examples.BFS_noEddy
 # example = examples.HexSlider
 
 U = 0
-dP = -43.07
-N = 100
+dP = -60
+N = 200
 
 solver = control.Reynolds_Solver(Example, U, dP)
 solver.solve_and_plot(N)

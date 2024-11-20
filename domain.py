@@ -56,8 +56,8 @@ class Space(Domain):
     def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr):
         super().__init__(x0, xf, y0, yf, N, filestr)
         self.U = U    # velocity at flat boundary 
-        self.visc = 0.188  # dynamic viscosity (mu or eta: Pa s)
-        self.dens = 850 # density (rho: kg/m^3)
+        self.visc =1 # dynamic viscosity (mu or eta: Pa s)
+        self.dens = 1 # density (rho: kg/m^3)
         self.p_ambient = 0 #10^5 Pa   
         self.flux=flux
         self.Re = Re #

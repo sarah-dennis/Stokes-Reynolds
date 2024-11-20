@@ -56,7 +56,7 @@ class Reynolds_Solver:
         v_title = "Velocity $(u,v)$: \n" + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(vx**2 + vy**2)
-        vmax = 2.5*np.median(uv_mag) #TODO velocity explodes at vertical edges
+        vmax = min(np.max(vx),10)# 2.5*np.median(uv_mag) #TODO velocity explodes at vertical edges
         graphics.plot_stream_heat(vx, vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vmax)
 
 def convg_pwl_fd(Example, U, dP, N0, dN, many):
