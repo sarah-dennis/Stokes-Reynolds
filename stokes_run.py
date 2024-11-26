@@ -19,24 +19,34 @@ import stokes_examples as examples
 # example = examples.BFS_H1p25L4_Re0_Q2_U0
 # example = examples.BFS_H1p125L4_Re0_Q2_U0
 #------------------------------------------------------------------------------
+# example = examples.BFS_H2p75L4_Re1_Q2_U0
+# example = examples.BFS_H2p5L4_Re1_Q2_U0
+# example = examples.BFS_H2p25L4_Re1_Q2_U0
+# example = examples.BFS_H2L4_Re1_Q2_U0
+# example = examples.BFS_H1p5L4_Re1_Q2_U0
+# example = examples.BFS_H1p25L4_Re1_Q2_U0
+# example = examples.BFS_H1p125L4_Re1_Q2_U0
+#------------------------------------------------------------------------------
 # example = examples.BFS_H2L4_delta1p5 
 # example = examples.BFS_H2L4_delta1p25 
 # example = examples.BFS_H2L4_delta1
 # example = examples.BFS_H2L4_delta0p75 
 # example = examples.BFS_H2L4_delta0p5 
 # example = examples.BFS_H2L4_delta0p25
-example = examples.BFS_H2L4_delta0p125
+# example = examples.BFS_H2L4_delta0p125
 # example = examples.BFS_H2L4_delta0
 #------------------------------------------------------------------------------
-# example = examples.BFS_H1p5L4_delta1
 # example = examples.BFS_H1p5L4_delta0p75
 # example = examples.BFS_H1p5L4_delta0p5 
-# example = examples.BFS_H1p5L4_delta0p25
+example = examples.BFS_H1p5L4_delta0p25 
 # example = examples.BFS_H1p5L4_delta0p125 
 # example = examples.BFS_H1p5L4_delta0
 #------------------------------------------------------------------------------
-# example = examples.BFS_H1p25L4_delta0                                             
+# example = examples.BFS_H1p25L4_delta0     
+# example = examples.BFS_H1p25L4_delta0p05                                      
 # example = examples.BFS_H1p25L4_delta0p125 
+# example = examples.BFS_H1p25L4_delta0p25
+# example = examples.BFS_H1p25L4_delta0p5
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H2p5L4_noEddy_Re0_Q2_U0
@@ -44,7 +54,7 @@ example = examples.BFS_H2L4_delta0p125
 # example = examples.BFS_H2L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H1p5L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H1p25L4_noEddy_Re0_Q2_U0
-
+#------------------------------------------------------------------------------
 # example = examples.BFS_H2L4_cornerTriA_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriC_Re0_Q2_U0
@@ -55,18 +65,20 @@ example = examples.BFS_H2L4_delta0p125
 
 # example = examples.basic
 # example = examples.BFS_biswas_Re0
-
-N=200
+N=160
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(example)                                      
 
 # solver.new_run(N, solver.max_iters) 
-# solver.load_scale(100,N)
+# solver.load_scale(160,320)
 
-solver.load_run(N,1)
+# solver.load_run(N,1)
 
 # solver.load_run(N,solver.max_iters)
 
-solver.load_plot(N, zoom=False)
+# solver.load_run_new_many(N, 2, 2)
+
+# solver.load_plot(N, zoom=False)
 # solver.load_plot(N, zoom=True)
 # ------------------------------------------------------------------------------
+solver.compare(20,[40,80,160],320)

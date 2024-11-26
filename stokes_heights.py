@@ -137,9 +137,6 @@ class PWLinear(Space):
         return v_nbr
 
     def scale_S(self, i,j):
-        # s=i
-        # t=j-1
-        
         y_N = self.ys[j+1]
         y_nbr = self.ys[j-1]
         y_bdry = self.hs[i][0] # arbitrary 

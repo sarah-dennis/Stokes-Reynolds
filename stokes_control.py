@@ -20,8 +20,8 @@ class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         self.Example = Example
         self.max_iters = max_iters
-        self.write_mod = 1000
-        self.error_mod = 1000
+        self.write_mod = 500
+        self.error_mod = 500
         self.err_tol = 1e-8
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
@@ -98,13 +98,13 @@ class Stokes_Solver:
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-    def compare(self,N_min, Ns, N_max,p_err=False):
+    def compare(self,N_min, Ns, N_max,p_err=True):
         
         l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.compare_Ns(self.Example, N_min, Ns, N_max,p_err)
-        title = "Error in $\psi$ to $N^{*}=%d$ \n %s"%(N_max, ex_min.spacestr)
+        title = "Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
         ax_labels = ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
-        linthresh = 1e-8
+        linthresh = 1e-7
         O1 = 1
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
@@ -127,11 +127,11 @@ class Stokes_Solver:
 
     # zoom domain for pressure
         if zoom:
-            lenx = 0.5
-            leny = 0.5
-            x_start = 1.5
+            lenx = 1
+            leny =1
+            x_start = 0.5
             x_stop= x_start + lenx
-            y_start = 0
+            y_start = 1
             y_stop = y_start + leny
             xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -140,7 +140,7 @@ class Stokes_Solver:
         dp, res = pressure.resistance(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta P =%.1f$'%dp
+        dp_str = ', $\Delta P =%.2f$'%dp
     
         p_max = np.max(p)
         p_min = np.min(p)
@@ -158,8 +158,8 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.5
-            leny = 0.5
+            lenx = 1
+            leny = 1
             x_start = 1
             x_stop= x_start + lenx
             y_start = 0
@@ -178,13 +178,11 @@ class Stokes_Solver:
         uv_mag = np.sqrt(u_2D**2 + v_2D**2)
         uv_mag_max = np.max(uv_mag)
         
-        u_2D_ma = np.ma.masked_where(ex.space==-1,u_2D)
-        v_2D_ma = np.ma.masked_where(ex.space==-1,v_2D)
-        graphics.plot_stream_heat(u_2D_ma, v_2D_ma, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
+        graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
         
         if zoom:
-            u_2D_zoom = grid_zoom_2D(u_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-            v_2D_zoom = grid_zoom_2D(v_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+            u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
+            v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
             uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
             graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
         

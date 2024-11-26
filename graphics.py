@@ -129,7 +129,27 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     pp.title(title,  fontweight ="bold")
-    fig.legend()
+    fig.legend(bbox_to_anchor=(0.9, 0.3))
+    return fig
+
+
+def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
+    fig = pp.figure()
+    pp.rcParams['figure.dpi'] = 300
+    ax = fig.add_subplot()
+    colors = ['firebrick', 'royalblue', 'darkorange', 'seagreen','hotpink','yellowgreen','rebeccapurple']
+
+    for i in range(len(fs)):
+        
+        ax.plot(xs[i], fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker='o')
+    
+    #ax.set_xlim([0, 1])
+    #ax.set_ylim([0, 1])
+
+    ax.set_xlabel(ax_labels[0])
+    ax.set_ylabel(ax_labels[1])
+    pp.title(title,  fontweight ="bold")
+    fig.legend(bbox_to_anchor=(1, 0.5))
     return fig
 
 
@@ -369,7 +389,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     
     ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
-    ax.set_ylim(0)
+    ax.set_ylim([0,10*np.max(fs)])
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     

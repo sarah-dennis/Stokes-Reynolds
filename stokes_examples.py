@@ -6,7 +6,6 @@ Created on Tue May 21 16:15:37 2024
 """
 
 from stokes_heights import PWLinear
-import numpy as np
 #------------------------------------------------------------------------------
 # <<===== BFS ======>>
 #------------------------------------------------------------------------------
@@ -19,6 +18,7 @@ class BFS(PWLinear):
         yf = H
         x_peaks = [x0, x0+l, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
+    
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
         
 #------------------------------------------------------------------------------
@@ -35,37 +35,50 @@ class BFS_biswas_Re0(BFS):
         name_str = "BFS_biswas_Re0"
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
-#------------------------------------------------------------------------------
 
-class BFS_H2L4_Re1_Q2_U0(BFS):
-    def __init__(self, N):
-        L = 4
-        l=1
-        H = 2
-        h = 1   
-        U = 0
-        Re = 1
-        q = 2
-        name_str = "BFS_H2L4_Re1_Q2_U0"
-        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(L, l, H, h, U, q, Re, N, filestr)
-#------------------------------------------------------------------------------
-       
-class BFS_H2L4_Re0p5_Q2_U0(BFS):
-    def __init__(self, N):
-        L = 4
-        l=1
-        H = 2
-        h = 1   
-        U = 0
-        Re = 0.5
-        q = 2
-        name_str = "BFS_H2L4_Re0p5_Q2_U0"
-        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(L, l, H, h, U, q, Re, N, filestr)
 
 #------------------------------------------------------------------------------
+
         
+class BFS_H2p75L4_Re0_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2.75
+        h = 1   
+        U = 0
+        Re = 0
+        q = 2
+        name_str = "BFS_H2p75L4_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)        
+
+class BFS_H2p5L4_Re0_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2.5
+        h = 1   
+        U = 0
+        Re = 0
+        q = 2
+        name_str = "BFS_H2p5L4_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)        
+
+class BFS_H2p25L4_Re0_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2.25
+        h = 1   
+        U = 0
+        Re = 0
+        q = 2
+        name_str = "BFS_H2p25L4_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)    
+
 class BFS_H2L4_Re0_Q2_U0(BFS):
     def __init__(self, N):
         L = 4
@@ -118,45 +131,117 @@ class BFS_H1p125L4_Re0_Q2_U0(BFS):
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
         
-class BFS_H2p5L4_Re0_Q2_U0(BFS):
-    def __init__(self, N):
-        L = 4
-        l=1
-        H = 2.5
-        h = 1   
-        U = 0
-        Re = 0
-        q = 2
-        name_str = "BFS_H2p5L4_Re0_Q2_U0"
-        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(L, l, H, h, U, q, Re, N, filestr)        
+#------------------------------------------------------------------------------
 
-class BFS_H2p25L4_Re0_Q2_U0(BFS):
-    def __init__(self, N):
-        L = 4
-        l=1
-        H = 2.25
-        h = 1   
-        U = 0
-        Re = 0
-        q = 2
-        name_str = "BFS_H2p25L4_Re0_Q2_U0"
-        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(L, l, H, h, U, q, Re, N, filestr)    
-
-class BFS_H2p75L4_Re0_Q2_U0(BFS):
+#------------------------------------------------------------------------------
+class BFS_H2p75L4_Re1_Q2_U0(BFS):
     def __init__(self, N):
         L = 4
         l=1
         H = 2.75
         h = 1   
         U = 0
-        Re = 0
+        Re = 1
         q = 2
-        name_str = "BFS_H2p75L4_Re0_Q2_U0"
+        name_str = "BFS_H2p75L4_Re1_Q2_U0"
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(L, l, H, h, U, q, Re, N, filestr)        
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+        
+class BFS_H2p5L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2.5
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H2p5L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
 
+class BFS_H2p25L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2.25
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H2p25L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+        
+class BFS_H2L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H2L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+        
+class BFS_H1p5L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 1.5
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H1p5L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+  
+        
+class BFS_H1p25L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 1.25
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H1p25L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+  
+class BFS_H1p125L4_Re1_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 1.125
+        h = 1   
+        U = 0
+        Re = 1
+        q = 2
+        name_str = "BFS_H1p125L4_Re1_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
+  
+
+
+#------------------------------------------------------------------------------
+       
+class BFS_H2L4_Re0p5_Q2_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l=1
+        H = 2
+        h = 1   
+        U = 0
+        Re = 0.5
+        q = 2
+        name_str = "BFS_H2L4_Re0p5_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, U, q, Re, N, filestr)
 #------------------------------------------------------------------------------
 # <<====== Smoothed BFS =======>>
 #------------------------------------------------------------------------------
@@ -275,6 +360,20 @@ class BFS_H2L4_delta0p125(BFS_deltaSmooth):
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
+class BFS_H2L4_delta0p01(BFS_deltaSmooth):
+    def __init__ (self, N):
+        L=4
+        l=2
+        H= 2 
+        h=1 
+        delta=0.05
+        U=0
+        q=2 
+        Re=0
+        name_str = "dBFS_H2L4_d0p01_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
 
 class BFS_H2L4_delta0(BFS):
     def __init__ (self, N):
@@ -377,20 +476,6 @@ class BFS_H1p5L4_delta0(BFS):
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
         
 #------------------------------------------------------------------------------
-class BFS_H1p25L4_delta1(BFS_deltaSmooth):
-    def __init__ (self, N):
-        L=4
-        l=L/2
-        H= 1.25
-        h=1 
-        delta=1
-        U=0
-        q=2
-        Re=0
-        name_str = "dBFS_H21p25L4_d1_Re0_Q2_U0"
-        filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
-        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
-
 class BFS_H1p25L4_delta0p75(BFS_deltaSmooth):
     def __init__ (self, N):
         L=4
@@ -405,7 +490,7 @@ class BFS_H1p25L4_delta0p75(BFS_deltaSmooth):
         filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
         super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
-
+        
 class BFS_H1p25L4_delta0p5(BFS_deltaSmooth):
     def __init__ (self, N):
         L=4
@@ -432,7 +517,7 @@ class BFS_H1p25L4_delta0p25(BFS_deltaSmooth):
         U=0
         q=2
         Re=0
-        name_str = "dBFS_H2p5L4_d0p4_Re0_Q2_U0"
+        name_str = "dBFS_H1p25L4_d0p25_Re0_Q2_U0"
         filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
         super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
@@ -450,6 +535,23 @@ class BFS_H1p25L4_delta0p125(BFS_deltaSmooth):
         name_str = "dBFS_H1p25L4_d0p125_Re0_Q2_U0"
         filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
         super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
+
+class BFS_H1p25L4_delta0p05(BFS_deltaSmooth):
+    def __init__ (self, N):
+        L=4
+        l=L/2
+        H= 1.25
+        h=1 
+        delta=0.05
+        U=0
+        q=2
+        Re=0
+        name_str = "dBFS_H1p25L4_d0p05_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str,name_str, N)
+        super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
+
+
 
 class BFS_H1p25L4_delta0(BFS):
     def __init__ (self, N):
