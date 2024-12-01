@@ -11,9 +11,9 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-# colour_map_stream = 'viridis' 
+colour_map_stream = 'viridis' 
 # colour_map_stream = 'Spectral_r' 
-colour_map_stream = 'plasma'
+# colour_map_stream = 'plasma'
 
 
 colour_map_mesh = 'plasma'
@@ -389,7 +389,9 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     
     ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
-    ax.set_ylim([0,10*np.max(fs)])
+
+    ax.set_ylim(0, np.max([O1,1.25*np.max(fs)]))
+
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     

@@ -77,10 +77,13 @@ def convg_pwl_fd(Example, U, dP, N0, dN, many):
         l1_errs[k] = np.sum(errs)
         l2_errs[k] = np.sqrt(np.sum(errs**2))
         N*=2
-    title = 'error FD to PWL Reynolds'
-    ax_labels=['N',  'err']
-    fun_labels=['l1', 'l2', 'inf']
-    graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,linthresh=1e-8)
+        
+    title = 'Grid Convergence for Reynolds pressure \n Finite-Difference to Piecewise-Linear-Analytic'
+    ax_labels=['N',  '$|p_{FD}(x) - p_{PWL}(x)|_p$']
+    fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
+    o1=1
+    o2=1
+    graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,linthresh=1e-6, O1=o1, O2=o2)
     
     l1_rate = error.convg_rate(l1_errs)
     l2_rate = error.convg_rate(l2_errs)

@@ -152,10 +152,11 @@ def update_rhs(ex, u, v, psi): #
                 dpsi_bc += -8 * ex.interp(scale_E, psi[k_W])
                 u_E = ex.interp(scale_E, u[k_W])
                 v_E = ex.interp(scale_E, v[k_W])
+                
             else:
                 u_E = u[k_E]
                 v_E = v[k_E]
-                
+        
             # West (i-1, j)          
             if ex.space[j,i-1] == -1: #W:
                 scale_W = ex.scale_W(i,j)
