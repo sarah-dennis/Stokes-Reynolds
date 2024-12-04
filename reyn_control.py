@@ -45,7 +45,7 @@ class Reynolds_Solver:
         # fd_ps = self.fd_solve(N)
         ex = self.Example(self.U, self.dP, N)
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
-        p_title = "Pressure $p(x)$: \n" + paramstr
+        p_title = "Pressure $p(x)$ \n" + paramstr
         p_labels = ["$x$", "Pressure $p(x)$"]
         graphics.plot_2D(pwl_ps, ex.xs, p_title, p_labels, color='r')
         # graphics.plot_2D(fd_ps, ex.xs, "fin-diff " + p_title, p_labels, color='r')
@@ -53,7 +53,7 @@ class Reynolds_Solver:
         #y-axis reverse
         vy=np.flip(vel.vy, 0)
         vx=np.flip(vel.vx, 0)
-        v_title = "Velocity $(u,v)$: \n" + paramstr
+        v_title = "Velocity $(u,v)$ \n" + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(vx**2 + vy**2)
         vmax = min(np.max(vx),10)# 2.5*np.median(uv_mag) #TODO velocity explodes at vertical edges
@@ -79,11 +79,11 @@ def convg_pwl_fd(Example, U, dP, N0, dN, many):
         N*=2
         
     title = 'Grid Convergence for Reynolds pressure \n Finite-Difference to Piecewise-Linear-Analytic'
-    ax_labels=['N',  '$|p_{FD}(x) - p_{PWL}(x)|_p$']
+    ax_labels=['$N$',  '$||p_{FD} - p_{PWL}||$']
     fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
-    o1=1
-    o2=1
-    graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,linthresh=1e-6, O1=o1, O2=o2)
+    o1=2
+    o2=2
+    graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,linthresh=1e-7, O1=o1, O2=o2)
     
     l1_rate = error.convg_rate(l1_errs)
     l2_rate = error.convg_rate(l2_errs)

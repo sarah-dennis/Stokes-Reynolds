@@ -22,7 +22,7 @@ class Stokes_Solver:
         self.max_iters = max_iters
         self.write_mod = 500
         self.error_mod = 500
-        self.err_tol = 1e-8
+        self.err_tol = 1e-9
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
         ex = self.Example(N)
@@ -127,11 +127,11 @@ class Stokes_Solver:
 
     # zoom domain for pressure
         if zoom:
-            lenx = 1
-            leny =1
-            x_start = 0.5
+            lenx =0.5
+            leny =0.5
+            x_start = 0.75
             x_stop= x_start + lenx
-            y_start = 1
+            y_start = 1.25
             y_stop = y_start + leny
             xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -158,8 +158,8 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 1
-            leny = 1
+            lenx = 0.5
+            leny = 0.5
             x_start = 1
             x_stop= x_start + lenx
             y_start = 0

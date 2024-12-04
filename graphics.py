@@ -11,24 +11,24 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-colour_map_stream = 'viridis' 
+# colour_map_stream = 'viridis' 
 # colour_map_stream = 'Spectral_r' 
-# colour_map_stream = 'plasma'
+colour_map_stream = 'plasma'
 
 
-colour_map_mesh = 'plasma'
+# colour_map_mesh = 'plasma'
 # colour_map_mesh='PiYG'
-# colour_map_mesh = 'Spectral_r'
+colour_map_mesh = 'Spectral_r'
 
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='b'):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = 300
-    if len(xs > 20):
-        marker = None
-    else:
-        marker = 'o'
-    pp.plot(xs, fs, color='b', linewidth=.8, marker=marker)
+    # if len(xs > 20):
+    #     marker = None
+    # else:
+    marker = 'o'
+    pp.plot(xs, fs, color=color, linewidth=.8, marker=marker)
 
     pp.title(title, fontweight="bold")
     
@@ -118,10 +118,10 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     pp.rcParams['figure.dpi'] = 300
     ax = fig.add_subplot()
     colors = ['red', 'blue', 'orange', 'green', 'magenta']
-
+    markers = ['D', 'o', 's', '*', 'H', 'X']
     for i in range(len(fs)):
         
-        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker='o')
+        ax.plot(xs, fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker=markers[i])
     
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
@@ -137,11 +137,11 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = 300
     ax = fig.add_subplot()
-    colors = ['firebrick', 'royalblue', 'darkorange', 'seagreen','hotpink','yellowgreen','rebeccapurple']
-
+    colors = ['firebrick', 'royalblue', 'forestgreen', 'royalblue','firebrick', 'royalblue',]
+    markers = ['D', 'o', 's', '*', 'X', 'H']
     for i in range(len(fs)):
         
-        ax.plot(xs[i], fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker='o')
+        ax.plot(xs[i], fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker=markers[i])
     
     #ax.set_xlim([0, 1])
     #ax.set_ylim([0, 1])
@@ -214,15 +214,15 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
 
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[8*len(ys)/len(xs),1]
+    stream_density=[len(ys)/len(xs),2]
     
     if log_cmap:
     
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=1, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     else:
         no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=False)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=0.5, color=color_map, cmap=colour_map_stream, norm=no_norm)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=1, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
     pp.colorbar(stream_plot.lines, label=ax_labels[0])
     
@@ -353,7 +353,7 @@ def plot_log_x_multi(fs, xs, title, f_labels,ax_labels):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = 300
     pp.xscale('log')
-    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    colors = ['firebrick', 'royalblue', 'forestgreen', 'darkorchid', 'goldenrod']
     ax = fig.gca()
     for i in range(len(fs)):
         ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
@@ -376,11 +376,12 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     
     
     ax = fig.add_subplot()
-    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    colors = ['firebrick', 'royalblue', 'forestgreen', 'darkorchid', 'goldenrod']    
+    markers = ['D', 'o', 's', '*', 'H', 'X']
 
-    pp.rcParams["lines.linewidth"] = .8
+    pp.rcParams["lines.linewidth"] =1
     for i in range(len(fs)):
-        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker='x', markevery=1)
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker=markers[i], markevery=1)
     
     
     # reference lines
@@ -396,7 +397,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(0.32, 0.45))
+    fig.legend(bbox_to_anchor=(0.3, 0.425))
     
     return fig
 
