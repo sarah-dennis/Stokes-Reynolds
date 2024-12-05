@@ -119,17 +119,4 @@ class pwlLinOp(LinearOperator):
             mv[N] = v[N-1] + cq * hs[N,0]**-3 * widths[N-1]
 
         return mv
-        
-        
-
-
-
-
-
-
-
-
-
-
-
 

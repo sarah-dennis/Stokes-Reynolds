@@ -34,10 +34,15 @@ class Velocity:
                 y = height.ys[j]
                 if y <= height.hs[i]:
                     vx[j,i] = U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3
-                                
                     vy[j,i] = -2*hx*(U/h**3 - 3*q/h**4) * y**2 * (h-y)
+                    
                 else:
                     vx[j,i] = 0
-                                
                     vy[j,i] = 0
+             
+        vy=np.flip(vy, 0)
+        vx=np.flip(vx, 0)
+        
         return vx, vy
+
+
