@@ -11,10 +11,10 @@ from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N):
-        H=2
+        H=2.5
         L=4
         h=1
-        l=2
+        l=1
         x0 = 0
         xf = L
         N_regions = 2

@@ -16,6 +16,7 @@ import stokes_pressure as pressure
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
+
 class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         self.Example = Example
@@ -23,6 +24,10 @@ class Stokes_Solver:
         self.write_mod = 500
         self.error_mod = 500
         self.err_tol = 1e-9
+        
+        self.vel_max = 4
+        self.p_min=-70
+        self.p_max=70
 #------------------------------------------------------------------------------
     def new_run(self, N, iters):
         ex = self.Example(N)
@@ -131,7 +136,7 @@ class Stokes_Solver:
             leny =0.5
             x_start = 0.75
             x_stop= x_start + lenx
-            y_start = 1.25
+            y_start = 0.75
             y_stop = y_start + leny
             xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -141,20 +146,18 @@ class Stokes_Solver:
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
         dp_str = ', $\Delta P =%.2f$'%dp
-    
-        p_max = np.max(p)
-        p_min = np.min(p)
+
     
         ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
         title_p = 'Pressure $p(x,y)$ \n' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
     
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p, log_cmap=False , n_contours=10, vmax=p_max, vmin=p_min)
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=40)
     
         if zoom:
             p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, log_cmap=False, n_contours=20, vmax=p_max, vmin=p_min)
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=20)
     
     # zoom domain for velocity & stream
         if zoom:
@@ -176,15 +179,14 @@ class Stokes_Solver:
         v_2D = v.reshape((ex.Ny,ex.Nx))
     
         uv_mag = np.sqrt(u_2D**2 + v_2D**2)
-        uv_mag_max = np.max(uv_mag)
         
-        graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max) 
+        graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
         
         if zoom:
             u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
             v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
             uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
-            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, log_cmap=False, vmin=0, vmax=uv_mag_max)
+            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         
     # Stream plot:
     

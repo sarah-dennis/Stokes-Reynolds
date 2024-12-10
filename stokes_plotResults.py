@@ -8,34 +8,34 @@ import numpy as np
 import graphics
 
 # BFS at Re=0, Q=2, U=0, L=4, varying H/h --> resistance error, reattachment lengths
-# h=1
-# L=4
-# l=1
-# H = np.asarray([2.75,2.5,2.25,2,1.5,1.25,1.125])
+h=1
+L=4
+l=1
+H = np.asarray([2.75,2.5,2.25,2,1.5,1.25,1.125])
 
-# dP_stokes = np.asarray([-40.12,-40.66,-41.55,-43.12,-51.65,-63.95,-75.91])
-# dP_reyn = np.asarray([-27.50,-28.55,-30.25,-33.05,-45.25,-61.00,-74.50])
-# flux = np.asarray([2,2,2,2,2,2,2])
-# # flux_reyn = np.asarray([2.92,2.84,2.74,2.61,2.28, 2.1, 2.04])
+dP_stokes = np.asarray([-40.12,-40.66,-41.55,-43.12,-51.65,-63.95,-75.91])
+dP_reyn = np.asarray([-27.50,-28.55,-30.25,-33.05,-45.25,-61.00,-74.50])
+flux = np.asarray([2,2,2,2,2,2,2])
+# flux_reyn = np.asarray([2.92,2.84,2.74,2.61,2.28, 2.1, 2.04])
 
-# res_stokes = dP_stokes/flux
-# res_reyn = dP_reyn/flux
-# res_err_pct = 100*np.abs(res_reyn-res_stokes)/np.abs(res_stokes)
+res_stokes = dP_stokes/flux
+res_reyn = dP_reyn/flux
+res_err_pct = 100*np.abs(res_reyn-res_stokes)/np.abs(res_stokes)
 
-# print('Resistance %err:', res_err_pct)
+print('Resistance %err:', res_err_pct)
 
-# graphics.plot_2D_multi([res_reyn, res_stokes], H, 'Stokes vs Reynolds: BFS Resistance', ['Reyn', 'Stokes'],['$H/h$','$R = \Delta P / Q$'])
-# graphics.plot_2D(res_err_pct, H, 'Stokes vs Reynolds: BFS resistance %-error', ['$H/h$','Resistance $R$ % error'], color='darkviolet')
+graphics.plot_2D_multi([res_reyn, res_stokes], H, 'Stokes vs Reynolds: BFS Resistance', ['Reyn', 'Stokes'],['$H/h$','$R = \Delta P / Q$'])
+graphics.plot_2D(res_err_pct, H, 'Stokes vs Reynolds: BFS resistance %-error', ['$H/h$','Resistance $R$ % error'], color='darkviolet')
 
-# x_r=np.asarray([0.47,0.43,0.40,0.35,0.25,0.15,0.09])
-# y_r=np.asarray([0.51,0.48,0.45,0.41,0.3,0.17,0.1])
+x_r=np.asarray([0.47,0.43,0.40,0.35,0.25,0.15,0.09])
+y_r=np.asarray([0.51,0.48,0.45,0.41,0.3,0.17,0.1])
 
-# eddy_area=0.5*x_r*y_r
-# total_area= (h*l) + (H*(L-l))
-# eddy_pct_area=100*(1-(total_area-eddy_area)/total_area)
+eddy_area=0.5*x_r*y_r
+total_area= (h*l) + (H*(L-l))
+eddy_pct_area=100*(1-(total_area-eddy_area)/total_area)
 
-# graphics.plot_2D_multi([x_r,y_r], H, 'Re=0 BFS Flow Separation Points', ['$x_r$','$y_r$'], ['$H$','lengths $|x_r|$, $|y_r|$'])
-# graphics.plot_2D(eddy_pct_area, H, 'Re=0 BFS: eddy %-area', ['expansion ratio $H/h$','eddy %-area'])
+graphics.plot_2D_multi([x_r,y_r], H, 'Re=0 BFS Flow Separation Points', ['$x_r$','$y_r$'], ['Expansion ratio $H/h$','side lengths $|x_r|$, $|y_r|$'])
+graphics.plot_2D(eddy_pct_area, H, 'Re=0 BFS: eddy %-area', ['expansion ratio $H/h$','eddy %-area'])
  
 
 

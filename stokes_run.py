@@ -16,7 +16,7 @@ import stokes_examples as examples
 # example = examples.BFS_H2p25L4_Re0_Q2_U0
 # example = examples.BFS_H2L4_Re0_Q2_U0
 # example = examples.BFS_H1p5L4_Re0_Q2_U0
-# example = examples.BFS_H1p25L4_Re0_Q2_U0
+example = examples.BFS_H1p25L4_Re0_Q2_U0
 # example = examples.BFS_H1p125L4_Re0_Q2_U0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_Re0p25_Q2_U0
@@ -39,7 +39,7 @@ import stokes_examples as examples
 # example = examples.BFS_H2p5L4_Re1_Q2_U0
 # example = examples.BFS_H2p25L4_Re1_Q2_U0
 # example = examples.BFS_H2L4_Re1_Q2_U0
-example = examples.BFS_H1p5L4_Re1_Q2_U0
+# example = examples.BFS_H1p5L4_Re1_Q2_U0
 # example = examples.BFS_H1p25L4_Re1_Q2_U0
 # example = examples.BFS_H1p125L4_Re1_Q2_U0
 #------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ example = examples.BFS_H1p5L4_Re1_Q2_U0
 
 # example = examples.basic
 # example = examples.BFS_biswas_Re0
-N=80
+N=160
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(example)                                      
 
@@ -94,10 +94,11 @@ solver = control.Stokes_Solver(example)
 
 # solver.load_run_new_many(N, 2, 2)
 
-# solver.load_plot(80, zoom=False)
-# solver.load_plot(N, zoom=True)
+# solver.load_plot(N, zoom=False)
+solver.load_plot(N, zoom=True)
+
 # ------------------------------------------------------------------------------
-solver.compare(20,[40,80,160],320)
+# solver.compare(20,[40,80,160],320)
 
 
 

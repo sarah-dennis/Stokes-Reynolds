@@ -11,14 +11,43 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-colour_map_stream = 'viridis' 
+# colour_map_stream = 'viridis' 
 # colour_map_stream = 'Spectral_r' 
-# colour_map_stream = 'plasma'
+
+colour_map_stream = 'plasma'
+my_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
+my_cmap[:,0:3] *= 1
+colour_map_stream = colors.ListedColormap(my_cmap)
 
 
 # colour_map_mesh = 'plasma'
 # colour_map_mesh='PiYG'
-colour_map_mesh = 'Spectral_r'
+# colour_map_mesh='RdYlBu_r'
+# colour_map_mesh = 'Spectral_r'
+my_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
+# my_cmap = pp.cm.PRGn(np.arange(pp.cm.PRGn.N))
+# my_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
+my_cmap[:,0:3] *= 0.95
+colour_map_mesh = colors.ListedColormap(my_cmap)
+
+# colour_bar_scale=0.02
+colour_bar_scale=0.025
+
+contour_width = 0.25
+stream_width=1
+
+SMALL_SIZE = 10
+MEDIUM_SIZE = 12
+BIGGER_SIZE = 16
+
+pp.rc('font', size=SMALL_SIZE)          # controls default text sizes
+pp.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+pp.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+pp.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+pp.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+pp.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+pp.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='b'):
@@ -182,12 +211,9 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    
-    m = len(ys)/len(xs)
-    h_max = max(ys)
-    stream_density_unbroken=[1,.6*m] 
-    
-    pp.streamplot(xs, ys, vx, vy, stream_density_unbroken, linewidth=0.5, color='k', broken_streamlines=False)
+
+    stream_density=[len(ys)/len(xs),1]
+    pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows
     ax = pp.gca()
@@ -201,29 +227,28 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.ylabel(ax_labels[1])
 
     ax.set_aspect('equal')
-    ax.set_ylim(0,1.01*h_max)
+    ax.set_ylim(0,1.01*max(ys))
     pp.show()
     
         
-def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False, linthresh=1e-18, contour_density=1e-2,vmin=0, vmax=1 ):
+def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=1e-18):
     
     pp.rcParams['figure.dpi'] = 500
+    
     pp.figure()
-
+    
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[len(ys)/len(xs),2]
+    stream_density=[len(ys)/len(xs),1]
     
     if log_cmap:
-    
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=1, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     else:
-        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=False)
-        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=1, color=color_map, cmap=colour_map_stream, norm=no_norm)
+        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
+        stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
-    pp.colorbar(stream_plot.lines, label=ax_labels[0])
-    
+    pp.colorbar(stream_plot.lines, label=ax_labels[0], fraction=colour_bar_scale, pad=0.05)
     # remove contours arrows
     ax = pp.gca()
     for art in ax.get_children():
@@ -235,50 +260,11 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, log_cmap=False
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
-
     ax.set_aspect('equal')
-    ax.set_ylim(0,max(ys)) #min max ys
+    ax.set_ylim(0,max(ys))
     pp.minorticks_on()
     pp.show()
 
-#------------------------------------------------------------------------------
-def plot_quiver(vx, vy, xs, ys, title, ax_labels):
-
-    pp.rcParams['figure.dpi'] = 500
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    
-    m = len(ys)
-    n = len(xs)
-    ly = max(ys)
-    lx = max(xs)
-    v_scale = 20*np.max(vx)/(lx)
-
-    vx = quiver_mask(vx, m, n, ly, lx)
-    vy = quiver_mask(vy, m, n, ly, lx)
-
-    pp.quiver(xs, ys, vx, vy, scale=v_scale, scale_units='x', width=.001, color='k')
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-    ax = pp.gca()
-
-    ax.set_aspect('equal')
-    ax.set_ylim(0,ly)
-    pp.show()
-
-def quiver_mask(grid, m, n, ly, lx):
-    density = (ly*4,lx)
-    mask = grid.copy()
-    j_mod, i_mod = density
-    for j in range(m):
-        for i in range(n):
-            if i % i_mod != 0 or j%j_mod != 0:
-                    mask[j,i] = None
-    return mask
- 
 #------------------------------------------------------------------------------       
 
 def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
@@ -308,21 +294,20 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=1e-16):
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, log_cmap=True, linthresh=1e-16, n_contours=20, vmin=None, vmax=None):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=1e-16, n_contours=20):
     pp.rcParams['figure.dpi'] = 1000
     pp.figure()
     X, Y = np.meshgrid(xs, ys)
 
     if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
     else:
-        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh,vmin=vmin, vmax=vmax)
+        color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
     
-    pp.colorbar(color_plot, label=labels[0])
-    
+    pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=0.05)
 
-    pp.rcParams["lines.linewidth"] = .25
+    pp.rcParams["lines.linewidth"] = contour_width
     pp.contour(X, Y, zs, n_contours, colors='black')
     
     pp.title(title, fontweight="bold")
