@@ -8,15 +8,15 @@ Created on Thu Oct 24 13:23:27 2024
 import reyn_control as control
 import reyn_examples as examples
 
-Example = examples.BFS
+# Example = examples.BFS
 
-# Example = examples.BFS_deltaSmooth
+Example = examples.BFS_deltaSmooth
 # Example = examples.TriSlider
 # Example = examples.BFS_noEddy
-# Example = examples.HexSlider
+# Exyample = examples.HexSlider
 # Example = examples.variableSlider
 U= 0
-dP = -28.55
+dP = -61.75
 N = 200
 
 

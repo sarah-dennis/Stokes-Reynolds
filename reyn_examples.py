@@ -11,10 +11,10 @@ from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N):
-        H=2.5
+        H=1.25
         L=4
         h=1
-        l=1
+        l=2
         x0 = 0
         xf = L
         N_regions = 2
@@ -27,9 +27,9 @@ class BFS_deltaSmooth(PWL_Height):
         x0 = 0
         xf = 4
         l=2
-        H=2
+        H=1.25
         h=1
-        delta = 0.75
+        delta = 0.125
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf],float)
         h_peaks=np.asarray([[h,h],[h,h],[h+(H-h)/2,h+(H-h)/2],[H,H],[H,H]],float)

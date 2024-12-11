@@ -31,7 +31,7 @@ my_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(my_cmap)
 
 # colour_bar_scale=0.02
-colour_bar_scale=0.025
+colour_bar_scale=0.022
 
 contour_width = 0.25
 stream_width=1
@@ -48,13 +48,12 @@ pp.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 pp.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 pp.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-
 #------------------------------------------------------------------------------
-def plot_2D(fs, xs, title, axis_labels, color='b'):
+def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = 300
-    marker = None
-    # marker = 'o'
+    # marker = None
+    marker = 'o'
     pp.plot(xs, fs, color=color, linewidth=.8, marker=marker)
 
     pp.title(title, fontweight="bold")
