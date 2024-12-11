@@ -57,11 +57,10 @@ import stokes_examples as examples
 # example = examples.dBFS_H1p5L4_d0p125_Re0_Q2_U0
 # example = examples.dBFS_H1p5L4_d0_Re0_Q2_U0
 #------------------------------------------------------------------------------
-example = examples.dBFS_H1p25L4_d0_Re0_Q2_U0    
+# example = examples.dBFS_H1p25L4_d0_Re0_Q2_U0    
 # example = examples.dBFS_H1p25L4_d0p05_Re0_Q2_U0                                      
 # example = examples.dBFS_H1p25L4_d0p125_Re0_Q2_U0 
-# example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
-# example = examples.dBFS_H1p25L4_d0p5_Re0_Q2_U0
+example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H2p5L4_noEddy_Re0_Q2_U0
@@ -93,8 +92,8 @@ solver = control.Stokes_Solver(example)
 
 # solver.load_run_new_many(N, 2, 2)
 
-solver.load_plot(N, zoom=False)
-# solver.load_plot(N, zoom=True)
+# solver.load_plot(N, zoom=False)
+solver.load_plot(N, zoom=True)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)

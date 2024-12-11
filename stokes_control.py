@@ -12,7 +12,7 @@ import graphics
 import stokes_readwrite as rw
 import stokes_convergence as cnvg
 import stokes_pressure as pressure
-
+delta = 0.25
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
@@ -134,7 +134,7 @@ class Stokes_Solver:
         if zoom:
             lenx =0.5
             leny =0.5
-            x_start = 0.75
+            x_start = 2-0.75*delta
             x_stop= x_start + lenx
             y_start = 0.75
             y_stop = y_start + leny
@@ -161,9 +161,9 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.5
-            leny = 0.5
-            x_start = 1
+            lenx = 0.25
+            leny = 0.25
+            x_start = 2+0.75*delta
             x_stop= x_start + lenx
             y_start = 0
             y_stop = y_start + leny

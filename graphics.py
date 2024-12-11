@@ -163,8 +163,10 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = 300
     ax = fig.add_subplot()
-    colors = ['firebrick', 'royalblue', 'forestgreen', 'royalblue','firebrick', 'royalblue',]
-    markers = ['D', 'o', 's', '*', 'X', 'H']
+    # colors = ['firebrick', 'royalblue', 'forestgreen', 'royalblue','firebrick', 'royalblue',]
+    
+    colors = ['firebrick', 'mediumblue','crimson','royalblue','indianred',  'dodgerblue']
+    markers = ['D', 'o', 's', '^', 'd', 'h']
     for i in range(len(fs)):
         
         ax.plot(xs[i], fs[i], label=fun_labels[i], color=colors[i], linewidth=0.8, marker=markers[i])
@@ -175,7 +177,7 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(1, 0.5))
+    fig.legend(bbox_to_anchor=(1.025, 0.5))
     return fig
 
 
