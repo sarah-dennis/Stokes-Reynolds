@@ -859,6 +859,9 @@ class BFS_H2L4_cornerTriA_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2
+        
+        # y_detatch = 0.41
+        # x_detatch = 1.36
         y_detatch = 0.20
         x_detatch = 1.17
         x_peaks = [x0,1,x_detatch,xf]
@@ -878,8 +881,10 @@ class BFS_H2L4_cornerTriB_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2
-        y_detatch = 0.38
-        x_detatch = 1.34
+        # y_detatch = 0.41
+        # x_detatch = 1.36
+        y_detatch = 0.6
+        x_detatch = 1.52
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0

@@ -47,8 +47,8 @@ import stokes_examples as examples
 # example = examples.dBFS_H2L4_d1_Re0_Q2_U0
 # example = examples.dBFS_H2L4_d0p75_Re0_Q2_U0
 # example = examples.dBFS_H2L4_d0p5_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0p25_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0p125_Re0_Q2_U0
+example = examples.dBFS_H2L4_d0p25_Re0_Q2_U0
+example = examples.dBFS_H2L4_d0p125_Re0_Q2_U0
 # example = examples.dBFS_H2L4_d0_Re0_Q2_U0
 #------------------------------------------------------------------------------
 # example = examples.dBFS_H1p5L4_d0p75_Re0_Q2_U0
@@ -60,7 +60,7 @@ import stokes_examples as examples
 # example = examples.dBFS_H1p25L4_d0_Re0_Q2_U0    
 # example = examples.dBFS_H1p25L4_d0p05_Re0_Q2_U0                                      
 # example = examples.dBFS_H1p25L4_d0p125_Re0_Q2_U0 
-example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
+# example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H2p5L4_noEddy_Re0_Q2_U0
@@ -68,23 +68,23 @@ example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
 # example = examples.BFS_H2L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H1p5L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H1p25L4_noEddy_Re0_Q2_U0
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # example = examples.BFS_H2L4_cornerTriA_Re0_Q2_U0
-# example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriC_Re0_Q2_U0
+# example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
+
 # example = examples.BFS_H2L4_cornerTriD_Re0_Q2_U0
-# example = examples.BFS_H2L4_cornerTriE_Re0_Q2_U0
 
 
 
 # example = examples.basic
 # example = examples.BFS_biswas_Re0
-N=80
+N=200
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(example)                                      
 
 # solver.new_run(N, solver.max_iters) 
-# solver.load_scale(80,160)
+# solver.load_scale(80,160) 
 
 # solver.load_run(N,1)
 

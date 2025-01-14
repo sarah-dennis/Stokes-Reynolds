@@ -30,8 +30,10 @@ my_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
 my_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(my_cmap)
 
-# colour_bar_scale=0.02
-colour_bar_scale=0.022
+# colour_bar_scale=0.015
+# colour_bar_scale=0.024
+colour_bar_scale=0.04
+
 
 contour_width = 0.25
 stream_width=1
@@ -48,6 +50,7 @@ pp.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 pp.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 pp.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     fig = pp.figure()
@@ -62,7 +65,7 @@ def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     
     pp.ylabel(axis_labels[1])
     # pp.ylim(0, 1.1*max(fs))
-    
+    pp.minorticks_on()
     return fig
 
 def scatter_2D(fs, xs, title, axis):
@@ -113,7 +116,7 @@ def plot_2D_inf_multi(fs, xs, title, ax_labels, f_labels ):
 
     fig, (ax1,ax2) = pp.subplots(1,2,sharey=True, width_ratios=[len(fs[0])-1,1])
     fig.subplots_adjust(wspace=0.1)
-    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    colors = ['forestgreen', 'darkmagenta', 'darkorgange']
     for k in range(len(fs)):
         ax1.plot(xs, fs[k], color=colors[k], linewidth=.8, marker='o',label=f_labels[k])
         ax2.scatter(xs, fs[k], color=colors[k])
@@ -139,11 +142,11 @@ def plot_2D_inf_multi(fs, xs, title, ax_labels, f_labels ):
     return fig
 
 
-def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
+def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper'):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = 1000
     ax = fig.add_subplot()
-    colors = ['red', 'blue', 'orange', 'green', 'magenta']
+    colors = ['r','b','forestgreen', 'darkmagenta', 'darkorgange']
     markers = ['D', 'o', 's', '*', 'H', 'X']
     for i in range(len(fs)):
         
@@ -155,15 +158,19 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels):
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(0.9, 0.3))
+    pp.minorticks_on()
+    if loc== 'upper':
+        
+        fig.legend(bbox_to_anchor=(0.9, 0.875))
+    else:
+        fig.legend(bbox_to_anchor=(0.9, 0.275))
     return fig
 
-
-def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
+def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = 1000
     ax = fig.add_subplot()
-    # colors = ['firebrick', 'royalblue', 'forestgreen', 'royalblue','firebrick', 'royalblue',]
+    colors = ['forestgreen', 'darkmagenta', 'orange', 'firebrick', 'royalblue', 'crimson']
     
     colors = ['firebrick', 'mediumblue','crimson','royalblue','indianred',  'dodgerblue']
     markers = ['D', 'o', 's', '^', 'd', 'h']
@@ -177,7 +184,12 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels):
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(1.025, 0.5))
+    if loc== 'upper':
+        
+        fig.legend(bbox_to_anchor=(0.9, 0.875))
+    else:
+        fig.legend(bbox_to_anchor=(0.9, 0.275))
+    pp.minorticks_on()
     return fig
 
 
@@ -213,7 +225,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
 
-    stream_density=[len(ys)/len(xs),1]
+    stream_density=[1,1]
     pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows
@@ -234,13 +246,13 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
         
 def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=1e-18):
     
-    pp.rcParams['figure.dpi'] = 500
+    pp.rcParams['figure.dpi'] = 1000
     
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[len(ys)/len(xs),1]
+    stream_density=[1,1]
     
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
@@ -249,7 +261,10 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
         no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
-    pp.colorbar(stream_plot.lines, label=ax_labels[0], fraction=colour_bar_scale, pad=0.05)
+    cb=pp.colorbar(stream_plot.lines, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
+    ticks = np.linspace(vmin, vmax, num=5)
+    cb.set_ticks(ticks)
+
     # remove contours arrows
     ax = pp.gca()
     for art in ax.get_children():
@@ -306,7 +321,11 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
     
-    pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=0.05)
+    cb = pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=0.025)
+    
+    
+    ticks = np.linspace(vmin, vmax, num=5)
+    cb.set_ticks(ticks)
 
     pp.rcParams["lines.linewidth"] = contour_width
     pp.contour(X, Y, zs, n_contours, colors='black')
@@ -314,9 +333,11 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
-    
+
+    pp.minorticks_on()
     ax = pp.gca()
-    ax.set_aspect('equal')
+    ax.set_aspect('equal')    
+    ax.set_ylim(min(ys),max(ys))
     # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   
@@ -360,7 +381,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=1e-16, O1=1e-2,
     
     
     ax = fig.add_subplot()
-    colors = ['firebrick', 'royalblue', 'forestgreen', 'darkorchid', 'goldenrod']    
+    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']    
     markers = ['D', 'o', 's', '*', 'H', 'X']
 
     pp.rcParams["lines.linewidth"] =1

@@ -11,7 +11,7 @@ from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N):
-        H=1.25
+        H=2
         L=4
         h=1
         l=2
@@ -27,7 +27,7 @@ class BFS_deltaSmooth(PWL_Height):
         x0 = 0
         xf = 4
         l=2
-        H=1.25
+        H=2
         h=1
         delta = 0.25
         N_regions = 4

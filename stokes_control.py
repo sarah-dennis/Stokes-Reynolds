@@ -109,12 +109,12 @@ class Stokes_Solver:
         title = "Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
         ax_labels = ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
-        linthresh = 1e-7
+        linthresh = 1e-5
         O1 = 1
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
 
-    
+   
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
@@ -134,9 +134,9 @@ class Stokes_Solver:
         if zoom:
             lenx =0.5
             leny =0.5
-            x_start = 2-0.75*delta
+            x_start = 2
             x_stop= x_start + lenx
-            y_start = 0.75
+            y_start = 0
             y_stop = y_start + leny
             xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
@@ -149,7 +149,7 @@ class Stokes_Solver:
 
     
         ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
-        title_p = 'Pressure $p(x,y)$ \n' + ex.spacestr + dp_str
+        title_p = '' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
     
@@ -161,9 +161,9 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.25
-            leny = 0.25
-            x_start = 2+0.75*delta
+            lenx = 0.5
+            leny = 0.5
+            x_start = 2.075
             x_stop= x_start + lenx
             y_start = 0
             y_stop = y_start + leny
@@ -172,7 +172,7 @@ class Stokes_Solver:
     #  Velocity plot: 
     
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-        title = 'Velocity $(u,v)$ \n' + ex.spacestr + dp_str
+        title = '' + ex.spacestr + dp_str
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
         
         u_2D = u.reshape((ex.Ny,ex.Nx))
@@ -213,4 +213,3 @@ def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
     j_0 = int((y_start - ex.y0)/ex.dy)
     j_f = int((y_stop - ex.y0)/ex.dy)
     return grid_x[i_0:i_f], grid_y[j_0:j_f]
-    

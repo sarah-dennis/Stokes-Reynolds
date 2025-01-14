@@ -21,12 +21,13 @@ class PWLinear(Space):
         self.y_peaks = y_peaks
         self.N_regions = len(self.x_peaks)-1
         self.make_space()
-        self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  
+
                             
         self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
         self.H_in = yf - self.hf_in
         self.H_out = yf-y_peaks[-1][0]
         
+        self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  
         if self.H_in == 0: # closed cavity --> Q=0, dp=0
             self.dp_in = 0
         else: # gap entry --> dp ~ Q
