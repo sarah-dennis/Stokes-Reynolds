@@ -10,37 +10,37 @@ import numpy as np
 from reyn_heights import PWL_Height
 
 class BFS(PWL_Height):
-    def __init__(self, U, dP, N):
-        H=2
-        L=4
-        h=1
-        l=2
+    def __init__(self, U, dP, N, args):
+        H = args[0]
+        l = args[1]
+        h = 1
         x0 = 0
-        xf = L
+        xf = 4
         N_regions = 2
         x_peaks = np.asarray([x0, l, xf],float)
         h_peaks = np.asarray([[0,h],[h,H],[H,0]],float)
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks,U,dP)
         
 class BFS_deltaSmooth(PWL_Height):
-    def __init__ (self, U, dP, N):
+    def __init__ (self, U, dP, N, args):
+        H = args[0]
+        delta = args[1]
+
+        l=2
+        h=1
         x0 = 0
         xf = 4
-        l=2
-        H=2
-        h=1
-        delta = 0.25
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf],float)
         h_peaks=np.asarray([[h,h],[h,h],[h+(H-h)/2,h+(H-h)/2],[H,H],[H,H]],float)
         super().__init__(x0, xf, N, N_regions,x_peaks, h_peaks,U,dP)
 
 class BFS_noEddy(PWL_Height):
-    def __init__(self, U, dP,N):
-        H=1.25
+    def __init__(self, U, dP,N, args):
+        H=args[0]
         L=4
-        xL=0.15
-        yL=0.17
+        xL=args[1]
+        yL=args[2]
         x0 = 0
         xf = L
         x_reattatch=1 +xL
@@ -55,7 +55,7 @@ class BFS_noEddy(PWL_Height):
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 class HexSlider(PWL_Height):
-    def __init__(self, U, dP,N):
+    def __init__(self, U, dP,N, args=None):
         x0 = 0
         xf = 4
         N_regions = 4
@@ -66,7 +66,7 @@ class HexSlider(PWL_Height):
 #-----------------------------------------------------------------------------------------------------------------------------------        
 
 class TriSlider(PWL_Height):
-    def __init__(self, U, dP,N):
+    def __init__(self, U, dP,N, args=None):
         x0 = 0
         xf = 4
         N_regions = 4

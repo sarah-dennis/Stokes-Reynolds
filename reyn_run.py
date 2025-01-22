@@ -8,20 +8,33 @@ Created on Thu Oct 24 13:23:27 2024
 import reyn_control as control
 import reyn_examples as examples
 
-# Example = examples.BFS
-# 
-Example = examples.BFS_deltaSmooth
-# Example = examples.TriSlider
+U= 0
+dP = -20
+N = 200
+linthresh=1e-5
+H=2 
+l=1
+xr = 0.35 
+yr = 0.41
+
+delta = 0.5
+
+Example = examples.BFS
+args = [H,l]
+
 # Example = examples.BFS_noEddy
+# args = [H,xr,yr] 
+
+# Example = examples.BFS_deltaSmooth
+# args = [H,delta]
+
+
+# Example = examples.TriSlider
 # Exyample = examples.HexSlider
 # Example = examples.variableSlider
-U= 0
-dP = -51.75
-N = 200
 
+solver = control.Reynolds_Solver(Example, U, dP, args)
+# flux = solver.solve_and_plot(N)
 
-solver = control.Reynolds_Solver(Example, U, dP)
-solver.solve_and_plot(N)
-
-# control.convg_pwl_fd(Example, U, dP, N0=20, dN=2, many=6)
+control.convg_pwl_fd(Example, U, dP, args, N0=20, dN=2, many=4,linthresh=linthresh)
 # 

@@ -7,14 +7,7 @@ Created on Mon Jun  3 15:23:37 2024
 
 import numpy as np
 
-def convg_rate(errs):
-    n = len(errs)
-    rates = np.zeros(n-1)
-    
-    for k in range(n-1):
-        rates[k]=errs[k+1]/errs[k]
-    
-    return rates
+
 
 def l1pctError(f_u, f_v, g_u, g_v, Nx, Ny):
     max_err = 0.0

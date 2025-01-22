@@ -23,7 +23,7 @@ class Stokes_Solver:
         self.max_iters = max_iters
         self.write_mod = 500
         self.error_mod = 500
-        self.err_tol = 1e-9
+        self.err_tol = 1e-8
         
         self.vel_max = 4
         self.p_min=-70
@@ -100,16 +100,22 @@ class Stokes_Solver:
     
         rw.write_solution(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
     
+    def get_dP(self,N):
+        ex = self.Example(N)
+        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
+        p = pressure.pressure(ex, u, v)
+        dp, res = pressure.resistance(ex, p) 
+        return dp
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-    def compare(self,N_min, Ns, N_max,p_err=True):
+    def compare(self,N_min, Ns, N_max,linthresh = 1e-7,p_err=True):
         
         l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.compare_Ns(self.Example, N_min, Ns, N_max,p_err)
-        title = "Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
-        ax_labels = ["N", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
+        title = ''#"Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
+        ax_labels = ["$N$", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
-        linthresh = 1e-5
+        
         O1 = 1
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
@@ -199,6 +205,7 @@ class Stokes_Solver:
             # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
             # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
     
+        return dp
 
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)

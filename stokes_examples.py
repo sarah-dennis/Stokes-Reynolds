@@ -625,6 +625,7 @@ class dBFS_H1p5L4_d0p125_Re0_Q2_U0(BFS_deltaSmooth):
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, delta, U, q, Re, N, filestr)
 
+
 class dBFS_H1p5L4_d0_Re0_Q2_U0(BFS):
     def __init__ (self, N):
         L=4

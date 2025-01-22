@@ -6,7 +6,6 @@ Created on Fri May 24 08:36:17 2024
 """
 import numpy as np
 import stokes_readwrite as rw
-import error
 import stokes_pressure as pressure
 #-------------------------------------------------------------------------------
  
@@ -74,29 +73,30 @@ def compare_Ns(Ex, N_min, Ns, N_max, p_err=True):
             
             if p_err:
                 err_p[n,j,i] = abs(p_max[j_max,i_max] - p_n[j_n,i_n])
-                err_p_l1[n]+= err_p[n,j,i]
-                err_p_l2[n]+= err_p[n,j,i]**2
+                err_p_l1[n]+= err_p[n,j,i] 
+                err_p_l2[n]+= (err_p[n,j,i]**2)
                 
-            
+        size_n= ex_n.Nx*ex_n.Ny   
         
         err_inf[n] = np.max(err[n])
-        err_l2[n] = np.sqrt(err_l2[n])
+        err_l1[n] /= size_n
+        err_l2[n] = np.sqrt(err_l2[n] / size_n)
         
         if p_err:
             err_p_inf[n] = np.max(err_p[n])
             err_p_l2[n] = np.sqrt(err_p_l2[n])
             err_dp[n]=np.abs(dp_max-dp_n)
             
-    l1_rate = error.convg_rate(err_l1)
-    l2_rate = error.convg_rate(err_l2)
-    inf_rate = error.convg_rate(err_inf)
+    l1_rate = convg_rate(err_l1)
+    l2_rate = convg_rate(err_l2)
+    inf_rate = convg_rate(err_inf)
     cnvg_rates = np.stack([l1_rate, l2_rate, inf_rate], axis=0)
     
     if p_err:
-        p_l1_rate = error.convg_rate(err_p_l1)
-        p_l2_rate = error.convg_rate(err_p_l2)
-        p_inf_rate = error.convg_rate(err_p_inf)
-        dp_rate = error.convg_rate(err_dp)
+        p_l1_rate = convg_rate(err_p_l1)
+        p_l2_rate = convg_rate(err_p_l2)
+        p_inf_rate = convg_rate(err_p_inf)
+        dp_rate = convg_rate(err_dp)
         p_cnvg_rates = np.stack([p_l1_rate, p_l2_rate, p_inf_rate, dp_rate], axis=0)
         
     print("stream cnvg rates")
@@ -113,41 +113,14 @@ def compare_Ns(Ex, N_min, Ns, N_max, p_err=True):
 
     return err_l1, err_l2, err_inf, cnvg_rates, ex_min
         
-
-
-
-#------------------------------------------------------------------------------
-# For BFS examples
-#------------------------------------------------------------------------------
-def get_attatchments(Ex, N):
-
-    step = Ex(N)
-    u, v, psi, past_iters = rw.read_solution(step.filestr+".csv", step.Nx * step.Ny)
+def convg_rate(errs):
+    n = len(errs)
+    rates = np.zeros(n-1)
     
-    psi_2D = psi.reshape((step.Ny,step.Nx))
-    psi_xs_yf = psi_2D[step.jf_out] #reattatchment wall 
-    psi_ys_xstep = psi_2D[:,step.i_step] # detatchment wall
+    for k in range(n-1):
+        rates[k]=errs[k+1]/errs[k]
     
-    xs_saddle = []
-    sign_ref = 0
-    for i in range(1, step.Nx):
-        sign_new = np.sign(psi_xs_yf[i])
-        if sign_new != sign_ref:
-            sign_ref = sign_new
-            xs_saddle.append(step.xs[i])
-
-    
-    ys_saddle = []
-    sign_ref = 0
-    for j in range(1, step.Ny):
-        sign_new = np.sign(psi_ys_xstep[j])
-        if sign_new != sign_ref:
-            sign_ref = sign_new
-            ys_saddle.append(step.ys[j])
-
-        
-    return xs_saddle, ys_saddle
-    
+    return rates
 
 #------------------------------------------------------------------------------
 
