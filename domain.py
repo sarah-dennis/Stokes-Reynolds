@@ -13,9 +13,9 @@ class Domain:
 
     def __init__(self, x0, xf, y0, yf, N, filestr):
         self.x0 = x0            # left boundary x = x0
-        self.xf = xf            # right boundary x = xf
-        self.y0 = y0            # lower surface y = y0 
-        self.yf = yf            # upper surface y = height(x) <= yf
+        self.xf = xf            # right boundary x = xf 
+        self.y0 = y0            # lower surface y = y0
+        self.yf = yf            # upper boundary y = max h = yf-y0
 
         self.N = N  # scale: number of grid points in [0,1]
         self.Nx = int((xf-x0)*N + 1) #total number of x grid points
@@ -44,11 +44,12 @@ class Height(Domain):
         self.h_min = min(self.hs)
         
         self.U = U    # velocity at flat boundary 
-        self.dP = dP
-        self.visc = 1 # dynamic viscosity (mu or eta)
+        self.visc = 1 # viscosity 
+        self.dP = dP 
         self.p_ambient = 0 #10^5 Pa  
         self.p0 = -dP
         self.pN = self.p_ambient
+     
         self.Re = 0
  
 # Domain for Stokes solver
