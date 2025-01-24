@@ -23,7 +23,8 @@ class Reynolds_Solver:
         self.args=args
         self.U = U
         self.dP = dP
-        
+
+        # colorbar min maxs
         self.vel_max = 4
         self.p_min=-70
         self.p_max=70
