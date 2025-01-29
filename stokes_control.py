@@ -106,6 +106,36 @@ class Stokes_Solver:
         p = pressure.pressure(ex, u, v)
         dp, res = pressure.resistance(ex, p) 
         return dp
+    
+    def get_attachments(self,N):
+        ex=self.Example(N)
+        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
+        
+        y_xr = 0 
+        x_yr = 1 #=l
+        
+        i_yr =int( x_yr/ex.dx +1)
+        
+        j_xr = int(y_xr+1)
+
+        xr = 0
+        yr = 0
+        
+        for i in range(ex.Nx-1):
+            k = j_xr*ex.Nx + i
+            k2 = j_xr*ex.Nx + i+1    
+            if np.sign(psi[k])!= np.sign(psi[k2]):
+                xr = ex.xs[i]-1
+                
+        for j in range(ex.Ny-1):
+            k = int(j*ex.Nx + i_yr)
+            k2 = int((j+1)*ex.Nx + i_yr)
+            if np.sign(psi[k])!= np.sign(psi[k2]):
+                yr = ex.ys[j]
+                
+        
+
+        return xr,yr
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
@@ -138,9 +168,9 @@ class Stokes_Solver:
 
     # zoom domain for pressure
         if zoom:
-            lenx =0.5
-            leny =0.5
-            x_start = 2
+            lenx =0.525
+            leny =0.525
+            x_start = 1-lenx/2
             x_stop= x_start + lenx
             y_start = 0
             y_stop = y_start + leny
@@ -167,9 +197,9 @@ class Stokes_Solver:
     
     # zoom domain for velocity & stream
         if zoom:
-            lenx = 0.5
-            leny = 0.5
-            x_start = 2.075
+            lenx = 0.55
+            leny = 0.55
+            x_start = 1
             x_stop= x_start + lenx
             y_start = 0
             y_stop = y_start + leny

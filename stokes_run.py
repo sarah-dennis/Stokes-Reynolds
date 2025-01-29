@@ -78,24 +78,25 @@ example = examples.dBFS_H1p5L4_d0p25_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=
 
 # example = examples.basic
 # example = examples.BFS_biswas_Re0
-N=320
+N=200
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(example)                                      
 
 # solver.new_run(N, solver.max_iters) 
-# solver.load_scale(80,160) 
+# solver.load_scale(100,200) 
 
 # solver.load_run(N,1)
 
 # solver.load_run(N,solver.max_iters)
 
-# solver.load_run_new_many(N, 2, 2)
+# ## solver.load_run_new_many(N, 2, 2)
 
 # solver.load_plot(N, zoom=False)
+# print(solver.get_attachments(N))
 # solver.load_plot(N, zoom=True)
  
 # ------------------------------------------------------------------------------
-solver.compare(20,[40,80,160],N, linthresh=1e-7)
+# solver.compare(20,[40,80,160],320, linthresh=1e-8)
 
 
 

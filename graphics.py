@@ -28,10 +28,11 @@ mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
 mesh_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
-# colour_bar_scale=0.015 
-# colour_bar_scale=0.024 
-colour_bar_scale=0.04 
+# colour_bar_scale=0.015 # very long figures, H=1.25, L=4
+# colour_bar_scale=0.024 # long figures like H=2, L=4
+colour_bar_scale=0.04 # almost square figures like H=2.75, L=4 or zooms
 
+dpi=400
 
 contour_width = 0.25
 stream_width = 1
@@ -53,7 +54,7 @@ linthresh = 1e-4
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = dpi
     # marker = None
     marker = 'o'
     pp.plot(xs, fs, color=color, linewidth=.8, marker=marker)
@@ -69,7 +70,7 @@ def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
 
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri'):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors== 'pri':
         cs = ['r','b','forestgreen', 'darkmagenta', 'darkorgange']
@@ -95,7 +96,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
 
 def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc, colors):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors=='sec':
         cs = ['forestgreen', 'darkmagenta', 'orange', 'firebrick', 'royalblue', 'crimson']
@@ -123,7 +124,7 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc, colors):
 #------------------------------------------------------------------------------
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
-    pp.rcParams['figure.dpi'] = 500
+    pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
@@ -149,7 +150,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
         
 def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=linthresh):
     
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = dpi
     
     pp.figure()
     
@@ -188,7 +189,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
 
 def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh):
     pp.rcParams["lines.linewidth"] = .5
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = dpi
 
     pp.figure()
     
@@ -214,7 +215,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh)
 
 
 def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=20):
-    pp.rcParams['figure.dpi'] = 1000
+    pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     X, Y = np.meshgrid(xs, ys)
 
@@ -247,7 +248,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
 
 def plot_log(fs, xs, title, ax_labels):
     fig = pp.figure()
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = dpi
     pp.loglog(xs, fs, color='b')   
 
     pp.title(title)
@@ -259,7 +260,7 @@ def plot_log(fs, xs, title, ax_labels):
 
 
 def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1e-2,O2=1e-2):
-    pp.rcParams['figure.dpi'] = 300
+    pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
     

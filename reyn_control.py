@@ -6,7 +6,6 @@ Created on Tue May 21 16:05:05 2024
 """
 import numpy as np
 import graphics
-import error
 import reyn_pressures_pwlinear as pwl
 from scipy.sparse.linalg import gmres as sp_gmres
 

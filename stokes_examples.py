@@ -20,7 +20,6 @@ class BFS(PWLinear):
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
     
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
-        
 #------------------------------------------------------------------------------
 class BFS_biswas_Re0(BFS):
     def __init__(self, N):
@@ -740,8 +739,8 @@ class BFS_H2p75L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2.75
-        y_detatch = 0.51
-        x_detatch = 1.47
+        y_detatch = 0.5
+        x_detatch = 1.46
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
@@ -779,8 +778,8 @@ class BFS_H2p25L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 2.25
-        y_detatch = 0.45
-        x_detatch = 1.4
+        y_detatch = 0.44
+        x_detatch = 1.34
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
@@ -818,8 +817,8 @@ class BFS_H1p5L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 1.5
-        y_detatch = 0.3
-        x_detatch = 1.25
+        y_detatch = 0.29
+        x_detatch = 1.24
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
@@ -837,7 +836,7 @@ class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
         xf = 4
         y0 = 0
         yf = 1.25
-        y_detatch = 0.17
+        y_detatch = 0.18
         x_detatch = 1.15
         x_peaks = [x0,1,x_detatch,xf]
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
