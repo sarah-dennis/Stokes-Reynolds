@@ -43,7 +43,7 @@ class Height(Domain):
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
         
-        self.U = U    # velocity at flat boundary 
+        self.U = U    # velocity at flat boundary -g
         self.visc = 1 # viscosity 
         self.dP = dP 
         self.p_ambient = 0 #10^5 Pa  
@@ -65,30 +65,32 @@ class Space(Domain):
         
 
 #------------------------------------------------------------------------------
-def center_diff(fs, N, dx):
-    D_lower = -1*np.ones(N)
-    D_upper = np.ones(N)
-    D = np.diagflat(D_lower[1:N], -1) + np.diagflat(D_upper[0:N-1], 1)
-    
+def center_diff(fs, Nx, dx):
+    D_lower = -1*np.ones(Nx)
+    D_upper = np.ones(Nx)
+    D = np.diagflat(D_lower[1:Nx], -1) + np.diagflat(D_upper[0:Nx-1], 1)
     D = D/(2*dx)
+    
     fs_dx = D@fs 
     
-    fs_dx[0] = fs_dx[1]
-    fs_dx[-1] = fs_dx[-2]
+    # fs_dx[0] = fs_dx[1]
+    fs_dx[0]= (-3*fs[0]+4*fs[1]-fs[2])/(2*dx)
     
+    # fs_dx[-1] = fs_dx[-2]
+    fs_dx[Nx-1]= (3*fs[Nx-1]-4*fs[Nx-2]+fs[Nx-3])/(2*dx)
     return np.asarray(fs_dx)
       
-def center_second_diff(fs, N, dx):
-    D_lower = np.ones(N-1)
-    D_upper = np.ones(N-1)
-    D_center = -2*np.ones(N)
+def center_second_diff(fs, Nx, dx):
+    D_lower = np.ones(Nx-1)
+    D_upper = np.ones(Nx-1)
+    D_center = -2*np.ones(Nx)
     D = np.diagflat(D_lower, -1) +  np.diagflat(D_center, 0)+ np.diagflat(D_upper, 1)
-    
-    D[0][N-1] = 0
-    D[N-1][0] = 0
-        
+
     D = D/(dx**2)
     fs_dxx = D@fs 
+    
+    fs_dxx[0]=(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**3)
+    fs_dxx[Nx-1]=(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**3)
     
     return np.asarray(fs_dxx)
    

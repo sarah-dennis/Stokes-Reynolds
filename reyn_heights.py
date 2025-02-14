@@ -70,9 +70,9 @@ class RandomHeight(Height):
 
 #------------------------------------------------------------------------------   
 
-class SinsusoidalHeight(Height): 
+class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, h_avg, r, k):
+    def __init__(self, x0, xf, N, h_avg, r, k, U,dP):
         Nx = (xf-x0)*N + 1
         self.h_mid = h_avg
         self.r = r 
@@ -87,8 +87,6 @@ class SinsusoidalHeight(Height):
         y0 = 0
         yf = 1.1*(h_avg+r) 
 
-        U = 1    
-        dP=0
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
 
     def h_fun(self, x):
