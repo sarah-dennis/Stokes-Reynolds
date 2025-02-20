@@ -12,7 +12,7 @@ class Velocity:
     
     def __init__(self, height, ps):
         self.vx, self.vy = self.make_velocity(height, ps)
-    
+        self.flux = get_flux(self.vx, height.hs, height.dx)
     # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
@@ -40,9 +40,7 @@ class Velocity:
                     vx[j,i] = 0
                     vy[j,i] = 0
                     
-        for i in range(height.Nx):
-            
-            print(np.trapezoid(vx[:,i]), dx = height.dx)
+
         vy=np.flip(vy, 0)
         vx=np.flip(vx, 0)
         
@@ -53,12 +51,10 @@ class Adj_Velocity:
     
     def __init__(self, height, adj_ps):
         self.vx, self.vy = self.make_adj_velocity(height, adj_ps)
-    
+        self.flux = get_flux(self.vx, height.hs, height.dx)
 
     def make_adj_velocity(self, height, ps):
-        ps=np.flip(ps, 0)
-        U = height.U
-        visc = height.visc
+        # ps=np.flip(ps,0)
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
@@ -66,39 +62,127 @@ class Adj_Velocity:
            
             y = height.ys[j]
             pj = ps[j]
-            for i in range(1,height.Nx-1):
-
-                h = height.hs[i]
-                hx = height.hxs[i]
-              
-                if y <= height.hs[i]:
-                    
-                    px = (pj[i+1] - pj[i-1])/(2*height.dx)
-                    pxx = (pj[i+1]- 2*pj[i] + pj[i-1])/(height.dx**2)
-                        
-                    vx[j,i] = -1/(2*visc) * px * y*(h-y) +U*(1-y/h)
+            for i in range(3, height.Nx-4):
                 
-                    a = (2*y-3*h)*pxx - 3*hx*px
-                    vy[j,i] = -1/(12*visc) * (y**2) * a - (U/2)* (y/h)**2 * hx
-                    
-                else:
+                h = height.hs[i]
+                p = pj[i]
+                
+                if y >= h:
                     vx[j,i] = 0
                     vy[j,i] = 0
-            
-        vx[np.isnan(vx)] = 0
-        flux_sum = 0
-        for i in range(1,height.Nx-1):
-            flux_sum += integrate.trapezoid(vx[:,i], dx=height.dx)
-        flux_sum/=height.Nx-2
-        print(flux_sum)
+                elif y == 0:
+                    vx[j,i] = height.U
+                    vy[j,i] = 0
+                    
+                else: # find px and pxx
+                    h_W = height.hs[i-1]
+                    p_W = pj[i-1]
+                    
+                    h_E = height.hs[i+1]
+                    p_E = pj[i+1]
+                    
+
+                    h_WW = height.hs[i-2]
+                    p_WW = pj[i-2]
+
+                    h_WWW = height.hs[i-3]
+                    p_WWW = pj[i-3]
+                    
+
+                    h_EE = height.hs[i+2]
+                    p_EE = pj[i+2]
+
+
+                    h_EEE = height.hs[i+3]
+                    p_EEE = pj[i+3]
+                    
+                    if y <= h_E and y <= h_W:  # interior
+                        px = (p_E - p_W)/(2*height.dx)
+                        pxx = (p_E -2*p + p_W)/height.dx**2
+
+                    elif y <= h_E and y > h_W: # West out of bounds, fwd diff (right sided)
+                        if y <= h_EE:
+                            px = (-3*p +4*p_E -p_EE)/(2*height.dx)
+                            
+                            if y <= h_EEE:
+                                pxx = (2*p -5*p_E +4*p_EE -p_EEE)/height.dx**2
+                            else:
+                                pxx = (p -2*p_E + p_EE)/height.dx**2
+
+                        else:
+                            px = (p_E - p)/height.dx
+                            pxx = 0
+
+                    
+                    elif y > h_E and y<= h_W: # East out of bounds, bkwd diff (left sided)
+                    
+                        if y <= h_WW:
+                            px = (3*p -4*p_W +p_WW)/(2*height.dx)
+                            
+                            if y <= h_WWW:
+                                pxx = (2*p -5*p_W +4*p_WW -p_WWW)/height.dx**2
+
+                            else:
+                                pxx = (p -2*p_W + p_WW)/height.dx**2
+                                
+                        else:
+                            px = (p - p_W)/height.dx
+                            pxx = 0
+                            
+                        
+                
+                    else: # both East and West out of bounds
+                        px = 0
+                        pxx = 0
+
+                    q = -height.U / h - 1/(2*height.visc) * h * px
+                                        
+                    qx = -1/(3*height.visc) * h * pxx
+
+                    vx[j,i]= 1/(2*height.visc)* px * y**2 + q * y + height.U
+                    
+                    vy[j,i] = -1/(6*height.visc) * pxx * y**3 - 1/2 * qx * y**2
         
-        vy=np.flip(vy, 0)
-        vx=np.flip(vx, 0)
+                    # if h <= height.ys[j+1] and  h >= height.ys[j]:
+                    #     print(vx[j,i], vy[j,i])
+        
+        
+        for j in range(height.Ny):
+            y = height.ys[j]
+            if y < height.hs[0]:
+               vx[j,0] = vx[j,3]
+               vy[j,0] = vy[j,3]
+            if y < height.hs[1]:
+                vx[j,1] = vx[j,3]
+                vy[j,1] = vy[j,3]
+            if y < height.hs[2]:
+                vx[j,2] = vx[j,3]
+                vy[j,2] = vy[j,3]
+            
+            if y < height.hs[-1]:
+                vx[j,-1] = vx[j,height.Nx-4]
+                vy[j,-1] = vy[j,height.Nx-4]
+            if y < height.hs[-2]:
+                vx[j,-2] = vx[j,height.Nx-4]
+                vy[j,-2] = vy[j,height.Nx-4]
+            if y < height.hs[-3]:
+                vx[j,-3] = vx[j,height.Nx-4]
+                vy[j,-3] = vy[j,height.Nx-4]
+
+        # vy=np.flip(vy, 0)
+        # vx=np.flip(vx, 0)
             
         return vx, vy
             
             
-            
+def get_flux(vx, hs, dx):
+    lenx = vx.shape[1]
+    q_avg=0
+    for i in range(lenx):
+        q= np.sum(vx[:,i])/lenx
+        q_avg+=q
+
+    return q_avg/lenx
             
             
             

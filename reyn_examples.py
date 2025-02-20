@@ -7,7 +7,7 @@ Created on Wed Feb 22 10:01:42 2023
 
 import numpy as np
 
-from reyn_heights import PWL_Height, SinusoidalHeight
+from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N, args):
@@ -62,6 +62,17 @@ class Bump(SinusoidalHeight):
         k=args[1]
         super().__init__(x0, xf, N, h_avg, r, k, U, dP)
 
+class CircCavity(CircleHeight):
+    def __init__(self, U, dP, N, args):
+        x0 = 0
+
+
+        r = args[0]
+        h0=args[1]
+        l=args[2]
+        xf = x0 + 2*r + 2*l
+        super().__init__(x0, xf, N, r, h0, l, U, dP)
+    
 #-----------------------------------------------------------------------------------------------------------------------------------
 
 class HexSlider(PWL_Height):
@@ -91,7 +102,7 @@ class TriSlider(PWL_Height):
 class TriCavity(PWL_Height):
     def __init__(self, U, dP,N, args):
         x0 = 0
-        xf = 2
+        xf = x0 + 2*args[1]
         N_regions = 2
         H_mult=args[0]
         H = H_mult*(xf-x0)
@@ -102,6 +113,7 @@ class TriCavity(PWL_Height):
         
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks,U,dP)
     
+
          
 class variableSlider(PWL_Height):
     def __init__(self, U, dP,N, args=None):

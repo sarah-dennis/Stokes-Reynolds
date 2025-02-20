@@ -12,7 +12,7 @@ import graphics
 import stokes_readwrite as rw
 import stokes_convergence as cnvg
 import stokes_pressure as pressure
-delta = 0.25
+
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
@@ -29,7 +29,7 @@ class Stokes_Solver:
         self.p_min=-70
         self.p_max=70
 #------------------------------------------------------------------------------
-    def new_run(self, N, iters):
+    def new_run(self, N):
         ex = self.Example(N)
         
         u_init = np.zeros(ex.Nx * ex.Ny)
@@ -37,9 +37,9 @@ class Stokes_Solver:
         psi_init = np.zeros(ex.Nx * ex.Ny)
         past_iters = 0
     
-        u, v, psi = run_spLU(ex, u_init, v_init, psi_init, iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
+        u, v, psi = run_spLU(ex, u_init, v_init, psi_init, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
     
-        rw.write_solution(ex, u, v, psi, iters)
+        rw.write_solution(ex, u, v, psi, self.max_iters)
     
     def new_run_many(self, N_0, dN, many):
         
@@ -67,13 +67,13 @@ class Stokes_Solver:
             self.load_run(N, self.max_iters)
             N *= dN 
                                                                                                                                                                                                                                                                        
-    def load_run(self, N, iters):                                
+    def load_run(self, N):                                
         ex = self.Example(N)
         u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
         
-        u, v, psi = run_spLU(ex, u, v, psi, iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
+        u, v, psi = run_spLU(ex, u, v, psi, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
         
-        rw.write_solution(ex, u, v, psi, iters+past_iters)
+        rw.write_solution(ex, u, v, psi, self.max_iters+past_iters)
     
 
     def load_scale(self, N_load, N_scale):

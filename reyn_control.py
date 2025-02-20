@@ -15,6 +15,13 @@ from numpy.linalg import solve as np_solve
 from reyn_velocity import Velocity, Adj_Velocity
 from reyn_pressure import Pressure, Adj_Pressure
 
+lenx = 2
+leny = 2
+x_start = 1
+y_start =0.5
+x_stop= x_start + lenx
+y_stop = y_start + leny
+
 
 class Reynolds_Solver: 
     def __init__(self, Example, U, dP, args=None):
@@ -24,20 +31,13 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min maxs
-        self.vel_max = 4
-        self.p_min=-70
-        self.p_max=70
+        self.vel_max = 10
+        self.p_min=-10
+        self.p_max=10
     
-    def est_flux(self,height,ps):
-        i=height.Nx//2
-        j=height.Ny-5
-        dp = (ps[j][i+1]-ps[j][i-1])/(2*height.dx)
-        hi=height.hs[i]
-        flux = -(hi**3 * dp)/(12*height.visc) + height.U*hi/2
-        return flux
-        
+
     
-    def pwl_solve(self, N, plot=True):
+    def pwl_solve(self, N, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         rhs = pwl.make_rhs(ex)
         linOp = pwl.pwlLinOp(ex)
@@ -47,28 +47,28 @@ class Reynolds_Solver:
             print('gmres did not converge')
         ps, flux = pwl.make_ps(ex, coefs)
         pressure = Pressure(ex, ps)
-        
+        velocity = Velocity(ex, ps)
         if plot:
-            self.p_plot(ex, pressure, flux)
-            velocity = Velocity(ex, ps)
-            self.v_plot(ex, velocity, flux)
-        return pressure, flux
+            self.p_plot(ex, pressure, flux,zoom)
+            
+            self.v_plot(ex, velocity, flux,zoom)
+        return pressure, velocity
     
-    def fd_solve(self, N, plot=True):
+    def fd_solve(self, N, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         rhs = fd.make_rhs(ex)
         mat = fd.make_mat(ex)
         ps = np_solve(mat, rhs)
         pressure  = Pressure(ex, ps)
-        flux = self.est_flux(ex, pressure.ps_2D)
+        velocity = Velocity(ex, ps)
         if plot:
-            self.p_plot(ex, pressure, flux)
+            self.p_plot(ex, pressure, velocity.flux,zoom)
             
-            velocity = Velocity(ex, ps)
-            self.v_plot(ex, velocity, flux)
-        return pressure, flux
+            
+            self.v_plot(ex, velocity, velocity.flux,zoom)
+        return pressure, velocity
     
-    def fd_adj_solve(self, N, plot=True):
+    def fd_adj_solve(self, N, plot=True, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
         rhs = fd.make_rhs(ex)
@@ -76,28 +76,40 @@ class Reynolds_Solver:
         reyn_ps = np_solve(mat, rhs)
         adj_pressure = Adj_Pressure(ex, reyn_ps)
         adj_velocity = Adj_Velocity(ex, adj_pressure.ps_2D)
-        flux = self.est_flux(ex, adj_pressure.ps_2D)
         
         if plot:
-            self.p_plot(ex, adj_pressure, flux)
-            self.v_plot(ex, adj_velocity, flux)
+            self.p_plot(ex, adj_pressure, adj_velocity.flux, zoom)
+            self.v_plot(ex, adj_velocity, adj_velocity.flux, zoom)
+    
         
-        #TODO: velocity for p_adj??
-        
-        return adj_pressure, flux
+        return adj_pressure, adj_velocity
 
-    def p_plot(self, ex, pressure, flux):
+    def p_plot(self, ex, pressure, flux, zoom):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
         p_title = "" + paramstr
         p_labels = ["$p(x)$", "$x$","$y$"]
         graphics.plot_contour_mesh(pressure.ps_2D, ex.xs, ex.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
-    def v_plot(self, ex, velocity, flux):
+        if zoom:
+            xs_zoom, ys_zoom = grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
+            p_zoom = grid_zoom_2D(pressure.ps_2D, ex, x_start, x_stop, y_start, y_stop)
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+    
+    
+    def v_plot(self, ex, velocity, flux, zoom):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
         v_title = "" + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+
+        if zoom:
+
+            xs_zoom, ys_zoom = grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
+            u_2D_zoom = grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)
+            v_2D_zoom = grid_zoom_2D(velocity.vy, ex, x_start, x_stop, y_start, y_stop)
+            uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
+            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
 
 def convg_rate(errs):
@@ -118,8 +130,8 @@ def convg_pwl_fd(Example, U, dP, args, N0, dN, many,linthresh):
     solver = Reynolds_Solver(Example, U, dP, args)
     for k in range(many):
         Ns[k] = N
-        pwl_p, flux = solver.pwl_solve(N, plot=False)
-        fd_p, flux = solver.fd_solve(N, plot=False)
+        pwl_p, pwl_vel = solver.pwl_solve(N, plot=False)
+        fd_p, fd_flux = solver.fd_solve(N, plot=False)
         size_k = len(pwl_p.ps_1D)
         
         p_err = np.abs(pwl_p.ps_1D - fd_p.ps_1D)
@@ -144,4 +156,18 @@ def convg_pwl_fd(Example, U, dP, args, N0, dN, many,linthresh):
     print("l2: " + np.array2string(l2_rate))
     print("linf" + np.array2string(inf_rate))
 
+
+def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    j_0 = int((y_start - ex.y0)/ex.dy)
+    j_f = int((y_stop - ex.y0)/ex.dy)
+    return grid[j_0:j_f,i_0:i_f]
+
+def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    j_0 = int((y_start - ex.y0)/ex.dy)
+    j_f = int((y_stop - ex.y0)/ex.dy)
+    return grid_x[i_0:i_f], grid_y[j_0:j_f]
         

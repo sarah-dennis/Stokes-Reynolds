@@ -36,7 +36,7 @@ class Height(Domain):
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
-        self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
+        # self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
         self.h_eq = "h(x)"
 
@@ -89,8 +89,8 @@ def center_second_diff(fs, Nx, dx):
     D = D/(dx**2)
     fs_dxx = D@fs 
     
-    fs_dxx[0]=(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**3)
-    fs_dxx[Nx-1]=(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**3)
+    fs_dxx[0]=(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxx[Nx-1]=(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
     
     return np.asarray(fs_dxx)
    

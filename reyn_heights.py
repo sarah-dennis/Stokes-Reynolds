@@ -72,7 +72,7 @@ class RandomHeight(Height):
 
 class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, h_avg, r, k, U,dP):
+    def __init__(self, x0, xf, N, h_avg, r, k, U, dP):
         Nx = (xf-x0)*N + 1
         self.h_mid = h_avg
         self.r = r 
@@ -80,17 +80,48 @@ class SinusoidalHeight(Height):
  
         h_str = "Sinusoidal Height"
             
-        dx = (xf - x0)/(Nx-1)
+        dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
         
         y0 = 0
-        yf = 1.1*(h_avg+r) 
+        yf = (h_avg+r) 
 
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
 
     def h_fun(self, x):
         return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+    
+class CircleHeight(Height):
+    
+    def __init__(self, x0, xf, N, r, h0, l, U, dP):
+        Nx = (xf-x0)*N + 1
+        dx = 1/N
+        
+        self.h0 = h0
+        self.r = r 
+        self.l = l
+    
+        h_str = "Half Circle Height"
+            
+        dx = (xf - x0)/(Nx-1)
+        xs = np.asarray([x0 + i*dx for i in range(Nx)])
+        hs = np.asarray([self.h_fun(x) for x in xs])
+        
+        y0 = 0
+        yf = h0 + r
+
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
+
+    def h_fun(self, x):
+        # return self.h0 + np.sqrt(self.r**2 - (x-self.r)**2)
+        if x <= self.l:
+            return self.h0+self.r
+        elif x <= self.l + 2*self.r:
+            return self.h0 + self.r - np.sqrt(self.r**2 - (x-self.l-self.r)**2)
+        else:
+            return self.h0+self.r
+    
     
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):

@@ -20,6 +20,7 @@ from matplotlib import patches
 # colour_map_stream = 'plasma'
 
 stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
+# stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
 stream_cmap[:,0:3] *= 1
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
@@ -134,10 +135,10 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     #remove arrows
     ax = pp.gca()
-    for art in ax.get_children():
-        if not isinstance(art, patches.FancyArrowPatch):
-            continue
-        art.remove()        
+    # for art in ax.get_children():
+    #     if not isinstance(art, patches.FancyArrowPatch):
+    #         continue
+    #     art.remove()        
     
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[0])
@@ -156,7 +157,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[1,1]
+    stream_density=[xs.shape[0]/ys.shape[0],1]
     
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
@@ -181,7 +182,44 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
     ax.set_aspect('equal')
-    ax.set_ylim(0,max(ys))
+    pp.minorticks_on()
+    pp.show()
+    
+    
+       
+def plot_quiver_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=linthresh):
+    
+    pp.rcParams['figure.dpi'] = dpi
+    
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    
+    vscale=1000
+    
+    if log_cmap:
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
+        quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+    else:
+        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
+        quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=no_norm)
+
+    cb=pp.colorbar(quiver_plot, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
+    ticks = np.linspace(vmin, vmax, num=5)
+    cb.set_ticks(ticks)
+
+    # remove contours arrows
+    ax = pp.gca()
+    # for art in ax.get_children():
+    #     if not isinstance(art, patches.FancyArrowPatch):
+    #         continue
+    #     art.remove()        
+
+
+    pp.title(title, fontweight="bold")
+    pp.xlabel(ax_labels[1])
+    pp.ylabel(ax_labels[2])
+    ax.set_aspect('equal')
     pp.minorticks_on()
     pp.show()
 
@@ -194,7 +232,7 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh)
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    n_contours = max(zs.shape)//4
+    n_contours = max(zs.shape)
 
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh)#, vmin=-1, vmax=1, clip=True)
