@@ -31,9 +31,14 @@ class Pressure:
     
 class Adj_Pressure:
     
-    def __init__(self, height, reyn_ps):
-        self.ps_2D= self.make_adj_ps(height, reyn_ps)
-        
+    def __init__(self, height, reyn_ps, adj_ps=None):
+        self.ps_1D = reyn_ps
+        if adj_ps is None:
+            self.ps_2D= self.make_adj_ps(height, reyn_ps)
+        else:
+            self.ps_2D= adj_ps
+    
+
     def make_adj_ps(self,height,reyn_ps):
         ps_adj = np.zeros((height.Ny, height.Nx))
         hs = height.hs
@@ -132,7 +137,7 @@ class Adj_Pressure:
 
                     ps_adj[j,i] = reyn_ps[i] + adj
     
-        # ps_adj = np.flip(ps_adj, axis=0)
+        ps_adj = np.flip(ps_adj, axis=0)
 
         return ps_adj
     

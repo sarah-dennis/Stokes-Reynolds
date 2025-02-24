@@ -327,4 +327,18 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1
     fig.legend(bbox_to_anchor=(0.3, 0.425))
     
     return fig
+#------------------------------------------------------------------------------------
+def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    j_0 = int((y_start - ex.y0)/ex.dy)
+    j_f = int((y_stop - ex.y0)/ex.dy)
+    return grid[j_0:j_f,i_0:i_f]
 
+def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
+    i_0 = int((x_start - ex.x0)/ex.dx)
+    i_f = int((x_stop - ex.x0)/ex.dx)
+    j_0 = int((y_start - ex.y0)/ex.dy)
+    j_f = int((y_stop - ex.y0)/ex.dy)
+    return grid_x[i_0:i_f], grid_y[j_0:j_f]
+        

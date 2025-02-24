@@ -13,17 +13,18 @@ from domain import Height
 # PWL Height
 #------------------------------------------------------------------------------
 class PWL_Height(Height):
-    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks,U,dP):
+    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, U, dP):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
         self.N_regions = N_regions #=len(hpeaks)-1
         
-        h_str = "Piecewise Linear"
+        
         hs, self.slopes, self.widths = self.make_hs(x0, xf, N, x_peaks, h_peaks)
         y0 = 0
         yf = max(hs)  
         dP=dP
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
+        filestr = "./examples/" + f"PWL_Nr{N_regions}_H{yf}_U{U}_dP{dP}_N{N}"
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
         
     def make_hs(self, x0, xf, N, x_peaks, h_peaks):
         slopes = np.zeros(self.N_regions)
@@ -56,7 +57,7 @@ class PWL_Height(Height):
 
 class RandomHeight(Height):
     def __init__(self, x0, xf, N, h_min, h_max, U,dP):
-        h_str = "Discrete Height"
+        h_str = "./examples/" +f"Rand_H{h_max}_U{U}_dP{dP}_N{N}"
 
         Nx = (xf-x0)*N + 1
         hs = np.zeros(Nx)
@@ -78,7 +79,7 @@ class SinusoidalHeight(Height):
         self.r = r 
         self.k = k
  
-        h_str = "Sinusoidal Height"
+        h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
             
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
@@ -102,7 +103,7 @@ class CircleHeight(Height):
         self.r = r 
         self.l = l
     
-        h_str = "Half Circle Height"
+        
             
         dx = (xf - x0)/(Nx-1)
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
@@ -110,7 +111,7 @@ class CircleHeight(Height):
         
         y0 = 0
         yf = h0 + r
-
+        h_str = "./examples/" +f"circ_r{r}_H{yf}_l{l}_U{U}_dP{dP}_N{N}"
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
 
     def h_fun(self, x):
@@ -126,7 +127,7 @@ class CircleHeight(Height):
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):
     def __init__(self, x0, xf, N, h0):
-        h_str = "Constant Height"
+        h_str = "./examples/" +f"Cnsnt_H{h0}_L{xf-x0}_N{N}"
         Nx = (xf-x0)*N + 1
         hs = np.ones(Nx)*h0
         
@@ -146,7 +147,7 @@ class LinearHeight(Height): #slider bearing
         self.x0 = x0
         self.m = (hf - h0)/(xf - x0)
         self.N_regions=1
-        h_str = "Wedge Slider"
+        
         Nx = (xf-x0)*N + 1
         dx = (xf - x0)/(Nx-1)
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
@@ -155,7 +156,7 @@ class LinearHeight(Height): #slider bearing
         y0 = 0
         yf = max(h0, hf)
         dP=0
-
+        h_str = "./examples/" +f"sldr_H{yf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
 
     def h_fun(self, x):
@@ -168,7 +169,7 @@ class StepHeight(Height):
         self.N_steps = 1
         self.h_steps= [h0, hf]
         self.step_width = (xf - x0)/2
-        h_str = "Step Height"
+        h_str = "./examples/" +f"BFS_H{hf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
         y0 = 0
         yf = max(self.h_steps)
         Nx = (xf-x0)*N + 1

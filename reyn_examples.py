@@ -65,8 +65,6 @@ class Bump(SinusoidalHeight):
 class CircCavity(CircleHeight):
     def __init__(self, U, dP, N, args):
         x0 = 0
-
-
         r = args[0]
         h0=args[1]
         l=args[2]

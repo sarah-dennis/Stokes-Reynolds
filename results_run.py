@@ -39,15 +39,17 @@ for k in range(N_exs):
     dP_stokes[k] = s_solver.get_dP(N)
     x_r[k], y_r[k] = s_solver.get_attachments(N)
 
-print(x_r, y_r)
+graphics.plot_2D_multi([y_r,x_r], H, '', ['$y_r$','$x_r$'], ['$\mathcal{H}$','length: $\Delta x = \Delta y$'], loc='lower', colors='pri')
+
 
 Q_reyn = np.zeros(N_exs)
 for k in range(N_exs):
     dp = dP_stokes[k]
     args = [H[k], l]
     r_solver = r_control.Reynolds_Solver(r_exs.BFS, U, dp, args)
-    _, Q_reyn[k], _ = r_solver.pwl_solve(Ns[0])
-
+    reyn_pres, reyn_vel = r_solver.pwl_solve(Ns[0], plot=False)
+    Q_reyn[k]=reyn_vel.flux
+    
 res_reyn = dP_stokes/-Q_reyn
 res_stokes = dP_stokes/-Q_stokes
 res_err_pct = 100*np.abs(res_reyn-res_stokes)/np.abs(res_stokes)
@@ -55,9 +57,7 @@ graphics.plot_2D_multi([res_stokes,res_reyn], H, '', ['Stokes','Reyn.'],['$\math
 graphics.plot_2D(res_err_pct, H, '', ['$\mathcal{H}$','$|\mathcal{R}_{Stokes}-\mathcal{R}_{Reyn.}|/\mathcal{R}_{Stokes}\%$'], color='darkmagenta')
 
 
-# x_r=np.asarray([0.47,0.43,0.40,0.35,0.25,0.15,0.09])
-# y_r=np.asarray([0.51,0.48,0.45,0.41,0.3,0.17,0.1])
-graphics.plot_2D_multi([y_r,x_r], H, '', ['$y_r$','$x_r$'], ['$\mathcal{H}$','length: $\Delta x = \Delta y$'], loc='lower', colors='pri')
+
 
 # #------------------------------------------------------------------------------------------------------------
 
@@ -91,8 +91,8 @@ for k in range(N_exs):
     else:
         args=[H,delta]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS_deltaSmooth, U, dp, args)
-    _, Q_H2_reyn[k], _ = r_solver.pwl_solve(200)
-
+    reyn_pres, reyn_vel = r_solver.pwl_solve(200, plot=False)
+    Q_H2_reyn[k] = reyn_vel.flux
 res_H2_stokes = dP_H2_stokes/-Q_stokes
 res_H2_reyn = dP_H2_stokes/-Q_H2_reyn
 
@@ -120,8 +120,8 @@ for k in range(N_exs):
     else:
         args=[H,delta]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS_deltaSmooth, U, dp, args)
-    _, Q_H1p5_reyn[k], _ = r_solver.pwl_solve(200)
-
+    reyn_pres, reyn_vel = r_solver.pwl_solve(200, plot=False)
+    Q_H1p5_reyn[k]=reyn_vel.flux
 res_H1p5_stokes = dP_H1p5_stokes/-Q_stokes
 res_H1p5_reyn = dP_H1p5_stokes/-Q_H1p5_reyn
 
@@ -150,8 +150,8 @@ for k in range(N_exs):
     else:
         args=[H,delta]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS_deltaSmooth, U, dp, args)
-    _, Q_H1p25_reyn[k], _ = r_solver.pwl_solve(200)
-
+    reyn_pres, reyn_vel= r_solver.pwl_solve(200, plot=False)
+    Q_H1p25_reyn[k] = reyn_vel.flux
 res_H1p25_stokes = dP_H1p25_stokes/-Q_stokes
 res_H1p25_reyn = dP_H1p25_stokes/-Q_H1p25_reyn
 

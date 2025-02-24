@@ -6,13 +6,12 @@ Created on Wed Aug 30 12:20:23 2023
 """
 import numpy as np
 import domain
-from scipy import integrate
 
 class Velocity:
     
     def __init__(self, height, ps):
         self.vx, self.vy = self.make_velocity(height, ps)
-        self.flux = get_flux(self.vx, height.hs, height.dx)
+        self.flux = get_flux(self.vx, height.dx)
     # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
@@ -51,10 +50,10 @@ class Adj_Velocity:
     
     def __init__(self, height, adj_ps):
         self.vx, self.vy = self.make_adj_velocity(height, adj_ps)
-        self.flux = get_flux(self.vx, height.hs, height.dx)
+        self.flux = get_flux(self.vx, height.dx)
 
     def make_adj_velocity(self, height, ps):
-        # ps=np.flip(ps,0)
+        ps=np.flip(ps,0)
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
@@ -169,17 +168,17 @@ class Adj_Velocity:
                 vx[j,-3] = vx[j,height.Nx-4]
                 vy[j,-3] = vy[j,height.Nx-4]
 
-        # vy=np.flip(vy, 0)
-        # vx=np.flip(vx, 0)
+        vy=np.flip(vy, 0)
+        vx=np.flip(vx, 0)
             
         return vx, vy
             
             
-def get_flux(vx, hs, dx):
+def get_flux(vx, dx):
     lenx = vx.shape[1]
     q_avg=0
     for i in range(lenx):
-        q= np.sum(vx[:,i])/lenx
+        q= np.sum(vx[:,i])*dx
         q_avg+=q
 
     return q_avg/lenx

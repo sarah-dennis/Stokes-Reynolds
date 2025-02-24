@@ -9,13 +9,21 @@ import numpy as np
 from scipy.interpolate import interpn
 
 import graphics
-import stokes_readwrite as rw
-import stokes_convergence as cnvg
+import readwrite as rw
+import convergence as cnvg
 import stokes_pressure as pressure
 
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
 
+lenx = 0.55
+leny = 0.55
+x_start = 1
+y_start = 0
+x_stop= x_start + lenx
+y_stop = y_start + leny
+
+log_linthresh=1e-5  
 
 class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
@@ -99,7 +107,8 @@ class Stokes_Solver:
         psi_scaled = psi_scaled_2D.ravel(order='F')
     
         rw.write_solution(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
-    
+        
+#------------------------------------------------------------------------------    
     def get_dP(self,N):
         ex = self.Example(N)
         u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
@@ -139,16 +148,16 @@ class Stokes_Solver:
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-    def compare(self,N_min, Ns, N_max,linthresh = 1e-7,p_err=True):
+    def compare(self,N_min, Ns, N_max,p_err=True):
         
-        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.compare_Ns(self.Example, N_min, Ns, N_max,p_err)
+        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.stokes_cnvg_self(self.Example, N_min, Ns, N_max,p_err)
         title = ''#"Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
         ax_labels = ["$N$", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
         
         O1 = 1
         O2 = 1
-        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, linthresh, O1, O2)
+        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, log_linthresh, O1, O2)
 
    
 #------------------------------------------------------------------------------
@@ -166,15 +175,9 @@ class Stokes_Solver:
         # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
     
 
-    # zoom domain for pressure
+    # zoom domain
         if zoom:
-            lenx =0.525
-            leny =0.525
-            x_start = 1-lenx/2
-            x_stop= x_start + lenx
-            y_start = 0
-            y_stop = y_start + leny
-            xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
+            xs_zoom, ys_zoom = graphics.grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 
     # Pressure plot: 
         p = pressure.pressure(ex, u, v)
@@ -192,18 +195,8 @@ class Stokes_Solver:
         graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=40)
     
         if zoom:
-            p_zoom = grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
+            p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=20)
-    
-    # zoom domain for velocity & stream
-        if zoom:
-            lenx = 0.55
-            leny = 0.55
-            x_start = 1
-            x_stop= x_start + lenx
-            y_start = 0
-            y_stop = y_start + leny
-            xs_zoom, ys_zoom = grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
     
     #  Velocity plot: 
     
@@ -219,9 +212,9 @@ class Stokes_Solver:
         graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
         
         if zoom:
-            u_2D_zoom = grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
-            v_2D_zoom = grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
-            uv_mag_zoom = grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
+            u_2D_zoom = graphics.grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
+            v_2D_zoom = graphics.grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
+            uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
             graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         
     # Stream plot:
@@ -236,17 +229,3 @@ class Stokes_Solver:
             # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
     
         return dp
-
-def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
-    i_0 = int((x_start - ex.x0)/ex.dx)
-    i_f = int((x_stop - ex.x0)/ex.dx)
-    j_0 = int((y_start - ex.y0)/ex.dy)
-    j_f = int((y_stop - ex.y0)/ex.dy)
-    return grid[j_0:j_f,i_0:i_f]
-
-def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
-    i_0 = int((x_start - ex.x0)/ex.dx)
-    i_f = int((x_stop - ex.x0)/ex.dx)
-    j_0 = int((y_start - ex.y0)/ex.dy)
-    j_f = int((y_stop - ex.y0)/ex.dy)
-    return grid_x[i_0:i_f], grid_y[j_0:j_f]

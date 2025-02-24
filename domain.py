@@ -38,7 +38,7 @@ class Height(Domain):
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
         # self.hxxs = center_second_diff(self.hs, self.Nx, self.dx)
         
-        self.h_eq = "h(x)"
+        # self.h_eq = "h(x)"
 
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
@@ -57,7 +57,7 @@ class Space(Domain):
     def __init__(self, x0, xf, y0, yf, N, U, flux, Re, p0, filestr):
         super().__init__(x0, xf, y0, yf, N, filestr)
         self.U = U    # velocity at flat boundary 
-        self.visc =1 # dynamic viscosity (mu or eta: Pa s)
+        self.visc =1 # dynamic viscosity
         self.dens = 1 # density (rho: kg/m^3)
         self.p_ambient = 0 #10^5 Pa   
         self.flux=flux

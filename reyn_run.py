@@ -7,13 +7,40 @@ Created on Thu Oct 24 13:23:27 2024
 
 import reyn_control as control
 import reyn_examples as examples
+#------------------------------------------------------------------------------
+# Instructions: 
+#------------------------------------------------------------------------------
+ 
+# I. Uncomment and select an example. 
+#    class structure: examples < reyn_examples < reyn_heights < domain
+#           examples sets fluid parameters dP, U, 
+#           reyn_examples sets args (geometric parameters) H, L, h, r, etc. 
+#           stokes_heights sets grid size N=1/dx and discretizes the height function
+
+#       /> N, U, dP = [100, 1 , 0]
+#       /> Example = examples.BFS
+#       /> args = [H=2,l=4] 
+
+# II. Initialize the solver with the selected example
+#        /> solver = control.Reynolds_Solver(Example, U, dP, args)
+
+# IV. Choose a method from the solver, provide a grid size N to run or load 
+#       the solver in reyn_control has several solution, graphing and convergence methods,
+
+#        /> solver.fd_solve(N, plot=plots_on)    # Finite difference solve
+
+#        /> solver.pwl_solve(N, plot=plots_on)   # Analytic solve for piecewise-linear heights
+
+#        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
+#------------------------------------------------------------------------------
 
 plots_on=True
-zoom_on=False
-log_linthresh=1e-5  #
+zoom_on=True
 
-N = 200         #N = 1/dx = 1/dy
+# Grid size
+N = 100        # N = 1/dx = 1/dy
  
+# surface velocity
 U=1             # u(x,0) = U; u(x,h) = 0
                 # v(x,0) = 0; v(x,h) = 0
                 
@@ -31,6 +58,9 @@ r=1
 k=3.14
 
 #------------------------------------------------------------------------------
+# Piecewise-linear examples 
+#       analytic or finite difference solution
+#------------------------------------------------------------------------------
 # Example = examples.BFS
 # args = [H,l]
 
@@ -39,17 +69,6 @@ k=3.14
 
 # Example = examples.BFS_deltaSmooth
 # args = [H,delta]
-
-
-# Example = examples.Bump #  #TODO currently fd only - not pwl 
-# args=[r,k]
-
-# Example = examples.CircCavity
-# args=[r,h,l]
-
-Example = examples.TriCavity
-args = [H,l]
-
 
 # Example = examples.TriSlider
 # args = None
@@ -60,10 +79,26 @@ args = [H,l]
 # Example = examples.variableSlider  
 # args = None
 #------------------------------------------------------------------------------
+# Continuous (not piecewise linear) examples 
+#      finite difference solution only
+#------------------------------------------------------------------------------
+# Example = examples.Bump # 
+# args=[r,k]
+
+# Example = examples.CircCavity
+# args=[r,h,l]
+
+Example = examples.TriCavity
+args = [H,l]
+
+
+
+#------------------------------------------------------------------------------
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-# solver.fd_solve(N, plot=plots_on)
-# solver.pwl_solve(N, plot=plots_on)
+# solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
+solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
 solver.fd_adj_solve(N, plot=plots_on, zoom=zoom_on)
 
-# control.convg_pwl_fd(Example, U, dP, args, N0=20, dN=2, many=4,linthresh=log_linthresh)
+# solver.compare_pwl_fd([20,40,80,160,320])
+# solver.load_plot(N, zoom=zoom_on)

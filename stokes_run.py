@@ -116,7 +116,8 @@ example = examples.dBFS_H1p5L4_d0p25_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=
 solver = control.Stokes_Solver(example)                
 
 N=200
-                      
+       
+zoom_on=False               
 
 # solver.new_run(N) 
 
@@ -128,12 +129,10 @@ N=200
 
 # solver.load_run_new_many(N, 2, 2)  
 
-# solver.load_plot(N, zoom=False)
+solver.load_plot(N, zoom=zoom_on)
 
-# solver.load_plot(N, zoom=True)
- 
 # ------------------------------------------------------------------------------
-# solver.compare(20,[40,80,160],320, linthresh=1e-8)
+# solver.compare(20,[40,80,160],320)
 
 
 
