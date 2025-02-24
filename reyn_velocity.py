@@ -6,6 +6,8 @@ Created on Wed Aug 30 12:20:23 2023
 """
 import numpy as np
 import domain
+import graphics
+from scipy import stats
 
 class Velocity:
     
@@ -26,7 +28,6 @@ class Velocity:
             px = pxs[i]
             h = height.hs[i]
             hx = height.hxs[i]
-            
             q = (U*h)/2 - (px*h**3)/(12*visc)
 
             for j in range(height.Ny):
@@ -127,8 +128,6 @@ class Adj_Velocity:
                         else:
                             px = (p - p_W)/height.dx
                             pxx = 0
-                            
-                        
                 
                     else: # both East and West out of bounds
                         px = 0
@@ -142,8 +141,7 @@ class Adj_Velocity:
                     
                     vy[j,i] = -1/(6*height.visc) * pxx * y**3 - 1/2 * qx * y**2
         
-                    # if h <= height.ys[j+1] and  h >= height.ys[j]:
-                    #     print(vx[j,i], vy[j,i])
+
         
         
         for j in range(height.Ny):
@@ -176,12 +174,17 @@ class Adj_Velocity:
             
 def get_flux(vx, dx):
     lenx = vx.shape[1]
-    q_avg=0
-    for i in range(lenx):
-        q= np.sum(vx[:,i])*dx
-        q_avg+=q
+    qs = np.zeros(lenx)
 
-    return q_avg/lenx
+    for i in range(lenx):
+        qs[i]= np.sum(vx[:,i])*dx
+
+    xs = np.linspace(0, lenx/dx, lenx, float)
+    graphics.plot_2D(qs, xs, 'flux', ['x','q'])
+    
+
+    q = stats.mode(qs, axis=0, keepdims=False)[0]
+    return q
             
             
             

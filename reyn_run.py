@@ -35,34 +35,34 @@ import reyn_examples as examples
 #------------------------------------------------------------------------------
 
 plots_on=True
-zoom_on=True
+zoom_on=False
 
 # Grid size
 N = 100        # N = 1/dx = 1/dy
  
 # surface velocity
-U=1             # u(x,0) = U; u(x,h) = 0
+U=0             # u(x,0) = U; u(x,h) = 0
                 # v(x,0) = 0; v(x,h) = 0
                 
-dP = 0          # p(0,y) = -dP; p(xf,y) = 0
+dP = 20          # p(0,y) = -dP; p(xf,y) = 0
 
 # space parmaters --> args
 l=1         
-h = .25         
-H=2             
+h = .125         
+H=1.5            
 
 xr = 0.35       
 yr = 0.41
-delta = 0.5
-r=1
+delta = 0.25
+r=0.125
 k=3.14
 
 #------------------------------------------------------------------------------
 # Piecewise-linear examples 
 #       analytic or finite difference solution
 #------------------------------------------------------------------------------
-# Example = examples.BFS
-# args = [H,l]
+Example = examples.BFS
+args = [H,l]
 
 # Example = examples.BFS_noEddy
 # args = [H,xr,yr] 
@@ -78,6 +78,7 @@ k=3.14
 
 # Example = examples.variableSlider  
 # args = None
+
 #------------------------------------------------------------------------------
 # Continuous (not piecewise linear) examples 
 #      finite difference solution only
@@ -88,8 +89,8 @@ k=3.14
 # Example = examples.CircCavity
 # args=[r,h,l]
 
-Example = examples.TriCavity
-args = [H,l]
+# Example = examples.TriCavity
+# args = [H,l]
 
 
 
@@ -97,7 +98,7 @@ args = [H,l]
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
-solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
+# solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
 solver.fd_adj_solve(N, plot=plots_on, zoom=zoom_on)
 
 # solver.compare_pwl_fd([20,40,80,160,320])

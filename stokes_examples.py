@@ -6,6 +6,28 @@ Created on Tue May 21 16:15:37 2024
 """
 
 from stokes_heights import PWLinear
+
+#------------------------------------------------------------------------------
+# <<===== BFS ======>>
+#------------------------------------------------------------------------------
+class TriCavity(PWLinear):
+    def __init__ (self, N):
+        p_amb = 0
+        x0 = 0
+        xf = 8
+        l=xf//4
+        y0 = 0
+        yf = 2
+        x_peaks = [x0, x0+l, x0+2*l, x0+3*l, xf]
+        delta = 1
+        y_peaks=[[yf,yf-delta],[yf-delta,yf-delta],[0,0],[yf-delta,yf-delta],[yf-delta,yf]]
+        q=1
+        U=0
+        Re=0
+        name_str = "TriCavity_H4_Re0_Q2_U0"
+        filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
+
 #------------------------------------------------------------------------------
 # <<===== BFS ======>>
 #------------------------------------------------------------------------------
@@ -406,7 +428,7 @@ class BFS_H1p125L4_Re0p25_Q2_U0(BFS):
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
          
 #------------------------------------------------------------------------------
-# <<====== Smoothed BFS =======>>
+# <<====== Smoothed-Step  =======>>
 #------------------------------------------------------------------------------
 class BFS_deltaSmooth(PWLinear):
     def __init__ (self, L, l,H, h, delta, U, q, Re, N, filestr):
@@ -730,7 +752,7 @@ class dBFS_H1p25L4_d0_Re0_Q2_U0(BFS):
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
 
 #------------------------------------------------------------------------------
-# <<====== Corner Removal =======>>
+# <<======  wedged corner BFS =======>>
 #------------------------------------------------------------------------------
 
 class BFS_H2p75L4_noEddy_Re0_Q2_U0(PWLinear):
@@ -850,7 +872,7 @@ class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)      
 
 #------------------------------------------------------------------------------
-# <<======lower corner smoothing =======>>
+# <<====== wedged corner variations =======>>
 #------------------------------------------------------------------------------
 
 class BFS_H2L4_cornerTriA_Re0_Q2_U0(PWLinear):

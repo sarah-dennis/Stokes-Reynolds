@@ -6,7 +6,7 @@ Created on Fri May 24 08:49:45 2024
 """
 import numpy as np
 import time
-import stokes_readwrite as rw
+import readwrite as rw
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 
@@ -34,7 +34,7 @@ def run_spLU(ex, u, v, old_psi, iters, past_iters, error_mod, write_mod, err_tol
                 break
 
         if k % write_mod == 0:
-            rw.write_solution(ex, u, v, psi, k+1+past_iters)
+            rw.write_stokes(ex, u, v, psi, k+1+past_iters)
             
         old_psi = psi
     t_kf = time.time()

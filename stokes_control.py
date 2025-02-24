@@ -26,11 +26,11 @@ y_stop = y_start + leny
 log_linthresh=1e-5  
 
 class Stokes_Solver:
-    def __init__(self, Example, max_iters=50000):
+    def __init__(self, Example, max_iters=5):
         self.Example = Example
         self.max_iters = max_iters
-        self.write_mod = 500
-        self.error_mod = 500
+        self.write_mod = 50
+        self.error_mod = 50
         self.err_tol = 1e-8
         
         self.vel_max = 4
@@ -47,7 +47,7 @@ class Stokes_Solver:
     
         u, v, psi = run_spLU(ex, u_init, v_init, psi_init, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
     
-        rw.write_solution(ex, u, v, psi, self.max_iters)
+        rw.write_stokes(ex, u, v, psi, self.max_iters)
     
     def new_run_many(self, N_0, dN, many):
         
@@ -77,11 +77,11 @@ class Stokes_Solver:
                                                                                                                                                                                                                                                                        
     def load_run(self, N):                                
         ex = self.Example(N)
-        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx*ex.Ny)
+        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx*ex.Ny)
         
         u, v, psi = run_spLU(ex, u, v, psi, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
         
-        rw.write_solution(ex, u, v, psi, self.max_iters+past_iters)
+        rw.write_stokes(ex, u, v, psi, self.max_iters+past_iters)
     
 
     def load_scale(self, N_load, N_scale):
@@ -90,7 +90,7 @@ class Stokes_Solver:
         
         points_load = (ex_load.ys, ex_load.xs)
         
-        u_load, v_load, psi_load, past_iters = rw.read_solution(ex_load.filestr+".csv", ex_load.Ny*ex_load.Nx)
+        u_load, v_load, psi_load, past_iters = rw.read_stokes(ex_load.filestr+".csv", ex_load.Ny*ex_load.Nx)
         u_load_2D = u_load.reshape((ex_load.Ny,ex_load.Nx))
         v_load_2D = v_load.reshape((ex_load.Ny,ex_load.Nx))
         psi_load_2D = psi_load.reshape((ex_load.Ny,ex_load.Nx))
@@ -106,19 +106,19 @@ class Stokes_Solver:
         v_scaled = v_scaled_2D.ravel(order='F')
         psi_scaled = psi_scaled_2D.ravel(order='F')
     
-        rw.write_solution(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
+        rw.write_stokes(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
         
 #------------------------------------------------------------------------------    
     def get_dP(self,N):
         ex = self.Example(N)
-        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
+        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         p = pressure.pressure(ex, u, v)
         dp, res = pressure.resistance(ex, p) 
         return dp
     
     def get_attachments(self,N):
         ex=self.Example(N)
-        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
+        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         
         y_xr = 0 
         x_yr = 1 #=l
@@ -165,7 +165,7 @@ class Stokes_Solver:
 #------------------------------------------------------------------------------
     def load_plot(self, N,zoom=False):
         ex = self.Example(N)
-        u, v, psi, past_iters = rw.read_solution(ex.filestr+".csv", ex.Nx * ex.Ny)
+        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
     
     # Grid domain
         xs = ex.xs
