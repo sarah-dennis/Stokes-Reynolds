@@ -13,7 +13,7 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
     ex_max = Ex(N_max)
     
     # Load max grid for 'true' values
-    u_max, v_max, psi_max, past_iters = rw.read_solution(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
+    u_max, v_max, psi_max, past_iters = rw.read_stokes(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
     psi_max = psi_max.reshape((ex_max.Ny,ex_max.Nx))
 
     if p_err:
@@ -45,7 +45,7 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
             mult = int(Ns[n-1]/N_min)
             
             
-        u_n, v_n, psi_n, past_iters = rw.read_solution(ex_n.filestr+".csv", ex_n.Nx * ex_n.Ny)
+        u_n, v_n, psi_n, past_iters = rw.read_stokes(ex_n.filestr+".csv", ex_n.Nx * ex_n.Ny)
         psi_n=psi_n.reshape((ex_n.Ny, ex_n.Nx))
 
         if p_err:
@@ -113,6 +113,114 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
     return err_l1, err_l2, err_inf, cnvg_rates, ex_min
 
 #------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+def reyn_cnvg_self(solver, N_min, Ns, N_max):
+    # Load max grid for 'true' values
+    p_max, vel_max = solver.fd_adj_solve(N_max, plot=True)
+    p_min, vel_min = solver.fd_adj_solve(N_min, plot=False)
+    
+    ps_max = np.nan_to_num(p_max.ps_2D)
+    ps_min = np.nan_to_num(p_min.ps_2D)
+
+    Nx_min = ps_min.shape[1]
+    Ny_min = ps_min.shape[0]
+
+
+    us_max = np.nan_to_num(vel_max.vx)
+    vs_max = np.nan_to_num(vel_max.vy)
+        
+
+    mult_max = int(N_max/N_min)
+    
+
+    err_p = np.zeros((len(Ns)+1,Ny_min,Nx_min))
+    err_p_inf = np.zeros(len(Ns)+1)
+    err_p_l1 = np.zeros(len(Ns)+1)
+    err_p_l2 = np.zeros(len(Ns)+1)
+    
+    err_vx = np.zeros((len(Ns)+1,Ny_min,Nx_min))
+    err_vy = np.zeros((len(Ns)+1,Ny_min,Nx_min))
+    err_vel_inf = np.zeros(len(Ns)+1)
+    err_vel_l1 = np.zeros(len(Ns)+1)
+    err_vel_l2 = np.zeros(len(Ns)+1)
+    
+    for n in range(len(Ns)+1):
+        if n == 0:
+            p_n, vel_n = solver.fd_adj_solve(N_min, plot=False)
+            mult = 1
+        else:
+            p_n, vel_n = solver.fd_adj_solve(Ns[n-1], plot=False)
+        
+            mult = int(Ns[n-1]/N_min)
+        
+        ps_n = np.nan_to_num(p_n.ps_2D)
+        us_n = np.nan_to_num(vel_n.vx)
+        vs_n = np.nan_to_num(vel_n.vy)
+            
+        for k_min in range(Ny_min*Nx_min):
+        # all indices (i,j) on grid N_min
+            i = k_min % Nx_min
+            j = (k_min // Nx_min)
+            
+            # -> indices on grid N || N_min
+            i_n = mult * i
+            j_n = mult * j
+
+            # -> indices on grid N_max || N_min
+            i_max = mult_max * i
+            j_max = mult_max * j
+            
+            err_p[n,j,i] = abs(ps_max[j_max,i_max] - ps_n[j_n,i_n])
+            err_p_l1[n] += err_p[n,j,i]
+            err_p_l2[n] += err_p[n,j,i]**2
+
+            err_vx[n,j,i] = abs(us_max[j_max,i_max] - us_n[j_n,i_n])
+            err_vy[n,j,i] = abs(vs_max[j_max,i_max] - vs_n[j_n,i_n])
+            err_vel_l1[n]+= err_vx[n,j,i] + err_vy[n,j,i]
+            err_vel_l2[n]+= (err_vx[n,j,i]**2 + err_vy[n,j,i]**2)
+                
+        size_n=  ps_n.shape[1]*ps_n.shape[0]
+        
+        err_p_inf[n] = np.max(err_p[n])
+        err_p_l1[n] /= size_n
+        err_p_l2[n] = np.sqrt(err_p_l2[n] / size_n)
+        
+    
+        err_vel_inf[n] = np.max([np.max(err_vx[n]),np.max(err_vy[n])])
+        err_vel_l1[n] /= size_n
+        err_vel_l2[n] = np.sqrt(err_vel_l2[n]/size_n)
+
+            
+    p_l1_rate = convg_rate(err_p_l1)
+    p_l2_rate = convg_rate(err_p_l2)
+    p_inf_rate = convg_rate(err_p_inf)
+    p_cnvg_rates = np.stack([p_l1_rate, p_l2_rate, p_inf_rate], axis=0)
+    
+
+    vel_l1_rate = convg_rate(err_vel_l1)
+    vel_l2_rate = convg_rate(err_vel_l2)
+    vel_inf_rate = convg_rate(err_vel_inf)
+    vel_cnvg_rates = np.stack([vel_l1_rate, vel_l2_rate, vel_inf_rate], axis=0)
+    
+    print("pressure cnvg rates")
+    print("l1: " + np.array2string(p_cnvg_rates[0], precision=2))
+    print("l2: " + np.array2string(p_cnvg_rates[1], precision=2))
+    print("linf" + np.array2string(p_cnvg_rates[2], precision=2))
+    
+
+    print("velocity cnvg rates")
+    print("l1: " + np.array2string(vel_cnvg_rates[0], precision=2))
+    print("l2: " + np.array2string(vel_cnvg_rates[1], precision=2))
+    print("linf" + np.array2string(vel_cnvg_rates[2], precision=2))
+
+    p_info = [err_p_l1, err_p_l2, err_p_inf, p_cnvg_rates]
+    vel_info = [err_vel_l1, err_vel_l2, err_vel_inf, vel_cnvg_rates]
+    return p_info, vel_info
+
+#------------------------------------------------------------------------------
+
+
+
 def reyn_cnvg_pwl_fd(solver, Ns):
     many=len(Ns)
     inf_errs = np.zeros(many)

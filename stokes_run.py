@@ -38,7 +38,7 @@ import stokes_examples as examples
 # example = examples.BFS_H2p75L4_Re0_Q2_U0
 # example = examples.BFS_H2p5L4_Re0_Q2_U0
 # example = examples.BFS_H2p25L4_Re0_Q2_U0
-example = examples.BFS_H2L4_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=320****
+# example = examples.BFS_H2L4_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=320****
 # example = examples.BFS_H1p25L4_Re0_Q2_U0
 # example = examples.BFS_H1p125L4_Re0_Q2_U0
 #------------------------------------------------------------------------------
@@ -113,22 +113,22 @@ example = examples.BFS_H2L4_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=320****
 # example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriD_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# example = examples.TriCavity
+example = examples.TriCavity
 #------------------------------------------------------------------------------
 
-solver = control.Stokes_Solver(example)                
+solver = control.Stokes_Solver(example, max_iters=50000)                
 
-N=80
+N=40
        
 zoom_on=False               
 
 # solver.new_run(N) 
-
+# 
 # solver.load_scale(100,200) 
 
-solver.load_run(N)
+# solver.load_run(N)
 # 
-# solver.load_run_new_many(N, 2, 2)  
+solver.load_run_new_many(N, 2, 3)  
 
 solver.load_plot(N, zoom=zoom_on)
 

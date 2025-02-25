@@ -86,7 +86,7 @@ class Reynolds_Solver:
         rhs = fd.make_rhs(ex)
         mat = fd.make_mat(ex)
         p_reyn = np_fd_solve(mat, rhs)
-        adj_pressure = Adj_Pressure(ex, p_reyn)
+        adj_pressure = Adj_Pressure(ex, reyn_ps=p_reyn)
         adj_velocity = Adj_Velocity(ex, adj_pressure.ps_2D)
         
         if plot:
@@ -121,7 +121,6 @@ class Reynolds_Solver:
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
         if zoom:
-
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)
             v_2D_zoom = graphics.grid_zoom_2D(velocity.vy, ex, x_start, x_stop, y_start, y_stop)
@@ -134,16 +133,13 @@ class Reynolds_Solver:
         u = u.reshape((ex.Ny, ex.Nx))
         v = v.reshape((ex.Ny, ex.Nx))
         p = p.reshape((ex.Ny, ex.Nx))
-        pressure = Adj_Pressure(ex, p)
+        pressure = Adj_Pressure(ex, adj_ps=p)
         velocity = Adj_Velocity(ex, p)
         self.p_plot(ex, pressure, velocity.flux, zoom)
         self.v_plot(ex, velocity, zoom)
 
-    def compare_pwl_fd(self, Ns):
-        
+    def convg_pwl_fd(self, Ns):
         l1_errs, l2_errs, inf_errs, cnvg_rates = cnvg.reyn_cnvg_pwl_fd(self, Ns)
-        
-        
         title ='' #'Grid Convergence for Reynolds pressure \n Finite-Difference to Piecewise-Linear-Analytic'
         ax_labels=['$N$',  '$||p_{FD} - p_{PLA}||$']
         fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
@@ -151,6 +147,19 @@ class Reynolds_Solver:
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,log_linthresh, O1, O2)
     
+    def convg_adj_fd(self,N_min, Ns, N_max):
+        p_info, vel_info = cnvg.reyn_cnvg_self(self, N_min, Ns, N_max)
+        p_title ='Convergence for Adjusted Reynolds pressure'
+        v_title ='Convergence for Adjusted Reynolds velocity'
+        p_ax_labels=['$N$',  '$||p_{N} - p_{N*}||$']
+        v_ax_labels=['$N$',  '$|(u,v)_{N} - (u,v)_{N*}|_2$']
+        fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
+        O1 = 1
+        O2 = 1
+        # p_info and vel_info store errors in l1, l2, linf norms (plotted) and convergance rates (not plotted)
+        graphics.plot_log_multi(p_info[:3],[N_min] + Ns,p_title,fun_labels,p_ax_labels,log_linthresh, O1, O2)
+        graphics.plot_log_multi(vel_info[:3],[N_min] + Ns,v_title,fun_labels,v_ax_labels,log_linthresh, O1, O2)
+
 
 
 

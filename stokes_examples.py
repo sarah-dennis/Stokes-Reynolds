@@ -14,15 +14,14 @@ class TriCavity(PWLinear):
     def __init__ (self, N):
         p_amb = 0
         x0 = 0
-        xf = 8
-        l=xf//4
+        xf = 2
+        l=xf//2
         y0 = 0
-        yf = 2
-        x_peaks = [x0, x0+l, x0+2*l, x0+3*l, xf]
-        delta = 1
-        y_peaks=[[yf,yf-delta],[yf-delta,yf-delta],[0,0],[yf-delta,yf-delta],[yf-delta,yf]]
-        q=1
-        U=0
+        yf = 4
+        x_peaks = [x0, x0+l, xf]
+        y_peaks=[[yf,yf],[0,0],[yf,yf]]
+        q=0
+        U=1
         Re=0
         name_str = "TriCavity_H4_Re0_Q2_U0"
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)

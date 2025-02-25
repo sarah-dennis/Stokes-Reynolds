@@ -102,8 +102,8 @@ class TriCavity(PWL_Height):
         x0 = 0
         xf = x0 + 2*args[1]
         N_regions = 2
-        H_mult=args[0]
-        H = H_mult*(xf-x0)
+
+        H = args[0]
         x_peaks = np.asarray([x0, xf//2, xf],float)
         
         dx = 1/((xf-x0)*N)

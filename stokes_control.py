@@ -26,13 +26,17 @@ y_stop = y_start + leny
 log_linthresh=1e-5  
 
 class Stokes_Solver:
-    def __init__(self, Example, max_iters=5):
+    def __init__(self, Example, max_iters=50000):
+        # domain 
         self.Example = Example
+        
+        # iterative solution args
         self.max_iters = max_iters
-        self.write_mod = 50
-        self.error_mod = 50
+        self.write_mod = 500
+        self.error_mod = 500
         self.err_tol = 1e-8
         
+        # plotting thresholds
         self.vel_max = 4
         self.p_min=-70
         self.p_max=70
@@ -56,23 +60,23 @@ class Stokes_Solver:
         for k in range (1, many): 
             N = N_load*dN
             self.load_scale(N_load, N)
-            self.load_run(N, self.max_iters)
+            self.load_run(N)
             N_load = N
 
     
     def load_run_new_many(self, N_0, dN, many):
         N_load = N_0
-        self.load_run(N_load, self.max_iters)
+        self.load_run(N_load)
         for k in range (many): 
             N = N_load*dN
             self.load_scale(N_load, N)
-            self.load_run(N, self.max_iters)
+            self.load_run(N)
             N_load = N
 
     def load_run_many(self, N_0, dN, many):
         N = N_0
         for k in range (many): 
-            self.load_run(N, self.max_iters)
+            self.load_run(N)
             N *= dN 
                                                                                                                                                                                                                                                                        
     def load_run(self, N):                                

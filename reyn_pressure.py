@@ -31,8 +31,10 @@ class Pressure:
     
 class Adj_Pressure:
     
-    def __init__(self, height, reyn_ps, adj_ps=None):
-        self.ps_1D = reyn_ps
+    def __init__(self, height, reyn_ps=None, adj_ps=None):
+        
+        if reyn_ps != None:
+            self.ps_1D = reyn_ps
         if adj_ps is None:
             self.ps_2D= self.make_adj_ps(height, reyn_ps)
         else:

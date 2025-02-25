@@ -189,6 +189,7 @@ def update_rhs(ex, u, v, psi): #
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
                 scale_SE = ex.scale_SE(i,j)
+                
                 dpsi_bc += ex.interp(scale_SE, psi[k_NW])
 
             if ex.space[j-1,i-1] == -1: #SW:
