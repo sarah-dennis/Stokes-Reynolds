@@ -13,8 +13,8 @@ class PWLinear(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
     # peak_ys = [(yf,h_in),...,(hi_left, hi_right),...,(h_out,yf)]
     
-    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, p_amb, filestr, x_peaks, y_peaks):
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, p_amb, filestr)
+    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
         # peaks must fall on the grid
         self.x_peaks = x_peaks
 

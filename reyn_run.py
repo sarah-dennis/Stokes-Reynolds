@@ -58,8 +58,8 @@ k=3.14
 # Example = examples.BFS_noEddy
 # args = [H,xr,yr] 
 
-# Example = examples.BFS_deltaSmooth
-# args = [H,delta]
+Example = examples.BFS_deltaSmooth
+args = [H,delta]
 
 # Example = examples.TriSlider
 # args = None
@@ -70,8 +70,8 @@ k=3.14
 # Example = examples.variableSlider  
 # args = None
 
-Example = examples.TriCavity
-args = [H,l]
+# Example = examples.TriCavity
+# args = [H,l]
 
 #------------------------------------------------------------------------------
 ## Smooth examples 
@@ -85,7 +85,7 @@ args = [H,l]
 
 #------------------------------------------------------------------------------
 ## surface velocity
-U=1             # u(x,0) = U; u(x,h) = 0
+U=0.0125             # u(x,0) = U; u(x,h) = 0
                 # v(x,0) = 0; v(x,h) = 0
 
 ## pressure drop                 
@@ -96,7 +96,7 @@ solver = control.Reynolds_Solver(Example, U, dP, args)
 #------------------------------------------------------------------------------
 
 ## grid size
-N = 80        # N = 1/dx = 1/dy
+# N = 80        # N = 1/dx = 1/dy
 
 ## solution methods (plots and returns pressure, velocity )
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
@@ -104,8 +104,8 @@ N = 80        # N = 1/dx = 1/dy
 # solver.fd_adj_solve(N, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
-solver.load_plot(N, zoom=zoom_on)
+# solver.load_plot(N, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
-# solver.convg_pwl_fd([20,40,80,160,320])
+# solver.convg_pwl_fd([20,40,80,160])
 # solver.convg_adj_fd(20, [40, 80, 160, 320,640,1280],2560)

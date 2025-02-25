@@ -13,17 +13,16 @@ from domain import Height
 # PWL Height
 #------------------------------------------------------------------------------
 class PWL_Height(Height):
-    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, U, dP):
+    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
-        self.N_regions = N_regions #=len(hpeaks)-1
-        
+        self.N_regions = N_regions # = len(h_peaks)-1
         
         hs, self.slopes, self.widths = self.make_hs(x0, xf, N, x_peaks, h_peaks)
+        
         y0 = 0
         yf = max(hs)  
-        dP=dP
-        filestr = "./examples/" + f"PWL_Nr{N_regions}_H{yf}_U{U}_dP{dP}_N{N}"
+        
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
         
     def make_hs(self, x0, xf, N, x_peaks, h_peaks):
@@ -56,8 +55,8 @@ class PWL_Height(Height):
 #------------------------------------------------------------------------------
 
 class RandomHeight(Height):
-    def __init__(self, x0, xf, N, h_min, h_max, U,dP):
-        h_str = "./examples/" +f"Rand_H{h_max}_U{U}_dP{dP}_N{N}"
+    def __init__(self, x0, xf, N, h_min, h_max, U, dP, filestr):
+        # h_str = "./examples/" +f"Rand_H{h_max}_U{U}_dP{dP}_N{N}"
 
         Nx = (xf-x0)*N + 1
         hs = np.zeros(Nx)
@@ -66,20 +65,20 @@ class RandomHeight(Height):
             hs[i] = h_min + (h_max - h_min) * random.random()/(i+1)
         y0 = 0
         yf = max(hs)
-        super().__init__(x0, xf, y0, yf, Nx-1, hs, U, dP, h_str)
+        
+        super().__init__(x0, xf, y0, yf, Nx-1, hs, U, dP, filestr)
   
 
 #------------------------------------------------------------------------------   
-
 class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, h_avg, r, k, U, dP):
+    def __init__(self, x0, xf, N, h_avg, r, k, U, dP, filestr):
         Nx = (xf-x0)*N + 1
         self.h_mid = h_avg
         self.r = r 
         self.k = k
  
-        h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
+        # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
             
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
@@ -88,14 +87,15 @@ class SinusoidalHeight(Height):
         y0 = 0
         yf = (h_avg+r) 
 
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
     def h_fun(self, x):
-        return self.h_mid * (1 + self.r * np.cos(self.k*x))    
+        return self.h_mid * (1 + self.r * np.cos(self.k*x))   
     
+#------------------------------------------------------------------------------    
 class CircleHeight(Height):
     
-    def __init__(self, x0, xf, N, r, h0, l, U, dP):
+    def __init__(self, x0, xf, N, r, h0, l, U, dP, filestr):
         Nx = (xf-x0)*N + 1
         dx = 1/N
         
@@ -111,8 +111,8 @@ class CircleHeight(Height):
         
         y0 = 0
         yf = h0 + r
-        h_str = "./examples/" +f"circ_r{r}_H{yf}_l{l}_U{U}_dP{dP}_N{N}"
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
+        # h_str = "./examples/" +f"circ_r{r}_H{yf}_l{l}_U{U}_dP{dP}_N{N}"
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
     def h_fun(self, x):
         # return self.h0 + np.sqrt(self.r**2 - (x-self.r)**2)
@@ -126,8 +126,8 @@ class CircleHeight(Height):
     
 #------------------------------------------------------------------------------
 class ConstantHeight(Height):
-    def __init__(self, x0, xf, N, h0):
-        h_str = "./examples/" +f"Cnsnt_H{h0}_L{xf-x0}_N{N}"
+    def __init__(self, x0, xf, N, h0, filestr):
+        # h_str = "./examples/" +f"Cnsnt_H{h0}_L{xf-x0}_N{N}"
         Nx = (xf-x0)*N + 1
         hs = np.ones(Nx)*h0
         
@@ -136,47 +136,23 @@ class ConstantHeight(Height):
         U = 1    
 
         dP=2
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP,  h_str)
-
-#------------------------------------------------------------------------------
-class LinearHeight(Height): #slider bearing
-    
-    def __init__(self, x0, xf, N, h0, hf, U):
-        self.h0 = h0
-        self.hf = hf
-        self.x0 = x0
-        self.m = (hf - h0)/(xf - x0)
-        self.N_regions=1
-        
-        Nx = (xf-x0)*N + 1
-        dx = (xf - x0)/(Nx-1)
-        xs = np.asarray([x0 + i*dx for i in range(Nx)])
-        hs = np.asarray([self.h_fun(x) for x in xs])
-
-        y0 = 0
-        yf = max(h0, hf)
-        dP=0
-        h_str = "./examples/" +f"sldr_H{yf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP, h_str)
-
-    def h_fun(self, x):
-        return self.h0 + self.m * (x - self.x0)
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
 #------------------------------------------------------------------------------
 class StepHeight(Height):
-    def __init__(self, x0, xf, N, h0, hf, x_step, U,dP):
+    def __init__(self, x0, xf, N, h0, hf, x_step, U,dP, filestr):
         self.x_step = x_step
         self.N_steps = 1
         self.h_steps= [h0, hf]
         self.step_width = (xf - x0)/2
-        h_str = "./examples/" +f"BFS_H{hf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
+        # h_str = "./examples/" +f"BFS_H{hf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
         y0 = 0
         yf = max(self.h_steps)
         Nx = (xf-x0)*N + 1
         hs = self.make_hs(x0, xf, Nx, self.N_steps, self.h_steps, self.step_width)  
 
 
-        super().__init__(x0, xf, y0, yf, N, hs, U, dP,h_str)
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
     def make_hs(self, x0, xf, Nx, n_steps, h_steps, step_width):
         hs = np.zeros(Nx)

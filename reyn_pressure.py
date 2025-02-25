@@ -8,11 +8,16 @@ Created on Thu Dec  5 13:28:42 2024
 import numpy as np
 
 class Pressure:
-    def __init__(self, height, ps):
-        self.ps_1D = ps
-        self.ps_2D = self.make_2D_ps(height,ps)
+    def __init__(self, height, ps_1D, ps_2D):
+        self.ps_1D = ps_1D
+        self.ps_2D = ps_2D
         
-    def make_2D_ps(s_elf,height,ps):
+class ReynoldsPressure(Pressure):
+    def __init__(self, height, ps_1D):
+        ps_2D = self.make_2D_ps(height,ps_1D)
+        super().__init__(height, ps_1D, ps_2D)
+        
+    def make_2D_ps(self,height,ps):
         ps_2D = np.zeros((height.Ny, height.Nx))
         
         for i in range(height.Nx):
@@ -29,19 +34,22 @@ class Pressure:
         return ps_2D
             
     
-class Adj_Pressure:
+class AdjPressure(Pressure):
     
     def __init__(self, height, reyn_ps=None, adj_ps=None):
         
-        if reyn_ps != None:
-            self.ps_1D = reyn_ps
+        if reyn_ps is not None:
+            ps_1D = reyn_ps # if reading in solution, reyn_ps were not saved
+            
         if adj_ps is None:
-            self.ps_2D= self.make_adj_ps(height, reyn_ps)
+            ps_2D= self.make_adj_ps(height, reyn_ps)
         else:
-            self.ps_2D= adj_ps
+            ps_2D= adj_ps
+        
+        super().__init__(height, ps_1D, ps_2D)
     
 
-    def make_adj_ps(self,height,reyn_ps):
+    def make_adj_ps(self, height, reyn_ps):
         ps_adj = np.zeros((height.Ny, height.Nx))
         hs = height.hs
         
@@ -144,3 +152,7 @@ class Adj_Pressure:
         return ps_adj
     
 
+class PertPressure:
+    def __init__(self, height, reyn_ps=None, pert_ps=None):
+        #TODO
+        super().__init__(height, reyn_ps, pert_ps)

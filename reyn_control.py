@@ -13,8 +13,8 @@ import reyn_pressures_pwlinear as pwl
 
 import reyn_pressures_finDiff as fd
 
-from reyn_velocity import Velocity, Adj_Velocity
-from reyn_pressure import Pressure, Adj_Pressure
+from reyn_velocity import Velocity, ReynoldsVelocity, AdjVelocity, PertVelocity
+from reyn_pressure import Pressure, ReynoldsPressure, AdjPressure, PertPressure
 from numpy.linalg import solve as np_fd_solve
 from reyn_heights import PWL_Height
 from scipy.sparse.linalg import gmres as sp_pwl_gmres
@@ -38,7 +38,7 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min maxs
-        self.vel_max =70
+        self.vel_max = 50
         self.p_min=-10
         self.p_max=10
     
@@ -57,14 +57,14 @@ class Reynolds_Solver:
         if exit_code != 0:
             raise Exception('gmres did not converge')
         ps, flux = pwl.make_ps(ex, coefs)
-        pressure = Pressure(ex, ps)
-        velocity = Velocity(ex, ps)
+        pressure = ReynoldsPressure(ex, ps)
+        velocity = ReynoldsVelocity(ex, ps)
         
         
         if plot:
             self.p_plot(ex, pressure, flux,zoom)
-            
             self.v_plot(ex, velocity, zoom)
+        
         return pressure, velocity
     
     def fd_solve(self, N, plot=True,zoom=False):
@@ -72,35 +72,62 @@ class Reynolds_Solver:
         rhs = fd.make_rhs(ex)
         mat = fd.make_mat(ex)
         ps = np_fd_solve(mat, rhs)
-        pressure  = Pressure(ex, ps)
-        velocity = Velocity(ex, ps)
+        pressure = ReynoldsPressure(ex, ps)
+        velocity = ReynoldsVelocity(ex, ps)
         if plot:
             self.p_plot(ex, pressure, velocity.flux, zoom)
-            
             self.v_plot(ex, velocity, zoom)
+
         return pressure, velocity
     
-    def fd_adj_solve(self, N, plot=True, zoom=False):
+    def fd_adj_solve(self, N, write=False, plot=True, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
         rhs = fd.make_rhs(ex)
         mat = fd.make_mat(ex)
         p_reyn = np_fd_solve(mat, rhs)
-        adj_pressure = Adj_Pressure(ex, reyn_ps=p_reyn)
-        adj_velocity = Adj_Velocity(ex, adj_pressure.ps_2D)
+        adj_pressure = AdjPressure(ex, reyn_ps=p_reyn)
+        adj_velocity = AdjVelocity(ex, adj_pressure.ps_2D)
         
         if plot:
             self.p_plot(ex, adj_pressure, adj_velocity.flux, zoom)
             self.v_plot(ex, adj_velocity, zoom)
         
-        nm = ex.Nx * ex.Ny
-        u = adj_velocity.vx.reshape(nm)
-        v = adj_velocity.vy.reshape(nm)
-        p_adj = adj_pressure.ps_2D.reshape(nm)
-        rw.write_reyn(ex, u, v, p_adj)
+        if write:
+            nm = ex.Nx * ex.Ny
+            u = adj_velocity.vx.reshape(nm)
+            v = adj_velocity.vy.reshape(nm)
+            p_adj = adj_pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p_adj)
         
         return adj_pressure, adj_velocity
+    
+    
 
+    def fd_pert_solve(self, N, write=False, plot=True, zoom=False):
+        ex = self.Example(self.U, self.dP, N, self.args)
+        
+        rhs = fd.make_rhs(ex)
+        mat = fd.make_mat(ex)
+        p_reyn = np_fd_solve(mat, rhs)
+        #TODO
+        pert_pressure = PertPressure(ex, reyn_ps=p_reyn)
+        pert_velocity = PertVelocity(ex, pert_pressure.ps_2D)
+        
+        if plot:
+            self.p_plot(ex, pert_pressure, pert_velocity.flux, zoom)
+            self.v_plot(ex, pert_velocity, zoom)
+        
+        if write:
+            nm = ex.Nx * ex.Ny
+            u = pert_velocity.vx.reshape(nm)
+            v = pert_velocity.vy.reshape(nm)
+            p_pert = pert_pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p_pert)
+        
+        return pert_pressure, pert_velocity
+    
+    
     def p_plot(self, ex, pressure, flux, zoom):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, self.dP)
         p_title = "" + paramstr
@@ -133,8 +160,8 @@ class Reynolds_Solver:
         u = u.reshape((ex.Ny, ex.Nx))
         v = v.reshape((ex.Ny, ex.Nx))
         p = p.reshape((ex.Ny, ex.Nx))
-        pressure = Adj_Pressure(ex, adj_ps=p)
-        velocity = Adj_Velocity(ex, p)
+        pressure = Pressure(ex, ps_2D=p)
+        velocity = Velocity(u, v)
         self.p_plot(ex, pressure, velocity.flux, zoom)
         self.v_plot(ex, velocity, zoom)
 

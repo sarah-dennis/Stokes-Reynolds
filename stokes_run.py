@@ -82,7 +82,7 @@ import stokes_examples as examples
 # example = examples.dBFS_H2L4_d0p125_Re0_Q2_U0
 # example = examples.dBFS_H2L4_d0_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# smoothed-step H=1.5 Re=0
+## smoothed-step H=1.5 Re=0
 #------------------------------------------------------------------------------
 # example = examples.dBFS_H1p5L4_d0p75_Re0_Q2_U0
 # example = examples.dBFS_H1p5L4_d0p5_Re0_Q2_U0
@@ -90,14 +90,14 @@ import stokes_examples as examples
 # example = examples.dBFS_H1p5L4_d0p125_Re0_Q2_U0
 # example = examples.dBFS_H1p5L4_d0_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# smoothed-step H=1.25 Re=0
+## smoothed-step H=1.25 Re=0
 #------------------------------------------------------------------------------
 # example = examples.dBFS_H1p25L4_d0_Re0_Q2_U0    
 # example = examples.dBFS_H1p25L4_d0p05_Re0_Q2_U0                                      
 # example = examples.dBFS_H1p25L4_d0p125_Re0_Q2_U0 
 # example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# wedged corner BFS Re=0
+## wedged corner BFS Re=0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H2p5L4_noEddy_Re0_Q2_U0
@@ -106,7 +106,7 @@ import stokes_examples as examples
 # example = examples.BFS_H1p5L4_noEddy_Re0_Q2_U0
 # example = examples.BFS_H1p25L4_noEddy_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# wedged corner variationds Re=0
+## wedged corner variationds Re=0
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2L4_cornerTriA_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriC_Re0_Q2_U0
@@ -118,7 +118,7 @@ example = examples.TriCavity
 
 solver = control.Stokes_Solver(example, max_iters=50000)                
 
-N=40
+N=320
        
 zoom_on=False               
 
@@ -126,14 +126,14 @@ zoom_on=False
 # 
 # solver.load_scale(100,200) 
 
-# solver.load_run(N)
+
 # 
-solver.load_run_new_many(N, 2, 3)  
+# solver.load_run_new_many(N, 2, 1)  
 
 solver.load_plot(N, zoom=zoom_on)
-
+solver.load_run(N)
 # ------------------------------------------------------------------------------
-# solver.compare(20,[40,80,160],320)
+# solver.compare(20,[40,80],160)
 
 
 

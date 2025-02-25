@@ -38,8 +38,8 @@ class Stokes_Solver:
         
         # plotting thresholds
         self.vel_max = 4
-        self.p_min=-70
-        self.p_max=70
+        self.p_min=-100
+        self.p_max=100
 #------------------------------------------------------------------------------
     def new_run(self, N):
         ex = self.Example(N)

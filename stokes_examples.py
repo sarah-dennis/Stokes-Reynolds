@@ -8,11 +8,10 @@ Created on Tue May 21 16:15:37 2024
 from stokes_heights import PWLinear
 
 #------------------------------------------------------------------------------
-# <<===== BFS ======>>
+# <<=============================== CAVITY ==================================>>
 #------------------------------------------------------------------------------
 class TriCavity(PWLinear):
     def __init__ (self, N):
-        p_amb = 0
         x0 = 0
         xf = 2
         l=xf//2
@@ -23,16 +22,15 @@ class TriCavity(PWLinear):
         q=0
         U=1
         Re=0
-        name_str = "TriCavity_H4_Re0_Q2_U0"
+        name_str = "TriCavity_H4_Re0_Q2_U1"
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, filestr, x_peaks, y_peaks)
 
 #------------------------------------------------------------------------------
-# <<===== BFS ======>>
+# <<===================== BACKWARD FACING STEP ==============================>>
 #------------------------------------------------------------------------------
 class BFS(PWLinear):
     def __init__ (self, L, l, H, h, U, q, Re, N, filestr):
-        p_amb = 0
         x0 = 0
         xf = L
         y0 = 0
@@ -40,7 +38,8 @@ class BFS(PWLinear):
         x_peaks = [x0, x0+l, xf]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
     
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, filestr, x_peaks, y_peaks)
+        
 #------------------------------------------------------------------------------
 class BFS_biswas_Re0(BFS):
     def __init__(self, N):
@@ -146,7 +145,6 @@ class BFS_H1p125L4_Re0_Q2_U0(BFS):
         name_str = "BFS_H1p125L4_Re0_Q2_U0"
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
-        
 
 #------------------------------------------------------------------------------
 class BFS_H2p75L4_Re1_Q2_U0(BFS):
@@ -241,7 +239,6 @@ class BFS_H1p125L4_Re1_Q2_U0(BFS):
         filestr = "./examples/%s/%s_N%s"%(name_str, name_str, N)
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
   
-
 #------------------------------------------------------------------------------
 class BFS_H2p75L4_Re0p5_Q2_U0(BFS):
     def __init__(self, N):
@@ -427,11 +424,10 @@ class BFS_H1p125L4_Re0p25_Q2_U0(BFS):
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
          
 #------------------------------------------------------------------------------
-# <<====== Smoothed-Step  =======>>
+# <<======================== Smoothed Step  =================================>>
 #------------------------------------------------------------------------------
 class BFS_deltaSmooth(PWLinear):
     def __init__ (self, L, l,H, h, delta, U, q, Re, N, filestr):
-        p_amb = 0
         x0 = 0
         xf = L
         y0 = 0
@@ -440,7 +436,7 @@ class BFS_deltaSmooth(PWLinear):
         x_peaks = [x0, l-delta, l, l+delta, xf]
         y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-h-(H-h)/2,yf-h-(H-h)/2],[0,0],[0,yf]]
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, filestr, x_peaks, y_peaks)
 
 #------------------------------------------------------------------------------
 
@@ -751,7 +747,7 @@ class dBFS_H1p25L4_d0_Re0_Q2_U0(BFS):
         super().__init__(L, l, H, h, U, q, Re, N, filestr)
 
 #------------------------------------------------------------------------------
-# <<======  wedged corner BFS =======>>
+# <<=========================  WEDGED CORNER BFS ============================>>
 #------------------------------------------------------------------------------
 
 class BFS_H2p75L4_noEddy_Re0_Q2_U0(PWLinear):
@@ -871,7 +867,7 @@ class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
         super().__init__(x0, xf, y0, yf, N, U, q, Re, p0, filestr, x_peaks, y_peaks)      
 
 #------------------------------------------------------------------------------
-# <<====== wedged corner variations =======>>
+# <<================= VARIATIONS OF WEDGED CORNER BFS =======================>>
 #------------------------------------------------------------------------------
 
 class BFS_H2L4_cornerTriA_Re0_Q2_U0(PWLinear):
@@ -986,11 +982,10 @@ class pipe_Re0(PWLinear):
         y_peaks = [[yf,0],[0,yf]]
         U = 0
         q = 2
-        p_amb = 0
         Re = 0
         name_str = 'pipe_Re0_Q2_U0'
         filestr = "./examples/%s/%s_N%d"%(name_str, name_str,N)
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p_amb, filestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re, filestr, x_peaks, y_peaks)
 
 
     

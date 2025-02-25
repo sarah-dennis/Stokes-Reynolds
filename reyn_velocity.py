@@ -10,10 +10,32 @@ import graphics
 from scipy import stats
 
 class Velocity:
+    def __init__(self,vx, vy, flux=None):
+        self.vx = vx
+        self.vy = vy
+        self.flux = flux
+
+            
+def get_flux(vx, dx):
+    lenx = vx.shape[1]
+    qs = np.zeros(lenx)
+
+    for i in range(lenx):
+        qs[i]= np.sum(vx[:,i])*dx
+
+    # xs = np.linspace(0, lenx/dx, lenx, float)
+    # graphics.plot_2D(qs, xs, 'flux', ['x','q'])
+    
+    q = stats.mode(qs, axis=0, keepdims=False)[0]
+    return q
+            
+            
+class ReynoldsVelocity(Velocity):
     
     def __init__(self, height, ps):
-        self.vx, self.vy = self.make_velocity(height, ps)
-        self.flux = get_flux(self.vx, height.dx)
+        vx, vy = self.make_velocity(height, ps)
+        flux = get_flux(vx, height.dx)
+        super().__init__(vx, vy, flux)
     # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
@@ -47,11 +69,12 @@ class Velocity:
         return vx, vy
     
 
-class Adj_Velocity:
+class AdjVelocity(Velocity):
     
     def __init__(self, height, adj_ps):
-        self.vx, self.vy = self.make_adj_velocity(height, adj_ps)
-        self.flux = get_flux(self.vx, height.dx)
+        vx, vy = self.make_adj_velocity(height, adj_ps)
+        flux = get_flux(vx, height.dx)
+        super().__init__(vx, vy, flux)
 
     def make_adj_velocity(self, height, ps):
         ps=np.flip(ps,0)
@@ -140,9 +163,7 @@ class Adj_Velocity:
                     vx[j,i]= 1/(2*height.visc)* px * y**2 + q * y + height.U
                     
                     vy[j,i] = -1/(6*height.visc) * pxx * y**3 - 1/2 * qx * y**2
-        
 
-        
         
         for j in range(height.Ny):
             y = height.ys[j]
@@ -171,23 +192,12 @@ class Adj_Velocity:
             
         return vx, vy
             
-            
-def get_flux(vx, dx):
-    lenx = vx.shape[1]
-    qs = np.zeros(lenx)
-
-    for i in range(lenx):
-        qs[i]= np.sum(vx[:,i])*dx
-
-    xs = np.linspace(0, lenx/dx, lenx, float)
-    graphics.plot_2D(qs, xs, 'flux', ['x','q'])
-    
-
-    q = stats.mode(qs, axis=0, keepdims=False)[0]
-    return q
-            
-            
-            
+class PertVelocity(Velocity): #TODO
+    def __init__(self, height, pert_ps):
+        vx = None
+        vy = None
+        flux = None
+        super().__init__(vx, vy, flux)
             
             
             
