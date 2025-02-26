@@ -13,8 +13,8 @@ class PWLinear(Space):
     # peak_xs = [x0, ..., xi,..., xf] : x0 < xi < xf
     # peak_ys = [(yf,h_in),...,(hi_left, hi_right),...,(h_out,yf)]
     
-    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, filestr, x_peaks, y_peaks):
-        super().__init__(x0, xf, y0, yf, N, U, Q, Re, filestr)
+    def __init__(self, x0, xf, y0, yf, N, U, Q, Re, namestr, x_peaks, y_peaks):
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re, namestr)
         # peaks must fall on the grid
         self.x_peaks = x_peaks
 
@@ -27,7 +27,7 @@ class PWLinear(Space):
         self.H_in = yf - self.hf_in
         self.H_out = yf-y_peaks[-1][0]
         
-        self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  
+        self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  # for plot title
         if self.H_in == 0: # closed cavity --> Q=0, dp=0
             self.dp_in = 0
         else: # gap entry --> dp ~ Q

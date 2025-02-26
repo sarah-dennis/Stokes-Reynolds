@@ -118,12 +118,12 @@ example = examples.TriCavity
 
 solver = control.Stokes_Solver(example, max_iters=50000)                
 
-N=320
+N=20
        
 zoom_on=False               
 
 # solver.new_run(N) 
-# 
+# solver.load_run(N)
 # solver.load_scale(100,200) 
 
 
@@ -131,9 +131,9 @@ zoom_on=False
 # solver.load_run_new_many(N, 2, 1)  
 
 solver.load_plot(N, zoom=zoom_on)
-solver.load_run(N)
+
 # ------------------------------------------------------------------------------
-# solver.compare(20,[40,80],160)
+# solver.compare(20,[40,80,160],320)
 
 
 

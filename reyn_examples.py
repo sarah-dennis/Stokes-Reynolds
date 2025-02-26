@@ -19,9 +19,8 @@ class BFS(PWL_Height):
         N_regions = 2
         x_peaks = np.asarray([x0, l, xf],float)
         h_peaks = np.asarray([[0,h],[h,H],[H,0]],float)
-        name_str = f'BFS_H{H}L{xf}_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'BFS_H{int(H)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
         
 class BFS_deltaSmooth(PWL_Height):
     def __init__ (self, U, dP, N, args):
@@ -35,9 +34,9 @@ class BFS_deltaSmooth(PWL_Height):
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf], float)
         h_peaks=np.asarray([[h,h],[h,h],[h+(H-h)/2,h+(H-h)/2],[H,H],[H,H]], float)
-        name_str = f'dBFS_H{H}L{xf}_d{delta}_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}_dP{int(dP)}_U{int(U)}'
+        
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
 
 class BFS_noEddy(PWL_Height):
     def __init__(self, U, dP,N, args):
@@ -52,9 +51,8 @@ class BFS_noEddy(PWL_Height):
         N_regions = 3
         x_peaks = np.asarray([x0, 1, x_reattatch, xf], float)
         h_peaks = np.asarray([[1,1],[1,y_reattatch],[y_reattatch,H],[H,H]], float)
-        name_str = f'cBFS_H{H}L{xf}_xr{xr}yr{yr}_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'cBFS_H{int(H)}L{int(xf)}_xr{int(xr)}yr{int(yr)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
         
 #-----------------------------------------------------------------------------------------------------------------------------------
 # args=[r,k]
@@ -66,9 +64,8 @@ class Bump(SinusoidalHeight):
         
         r=args[0]
         k=args[1]
-        name_str = f'Bump_r{r}k{k}_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, h_avg, r, k, U, dP, filestr)
+        namestr = f'Bump_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, h_avg, r, k, U, dP, namestr)
 
 class CircCavity(CircleHeight):
     def __init__(self, U, dP, N, args):
@@ -77,9 +74,8 @@ class CircCavity(CircleHeight):
         h0=args[1]
         l=args[2]
         xf = x0 + 2*r + 2*l
-        name_str = f'Circ_r{r}h{h0}L{xf}_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, r, h0, l, U, dP, filestr)
+        namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, r, h0, l, U, dP, namestr)
     
 #-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -90,9 +86,8 @@ class HexSlider(PWL_Height):
         N_regions = 4
         x_peaks = np.asarray([x0, 1, 2, 3, xf], float)
         h_peaks = np.asarray(([[0,1],[1,1.5],[2,2],[1.5,1],[1,0]]), float)
-        name_str = f'Hex_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'Hex_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
         
 #-----------------------------------------------------------------------------------------------------------------------------------        
 
@@ -105,9 +100,8 @@ class TriSlider(PWL_Height):
         x_peaks = np.asarray([x0, 1, 2, 3, xf], float)
         
         h_peaks = np.asarray(([[0,1],[1,1],[2,2],[1,1],[1,0]]), float)
-        name_str = f'Tri_dP{dP}_U{U}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'Tri_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
     
 
 class TriCavity(PWL_Height):
@@ -121,9 +115,8 @@ class TriCavity(PWL_Height):
         
         dx = 1/((xf-x0)*N)
         h_peaks = np.asarray(([[0,0+dx/10],[H,H],[0+dx/10,0]]), float)
-        name_str = f'TriCavity_H{int(H)}L{int(xf)}_U{int(U)}'
-        filestr = f'./reyn_examples/{name_str}/{name_str}_N{N}'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr)
+        namestr = f'TriCavity_H{int(H)}L{int(xf)}_U{int(U)}'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
     
 
 

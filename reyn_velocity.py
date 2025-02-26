@@ -10,32 +10,32 @@ import graphics
 from scipy import stats
 
 class Velocity:
-    def __init__(self,vx, vy, flux=None):
+    def __init__(self, height, vx, vy):
         self.vx = vx
         self.vy = vy
-        self.flux = flux
+        self.flux = self.get_flux(vx, height.dx)
+        
 
             
-def get_flux(vx, dx):
-    lenx = vx.shape[1]
-    qs = np.zeros(lenx)
-
-    for i in range(lenx):
-        qs[i]= np.sum(vx[:,i])*dx
-
-    # xs = np.linspace(0, lenx/dx, lenx, float)
-    # graphics.plot_2D(qs, xs, 'flux', ['x','q'])
+    def get_flux(self, vx, dx):
+        lenx = vx.shape[1]
+        qs = np.zeros(lenx)
     
-    q = stats.mode(qs, axis=0, keepdims=False)[0]
-    return q
+        for i in range(lenx):
+            qs[i]= np.sum(vx[:,i])*dx
+    
+        # xs = np.linspace(0, lenx/dx, lenx, float)
+        # graphics.plot_2D(qs, xs, 'flux', ['x','q'])
+        
+        q = stats.mode(qs, axis=0, keepdims=False)[0]
+        return q
             
             
 class ReynoldsVelocity(Velocity):
     
     def __init__(self, height, ps):
         vx, vy = self.make_velocity(height, ps)
-        flux = get_flux(vx, height.dx)
-        super().__init__(vx, vy, flux)
+        super().__init__(height, vx, vy)
     # 2D velocity field from 1D pressure 
     def make_velocity(self, height, ps):
         U = height.U
@@ -69,12 +69,11 @@ class ReynoldsVelocity(Velocity):
         return vx, vy
     
 
-class AdjVelocity(Velocity):
+class AdjReynVelocity(Velocity):
     
     def __init__(self, height, adj_ps):
         vx, vy = self.make_adj_velocity(height, adj_ps)
-        flux = get_flux(vx, height.dx)
-        super().__init__(vx, vy, flux)
+        super().__init__(height, vx, vy)
 
     def make_adj_velocity(self, height, ps):
         ps=np.flip(ps,0)
@@ -192,12 +191,12 @@ class AdjVelocity(Velocity):
             
         return vx, vy
             
-class PertVelocity(Velocity): #TODO
+class PertReynVelocity(Velocity): #TODO
     def __init__(self, height, pert_ps):
         vx = None
         vy = None
-        flux = None
-        super().__init__(vx, vy, flux)
+
+        super().__init__(height, vx, vy)
             
             
             

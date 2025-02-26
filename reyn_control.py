@@ -8,17 +8,9 @@ import numpy as np
 import graphics
 import readwrite as rw
 import convergence as cnvg
-import reyn_pressures_pwlinear as pwl
 
-
-import reyn_pressures_finDiff as fd
-
-from reyn_velocity import Velocity, ReynoldsVelocity, AdjVelocity, PertVelocity
-from reyn_pressure import Pressure, ReynoldsPressure, AdjPressure, PertPressure
-from numpy.linalg import solve as np_fd_solve
-from reyn_heights import PWL_Height
-from scipy.sparse.linalg import gmres as sp_pwl_gmres
-
+import reyn_velocity as rv
+import reyn_pressure as rp 
 
 lenx = 1
 leny = 1
@@ -44,50 +36,47 @@ class Reynolds_Solver:
     
 
     
-    def pwl_solve(self, N, plot=True,zoom=False):
+    def pwl_solve(self, N, write=False, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
-        
-        if not isinstance(ex, PWL_Height):
-            raise TypeError('Example is not piecewise linear')
-        
-        rhs = pwl.make_rhs(ex)
-        linOp = pwl.pwlLinOp(ex)
-        coefs, exit_code = sp_pwl_gmres(linOp, rhs, tol=1e-10)
-         
-        if exit_code != 0:
-            raise Exception('gmres did not converge')
-        ps, flux = pwl.make_ps(ex, coefs)
-        pressure = ReynoldsPressure(ex, ps)
-        velocity = ReynoldsVelocity(ex, ps)
-        
+
+        pressure = rp.PWLAnalyticReynPressure(ex)
+        velocity = rv.ReynoldsVelocity(ex, pressure.ps_1D)
         
         if plot:
-            self.p_plot(ex, pressure, flux,zoom)
+            self.p_plot(ex, pressure, velocity.flux, zoom)
             self.v_plot(ex, velocity, zoom)
+        
+        if write:
+            nm = ex.Nx * ex.Ny
+            u = velocity.vx.reshape(nm)
+            v = velocity.vy.reshape(nm)
+            p = pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p)
         
         return pressure, velocity
     
-    def fd_solve(self, N, plot=True,zoom=False):
+    def fd_solve(self, N, write=False, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
-        rhs = fd.make_rhs(ex)
-        mat = fd.make_mat(ex)
-        ps = np_fd_solve(mat, rhs)
-        pressure = ReynoldsPressure(ex, ps)
-        velocity = ReynoldsVelocity(ex, ps)
+        pressure = rp.FinDiffReynPressure(ex)
+        
+        velocity = rv.ReynoldsVelocity(ex, pressure.ps_1D)
         if plot:
             self.p_plot(ex, pressure, velocity.flux, zoom)
             self.v_plot(ex, velocity, zoom)
 
+        if write:
+            nm = ex.Nx * ex.Ny
+            u = velocity.vx.reshape(nm)
+            v = velocity.vy.reshape(nm)
+            p= pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p)
         return pressure, velocity
     
     def fd_adj_solve(self, N, write=False, plot=True, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        rhs = fd.make_rhs(ex)
-        mat = fd.make_mat(ex)
-        p_reyn = np_fd_solve(mat, rhs)
-        adj_pressure = AdjPressure(ex, reyn_ps=p_reyn)
-        adj_velocity = AdjVelocity(ex, adj_pressure.ps_2D)
+        adj_pressure = rp.AdjReynPressure(ex)
+        adj_velocity = rv.AdjReynVelocity(ex, adj_pressure.ps_2D)
         
         if plot:
             self.p_plot(ex, adj_pressure, adj_velocity.flux, zoom)
@@ -97,8 +86,8 @@ class Reynolds_Solver:
             nm = ex.Nx * ex.Ny
             u = adj_velocity.vx.reshape(nm)
             v = adj_velocity.vy.reshape(nm)
-            p_adj = adj_pressure.ps_2D.reshape(nm)
-            rw.write_reyn(ex, u, v, p_adj)
+            p = adj_pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p)
         
         return adj_pressure, adj_velocity
     
@@ -107,12 +96,8 @@ class Reynolds_Solver:
     def fd_pert_solve(self, N, write=False, plot=True, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        rhs = fd.make_rhs(ex)
-        mat = fd.make_mat(ex)
-        p_reyn = np_fd_solve(mat, rhs)
-        #TODO
-        pert_pressure = PertPressure(ex, reyn_ps=p_reyn)
-        pert_velocity = PertVelocity(ex, pert_pressure.ps_2D)
+        pert_pressure = rp.PertReynPressure(ex)
+        pert_velocity = rv.PertReynVelocity(ex, pert_pressure.ps_2D)
         
         if plot:
             self.p_plot(ex, pert_pressure, pert_velocity.flux, zoom)
@@ -122,8 +107,8 @@ class Reynolds_Solver:
             nm = ex.Nx * ex.Ny
             u = pert_velocity.vx.reshape(nm)
             v = pert_velocity.vy.reshape(nm)
-            p_pert = pert_pressure.ps_2D.reshape(nm)
-            rw.write_reyn(ex, u, v, p_pert)
+            p = pert_pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p)
         
         return pert_pressure, pert_velocity
     
@@ -160,8 +145,8 @@ class Reynolds_Solver:
         u = u.reshape((ex.Ny, ex.Nx))
         v = v.reshape((ex.Ny, ex.Nx))
         p = p.reshape((ex.Ny, ex.Nx))
-        pressure = Pressure(ex, ps_2D=p)
-        velocity = Velocity(u, v)
+        pressure = rp.Pressure(ex, ps_2D=p)
+        velocity = rv.Velocity(ex, u, v)
         self.p_plot(ex, pressure, velocity.flux, zoom)
         self.v_plot(ex, velocity, zoom)
 

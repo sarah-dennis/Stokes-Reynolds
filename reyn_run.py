@@ -33,21 +33,23 @@ import reyn_examples as examples
 
 #        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
 #------------------------------------------------------------------------------
-
 plots_on=True
 zoom_on=False
-
+write_on=True
 #------------------------------------------------------------------------------
 ## space parmaters |--> args = [ ... ]
 #------------------------------------------------------------------------------
-l=1         
-h = .125         
-H=4            
-xr = 0.35       
-yr = 0.41
-delta = 0.25
-r=0.125
-k=3.14
+l = 1           # inlet/outlet length        
+h = .125        # minimum height       
+H = 4           # maximum height
+xr = 0.35       # BFS reattachment point x=l+xr
+yr = 0.41       # BFS detachment point y=yr
+delta = 0.25    # smoothed step slope reciprocal 0 <= delta < L/2
+r=2/3           # radius 0 <= r <= 1
+k= 2* 3.14      # period sin(kx)
+
+## args are specific to each example and domain is initialized at solve time
+
 #------------------------------------------------------------------------------
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
@@ -58,8 +60,8 @@ k=3.14
 # Example = examples.BFS_noEddy
 # args = [H,xr,yr] 
 
-Example = examples.BFS_deltaSmooth
-args = [H,delta]
+# Example = examples.BFS_deltaSmooth
+# args = [H,delta]
 
 # Example = examples.TriSlider
 # args = None
@@ -74,18 +76,18 @@ args = [H,delta]
 # args = [H,l]
 
 #------------------------------------------------------------------------------
-## Smooth examples 
+## Smooth examples  
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
-# Example = examples.Bump # 
-# args=[r,k]
+Example = examples.Bump # 
+args=[r,k]
 
 # Example = examples.CircCavity
 # args=[r,h,l]
 
 #------------------------------------------------------------------------------
 ## surface velocity
-U=0.0125             # u(x,0) = U; u(x,h) = 0
+U=0.5             # u(x,0) = U; u(x,h) = 0
                 # v(x,0) = 0; v(x,h) = 0
 
 ## pressure drop                 
@@ -96,15 +98,15 @@ solver = control.Reynolds_Solver(Example, U, dP, args)
 #------------------------------------------------------------------------------
 
 ## grid size
-# N = 80        # N = 1/dx = 1/dy
+N = 80        # N = 1/dx = 1/dy
 
 ## solution methods (plots and returns pressure, velocity )
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-# solver.fd_adj_solve(N, plot=plots_on, zoom=zoom_on)
+# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
-# solver.load_plot(N, zoom=zoom_on)
+solver.load_plot(N, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.convg_pwl_fd([20,40,80,160])

@@ -11,7 +11,7 @@ import numpy as np
 
 class Domain:
 
-    def __init__(self, x0, xf, y0, yf, N, filestr):
+    def __init__(self, x0, xf, y0, yf, N, dirstr=None, namestr=None):
         self.x0 = x0            # left boundary x = x0
         self.xf = xf            # right boundary x = xf 
         self.y0 = y0            # lower surface y = y0
@@ -26,13 +26,15 @@ class Domain:
         
         self.xs = np.linspace(x0, xf, self.Nx)
         self.ys = np.linspace(y0, yf, self.Ny)
-        self.filestr=filestr
+        self.dirstr = dirstr
+        self.filestr= f"{dirstr}/{namestr}_N{N}"
 #------------------------------------------------------------------------------
 # Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, filestr):
-        super().__init__(x0, xf, y0, yf, N, filestr) # -> {dx, dy, xs, ys}
+    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, namestr):
+        dirstr = f"./reyn_examples/{namestr}"
+        super().__init__(x0, xf, y0, yf, N, dirstr,namestr) # -> {dx, dy, xs, ys}
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
@@ -51,15 +53,15 @@ class Height(Domain):
  
 # Domain for Stokes solver
 class Space(Domain):
-    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, filestr):
-        super().__init__(x0, xf, y0, yf, N, filestr)
+    def __init__(self, x0, xf, y0, yf, N, U, flux, Re, namestr):
+        dirstr = f"./examples/{namestr}"
+        super().__init__(x0, xf, y0, yf, N, dirstr, namestr)
         self.U = U    # velocity at flat boundary 
         self.visc = 1  # dynamic viscosity
         self.dens = 1 # density 
         self.p_ambient = 0 #10^5 Pa   
         self.flux=flux
         self.Re = Re #
-        
 
 #------------------------------------------------------------------------------
 def center_diff(fs, Nx, dx):
