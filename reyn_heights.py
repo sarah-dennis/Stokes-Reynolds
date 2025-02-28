@@ -47,7 +47,21 @@ class PWL_Height(Height):
             hs[i] = h_peaks[r,1] + slopes[r] * (xi - x_peaks[r])
         return  hs, slopes, widths
     
-
+    def get_dimless_vars(self):
+        x_scale = self.xf - self.x0
+        y_scale = self.yf - self.y0
+        
+        Q = self.dP * (y_scale**3) / (self.U * x_scale)
+        
+        U_scale = Q/x_scale
+        V_scale = Q/y_scale
+        
+        if self.dP == 0:
+            P_scale = 1
+        else:
+            P_scale = self.dP
+        
+        return x_scale, y_scale, U_scale, V_scale, P_scale
     
     
 #------------------------------------------------------------------------------

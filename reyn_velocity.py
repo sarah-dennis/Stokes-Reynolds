@@ -191,17 +191,6 @@ class AdjReynVelocity(Velocity):
             
         return vx, vy
             
-class PertReynVelocity(Velocity): #TODO
-    def __init__(self, height, pert_ps):
-        vx = None
-        vy = None
-
-        super().__init__(height, vx, vy)
-            
-            
-            
-            
-            
             
             
             

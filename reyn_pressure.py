@@ -7,6 +7,7 @@ Created on Thu Dec  5 13:28:42 2024
 """
 import numpy as np
 import reyn_pressure_adjusted
+
 import reyn_pressures_finDiff as fd
 from numpy.linalg import solve as np_fd_solve
 from scipy.sparse.linalg import gmres as sp_pwl_gmres
@@ -75,16 +76,4 @@ class AdjReynPressure(Pressure):
         ps_1D = np_fd_solve(mat, rhs)
         ps_2D = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
 
-        super().__init__(height, ps_1D, ps_2D)
-    
-
-
-class PertReynPressure(Pressure):
-    def __init__(self, height):
-
-        rhs = fd.make_rhs(height)
-        mat = fd.make_mat(height)
-        ps_1D = np_fd_solve(mat, rhs)
-        #TODO
-        ps_2D = np.zeros((height.Ny, height.Nx))
         super().__init__(height, ps_1D, ps_2D)

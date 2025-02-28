@@ -40,6 +40,7 @@ class Stokes_Solver:
         self.vel_max = 4
         self.p_min=-100
         self.p_max=100
+        
 #------------------------------------------------------------------------------
     def new_run(self, N):
         ex = self.Example(N)
@@ -82,11 +83,8 @@ class Stokes_Solver:
     def load_run(self, N):                                
         ex = self.Example(N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx*ex.Ny)
-        
         u, v, psi = run_spLU(ex, u, v, psi, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
-        
         rw.write_stokes(ex, u, v, psi, self.max_iters+past_iters)
-    
 
     def load_scale(self, N_load, N_scale):
         ex_load = self.Example(N_load)
@@ -98,7 +96,6 @@ class Stokes_Solver:
         u_load_2D = u_load.reshape((ex_load.Ny,ex_load.Nx))
         v_load_2D = v_load.reshape((ex_load.Ny,ex_load.Nx))
         psi_load_2D = psi_load.reshape((ex_load.Ny,ex_load.Nx))
-    
     
         points_scale = np.meshgrid(ex_scale.ys, ex_scale.xs)
         
@@ -145,10 +142,8 @@ class Stokes_Solver:
             k2 = int((j+1)*ex.Nx + i_yr)
             if np.sign(psi[k])!= np.sign(psi[k2]):
                 yr = ex.ys[j]
-                
-        
-
         return xr,yr
+    
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
@@ -163,7 +158,6 @@ class Stokes_Solver:
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels, log_linthresh, O1, O2)
 
-   
 #------------------------------------------------------------------------------
 # PLOTTING 
 #------------------------------------------------------------------------------
