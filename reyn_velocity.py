@@ -63,8 +63,8 @@ class ReynoldsVelocity(Velocity):
                     vy[j,i] = 0
                     
 
-        vy=np.flip(vy, 0)
-        vx=np.flip(vx, 0)
+        # vy=np.flip(vy, 0)
+        # vx=np.flip(vx, 0)
         
         return vx, vy
     
@@ -76,7 +76,7 @@ class AdjReynVelocity(Velocity):
         super().__init__(height, vx, vy)
 
     def make_adj_velocity(self, height, ps):
-        ps=np.flip(ps,0)
+        # ps=np.flip(ps,0)
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
@@ -186,8 +186,8 @@ class AdjReynVelocity(Velocity):
                 vx[j,-3] = vx[j,height.Nx-4]
                 vy[j,-3] = vy[j,height.Nx-4]
 
-        vy=np.flip(vy, 0)
-        vx=np.flip(vx, 0)
+        # vy=np.flip(vy, 0)
+        # vx=np.flip(vx, 0)
             
         return vx, vy
             

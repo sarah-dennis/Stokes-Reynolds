@@ -47,22 +47,7 @@ class PWL_Height(Height):
             hs[i] = h_peaks[r,1] + slopes[r] * (xi - x_peaks[r])
         return  hs, slopes, widths
     
-    def get_dimless_vars(self):
-        x_scale = self.xf - self.x0
-        y_scale = self.yf - self.y0
-        
-        Q = self.dP * (y_scale**3) / (self.U * x_scale)
-        
-        U_scale = Q/x_scale
-        V_scale = Q/y_scale
-        
-        if self.dP == 0:
-            P_scale = 1
-        else:
-            P_scale = self.dP
-        
-        return x_scale, y_scale, U_scale, V_scale, P_scale
-    
+
     
 #------------------------------------------------------------------------------
 # Other Height Functions
@@ -91,26 +76,48 @@ class SinusoidalHeight(Height):
         self.h_mid = h_avg
         self.r = r 
         self.k = k
- 
+
         # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
-            
+        y0 = 0
+        yf = h_avg + r
+        self.h_max=yf    
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
         
-        y0 = 0
-        yf = (h_avg+r) 
+        
 
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
     def h_fun(self, x):
-        return self.h_mid * (1 + self.r * np.cos(self.k*x))   
+        return self.h_mid * (1 + self.r * np.cos(self.k*x))
     
+class BumpHeight(Height): 
+    #h(x) = h_min + r(1 + cos(kx))
+    def __init__(self, x0, xf, N, lam, H, U, dP, filestr):
+        Nx = (xf-x0)*N + 1
+        # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
+        y0 = 0
+        yf = H
+        self.h_max=H         
+        self.x_scale = (xf-x0)/2  
+        dx = 1/N
+        xs = np.asarray([x0 + i*dx for i in range(Nx)])
+        hs = np.asarray([self.h_fun(x, lam) for x in xs])
+
+        
+
+        super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
+  
+    def h_fun(self, x, lam):
+        return self.h_max*(1-(lam/2)*(1+np.cos(3.14159*x/self.x_scale)))
+   
+
 #------------------------------------------------------------------------------    
 class CircleHeight(Height):
     
     def __init__(self, x0, xf, N, r, h0, l, U, dP, filestr):
-        Nx = (xf-x0)*N + 1
+        Nx = int((xf-x0)*N + 1)
         dx = 1/N
         
         self.h0 = h0

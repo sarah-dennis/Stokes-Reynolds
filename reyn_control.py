@@ -11,11 +11,12 @@ import convergence as cnvg
 
 import reyn_velocity as rv
 import reyn_pressure as rp 
+import reyn_perturbed as rpert
 
-lenx = 1
-leny = 1
-x_start = 1
-y_start =0.5
+lenx = .1
+leny = .1
+x_start = 0
+y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
@@ -29,10 +30,10 @@ class Reynolds_Solver:
         self.U = U
         self.dP = dP
 
-        # colorbar min maxs
-        self.vel_max = 50
-        self.p_min=-10
-        self.p_max=10
+        # colorbar min max
+        self.vel_max = 3
+        self.p_min=-5
+        self.p_max=5
     
 
     
@@ -93,24 +94,27 @@ class Reynolds_Solver:
     
     
 
-    def fd_pert_solve(self, N, write=False, plot=True, zoom=False):
+    def fd_pert_solve(self, N, write=False, plot=True, zoom=False, get_dPs = False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        pert_pressure = rp.PertReynPressure(ex)
-        pert_velocity = rv.PertReynVelocity(ex, pert_pressure.ps_2D)
+    
+        pert = rpert.PerturbedReynSol(ex)
         
         if plot:
-            self.p_plot(ex, pert_pressure, pert_velocity.flux, zoom)
-            self.v_plot(ex, pert_velocity, zoom)
+            self.p_plot(ex, pert.pert_pressure, pert.pert_velocity.flux, zoom)
+            self.v_plot(ex, pert.pert_velocity, zoom)
         
         if write:
             nm = ex.Nx * ex.Ny
-            u = pert_velocity.vx.reshape(nm)
-            v = pert_velocity.vy.reshape(nm)
-            p = pert_pressure.ps_2D.reshape(nm)
+            u = pert.pert_velocity.vx.reshape(nm)
+            v = pert.pert_velocity.vy.reshape(nm)
+            p = pert.pert_pressure.ps_2D.reshape(nm)
             rw.write_reyn(ex, u, v, p)
-        
-        return pert_pressure, pert_velocity
+            
+        if get_dPs:
+            return pert.dP_reyn, pert.dP_pert, pert.pert_pressure, pert.pert_velocity
+        else:
+            return pert.pert_pressure, pert.pert_velocity
     
     
     def p_plot(self, ex, pressure, flux, zoom):
@@ -130,8 +134,11 @@ class Reynolds_Solver:
         v_title = "" + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
+        
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-
+        graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        graphics.plot_quiver_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+        
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)
@@ -160,7 +167,7 @@ class Reynolds_Solver:
         graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,log_linthresh, O1, O2)
     
     def convg_adj_fd(self,N_min, Ns, N_max):
-        p_info, vel_info = cnvg.reyn_cnvg_self(self, N_min, Ns, N_max)
+        p_info, vel_info = cnvg.reyn_cnvg_self(self.fd_adj_solve, N_min, Ns, N_max)
         p_title ='Convergence for Adjusted Reynolds pressure'
         v_title ='Convergence for Adjusted Reynolds velocity'
         p_ax_labels=['$N$',  '$||p_{N} - p_{N*}||$']
@@ -172,6 +179,20 @@ class Reynolds_Solver:
         graphics.plot_log_multi(p_info[:3],[N_min] + Ns,p_title,fun_labels,p_ax_labels,log_linthresh, O1, O2)
         graphics.plot_log_multi(vel_info[:3],[N_min] + Ns,v_title,fun_labels,v_ax_labels,log_linthresh, O1, O2)
 
+
+    
+    def convg_pert_fd(self,N_min, Ns, N_max):
+        p_info, vel_info = cnvg.reyn_cnvg_self(self.fd_pert_solve, N_min, Ns, N_max)
+        p_title ='Convergence for Perturbed Reynolds pressure'
+        v_title ='Convergence for Perturbed Reynolds velocity'
+        p_ax_labels=['$N$',  '$||p_{N} - p_{N*}||$']
+        v_ax_labels=['$N$',  '$|(u,v)_{N} - (u,v)_{N*}|_2$']
+        fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
+        O1 = 1
+        O2 = 1
+        # p_info and vel_info store errors in l1, l2, linf norms (plotted) and convergance rates (not plotted)
+        graphics.plot_log_multi(p_info[:3],[N_min] + Ns,p_title,fun_labels,p_ax_labels,log_linthresh, O1, O2)
+        graphics.plot_log_multi(vel_info[:3],[N_min] + Ns,v_title,fun_labels,v_ax_labels,log_linthresh, O1, O2)
 
 
 

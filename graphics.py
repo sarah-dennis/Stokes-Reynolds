@@ -19,8 +19,8 @@ from matplotlib import patches
 # colour_map_mesh = 'Spectral_r'
 # colour_map_stream = 'plasma'
 
-stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
-# stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
+# stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
+stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
 stream_cmap[:,0:3] *= 1
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
@@ -74,7 +74,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors== 'pri':
-        cs = ['r','b','forestgreen', 'darkmagenta', 'darkorgange']
+        cs = ['r','forestgreen','b', 'darkmagenta', 'darkorgange']
     else: 
         cs=['forestgreen', 'darkmagenta', 'darkorgange']
     markers = ['D', 'o', 's', '*', 'H', 'X']
@@ -91,6 +91,8 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     pp.minorticks_on()
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
+    elif loc=='left':
+        fig.legend(bbox_to_anchor=(0.4, 0.875))
     else:
         fig.legend(bbox_to_anchor=(0.9, 0.275))
     return fig
@@ -187,7 +189,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     
     
        
-def plot_quiver_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=linthresh):
+def plot_quiver_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthresh=linthresh):
     
     pp.rcParams['figure.dpi'] = dpi
     
@@ -195,18 +197,19 @@ def plot_quiver_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     
     X, Y = np.meshgrid(xs, ys)
     
-    vscale=1000
+    N = 10
+    vscale=10
     
-    if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
-        quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
-    else:
-        no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
-        quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=no_norm)
+    # if log_cmap:
+        # norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
+    pp.quiver(xs[:: N], ys[:: N], vx[::N, ::N], vy[::N, ::N], scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+    # else:
+        # no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
+        # quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
-    cb=pp.colorbar(quiver_plot, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
-    ticks = np.linspace(vmin, vmax, num=5)
-    cb.set_ticks(ticks)
+    # cb=pp.colorbar(quiver_plot, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
+    # ticks = np.linspace(vmin, vmax, num=5)
+    # cb.set_ticks(ticks)
 
     # remove contours arrows
     ax = pp.gca()
@@ -297,7 +300,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
 
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1e-2,O2=1e-2):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1,O2=1e1):
     pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
@@ -324,8 +327,8 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
-    fig.legend(bbox_to_anchor=(0.3, 0.425))
-    
+    # fig.legend(bbox_to_anchor=(0.3, 0.325))
+    fig.legend(bbox_to_anchor=(0.3, 0.425))    
     return fig
 #------------------------------------------------------------------------------------
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):

@@ -104,6 +104,6 @@ def make_adj_ps(height, reyn_ps):
 
                 ps_adj[j,i] = reyn_ps[i] + adj
 
-    ps_adj = np.flip(ps_adj, axis=0)
+    # ps_adj = np.flip(ps_adj, axis=0)
 
     return ps_adj

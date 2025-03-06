@@ -28,6 +28,8 @@ class Domain:
         self.ys = np.linspace(y0, yf, self.Ny)
         self.dirstr = dirstr
         self.filestr= f"{dirstr}/{namestr}_N{N}"
+        
+
 #------------------------------------------------------------------------------
 # Domain for Reynolds solver
 class Height(Domain):
@@ -38,27 +40,31 @@ class Height(Domain):
         
         self.hs = hs
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
-        
+
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
         
-        self.U = U    # velocity at flat boundary 
-        self.visc = 1 # kinematic viscosity 
-        self.dP = dP 
+        self.U = U    # velocity at flat boundary
+        self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
+        # Tavakol: density 848 kgm^-3, dynamic viscosity 2.45 Pas, flux 14.4mm^3/s
         self.p_ambient = 0 
         self.p0 = -dP
         self.pN = self.p_ambient
      
         self.Re = 0
- 
+
+
+    
 # Domain for Stokes solver
 class Space(Domain):
     def __init__(self, x0, xf, y0, yf, N, U, flux, Re, namestr):
         dirstr = f"./examples/{namestr}"
         super().__init__(x0, xf, y0, yf, N, dirstr, namestr)
         self.U = U    # velocity at flat boundary 
-        self.visc = 1  # dynamic viscosity
-        self.dens = 1 # density 
+        self.visc = 1  # dynamic viscosity (Ns/m^2)
+        self.dens = 1  # density (kg/m^3)
+        # kinematic viscosity nu = dynamic viscosity mu / density rho
+        
         self.p_ambient = 0 #10^5 Pa   
         self.flux=flux
         self.Re = Re #

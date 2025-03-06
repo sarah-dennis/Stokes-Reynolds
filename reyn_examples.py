@@ -7,15 +7,15 @@ Created on Wed Feb 22 10:01:42 2023
 
 import numpy as np
 
-from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight
+from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N, args):
         H = args[0]
         l = args[1]
-        h = 1
+        h = 1/2
         x0 = 0
-        xf = 4
+        xf = args[2]
         N_regions = 2
         x_peaks = np.asarray([x0, l, xf],float)
         h_peaks = np.asarray([[0,h],[h,H],[H,0]],float)
@@ -56,16 +56,28 @@ class BFS_noEddy(PWL_Height):
         
 #-----------------------------------------------------------------------------------------------------------------------------------
 # args=[r,k]
-class Bump(SinusoidalHeight):
+class Sinusoid(SinusoidalHeight):
     def __init__(self, U, dP, N, args):
         x0=0
-        xf=4
-        h_avg=1
+        xf=args[2]
+
         
         r=args[0]
+        h_avg=2*r + r/2
         k=args[1]
-        namestr = f'Bump_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
+        namestr = f'Sinusoid_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, h_avg, r, k, U, dP, namestr)
+
+class LambdaBump(BumpHeight):
+    def __init__(self, U, dP, N, args):
+        x0=-args[2]
+        xf=args[2]
+
+        H = args[1]
+        lam = args[0]
+        namestr = f'Bump_lambda{int(lam)}H{int(H)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, lam, H, U, dP, namestr)
+
 
 class CircCavity(CircleHeight):
     def __init__(self, U, dP, N, args):
@@ -108,7 +120,7 @@ class TriCavity(PWL_Height):
     def __init__(self, U, dP,N, args):
         x0 = 0
         xf = x0 + 2*args[1]
-        N_regions = 2
+        N_regions = 2 
 
         H = args[0]
         x_peaks = np.asarray([x0, xf//2, xf], float)

@@ -16,6 +16,9 @@ import reyn_pressures_pwlinear as pwl
 
 class Pressure:
     def __init__(self, height, ps_1D=None, ps_2D=None):
+        # initializing for adjusted solutions generates both ps_1D and ps_2D
+    
+        # reading in data for any adjusted solution, ps_1D will be missing
         if ps_1D is None:
             rhs = fd.make_rhs(height)
             mat = fd.make_mat(height)
@@ -23,12 +26,16 @@ class Pressure:
         else:
             self.ps_1D = ps_1D
         
+        # initializing for any 1D Reynolds solution, ps_2D will be missing
         if ps_2D is None:
             self.ps_2D = self.make_2D_ps(height, ps_1D)
         else:
             self.ps_2D = ps_2D
         
-    def make_2D_ps(self,height,ps): # p(x,y) = p(x) 
+        self.dP = self.ps_1D[-1]- self.ps_1D[0]
+        
+        
+    def make_2D_ps(self,height,ps): # sets p(x,y) = p(x) 
         ps_2D = np.zeros((height.Ny, height.Nx))
         
         for i in range(height.Nx):
@@ -39,7 +46,7 @@ class Pressure:
                     ps_2D[j,i] = ps[i]
                 else:
                     ps_2D[j,i] = None
-        ps_2D = np.flip(ps_2D, axis=0)
+        # ps_2D = np.flip(ps_2D, axis=0)
         return ps_2D
                     
 class FinDiffReynPressure(Pressure):
@@ -64,16 +71,15 @@ class PWLAnalyticReynPressure(Pressure):
             
         ps_1D, flux = pwl.make_ps(height, coefs)
         super().__init__(height, ps_1D)
-       
-            
     
 class AdjReynPressure(Pressure):
     
     def __init__(self, height):
+        reyn_pressure = FinDiffReynPressure(height)
+        ps_1D = reyn_pressure.ps_1D
         
-        rhs = fd.make_rhs(height)
-        mat = fd.make_mat(height)
-        ps_1D = np_fd_solve(mat, rhs)
         ps_2D = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
 
         super().__init__(height, ps_1D, ps_2D)
+
+    

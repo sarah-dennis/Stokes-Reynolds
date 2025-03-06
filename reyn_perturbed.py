@@ -6,225 +6,158 @@ Created on Wed Feb 26 14:30:05 2025
 @author: sarahdennis
 """
 import numpy as np
-from scipy import integrate
 
+from reyn_pressure import Pressure, FinDiffReynPressure
+from reyn_velocity import Velocity, ReynoldsVelocity
 
+class PerturbedReynSol:
+    def __init__(self, height):
+    
 
-def get_pert2_p_u_v(height, reyn_ps, reyn_velx):
-    x_scale, y_scale, U_scale, V_scale, P_scale = height.get_dimless_vars()
-    # P2(x,y) = -dU0/dx + C3(x)
-    
-    # xs = height.xs/x_scale
-    ys = height.ys/y_scale
-    hs = height.hs/y_scale
-    reyn_ps /= P_scale
+        self.reyn_pressure = FinDiffReynPressure(height)
+        self.reyn_velocity = ReynoldsVelocity(height, self.reyn_pressure.ps_1D)
+        
+        self.x_scale = (height.xf - height.x0)/2
+        self.y_scale = height.yf - height.y0
+        self.Q_scale = self.reyn_velocity.flux
 
+        self.P_scale = height.visc * self.Q_scale * self.x_scale * (self.y_scale**-3)
+         
+        self.U_scale = self.Q_scale/self.y_scale
+        self.V_scale = self.Q_scale/self.x_scale                      
+       
 
-    u0_xs = np.zeros((height.Ny, height.Nx))  # d/dx [reyn_velx] 
-    c3x_xs = np.zeros((height.Ny, height.Nx)) # d/dx [dC3/dx]
+        delta_sqr = (self.y_scale/self.x_scale)**2
+
+        
+        p2s, u2s, v2s = self.perturb_second(height)
+        
+
+        
+        pert_ps_2D = self.reyn_pressure.ps_2D + delta_sqr * p2s*self.P_scale
+        pert_us_2D = self.reyn_velocity.vx + delta_sqr * u2s*self.U_scale
+        pert_vs_2D = self.reyn_velocity.vy + delta_sqr * v2s*self.V_scale
+        
+        self.pert_pressure = Pressure(height, ps_1D = self.reyn_pressure.ps_1D, ps_2D=pert_ps_2D)
+        self.pert_velocity = Velocity(height, pert_us_2D, pert_vs_2D)
+        
+        self.dP_reyn = (self.reyn_pressure.ps_1D[-1]-self.reyn_pressure.ps_1D[0])/self.P_scale
+        self.dP_pert = (pert_ps_2D[0,-1]-pert_ps_2D[0,0])/self.P_scale
+      
     
-    u2s = np.zeros((height.Ny, height.Nx)) #
-    v2s = np.zeros((height.Ny, height.Nx)) #
-    
-    h_x=0       # d/dx [h] @ xi
-    h2_xx = 0   # d^2/dx^2 [h^-2] @ xi
-    h3_xx = 0   # d^2/dx^2 [h^-3] @ xi
-    h2_xxx = 0  # d^3/dx^3 [h^-2] @ xi
-    h3_xxx = 0  # d^3/dx^3 [h^-3] @ xi
-    
-    h2_xx_E = 0 # d^2/dx^2 [h^-2] @ i+1
-    h2_xx_W = 0 # d^2/dx^2 [h^-2] @ i-1
-    h3_xx_E = 0 # d^2/dx^2 [h^-3] @ i+1
-    h3_xx_W = 0 # d^2/dx^2 [h^-3] @ i-1
-    
-    dx = height.dx/x_scale
-    dy = height.dx/y_scale
-    dxx = dx**2
-    dxxx = dx**3
-    
-    
-    for j in range (height.Ny):
-        y = ys[j]
+    def perturb_second(self, height):
+        xs = height.xs/self.x_scale
+        ys = height.ys/self.y_scale
+        hs = height.hs/self.y_scale
+        us = self.reyn_velocity.vx/self.U_scale
+
+        # p2s = -u0_xs + c3s
+        c3_xs = np.zeros(height.Nx) # d/dx [c3(x)]
+        c3s = np.zeros(height.Nx) # intS d/dx[c3(x)] dx
+        u0_xs = np.zeros((height.Ny, height.Nx))  # d/dx [reyn_velx] 
+            
+        u2s = np.zeros((height.Ny, height.Nx)) #
+        v2s = np.zeros((height.Ny, height.Nx)) #
+        
+        # h_x = 0     # d/dx [h] @ xi
+        # h2_xx = 0   # d^2/dx^2 [h^-2] @ xi
+        # h3_xx = 0   # d^2/dx^2 [h^-3] @ xi
+        # h2_xxx = 0  # d^3/dx^3 [h^-2] @ xi
+        # h3_xxx = 0  # d^3/dx^3 [h^-3] @ xi
+        
+        dx = height.dx/(self.x_scale)
+        dxx = dx**2
+        dxxx = dx**3
         
         for i in range(height.Nx):
-            h = hs[i] 
-            
-            # finite difference buffer [x0, x1, x2] ... [xN-3, xN-2, xN-1]
-            if i < 3  or i > height.Nx-4 or y >= h:
-                u0_xs[j,i] = 0
-                c3x_xs[j,i] = 0
-                u2s[j,i] = 0
-                v2s[j,i] = 0
-            
+            if i < 2  or i > height.Nx-3:
+                c3_xs[i] = 0
+                
             else:
+                h = hs[i]
+                h_E = hs[i+1]                
+                h_EE = hs[i+2]
+                h_W = hs[i-1]
+                h_WW = hs[i-2]
                 
-                h_E = height.hs[i+1]                
-                h_EE = height.hs[i+2]
-                h_EEE = height.hs[i+3]
-                h_W = height.hs[i-1]
-                h_WW = height.hs[i-2]
-                h_WWW = height.hs[i-3]
+                h_x = (h_E - h_W)/(2*dx)    
                 
-                u = reyn_velx[j,i]
-                u_E = reyn_velx[j,i+1]
-                u_EE = reyn_velx[j,i+2]   
-                u_W = reyn_velx[j,i-1]
-                u_WW = reyn_velx[j,i+2]
-
                 
-                if y < h_E and y < h_W: # [..., i-1, i, i+1, ...]
-                    
-                    u0_x = (u_E - u_W)/(2*dx)
-                    
-                    h_x = (h_E - h_W)/(2*dx)
-                    
-                    h2_xx = ((h_E**-2) -2*(h**-2) + (h_W**-2))/(dxx)
-                    h3_xx = ((h_E**-3) -2*(h**-3) + (h_W**-3))/(dxx)
-            
-                    
-                    if y < h_EE and y < h_WW: # [i-2, i-1, i, i+1, i+2]
-                        
-                        h2_xxx = ((h_EE**-2) - 2*(h_E**-2) +2*(h_W**-2) - (h_WW**-2))/(2*dxxx)
-                        h3_xxx = ((h_EE**-3) - 2*(h_E**-3) +2*(h_W**-3) - (h_WW**-3))/(2*dxxx)
-                        
-                        h2_xx_E = ((h_EE**-2) -2*(h_E**-2) + (h**-2))/dxx
-                        h2_xx_W = ((h**-2)    -2*(h_W**-2) + (h_WW**-2))/dxx
-
-                        h3_xx_E = ((h_EE**-3) -2*(h_E**-3) + (h**-3))/dxx
-                        h3_xx_W = ((h**-3)    -2*(h_W**-3) + (h_WW**-3))/dxx                  
-                    
-                    else: # one or both of i+2 or i-2 is out of bounds
-                        
-                        h2_xxx = 0
-                        h3_xxx = 0
-                        
-                        if y < h_EE and y>= h_WW: # [i-1, i, i+1, i+2]
-                       
-                            h2_xx_E = ((h_EE**-2) -2*(h_E**-2) + (h**-2))/dxx
-                            h2_xx_W = ((h_E**-2)  -2*(h**-2)   + (h_W**-2))/dxx
-                            
-                            h3_xx_E = ((h_EE**-3) -2*(h_E**-3) + (h**-3))/dxx
-                            h3_xx_W = ((h_E**-3)  -2*(h**-3)   + (h_W**-3))/dxx                        
-                            
-                        elif y >= h_EE and y < h_WW: #  [i-2, i-1, i, i+1]
-                            
-                            h2_xx_E = ((h_E**-2) -2*(h**-2)   + (h_W**-2))/dxx
-                            h2_xx_W = ((h**-2)   -2*(h_W**-2) + (h_WW**-2))/dxx
-          
-                            h3_xx_E = ((h_E**-3) -2*(h**-3)   + (h_W**-3))/dxx
-                            h2_xx_W = ((h**-3)   -2*(h_W**-3) + (h_WW**-3))/dxx
-
-                        else: # [i-1, i, i+1]
-                            h2_xx_E = 0
-                            h2_xx_W = 0
-                            h3_xx_E = 0
-                            h3_xx_W = 0
-                    
-                    
-                    c3x_E = 6 * h_E * h2_xx_E - 18/5 * (h_E**2) * h3_xx_E
-                    c3x_W = 6 * h_W * h2_xx_W - 18/5 * (h_W**2) * h3_xx_W
-                    
-                    c3x_x = (c3x_E - c3x_W)(2*height.dx)
-                    
-                            
-                elif y < h_E and y >= h_W: # [i, i+1, ...] 
-                    
-                    h2_xxx = 0
-                    h3_xxx = 0
-                                        
-                    h2_xx_W = 0
-                    h3_xx_W = 0
-                    
-                    if y < h_EE: # [i, i+1, i+2, ...]
-                    
-                        u0_x = (-3*u +4*u_E -u_EE)/(2*dx)   
-                        h_x = (h_EE - h)/(2*dx)
-                        h2_xx_E = ((h_EE**-2) -2*(h_E**-2) + (h**-2))/dxx
-                        h3_xx_E = ((h_EE**-3) -2*(h_E**-3) + (h**-3))/dxx
-
-                        if y < h_EEE: #[i, i+1, i+2, i+3]
-                            h2_xx = (2*(h**-2) -5*(h_E**-2) +4*(h_EE**-2) -(h_EEE**-2))/dxx
-                            h3_xx = (2*(h**-3) -5*(h_E**-3) +4*(h_EE**-3) -(h_EEE**-3))/dxx
-                            
-                        else: # [i, i+1, i+2]
-                            h2_xx = ((h_EE**-2) - 2*(h_E**-2) + (h**-2))/dxx
-                            h3_xx = ((h_EE**-3) - 2*(h_E**-3) + (h**-3))/dxx
-            
-                    else: # [i, i+1]
-                        u0_x = (u_E - u)/dx
-                        h_x = (h_E - h)/dx
-                        h2_xx = 0
-                        h3_xx = 0
-                        h2_xx_E = 0
-                        h3_xx_E = 0
-                    
-                    c3x_E = 6 * h_E * h2_xx_E - 18/5 * (h_E**2) * h3_xx_E
-                    c3x   = 6 * h   * h2_xx   - 18/5 * (h**2)   * h3_xx
-                    
-                    c3x_x = (c3x_E - c3x)/dx
-
-                elif y >= h_E and y < h_W: # [..., i-1, i]
-                    h2_xxx = 0
-                    h3_xxx = 0
-                                        
-                    h2_xx_E = 0
-                    h3_xx_E = 0
-
-                    if y < h_WW: # [..., i-2, i-1, i]
-                        u0_x = (3*u -4*u_W +u_WW)/(2*dx)
-                        h_x = (h - h_WW)/(2*dx)
-                        h2_xx_W = ((h_WW**-2) -2*(h_W**-2) + (h**-2))/dxx
-                        h3_xx_W = ((h_WW**-3) -2*(h_W**-3) + (h**-3))/dxx
-                        
-                        if y < h_WWW: # [i-3, i-2, i-1, i]
-                            h2_xx = (2*(h**-2) -5*(h_W**-2) +4*(h_WW**-2) -(h_WWW**-2))/dxx
-                            h3_xx = (2*(h**-3) -5*(h_W**-3) +4*(h_WW**-3) -(h_WWW**-3))/dxx 
-                            
-                        else: # [i-2, i-1, i]
-                            h2_xx = ((h**-2) - 2*(h_W**-2) + (h_WW**-2))/dxx
-                            h3_xx = ((h**-3) - 2*(h_W**-3) + (h_WW**-3))/dxx
-            
-                    else: # [i-1, i]
-                        u0_x = (u - u_W)/dx
-                        h2_xx = 0
-                        h3_xx = 0
-                        h2_xx_W = 0
-                        h3_xx_W = 0
-                    
-                    c3x_W = 6 * h_W * h2_xx_W - 18/5 * (h_W**2) * h3_xx_W
-                    c3x = 6 * h * h2_xx - 18/5 * (h**2) * h3_xx
-                    
-                    c3x_x = (c3x - c3x_W)/dx
-
-                else: # [i]
-                    u0_x = 0
-                    h2_xx = 0
-                    h3_xx = 0
-                    h2_xxx = 0
-                    h3_xxx = 0
-                    c3x_x = 0
+                h2_xx = ((h_E**-2) -2*(h**-2) +(h_W**-2))/dxx
+                h3_xx = ((h_E**-3) -2*(h**-3) +(h_W**-3))/dxx
+                 
+                h2_xxx = ((h_EE**-2) -2*(h_E**-2) +2*(h_W**-2) -(h_WW**-2))/(2*dxxx)
+                h3_xxx = ((h_EE**-3) -2*(h_E**-3) +2*(h_W**-3) -(h_WW**-3))/(2*dxxx)
+               
+                # print(h2_xx, h2_xx_b)
                 
-                u0_xs[j,i] = u0_x
-                c3x_xs[j,i] = c3x_x
+                c3_x = 6 * h2_xx * h - 18/5 * h3_xx * (h**2) 
+                c3_xx = 6* (h2_xx * h_x +  h2_xxx * h) -18/5* (2*h*h_x * h3_xx + (h**2) * h3_xxx)
                 
-                u2s[j,i] = -2 * h2_xx * (y**3 - (h**2) * y) + h3_xx * (y**4 - (h**3) * y) + (1/2) * c3x_xs[j,i] * (y**2 - h * y)      
-                v2s[j,i] = h2_xxx * (0.5 * (y**4) - (h**2) * (y**2)) - 2 * h2_xx * h_x * (y**2) - h3_xxx * ((1/5)*y**5 - (h**3) * (y**2)) + (3/2) * h3_xx * (h_x**2) * y**2 - c3x_xs[j,i]*((1/6)*(y**3)-(1/4)*h*(y**2)) + (1/4)*c3x * h_x * (y**2)
+                c3_xs[i] = c3_x
+                
+            for j in range (height.Ny):
+                y = ys[j]
+
+                # inlet outlet buffer [x0, x1,] ... [, xN-2, xN-1]
+                if i < 2  or i > height.Nx-3 or y >= h:
+                    u0_xs[j,i] = 0
+                    u2s[j,i] = 0
+                    v2s[j,i] = 0
+                
+                else:
+                    u_E = us[j,i+1]  
+                    u_W = us[j,i-1]
+                    x_E = xs[i+1]
+                    x_W = xs[i-1]
+                    
+                    if y < h_E and y < h_W: # [..., i-1, i, i+1, ...]
+                        u0_x = (u_E - u_W)/(2*dx)
+                                
+                    elif y < h_E and y >= h_W: # [i, i+1, ...] 
+
+                        x_bdry = x_E -2*dx * (h_E - y)/(h_W - h_E)
+                        scale = (x_W - x_bdry)/(x_E - x_bdry)
+                        u_W =  -u_E * scale
+                        u0_x = (u_E - u_W)/(2*dx)
+
+                        
+                    elif y >= h_E and y < h_W: # [..., i-1, i]
+                        x_bdry = x_W + 2*dx * (h_W - y)/(h_E - h_W)
+                        scale = (x_E - x_bdry)/(x_W -x_bdry)
+                        u_E =  -u_W * scale
+                        u0_x = (u_E - u_W)/(2*dx)
+
+                           
+                    else: # [i]
+                        u0_x = 0
+                    
+                    u0_xs[j,i] = u0_x
+                    
+                    u2_A = -2 * h2_xx * (y**3 - (h**2) * y) 
+                    u2_B = h3_xx * (y**4 - (h**3) * y)
+                    u2_C = (1/2) * c3_x * (y**2 - h * y)
+                    u2s[j,i] = u2_A + u2_B +  u2_C
+                    
+                    v2_A = h2_xxx * ((1/2) * (y**4) - (h**2) * (y**2))
+                    v2_B = -2 * h2_xx * h_x * (y**2)
+                    v2_C = -h3_xxx * ((1/5)*(y**5) - (h**3) * (y**2))
+                    v2_D = (3/2) * h3_xx * (h_x**2) * y**2
+                    v2_E = -c3_xx * ((1/6)*(y**3) - (1/4)* h *(y**2))
+                    v2_F = (1/4) * c3_x * h_x * (y**2)
+                    v2s[j,i] = v2_A + v2_B + v2_C + v2_D + v2_E + v2_F
+                
+                    
+        c3s[0] = 0 # p2s[0] = 0 (no correction at inlet)
+        c3s[1] = 0
+        for i in range(2, height.Nx):
+            c3s[i] =(4*c3s[i-1] -c3s[i-2] + 2*dx*c3_xs[i])/3
     
-    c3s = np.zeros(height.Nx)
-    c3_init = u0_xs[height.Ny//2,0]
-    for i in range(height.Nx):
-        c3s[i] = integrate.trapezoid(c3x_xs[:,i], x=ys, dx=dy) + c3_init
-    
-    
-    p2s = -u0_xs + c3s    
-    
-    p2s_reDim = p2s*P_scale
-    u2s_reDim = u2s*U_scale
-    v2s_reDim = v2s*V_scale
+        p2s = -u0_xs + c3s  
+        
 
-
-    return p2s_reDim, u2s_reDim, v2s_reDim
-
+    
+        return p2s, u2s, v2s
 
 
 
