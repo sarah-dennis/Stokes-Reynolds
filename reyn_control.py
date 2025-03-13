@@ -31,9 +31,9 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 1
-        self.p_min=-5
-        self.p_max=5
+        self.vel_max = 3
+        self.p_min=-10
+        self.p_max=10
     
 
     

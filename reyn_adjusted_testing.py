@@ -18,8 +18,8 @@ import graphics
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
 r=1
-h0 = 0.2
-l=1
+h0 = 0.01
+l=2
 d = h0+r
 args= [r,h0,l]
 
@@ -80,13 +80,15 @@ ex = Example(U, dP, N, args)
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-adj_p, adj_v = solver.fd_adj_solve(N, write=False, plot=False)
+adj_pressure, _ = solver.fd_adj_solve(N, write=False, plot=False)
+reyn_pressure, _ = solver.fd_solve(N, write=False, plot=False)
 
-adj_ps = adj_p.ps_2D/(U/h0)
+adj_ps = adj_pressure.ps_2D/abs((U/h0))
+reyn_ps = reyn_pressure.ps_2D/abs((U/h0))
 
-stokes_ps, reyn_ps = pressure_cylinder(ex, N)
-stokes_ps = stokes_ps/(U/h0)
-reyn_ps = reyn_ps/(U/h0)
+stokes_ps, _ = pressure_cylinder(ex, N)
+stokes_ps = stokes_ps/abs((U/h0))
+
 
 x_start = -0.4
 i_start = int(x_start*N) + ex.Nx//2   
@@ -97,19 +99,32 @@ i_stop = int(x_stop*N) + ex.Nx//2
 y_max = max(ex.hs[i_start],ex.hs[i_stop])
 
 
+
+graphics.plot_contour_mesh(stokes_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Wannier Analytic Stokes pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
+graphics.plot_contour_mesh(adj_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
+graphics.plot_contour_mesh(reyn_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Reynolds pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
+
 stokes_adj = stokes_ps - reyn_ps
 reyn_adj = adj_ps - reyn_ps
 
+graphics.plot_contour_mesh(stokes_adj[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Wannier Analytic Stokes pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
+graphics.plot_contour_mesh(reyn_adj[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
 
-
-graphics.plot_contour_mesh(stokes_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Wannier Analytic Stokes pressure', ['p','x','y'], vmin=-3, vmax=3,y_lim=y_max)
-graphics.plot_contour_mesh(adj_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3,y_lim=y_max)
-graphics.plot_contour_multi([stokes_ps[:,i_start:i_stop], adj_ps[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Stokes vs. Adjusted Reynolds presure', ['$p_{Stokes}$', '$p_{Adj.}$'], ['x','y'], y_lim=y_max)
+# graphics.plot_contour_multi([stokes_ps[:,i_start:i_stop], adj_ps[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Stokes vs. Adjusted Reynolds presure', ['$p_{Stokes}$', '$p_{Adj.}$'], ['x','y'], y_lim=y_max)
 graphics.plot_contour_multi([stokes_adj[:,i_start:i_stop], reyn_adj[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, "Reynolds 'missing' pressure component", ['Stokes', 'Adj. Reyn.'], ['x','y'], y_lim=y_max)
 
-# x_test = 0.9
-# L=ex.xf-ex.x0
-# i_test = int(x_test*N) + ex.Nx//2
-# p_adj_test = (adj_ps[1:,i_test]- reyn_ps[1:,i_test])
-# p_anylt_test = (stokes_ps[1:,i_test]- reyn_ps[1:,i_test])
-# graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'analytic stokes'], ['y', '$p(x_0,y)$'])
+x_test = 0.2
+L=ex.xf-ex.x0
+i_test = int(x_test*N) + ex.Nx//2
+p_adj_test = (adj_ps[1:,i_test]- reyn_ps[1:,i_test])
+p_anylt_test = (stokes_ps[1:,i_test]- reyn_ps[1:,i_test])
+graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'analytic stokes'], ['y', '$p(x_0,y)$'])
+
+
+
+
+
+
+
+
+

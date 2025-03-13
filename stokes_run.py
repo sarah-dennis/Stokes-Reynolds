@@ -118,7 +118,7 @@ example = examples.TriCavity
 
 solver = control.Stokes_Solver(example, max_iters=50000)                
 
-N=20
+N=40
        
 zoom_on=False               
 

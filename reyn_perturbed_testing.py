@@ -26,7 +26,7 @@ args=[lam, H, l]
 U=0
 dP=1
 
-n_Ns = 10
+n_Ns = 5
 Ns = np.zeros(n_Ns)
 errs = np.zeros(n_Ns)
 errs_p0 = np.zeros(n_Ns)
@@ -80,28 +80,28 @@ args=[lam, H, l]
 U=0
 dP=1
 
-# N=100
-# n_lams =10
-# dlam= 1/(n_lams+2)
-# pdPs = np.zeros(n_lams)
-# rdPs = np.zeros(n_lams)
-# adPs = np.zeros(n_lams)
-# lams = np.zeros(n_lams)
-# for k in range(n_lams):
-#     lam= dlam * (k+1)
+N=100
+n_lams =5
+dlam= 1/(n_lams+2)
+pdPs = np.zeros(n_lams)
+rdPs = np.zeros(n_lams)
+adPs = np.zeros(n_lams)
+lams = np.zeros(n_lams)
+for k in range(n_lams):
+    lam= dlam * (k+1)
 
-#     args=[lam, H, l]
-#     solver = control.Reynolds_Solver(Example, U, dP, args)
-#     rdP, pdP, pp, pv = solver.fd_pert_solve(N, write=False, plot=False, get_dPs=True)
+    args=[lam, H, l]
+    solver = control.Reynolds_Solver(Example, U, dP, args)
+    rdP, pdP, pp, pv = solver.fd_pert_solve(N, write=False, plot=False, get_dPs=True)
 
-#     rp, rv = solver.fd_solve(N, write=False, plot=False)
-#     lams[k] = lam
-#     rdPs[k] = -rdP
-#     pdPs[k] = -pdP
+    rp, rv = solver.fd_solve(N, write=False, plot=False)
+    lams[k] = lam
+    rdPs[k] = -rdP
+    pdPs[k] = -pdP
     
-#     ardP = 3*(3*lam**2-8*lam+8)/(1-lam)**(5/2)
-#     padP = 12*(np.pi*(H/l)*lam)**2/(5*(1-lam)**(3/2))
-#     adPs[k] = ardP + padP 
+    ardP = 3*(3*lam**2-8*lam+8)/(1-lam)**(5/2)
+    padP = 12*(np.pi*(H/l)*lam)**2/(5*(1-lam)**(3/2))
+    adPs[k] = ardP + padP 
 
-# graphics.plot_2D_multi([rdPs,adPs,pdPs], lams, f'CLT vs ELT-2 $(\delta={delta})$', ['CLT', 'analytic ELT-2','ELT-2'], ['$\lambda$','$\Delta P$'], loc='left')
-# graphics.plot_2D(100*abs(adPs-pdPs)/abs(pdPs), lams, '%-err ELT-analytic vs ELT-2 (arch)',  ['$\lambda$','err $\Delta P$'])
+graphics.plot_2D_multi([rdPs,adPs,pdPs], lams, f'CLT vs ELT-2 $(\delta={delta})$', ['CLT', 'analytic ELT-2','ELT-2'], ['$\lambda$','$\Delta P$'], loc='left')
+graphics.plot_2D(100*abs(adPs-pdPs)/abs(pdPs), lams, '%-err ELT-analytic vs ELT-2 (arch)',  ['$\lambda$','err $\Delta P$'])
