@@ -39,15 +39,15 @@ class PerturbedReynSol:
         self.perturb_second(height)
         
         # make self.u4s, self.v4s, self.p4s, etc... 
-        self.perturb_fourth(height)
+        # self.perturb_fourth(height)
         
-        # pert_ps_2D = (self.p0s + delta_sqr * self.p2s)*self.P_scale
-        # pert_us_2D = (self.u0s + delta_sqr * self.u2s)*self.U_scale
-        # pert_vs_2D = (self.v0s + delta_sqr * self.v2s)*self.V_scale
+        pert_ps_2D = (self.p0s + delta_sqr * self.p2s)*self.P_scale
+        pert_us_2D = (self.u0s + delta_sqr * self.u2s)*self.U_scale
+        pert_vs_2D = (self.v0s + delta_sqr * self.v2s)*self.V_scale
         
-        pert_ps_2D = (self.p0s + delta_sqr * self.p2s + delta_frth * self.p4s)*self.P_scale
-        pert_us_2D = (self.u0s + delta_sqr * self.u2s + delta_frth * self.u4s)*self.U_scale
-        pert_vs_2D = (self.v0s + delta_sqr * self.v2s + delta_frth * self.v4s)*self.V_scale
+        # pert_ps_2D = (self.p0s + delta_sqr * self.p2s + delta_frth * self.p4s)*self.P_scale
+        # pert_us_2D = (self.u0s + delta_sqr * self.u2s + delta_frth * self.u4s)*self.U_scale
+        # pert_vs_2D = (self.v0s + delta_sqr * self.v2s + delta_frth * self.v4s)*self.V_scale
         
         self.pert_pressure = Pressure(height, ps_1D = reyn_pressure.ps_1D, ps_2D=pert_ps_2D)
         self.pert_velocity = Velocity(height, pert_us_2D, pert_vs_2D)
