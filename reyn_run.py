@@ -71,10 +71,10 @@ write_on=False
 # Example = examples.HexSlider
 # args = None
 
-Example = examples.TriCavity
-H=4
-L=1
-args = [H,L]
+# Example = examples.TriCavity
+# H=4
+# L=1
+# args = [H,L]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -83,11 +83,11 @@ args = [H,L]
 # Example = examples.Sinusoid
 # args = [r, k, L]
 
-# Example = examples.LambdaBump # 
-# lam=0.2
-# H=1
-# l=1
-# args=[lam, H, l]
+Example = examples.LambdaBump # 
+lam=0.2
+H=1
+l=1
+args=[lam, H, l]
 
 # Example = examples.Cylinder
 # r=1
@@ -97,18 +97,18 @@ args = [H,L]
 # args= [r,h0,l]
 
 U=1
-dP=0
+dP=-1
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=100
+N=50
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
-solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
+# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 solver.fd_pert_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------

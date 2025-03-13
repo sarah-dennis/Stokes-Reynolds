@@ -33,21 +33,21 @@ class PerturbedReynSol:
 
 
         delta_sqr = (self.y_scale/self.x_scale)**2
-        delta_frth = (self.y_scale/self.x_scale)**4
+        delta_fourth = (self.y_scale/self.x_scale)**4
 
         # make self.u2s, self.v2s, self.p2s, etc... 
         self.perturb_second(height)
         
         # make self.u4s, self.v4s, self.p4s, etc... 
-        # self.perturb_fourth(height)
+        self.perturb_fourth(height)
         
         pert_ps_2D = (self.p0s + delta_sqr * self.p2s)*self.P_scale
         pert_us_2D = (self.u0s + delta_sqr * self.u2s)*self.U_scale
         pert_vs_2D = (self.v0s + delta_sqr * self.v2s)*self.V_scale
         
-        # pert_ps_2D = (self.p0s + delta_sqr * self.p2s + delta_frth * self.p4s)*self.P_scale
-        # pert_us_2D = (self.u0s + delta_sqr * self.u2s + delta_frth * self.u4s)*self.U_scale
-        # pert_vs_2D = (self.v0s + delta_sqr * self.v2s + delta_frth * self.v4s)*self.V_scale
+        pert_ps_2D = (self.p0s + delta_sqr * self.p2s + delta_fourth * self.p4s)*self.P_scale
+        pert_us_2D = (self.u0s + delta_sqr * self.u2s + delta_fourth * self.u4s)*self.U_scale
+        pert_vs_2D = (self.v0s + delta_sqr * self.v2s + delta_fourth * self.v4s)*self.V_scale
         
         self.pert_pressure = Pressure(height, ps_1D = reyn_pressure.ps_1D, ps_2D=pert_ps_2D)
         self.pert_velocity = Velocity(height, pert_us_2D, pert_vs_2D)
@@ -195,36 +195,31 @@ class PerturbedReynSol:
         u4s = np.zeros((height.Ny, height.Nx)) #
         v4s = np.zeros((height.Ny, height.Nx)) #
         
-        dy = height.dx/(self.y_scale)
+        dy = height.dy/(self.y_scale)
         dx = height.dx/(self.x_scale)
         d2x = dx**2
         d3x = dx**3
-        d4x = dx**4
-        d5x = dx**5
         
         for i in range(height.Nx):
             v0_Sy_i = 0
-            if i >= 3  and i <= height.Nx-4: #3-wide buffer inlet & outlet 
+            if i >= 2  and i <= height.Nx-3: #3-wide buffer inlet & outlet 
                 
                 h = hs[i]
                 
                 h_E = hs[i+1]                
                 h_2E = hs[i+2]
-                h_3E = hs[i+3]
                 
                 h_W = hs[i-1]
                 h_2W = hs[i-2]
-                h_3W = hs[i-3]
 
                 h_x = height.hxs[i]
                 
+                h2_4x = (self.h2_3xs[i+1] - self.h2_3xs[i-1])/(2*dx)
+                h2_5x = (self.h2_3xs[i+1] -2*self.h2_3xs[i] + self.h2_3xs[i-1])/d2x
                 
-                h2_4x = ((h_2E**-2) -4*(h_E**-2) + 6*(h**-2) - 4*(h_W**-2) + (h_2W**-2))/d4x
-                h3_4x = ((h_2E**-3) -4*(h_E**-3) + 6*(h**-3) - 4*(h_W**-3) + (h_2W**-3))/d4x
-                
-                h2_5x = ((h_3E**-2) -4*(h_2E**-2) + 5*(h_E**-2) - 5*(h_W**-2) + 4*(h_2W**-2) -(h_3W**-2))/(2*d5x)
-                h3_5x = ((h_3E**-3) -4*(h_2E**-3) + 5*(h_E**-3) - 5*(h_W**-3) + 4*(h_2W**-3) -(h_3W**-3))/(2*d5x)
-                
+                h3_4x = (self.h3_3xs[i+1] - self.h3_3xs[i-1])/(2*dx)
+                h3_5x = (self.h3_3xs[i+1] -2*self.h3_3xs[i] + self.h3_3xs[i-1])/d2x
+                 
                 # f1 = h^3 h3_xx 
                 f1_2x = ((h_E**3)*self.h3_2xs[i+1] - 2*(h**3)*self.h3_2xs[i] + (h_W**3)*self.h3_2xs[i-1])/d2x
                 f1_3x = ((h_2E**3)*self.h3_2xs[i+2] - 2*(h_E**3)*self.h3_2xs[i+1] + 2*(h_W**3)*self.h3_2xs[i-1] - (h_2W**3)*self.h3_2xs[i-2])/(2*d3x)
@@ -239,20 +234,21 @@ class PerturbedReynSol:
 
                 # c3_3x = d^2/d^2x[dc3/dx]
                 c3_3x = (self.c3_xs[i+1] - 2*self.c3_xs[i] + self.c3_xs[i-1])/d2x
-                c3_4x = (self.c3_xs[i+2] - 2*self.c3_xs[i+1] + 2*self.c3_xs[i-1] - self.c3_xs[i-1])/(2*d3x)
+                c3_4x = (self.c3_xs[i+2] - 2*self.c3_xs[i+1] + 2*self.c3_xs[i-1] - self.c3_xs[i-2])/(2*d3x)
                 
                 # c5_x = d/dx[c5]  
                 c5_x = (3/14)*h3_4x*(h**4) - (3/5)*h2_4x*(h**3) - (f1_2x - 2*f2_2x)*h + (3/10)*c3_3x*(h**2) -(1/2)*f3_2x*h
-                c5_2x_A = (3/14)*( h3_5x*(h**4) + 4*h3_4x*h_x*(h**3)) - (3/5)*(h2_5x*(h**3) + 3*h3_4x*h_x*(h**2))
+                c5_2x_A = (3/14)*( h3_5x*(h**4) + 4*h3_4x*h_x*(h**3)) - (3/5)*(h2_5x*(h**3) + 3*h2_4x*h_x*(h**2))
                 c5_2x_B = -((f1_3x - 2*f2_3x)*h + (f1_2x - 2*f2_2x)*h_x) + (3/10)*(c3_4x*(h**2) + 2*c3_3x*h_x*h) - (1/2)*(f3_3x*h + f3_2x*h_x) 
                 c5_2x = c5_2x_A + c5_2x_B
-                
+
                 # save for p4
                 c5_xs[i] = c5_x 
 
 
                 for j in range (height.Ny):
                     y = ys[j]
+                    
                     v0_Sy_i += self.v0s[j,i] *  dy
                     v0_Sys[j,i] = v0_Sy_i
                     
@@ -293,12 +289,16 @@ class PerturbedReynSol:
                         
                         v4_A = (-1/20)*h3_5x*((1/7)*(y**7) - (1/2)*(h**5)*(y**2)) + (1/8)*h3_4x*h_x*(h**4)*(y**2)
                         v4_B = (3/20)*h2_5x*((1/6)*(y**6) - (1/2)*(h**4)*(y**2)) - (3/10)*h2_4x*h_x*(h**3)*(y**2)
-                        v4_C = (1/3)*((f1_3x - 2*f2_3x)*((1/4)*y**4 - (1/2)*(h**2)*(y**2)) - (f1_2x - 2*f2_2x)*h_x*h*(y**2))
-                        v4_D = (1/6)*(f3_3x*((1/4)*y**4 - (1/2)*(h**2)*(y**2)) - f3_2x*h_x*h*(y**2))
-                        v4_E = (-1/12)*(c3_4x)*((1/5)*(y**5) - (1/2)*(h**3)*y**2) + (1/8)*c3_3x*h_x*(h**2)*(y**2)
+                        v4_C = (1/3)*((f1_3x - 2*f2_3x)*((1/4)*(y**4) - (1/2)*(h**2)*(y**2)) - (f1_2x - 2*f2_2x)*h_x*h*(y**2))
+                        v4_D = (1/6)*(f3_3x*((1/4)*(y**4) - (1/2)*(h**2)*(y**2)) - f3_2x*h_x*h*(y**2))
+                        v4_E = (-1/12)*(c3_4x)*((1/5)*(y**5) - (1/2)*(h**3)*(y**2)) + (1/8)*c3_3x*h_x*(h**2)*(y**2)
                         v4_F = (1/2)*(c5_2x)*((1/3)*(y**3) - (1/2)*h*(y**2)) - (1/4)*c5_x*h_x*(y**2)
                         
                         v4s[j,i] = v4_A + v4_B + v4_C + v4_D + v4_E + v4_F
+         
+                    
+                        if ys[j+1] > hs[i]:
+                            print(u4s[j,i], v4s[j,i])
                         
                 # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
                 
