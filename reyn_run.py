@@ -84,7 +84,7 @@ write_on=False
 # args = [r, k, L]
 
 Example = examples.LambdaBump # 
-lam=0.2
+lam=0.4
 H=1
 l=1
 args=[lam, H, l]
@@ -96,14 +96,14 @@ args=[lam, H, l]
 # #d = h0+r
 # args= [r,h0,l]
 
-U=1
-dP=-1
+U=0
+dP=1
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=50
+N=200
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
