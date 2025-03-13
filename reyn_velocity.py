@@ -11,21 +11,21 @@ from scipy import stats
 
 class Velocity:
     def __init__(self, height, vx, vy):
+        self.height=height
         self.vx = vx
         self.vy = vy
-        self.flux = self.get_flux(vx, height.dx)
+        self.flux = self.get_flux(vx)
         
 
             
-    def get_flux(self, vx, dx):
+    def get_flux(self, vx):
         lenx = vx.shape[1]
         qs = np.zeros(lenx)
     
-        for i in range(lenx):
-            qs[i]= np.sum(vx[:,i])*dx
-    
-        # xs = np.linspace(0, lenx/dx, lenx, float)
-        # graphics.plot_2D(qs, xs, 'flux', ['x','q'])
+        for i in range(self.height.Nx):
+            qs[i]= np.sum(vx[:,i])*self.height.dx
+
+        # graphics.plot_2D(qs, self.height.xs, f'flux $\lambda={self.height.lam :.2f}$', ['x','q'])
         
         q = stats.mode(qs, axis=0, keepdims=False)[0]
         return q
@@ -84,9 +84,10 @@ class AdjReynVelocity(Velocity):
            
             y = height.ys[j]
             pj = ps[j]
-            for i in range(3, height.Nx-4):
+            for i in range(3, height.Nx-3):
                 
                 h = height.hs[i]
+
                 p = pj[i]
                 
                 if y >= h:
@@ -119,28 +120,29 @@ class AdjReynVelocity(Velocity):
                     p_EEE = pj[i+3]
                     
                     if y <= h_E and y <= h_W:  # interior
+
                         px = (p_E - p_W)/(2*height.dx)
                         pxx = (p_E -2*p + p_W)/height.dx**2
 
                     elif y <= h_E and y > h_W: # West out of bounds, fwd diff (right sided)
+
                         if y <= h_EE:
                             px = (-3*p +4*p_E -p_EE)/(2*height.dx)
-                            
                             if y <= h_EEE:
                                 pxx = (2*p -5*p_E +4*p_EE -p_EEE)/height.dx**2
                             else:
                                 pxx = (p -2*p_E + p_EE)/height.dx**2
 
                         else:
-                            px = (p_E - p)/height.dx
+                            px = 0#(p_E - p)/height.dx
                             pxx = 0
 
                     
-                    elif y > h_E and y<= h_W: # East out of bounds, bkwd diff (left sided)
-                    
+                    elif y > h_E and y <= h_W: # East out of bounds, bkwd diff (left sided)
+
                         if y <= h_WW:
                             px = (3*p -4*p_W +p_WW)/(2*height.dx)
-                            
+                 
                             if y <= h_WWW:
                                 pxx = (2*p -5*p_W +4*p_WW -p_WWW)/height.dx**2
 
@@ -152,6 +154,7 @@ class AdjReynVelocity(Velocity):
                             pxx = 0
                 
                     else: # both East and West out of bounds
+
                         px = 0
                         pxx = 0
 
@@ -162,27 +165,28 @@ class AdjReynVelocity(Velocity):
                     vx[j,i]= 1/(2*height.visc)* px * y**2 + q * y + height.U
                     
                     vy[j,i] = -1/(6*height.visc) * pxx * y**3 - 1/2 * qx * y**2
-
+                    
+                
         
         for j in range(height.Ny):
             y = height.ys[j]
-            if y < height.hs[0]:
+            if y <= height.hs[0]:
                vx[j,0] = vx[j,3]
                vy[j,0] = vy[j,3]
-            if y < height.hs[1]:
+            if y <= height.hs[1]:
                 vx[j,1] = vx[j,3]
                 vy[j,1] = vy[j,3]
-            if y < height.hs[2]:
+            if y <= height.hs[2]:
                 vx[j,2] = vx[j,3]
                 vy[j,2] = vy[j,3]
             
-            if y < height.hs[-1]:
+            if y <= height.hs[-1]:
                 vx[j,-1] = vx[j,height.Nx-4]
                 vy[j,-1] = vy[j,height.Nx-4]
-            if y < height.hs[-2]:
+            if y <= height.hs[-2]:
                 vx[j,-2] = vx[j,height.Nx-4]
                 vy[j,-2] = vy[j,height.Nx-4]
-            if y < height.hs[-3]:
+            if y <= height.hs[-3]:
                 vx[j,-3] = vx[j,height.Nx-4]
                 vy[j,-3] = vy[j,height.Nx-4]
 

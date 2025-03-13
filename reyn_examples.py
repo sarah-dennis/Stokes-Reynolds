@@ -79,15 +79,17 @@ class LambdaBump(BumpHeight):
         super().__init__(x0, xf, N, lam, H, U, dP, namestr)
 
 
-class CircCavity(CircleHeight):
+class Cylinder(CircleHeight):
     def __init__(self, U, dP, N, args):
-        x0 = 0
+        
         r = args[0]
-        h0=args[1]
+        h0 = args[1]
         l=args[2]
-        xf = x0 + 2*r + 2*l
+        x0 = -(l+r)
+
+        xf = l+r
         namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
-        super().__init__(x0, xf, N, r, h0, l, U, dP, namestr)
+        super().__init__(x0, xf, N, r, h0, U, dP, namestr)
     
 #-----------------------------------------------------------------------------------------------------------------------------------
 

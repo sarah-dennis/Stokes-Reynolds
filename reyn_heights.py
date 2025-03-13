@@ -101,28 +101,29 @@ class BumpHeight(Height):
         yf = H
         self.h_max=H         
         self.x_scale = (xf-x0)/2  
+        self.lam=lam
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
-        hs = np.asarray([self.h_fun(x, lam) for x in xs])
+        hs = np.asarray([self.h_fun(x) for x in xs])
 
         
 
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
   
-    def h_fun(self, x, lam):
-        return self.h_max*(1-(lam/2)*(1+np.cos(3.14159*x/self.x_scale)))
+    def h_fun(self, x):
+        return self.h_max*(1-(self.lam/2)*(1+np.cos(3.14159*x/self.x_scale)))
    
 
 #------------------------------------------------------------------------------    
 class CircleHeight(Height):
     
-    def __init__(self, x0, xf, N, r, h0, l, U, dP, filestr):
+    def __init__(self, x0, xf, N, r, h0, U, dP, filestr):
         Nx = int((xf-x0)*N + 1)
         dx = 1/N
         
-        self.h0 = h0
+        self.h0 = h0 #clearance
         self.r = r 
-        self.l = l
+        self.l = ((xf-x0)-2*r)/2
     
         
             
@@ -132,17 +133,14 @@ class CircleHeight(Height):
         
         y0 = 0
         yf = h0 + r
-        # h_str = "./examples/" +f"circ_r{r}_H{yf}_l{l}_U{U}_dP{dP}_N{N}"
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
 
     def h_fun(self, x):
         # return self.h0 + np.sqrt(self.r**2 - (x-self.r)**2)
-        if x <= self.l:
+        if x <-self.r or x >self.r:
             return self.h0+self.r
-        elif x <= self.l + 2*self.r:
-            return self.h0 + self.r - np.sqrt(self.r**2 - (x-self.l-self.r)**2)
         else:
-            return self.h0+self.r
+            return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
     
     
 #------------------------------------------------------------------------------

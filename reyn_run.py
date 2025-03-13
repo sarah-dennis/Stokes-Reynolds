@@ -40,16 +40,16 @@ write_on=False
 #------------------------------------------------------------------------------
 ## space parmaters |--> args = [ ... ]
 #------------------------------------------------------------------------------
-l = 1          # inlet/outlet length        
-h = .125        # minimum height       
-H = 1           # maximum height
-xr = 0.35       # BFS reattachment point x=l+xr
-yr = 0.41       # BFS detachment point y=yr
-delta = 0.25    # smoothed step slope reciprocal 0 <= delta < L/2
-r=0.4             # radius 0 <= r < 1/2
-lam = 0.2
-k= 2      # period sin(kx)
-L=4
+# l = 1     # inlet/outlet length        
+# h = .125        # minimum height       
+# H = 1/2           # maximum height
+# xr = 0.35       # BFS reattachment point x=l+xr
+# yr = 0.41       # BFS detachment point y=yr
+# delta = 0.5    # smoothed step slope reciprocal 0 <= delta < L/2
+# r = 0.             # radius 0 <= r < 1/2
+# lam = 0.2
+# k= 2      # period sin(kx)
+# L= 4
 ## args are specific to each example and domain is initialized at solve time
 
 #------------------------------------------------------------------------------
@@ -78,29 +78,35 @@ L=4
 ## Smooth examples  
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
-Example = examples.Sinusoid
-args = [r, k, L]
+# Example = examples.Sinusoid
+# args = [r, k, L]
 
-# Example = examples.LambdaBump # 
-# args=[lam, H, l]
+Example = examples.LambdaBump # 
+lam=0.2
+H=1
+l=1
+args=[lam, H, l]
+
+# Example = examples.Cylinder
+# r=1
+# h0 = 1
+# l=2
+# #d = h0+r
+# args= [r,h0,l]
 
 U=0
-dP=1
+dP=-1
 
 #------------------------------------------------------------------------------
-
-# Example = examples.CircCavity
-# args=[r,h,l]
-
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=211
+N=100
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-# # solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 solver.fd_pert_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
@@ -108,5 +114,4 @@ solver.fd_pert_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.convg_pwl_fd([20,40,80,160])
-# solver.convg_adj_fd(20, [40, 80, 160, 320,640,1280],2560)
-# solver.convg_pert_fd(20, [40, 80, 160, 320,640],1280)
+

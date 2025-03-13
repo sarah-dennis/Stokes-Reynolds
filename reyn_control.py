@@ -31,7 +31,7 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 3
+        self.vel_max = 1
         self.p_min=-5
         self.p_max=5
     
@@ -134,11 +134,10 @@ class Reynolds_Solver:
         v_title = "" + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
-        
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-        graphics.plot_quiver_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
-        
+        # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+        # graphics.plot_2D(velocity.vy[:,ex.Nx//3], ex.ys, f'$v(x_0,y)$, $x_0={ex.xs[i0]:.2f}$, $h(x)={ex.hs[i0]:.5f}$', ['y','v'])
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)
@@ -165,35 +164,4 @@ class Reynolds_Solver:
         O1 = 1
         O2 = 1
         graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,log_linthresh, O1, O2)
-    
-    def convg_adj_fd(self,N_min, Ns, N_max):
-        p_info, vel_info = cnvg.reyn_cnvg_self(self.fd_adj_solve, N_min, Ns, N_max)
-        p_title ='Convergence for Adjusted Reynolds pressure'
-        v_title ='Convergence for Adjusted Reynolds velocity'
-        p_ax_labels=['$N$',  '$||p_{N} - p_{N*}||$']
-        v_ax_labels=['$N$',  '$|(u,v)_{N} - (u,v)_{N*}|_2$']
-        fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
-        O1 = 1
-        O2 = 1
-        # p_info and vel_info store errors in l1, l2, linf norms (plotted) and convergance rates (not plotted)
-        graphics.plot_log_multi(p_info[:3],[N_min] + Ns,p_title,fun_labels,p_ax_labels,log_linthresh, O1, O2)
-        graphics.plot_log_multi(vel_info[:3],[N_min] + Ns,v_title,fun_labels,v_ax_labels,log_linthresh, O1, O2)
-
-
-    
-    def convg_pert_fd(self,N_min, Ns, N_max):
-        p_info, vel_info = cnvg.reyn_cnvg_self(self.fd_pert_solve, N_min, Ns, N_max)
-        p_title ='Convergence for Perturbed Reynolds pressure'
-        v_title ='Convergence for Perturbed Reynolds velocity'
-        p_ax_labels=['$N$',  '$||p_{N} - p_{N*}||$']
-        v_ax_labels=['$N$',  '$|(u,v)_{N} - (u,v)_{N*}|_2$']
-        fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
-        O1 = 1
-        O2 = 1
-        # p_info and vel_info store errors in l1, l2, linf norms (plotted) and convergance rates (not plotted)
-        graphics.plot_log_multi(p_info[:3],[N_min] + Ns,p_title,fun_labels,p_ax_labels,log_linthresh, O1, O2)
-        graphics.plot_log_multi(vel_info[:3],[N_min] + Ns,v_title,fun_labels,v_ax_labels,log_linthresh, O1, O2)
-
-
-
-
+   

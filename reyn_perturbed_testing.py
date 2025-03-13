@@ -12,6 +12,10 @@ import convergence
 
 import numpy as np
 import graphics
+
+#------------------------------------------------------------------------------
+# Convergence to analytic solution
+#------------------------------------------------------------------------------
 Example = examples.LambdaBump # 
 H=1 #=h0
 l=1 #=L/2
@@ -21,35 +25,7 @@ args=[lam, H, l]
 
 U=0
 dP=1
-#------------------------------------------------------------------------------
 
-# N=100
-# n_lams =10
-# dlam= 1/(n_lams+2)
-# pdPs = np.zeros(n_lams)
-# rdPs = np.zeros(n_lams)
-# adPs = np.zeros(n_lams)
-# lams = np.zeros(n_lams)
-# for k in range(n_lams):
-#     lam= dlam * (k+1)
-
-#     args=[lam, H, l]
-#     solver = control.Reynolds_Solver(Example, U, dP, args)
-#     rdP, pdP, pp, pv = solver.fd_pert_solve(N, write=False, plot=False, get_dPs=True)
-
-#     rp, rv = solver.fd_solve(N, write=False, plot=False)
-#     lams[k] = lam
-#     rdPs[k] = -rdP
-#     pdPs[k] = -pdP
-    
-#     ardP = 3*(3*lam**2-8*lam+8)/(1-lam)**(5/2)
-#     padP = 12*(np.pi*(H/l)*lam)**2/(5*(1-lam)**(3/2))
-#     adPs[k] = ardP + padP 
-
-# graphics.plot_2D_multi([rdPs,adPs,pdPs], lams, f'CLT vs ELT-2 $(\delta={delta})$', ['CLT', 'analytic ELT-2','ELT-2'], ['$\lambda$','$\Delta P$'], loc='left')
-# graphics.plot_2D(100*abs(adPs-pdPs)/abs(pdPs), lams, '%-err ELT-analytic vs ELT-2 (arch)',  ['$\lambda$','err $\Delta P$'])
-
-#------------------------------------------------------------------------------
 n_Ns = 10
 Ns = np.zeros(n_Ns)
 errs = np.zeros(n_Ns)
@@ -58,6 +34,7 @@ errs_p2 = np.zeros(n_Ns)
 dN = 2
 N = 7
 
+# analytic solution dP for LambdaBump
 ardP = -3*(3*(lam**2)-8*lam+8)/(1-lam)**(5/2)
 padP = -12*((3.14159*(H/l)*lam)**2)/(5*(1-lam)**(3/2))
 adP = (ardP + padP) 
@@ -89,3 +66,42 @@ print("cnvg rates")
 print("p: " + np.array2string(p_rate))
 print("p0: " + np.array2string(p0_rate))
 print("p2" + np.array2string(p2_rate))
+
+#------------------------------------------------------------------------------
+# Comparison of dP with Reynolds (unadjusted) model
+#------------------------------------------------------------------------------
+Example = examples.LambdaBump # can change to any example
+H=1 #=h0
+l=1 #=L/2
+delta = H/l
+lam = 0.8
+args=[lam, H, l]
+
+U=0
+dP=1
+
+# N=100
+# n_lams =10
+# dlam= 1/(n_lams+2)
+# pdPs = np.zeros(n_lams)
+# rdPs = np.zeros(n_lams)
+# adPs = np.zeros(n_lams)
+# lams = np.zeros(n_lams)
+# for k in range(n_lams):
+#     lam= dlam * (k+1)
+
+#     args=[lam, H, l]
+#     solver = control.Reynolds_Solver(Example, U, dP, args)
+#     rdP, pdP, pp, pv = solver.fd_pert_solve(N, write=False, plot=False, get_dPs=True)
+
+#     rp, rv = solver.fd_solve(N, write=False, plot=False)
+#     lams[k] = lam
+#     rdPs[k] = -rdP
+#     pdPs[k] = -pdP
+    
+#     ardP = 3*(3*lam**2-8*lam+8)/(1-lam)**(5/2)
+#     padP = 12*(np.pi*(H/l)*lam)**2/(5*(1-lam)**(3/2))
+#     adPs[k] = ardP + padP 
+
+# graphics.plot_2D_multi([rdPs,adPs,pdPs], lams, f'CLT vs ELT-2 $(\delta={delta})$', ['CLT', 'analytic ELT-2','ELT-2'], ['$\lambda$','$\Delta P$'], loc='left')
+# graphics.plot_2D(100*abs(adPs-pdPs)/abs(pdPs), lams, '%-err ELT-analytic vs ELT-2 (arch)',  ['$\lambda$','err $\Delta P$'])

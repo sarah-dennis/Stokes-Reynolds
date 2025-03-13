@@ -83,7 +83,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
     #ax.set_xlim([0, 1])
-    #ax.set_ylim([0, 1])
+    # ax.set_ylim([-1, 1])
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -189,7 +189,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     
     
        
-def plot_quiver_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthresh=linthresh):
+def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthresh=linthresh):
     
     pp.rcParams['figure.dpi'] = dpi
     
@@ -249,13 +249,39 @@ def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh)
     pp.ylabel(labels[2])
     pp.colorbar(contour_plot, label=labels[0])
     
-    # ax = pp.gca()
-    # ax.set_aspect('equal')
+    ax = pp.gca()
+    ax.set_aspect('equal')
     pp.show()
+    
+def plot_contour_multi(funs, xs, ys, title, fun_labels, labels, y_lim=None):
+    pp.rcParams["lines.linewidth"] = .5
+    pp.rcParams['figure.dpi'] = dpi
+
+    pp.figure()
+    
+    X, Y = np.meshgrid(xs, ys)
+    n_contours = len(xs)//2
+    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']  
+    plots = []
+    
+    for i in range(len(funs)):          
+        pp.contour(X, Y, funs[i], n_contours, colors=colors[i])
+        plots.append(pp.plot(0,0,color=colors[i], label=fun_labels[i]))
+        
+        
+    pp.title(title, fontweight="bold")
+    pp.xlabel(labels[0])
+    pp.ylabel(labels[1])    
+    ax = pp.gca()
+    pp.legend()
+    # ax.set_aspect('equal')
+    if y_lim is not None:
+        ax.set_ylim(0, y_lim)
+    pp.show()    
 
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=20):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=20, y_lim=None):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     X, Y = np.meshgrid(xs, ys)
@@ -282,7 +308,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     pp.minorticks_on()
     ax = pp.gca()
     ax.set_aspect('equal')    
-    ax.set_ylim(min(ys),max(ys))
+    ax.set_ylim(min(ys),y_lim)
     # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   
