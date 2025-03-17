@@ -6,8 +6,7 @@ Created on Wed Aug 30 12:20:23 2023
 """
 import numpy as np
 import domain
-import graphics
-from scipy import stats
+
 
 class Velocity:
     def __init__(self, height, vx, vy):
@@ -25,9 +24,8 @@ class Velocity:
         for i in range(self.height.Nx):
             qs[i]= np.sum(vx[:,i])*self.height.dx
 
-        # graphics.plot_2D(qs, self.height.xs, f'flux $\lambda={self.height.lam :.2f}$', ['x','q'])
         
-        q = stats.mode(qs, axis=0, keepdims=False)[0]
+        q = np.min(qs)
         return q
             
             

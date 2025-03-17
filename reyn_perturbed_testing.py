@@ -28,43 +28,52 @@ dP=1
 
 n_Ns = 5
 Ns = np.zeros(n_Ns)
-errs = np.zeros(n_Ns)
 errs_p0 = np.zeros(n_Ns)
+errs_p4 = np.zeros(n_Ns)
 errs_p2 = np.zeros(n_Ns)
 dN = 2
-N = 7
+N = 20
 
 # analytic solution dP for LambdaBump
-ardP = -3*(3*(lam**2)-8*lam+8)/(1-lam)**(5/2)
-padP = -12*((3.14159*(H/l)*lam)**2)/(5*(1-lam)**(3/2))
-adP = (ardP + padP) 
+fac_lam = np.sqrt(1-lam)
+analytic_pert0_dP = -3*(3*(lam**2)-8*lam + 8)/(fac_lam**5)
+
+analytic_pert2_dP = -12*((np.pi*lam)**2)/(5*fac_lam**3)
+
+analytic_pert4_dP = -8*(np.pi**4)* (428*(-1+fac_lam) - 214*(-2 + fac_lam)*lam - 53*(lam**2))/(175*fac_lam)
+
+
  
 for k in range(n_Ns):
     Ns[k] = N 
     
     solver = control.Reynolds_Solver(Example, U, dP, args)
-    rdP, p2dP, p2p, p2v = solver.fd_pert_solve(N, write=False, plot=False, get_dPs=True)
+    pert = solver.fd_pert_solve(N,order=4, write=False, plot=False, get_dPs=True)
 
-    errs[k] = abs(p2dP -adP)/abs(adP)
-    errs_p0[k] = abs(rdP -ardP)/abs(ardP)
-    errs_p2[k] = abs((p2dP-ardP) -padP)/abs(padP)
+    errs_p0[k] = abs(pert.dP_reyn -analytic_pert0_dP)/abs(analytic_pert0_dP)
+    if pert.order >1:
+        print(pert.dP_pert2, analytic_pert2_dP)
+        errs_p2[k] = abs(pert.dP_pert2 -analytic_pert2_dP)/abs(analytic_pert2_dP)
+
+    if pert.order > 2:
+        # print(pert.dP_pert4)
+        print(pert.dP_pert4, analytic_pert4_dP)
+        errs_p4[k] = abs(pert.dP_pert4 -analytic_pert4_dP)/abs(analytic_pert4_dP)
     
     N *= dN
     
-linthresh = min(errs)*1e-1
-graphics.plot_log_multi([errs, errs_p0, errs_p2], Ns, f'ELT-2 convergence $(\lambda={lam}, \delta={delta})$',[ '$\Delta P$' , '$\Delta P_0$', '$\Delta P_2$'], ['N', 'Rel. Error '], linthresh, O1=1, O2=1e1)
+linthresh = 1e-8
+graphics.plot_log_multi([errs_p0, errs_p2, errs_p4], Ns, f'ELT-2 convergence $(\lambda={lam}, \delta={delta})$',['$\Delta P_0$', '$\Delta P_2$', '$\Delta P_4$'], ['N', 'Rel. Error '], linthresh, O1=1, O2=1e1)
 
 
-p_rate = convergence.convg_rate(errs)
-p0_rate = convergence.convg_rate(errs_p0)
+p4_rate = convergence.convg_rate(errs_p4)
 p2_rate = convergence.convg_rate(errs_p2)
-cnvg_rates = np.stack([p_rate, p0_rate, p2_rate], axis=0)
+cnvg_rates = np.stack([p2_rate, p4_rate], axis=0)
 
 
     
 print("cnvg rates")
-print("p: " + np.array2string(p_rate))
-print("p0: " + np.array2string(p0_rate))
+print("p4: " + np.array2string(p4_rate))
 print("p2" + np.array2string(p2_rate))
 
 # #------------------------------------------------------------------------------

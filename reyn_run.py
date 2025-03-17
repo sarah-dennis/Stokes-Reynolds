@@ -81,10 +81,13 @@ write_on=False
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
 # Example = examples.Sinusoid
+# r=0.5
+# k=2
+# L=4
 # args = [r, k, L]
 
 Example = examples.LambdaBump # 
-lam=0.4
+lam=0.2
 H=1
 l=1
 args=[lam, H, l]
@@ -94,22 +97,22 @@ args=[lam, H, l]
 # h0 = 1
 # l=2
 # #d = h0+r
-# args= [r,h0,l]
+# args= [ r,h0,l]
 
-U=0
-dP=1
+U=1
+dP=-2
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=200
+N=50
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
-solver.fd_pert_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

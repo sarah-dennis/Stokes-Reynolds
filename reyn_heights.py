@@ -106,12 +106,13 @@ class BumpHeight(Height):
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
 
+
         
 
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
   
     def h_fun(self, x):
-        return self.h_max*(1-(self.lam/2)*(1+np.cos(3.14159*x/self.x_scale)))
+        return self.h_max*(1-(self.lam/2)*(1+np.cos(np.pi*x/self.x_scale)))
    
 
 #------------------------------------------------------------------------------    
