@@ -102,8 +102,8 @@ class Reynolds_Solver:
         solver_title = "Reynolds"
         
         if plot:
-            self.p_plot(ex, pert.reyn_pressure, pert.reyn_velocity.flux, solver_title, zoom)
-            self.v_plot(ex, pert.reyn_velocity, solver_title, zoom)
+            # self.p_plot(ex, pert.reyn_pressure, pert.reyn_velocity.flux, solver_title, zoom)
+            # self.v_plot(ex, pert.reyn_velocity, solver_title, zoom)
             if order > 1:
                 solver_title2 = solver_title + " $O(\delta^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
