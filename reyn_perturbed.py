@@ -62,7 +62,7 @@ class PerturbedReynSol:
             self.pert4_pressure = Pressure(height, ps_1D = self.reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
             self.pert4_velocity = Velocity(height, pert4_us_2D, pert4_vs_2D)
         
-            self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
+            self.dP_pert4 = (self.p4s[0,-6]-self.p4s[0,6])
     
     
         
@@ -99,6 +99,7 @@ class PerturbedReynSol:
                 h_EE = hs[i+2] 
                 
                 if i == 0:
+                    
                     h_W = h_E
                     h_WW = h_EE
     
@@ -184,6 +185,7 @@ class PerturbedReynSol:
         
         
         self.c3s = c3s
+        
         self.c3_xs = c3_xs
         self.c3_2xs = c3_2xs
         self.h_xs = h_xs
@@ -191,14 +193,14 @@ class PerturbedReynSol:
         self.h3_2xs = h3_2xs   # d^2/dx^2 [h^-3] @ xi
         self.h2_3xs = h2_3xs   # d^3/dx^3 [h^-2] @ xi
         self.h3_3xs = h3_3xs   # d^3/dx^3 [h^-3] @ xi
-        
+
 
     def perturb_fourth(self, height):
 
         ys = height.ys/self.y_scale
         hs = height.hs/self.y_scale
 
-        
+        c5_2xs = np.zeros(height.Nx) # d/dx [c5(x)]
         c5_xs = np.zeros(height.Nx) # d/dx [c5(x)]
         c5s = np.zeros(height.Nx) # intS d/dx[c5(x)] dx
         
@@ -213,6 +215,8 @@ class PerturbedReynSol:
         dx = height.dx/(self.x_scale)
         d2x = dx**2
         d3x = dx**3
+        d4x = dx**4
+        d5x = dx**5
         
         for i in range(height.Nx):
             v0_Sy_i = 0
@@ -227,173 +231,137 @@ class PerturbedReynSol:
             
             c3_x = self.c3_xs[i]
             c3_2x = self.c3_2xs[i]
-            
-            if i < 2: # Inlet  boundary 
-            
+
+            if i < 3:
                 h_E = hs[i+1] 
                 h_2E = hs[i+2] 
-
-                h2_2x_E = self.h2_2xs[i+1]
-                h2_2x_2E = self.h2_2xs[i+2]
-                h3_2x_E = self.h3_2xs[i+1]
-                h3_2x_2E = self.h3_2xs[i+2]
-                h2_3x_E = self.h2_3xs[i+1]
-                h3_3x_E = self.h3_3xs[i+1]
-                
-                c3_x_E = self.c3_xs[i+1]
-                c3_x_2E = self.c3_xs[i+2]
-                c3_2x_E = self.c3_2xs[i+1]
-                
-                if i == 0: # adjust W:=i-1 & 2W:=i-2
-                    h_W = h_E
-                    h_2W = h_2E
-                    
-                    h2_2x_W = h2_2x_E
-                    h2_2x_2W = h2_2x_2E
-                    h3_2x_W = h3_2x_E
-                    h3_2x_2W = h3_2x_2E
-                    h2_3x_W = h2_3x_E
-                    h3_3x_W = h3_3x_E
-                    
-                    c3_x_W = c3_x_E
-                    c3_x_2W = c3_x_2E
-                    c3_2x_W = c3_2x_E
-                    
-    
-                elif i == 1: # adjust 2W:=i-2
-                    h_W = hs[i-1]
-                    h_2W = h
-                    
-                    h2_2x_W = self.h2_2xs[i-1]
-                    h2_2x_2W = h2_2x
-                    h3_2x_W = self.h3_2xs[i-1]
-                    h3_2x_2W = h3_2x
-                    h2_3x_W = self.h2_3xs[i-1]
-                    h3_3x_W = self.h3_3xs[i-1]
-                    
-                    c3_x_W = self.c3_xs[i-1]
-                    c3_x_2W = c3_x
-                    c3_2x_W = self.c3_2xs[i-1]
-                    
-
-            if i > height.Nx-3: # Outlet boundary 
-                h_W = hs[i-1]
-                h_2W = hs[i-2]
-
-                h2_2x_W = self.h2_2xs[i-1]
-                h2_2x_2W = self.h2_2xs[i-2]
-                h3_2x_W = self.h3_2xs[i-1]
-                h3_2x_2W = self.h3_2xs[i-2]
-                h2_3x_W = self.h2_3xs[i-1]
-                h3_3x_W = self.h3_3xs[i-1]
-                
-                c3_x_W = self.c3_xs[i-1]
-                c3_x_2W = self.c3_xs[i-2]
-                c3_2x_W = self.c3_2xs[i-1]
-                
-                if i == height.Nx-1: # adjust E:=i+1 & 2E:=i+2
-                    h_E = h_W
-                    h_2E = h_2W
-                
-                    h2_2x_E = h2_2x_W
-                    h2_2x_2E = h2_2x_2W
-                    h3_2x_E = h3_2x_W
-                    h3_2x_2E = h3_2x_2W
-                    h2_3x_E = h2_3x_W
-                    h3_3x_E = h3_3x_W
-                    
-                    c3_x_E = c3_x_W
-                    c3_x_2E = c3_x_2W
-                    c3_2x_E = c3_2x_W
-                    
-                elif i == height.Nx-2: # adjust 2E:=i+2
-                    h_E = hs[i+1]
-                    h_2E = h_E
-                    
-                    h2_2x_E = self.h2_2xs[i+1]
-                    h2_2x_2E = h2_2x
-                    h3_2x_E = self.h3_2xs[i+1]
-                    h3_2x_2E = h3_2x
-                    h2_3x_E = self.h2_3xs[i+1]
-                    h3_3x_E = self.h3_3xs[i+1]
-                    
-                    
-                    c3_x_E = self.c3_xs[i+1]
-                    c3_x_2E = c3_x
-                    c3_2x_E = self.c3_2xs[i+1]
-                
-            else: # all interior nbrs
-                
-                h_E  = hs[i+1] 
-                h_2E = hs[i+2]
-                h_W  = hs[i-1]
-                h_2W = hs[i-2]
-                
-                h2_2x_E  = self.h2_2xs[i+1]
-                h2_2x_2E = self.h2_2xs[i+2]
-                h3_2x_E  = self.h3_2xs[i+1]
-                h3_2x_2E = self.h3_2xs[i+2]
-                h2_3x_E  = self.h2_3xs[i+1]
-                h3_3x_E  = self.h3_3xs[i+1]
-                
-                h2_2x_W  = self.h2_2xs[i-1]
-                h2_2x_2W = self.h2_2xs[i-2]
-                h3_2x_W  = self.h3_2xs[i-1]
-                h3_2x_2W = self.h3_2xs[i-2]
-                h2_3x_W  = self.h2_3xs[i-1]
-                h3_3x_W  = self.h3_3xs[i-1]
+                h_3E = hs[i+3]
                 
                 c3_x_E  = self.c3_xs[i+1]
-                c3_x_2E = self.c3_xs[i+2]
                 c3_2x_E = self.c3_2xs[i+1]
                 
+                
+                if i == 0:
+                    # h_W = h_E
+                    # h_2W = h_2E
+                    # h_3W = h_3E
+                    h_W = h
+                    h_2W = h
+                    h_3W = h
+                    
+                    c3_x_W  = c3_x
+                    c3_2x_W = c3_2x
+    
+                elif i == 1:
+                    h_W = hs[i-1]
+                    # h_2W = h_E
+                    # h_3W = h_2E
+
+                    h_2W = h_W
+                    h_3W = h_W
+
+                    c3_x_W  = self.c3_xs[i-1]
+                    c3_2x_W = self.c3_2xs[i-1]
+                    
+                elif i == 2:
+                    h_W = hs[i-1]
+                    h_2W = hs[i-2]
+                    h_3W = h_2W
+
+                    c3_x_W  = self.c3_xs[i-1]
+                    c3_2x_W = self.c3_2xs[i-1]
+                    
+            elif i > height.Nx-4:
+                h_W = hs[i-1]
+                h_2W = hs[i-2]
+                h_3W = hs[i-3]
+
                 c3_x_W  = self.c3_xs[i-1]
-                c3_x_2W = self.c3_xs[i-2]
                 c3_2x_W = self.c3_2xs[i-1]
+                
+                if i == height.Nx-1:
+                    # h_E = h_W
+                    # h_2E = h_2W
+                    # h_3W = h_3W
+                    h_E = h
+                    h_2E = h
+                    h_3E = h
+                   
+                    c3_x_E  = c3_x
+                    c3_2x_E = c3_2x
+                    
+                    
+                elif i == height.Nx-2:
+                    h_E = hs[i+1]
+                    # h_2E = h_W
+                    # h_3E = h_2W
+
+                    h_2E = h_E
+                    h_3E = h_E
+                    
+                    c3_x_E  = self.c3_xs[i+1]
+                    c3_2x_E = self.c3_2xs[i+1]
+                    
+                elif i == height.Nx-3:
+                    h_E = hs[i+1]
+                    h_2E = hs[i+2]
+                    # h_3E = h_W
+                    h_3E = h_2E
+                    
+                    c3_x_E  = self.c3_xs[i+1]
+                    c3_2x_E = self.c3_2xs[i+1]
+                                    
+            else:  
+                h_E  = hs[i+1] 
+                h_2E = hs[i+2]
+                h_3E = hs[i+3]
+                h_W  = hs[i-1]
+                h_2W = hs[i-2]
+                h_3W = hs[i-3]
         
+                c3_x_E  = self.c3_xs[i+1]
+                c3_2x_E = self.c3_2xs[i+1]
+                c3_x_W  = self.c3_xs[i-1]
+                c3_2x_W = self.c3_2xs[i-1]
+    
+    ##
+            c3_3x = (c3_x_E - 2*c3_x + c3_x_W)/(d2x)
+            c3_4x = (c3_2x_E - 2*c3_2x + c3_2x_W)/(d2x)    
+    
+            h_2x = (h_E - 2*h + h_W)/(d2x)
+            h_3x = (h_2E - 2*h_E + 2*h_W - h_2W)/(2*d3x)
+
+            h2_4x = ((h_2E**-2) - 4*(h_E**-2) + 6*(h**-2) - 4*(h_W**-2) + (h_2W**-2))/(d4x)
+            h2_5x = ((h_3E**-2) - 4*(h_2E**-2) + 5*(h_E**-2) - 5*(h_W**-2) + 4*(h_2W**-2) - (h_3W**-2))/(2*d5x)
+
+            h3_4x = ((h_2E**-3) - 4*(h_E**-3) + 6*(h**-3) - 4*(h_W**-3) + (h_2W**-3))/(d4x)
+            h3_5x = ((h_3E**-3) - 4*(h_2E**-3) + 5*(h_E**-3) - 5*(h_W**-3) + 4*(h_2W**-3) - (h_3W**-3))/(2*d5x)
+    
+            f1_2x_A = (6*h*(h_x**2) + 3*(h**2)*h_2x)*h3_2x
+            f1_2x_B = 6*(h**2)*h_x*h3_3x + (h**3)*h3_4x
+            f1_2x = f1_2x_A + f1_2x_B
             
+            f1_3x_A = (6*(h_x**3) + 18*h*h_x*h_2x + 3*(h**2)*h_3x) *h3_2x
+            f1_3x_B = (9*(h**2)*h_2x + 18*h*(h_x**2)) *h3_3x
+            f1_3x_C = 9*(h**2)*h_x*h3_4x + (h**3)*h3_5x
+            f1_3x = f1_3x_A + f1_3x_B + f1_3x_C
         
+            f2_2x_A = (2*(h_x**2) + 2*h*h_2x)*h2_2x
+            f2_2x_B = 4*h*h_x*h2_3x + (h**2)*h2_4x
+            f2_2x = f2_2x_A + f2_2x_B
+            
+            f2_3x_A = (6*h_x*h_2x + 2*h*h_3x)*h2_2x
+            f2_3x_B = (6*h*h_2x + 6*(h_x**2))*h2_3x
+            f2_3x_C = 6*h*h_x*h2_4x + (h**2)*h2_5x
+            f2_3x = f2_3x_A + f2_3x_B + f2_3x_C
 
-            h2_4x = (h2_3x_E - h2_3x_W)/(2*dx)
-            h2_5x = (h2_3x_E - 2*h2_3x + h2_3x_W)/d2x
+            f3_2x = h_2x*c3_x + 2*h_x*c3_2x + h*c3_3x
+            f3_3x = h_3x*c3_x + 3*h_2x*c3_2x + 3*h_x*c3_3x + h*c3_4x
+    
             
-            h3_4x = (h3_3x_E - h3_3x_W)/(2*dx)
-            h3_5x = (h3_3x_E - 2*h3_3x + h3_3x_W)/d2x
-            
-            
-            f1    = (h**3)   * h3_2x
-            f1_E  = (h_E**3) * h3_2x_E    
-            f1_2E = (h_2E**3)* h3_2x_2E
-            f1_W  = (h_W**3) * h3_2x_W
-            f1_2W = (h_2W**3)* h3_2x_2W                
-            
-            f1_2x = (f1_E - 2*f1 + f1_W)/d2x
-            f1_3x = (f1_2E - 2*f1_E + 2*f1_W - f1_2W)/(2*d3x)
-            
-            f2    = (h**2)   * h2_2x
-            f2_E  = (h_E**2) * h2_2x_E
-            f2_2E = (h_2E**2)* h2_2x_2E
-            
-            f2_W  = (h_W**2) * h2_2x_W
-            f2_2W = (h_2W**2)* h2_2x_2W
-            
-            f2_2x = (f2_E - 2*f2 + f2_W)/d2x
-            f2_3x = (f2_2E - 2*f2_E + 2*f2_W - f2_2W)/(2*d3x)
-            
-            f3    = h    * c3_x
-            f3_E  = h_E  * c3_x_E
-            f3_2E = h_2E * c3_x_2E
-            f3_W  = h_W  * c3_x_W
-            f3_2W = h_2W * c3_x_2W #fixed typo 3/18
-            
-            f3_2x = (f3_E - 2*f3 + f3_W)/d2x
-            f3_3x = (f3_2E - 2*f3_E + 2*f3_W - f3_2W)/(2*d3x)
-
-
-            c3_3x = (c3_2x_E - c3_2x_W)/(2*dx)
-            c3_4x = (c3_2x_E - 2*c3_2x + c3_2x_W)/d2x
-            
-            c5_x = (3/14)*h3_4x*(h**4) - (3/5)*h2_4x*(h**3) - (f1_2x - 2*f2_2x)*h + (3/10)*c3_3x*(h**2) -(1/2)*f3_2x*h
+            c5_x_A = (3/14)*h3_4x*(h**4) - (3/5)*h2_4x*(h**3)+ (3/10)*c3_3x*(h**2)
+            c5_x_B = -(f1_2x - 2*f2_2x)*h  -(1/2)*f3_2x*h
+            c5_x =  c5_x_A + c5_x_B
             
             c5_2x_A = (3/14)*(h3_5x*(h**4) + 4*h3_4x*h_x*(h**3)) 
             c5_2x_B = -(3/5)*(h2_5x*(h**3) + 3*h2_4x*h_x*(h**2))
@@ -402,12 +370,13 @@ class PerturbedReynSol:
             c5_2x_E = -(1/2)*(f3_3x*h + f3_2x*h_x) 
             c5_2x = c5_2x_A + c5_2x_B + c5_2x_C + c5_2x_D + c5_2x_E 
 
-
-            if i <3 or i > height.Nx-4:
-                print(h2_4x, h2_5x, h3_4x, h3_5x, c3_3x, c3_4x, c5_x, c5_2x)    
+ 
             # save for p4
             c5_xs[i] = c5_x
-
+            c5_2xs[i] = c5_2x
+            
+            # print(f1_2x, f1_3x, f2_2x, f2_3x, f3_2x, f3_3x)
+            
             for j in range (height.Ny):
                 y = ys[j]
                 
@@ -435,17 +404,18 @@ class PerturbedReynSol:
                     v4_F = (1/2)*(c5_2x)*((1/3)*(y**3) - (1/2)*h*(y**2)) - (1/4)*c5_x*h_x*(y**2)
                     v4s[j,i] = -(v4_A + v4_B + v4_C + v4_D + v4_E + v4_F)
     
-
+    
+        print(c5_xs, c5_2xs)
                         
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
                 
         for j in range(height.Ny):
-            v0_Sy_xxs[j] = domain.center_second_diff(v0_Sys[j], height.Nx, dx)
+            v0_Sy_xxs[j][4:-4] = domain.center_second_diff(v0_Sys[j], height.Nx, dx)[4:-4]
 
         p4s = np.zeros((height.Ny, height.Nx))
-        
-        c5s[0] = 0
-        c5s[1] = c5s[0] + c5_xs[1]*dx
+
+        c5s[0] = 0#np.mean(u2_xs[:,0]) - np.mean(v0_Sy_xxs[:,0])
+        c5s[1] = 0#c5s[0] + c5_xs[]*dx
 
         for i in range(2, height.Nx):
             c5s[i] =(4*c5s[i-1] -c5s[i-2] + 2*dx*c5_xs[i])/3
