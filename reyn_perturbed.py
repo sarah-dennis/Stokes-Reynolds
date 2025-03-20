@@ -6,11 +6,15 @@ Created on Wed Feb 26 14:30:05 2025
 @author: sarahdennis
 """
 import numpy as np
-import domain
+import domain as dm
 import graphics
 
 from reyn_pressure import Pressure, FinDiffReynPressure
 from reyn_velocity import Velocity, ReynoldsVelocity
+
+        
+neg_sqr = lambda h: h**-2
+neg_cube = lambda h: h**-3
 
 class PerturbedReynSol:
     def __init__(self, height, order):
@@ -23,7 +27,7 @@ class PerturbedReynSol:
     
         
         
-        self.x_scale = (height.xf - height.x0)/2
+        self.x_scale = (height.xf - height.x0)/2 
         self.y_scale = height.yf - height.y0
         self.Q_scale = self.reyn_velocity.flux
 
@@ -39,6 +43,7 @@ class PerturbedReynSol:
         self.dP_reyn = (self.p0s[0,-1]-self.p0s[0,0])
         
         delta = self.y_scale/self.x_scale
+        
         if order > 1:
 
             # make self.u2s, self.v2s, self.p2s, etc... 
@@ -62,7 +67,7 @@ class PerturbedReynSol:
             self.pert4_pressure = Pressure(height, ps_1D = self.reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
             self.pert4_velocity = Velocity(height, pert4_us_2D, pert4_vs_2D)
         
-            self.dP_pert4 = (self.p4s[0,-6]-self.p4s[0,6])
+            self.dP_pert4 = (self.p4s[0,-3]-self.p4s[0,2])
     
     
         
@@ -89,64 +94,76 @@ class PerturbedReynSol:
 
         
         dx = height.dx/(self.x_scale)
-        dxx = dx**2
-        dxxx = dx**3
-        
+
         for i in range(height.Nx):
             h = hs[i]
-            if i < 2:
-                h_E = hs[i+1] 
-                h_EE = hs[i+2] 
-                
-                if i == 0:
-                    
-                    h_W = h_E
-                    h_WW = h_EE
-    
-                elif i == 1:
-                    h_W = hs[i-1]
-                    h_WW = h
+            
+            # find h_x, h2_2x, h2_3x, h3_2x, h3_3x
+            
+            if i < 2: #inlet
 
-            elif i > height.Nx-3:
-                h_W = hs[i-1]
-                h_WW = hs[i-2]
-                
-                if i == height.Nx-1:
-                    h_E = h_W
-                    h_EE = h_WW
+                if i < 1:
+                    h_x = dm.right_first(dx, hs[i : i+3])
+                    h2_2x = dm.right_second(dx, list(map(neg_sqr, hs[i : i+4])))
+                    h3_2x = dm.right_second(dx, list(map(neg_cube,hs[i : i+4])))
                     
-                elif i == height.Nx-2:
-                    h_E = hs[i+1]
-                    h_EE = h
+                    # h_x = dm.right_first_O4(dx, hs[i : i+5])
+                    # h2_2x = dm.right_second_O4(dx, list(map(neg_sqr, hs[i : i+6])))
+                    # h3_2x = dm.right_second_O4(dx, list(map(neg_cube,hs[i : i+6])))
+                else:
+                    h_x = dm.center_first(dx, hs[i-1 : i+2])
+                    h2_2x = dm.center_second(dx, list(map(neg_sqr, hs[i-1 : i+2])))
+                    h3_2x = dm.center_second(dx, list(map(neg_cube, hs[i-1 : i+2])))
                 
-            else:  
+                h2_3x = dm.right_third(dx, list(map(neg_sqr, hs[i : i+5])))
+                h3_3x = dm.right_third(dx, list(map(neg_cube, hs[i : i+5] )))
+                # h2_3x = dm.right_third_O4(dx, list(map(neg_sqr, hs[i : i+7])))
+                # h3_3x = dm.right_third_O4(dx, list(map(neg_cube, hs[i : i+7] )))
                 
-                h_E = hs[i+1] 
-                h_EE = hs[i+2]
-                h_W = hs[i-1]
-                h_WW = hs[i-2]
+
+            elif i > height.Nx-3: #outlet
                 
-            h_x = (h_E - h_W)/(2*dx)
+                if i > height.Nx-2:
+                    h_x = dm.left_first(dx, hs[i-2 : i+1])
+                    h2_2x = dm.left_second(dx, list(map(neg_sqr, hs[i-3 : i+1])))
+                    h3_2x = dm.left_second(dx, list(map(neg_cube, hs[i-3 : i+1])))
+                    
+                    # h_x = dm.left_first_O4(dx, hs[i-4 : i+1])
+                    # h2_2x = dm.left_second_O4(dx, list(map(neg_sqr, hs[i-5 : i+1])))
+                    # h3_2x = dm.left_second_O4(dx, list(map(neg_cube, hs[i-5 : i+1])))
+                    
+                else:
+                    h_x = dm.center_first(dx, hs[i-1 : i+2])
+                    h2_2x = dm.center_second(dx, list(map(neg_sqr, hs[i-1 : i+2])))
+                    h3_2x = dm.center_second(dx, list(map(neg_cube, hs[i-1 : i+2])))
+                
+                h2_3x = dm.left_third(dx, list(map(neg_sqr, hs[i-4 : i+1] )))
+                h3_3x = dm.left_third(dx, list(map(neg_cube, hs[i-4 : i+1])))
+                
+                # h2_3x = dm.left_third_O4(dx, list(map(neg_sqr, hs[i-6 : i+1] )))
+                # h3_3x = dm.left_third_O4(dx, list(map(neg_cube, hs[i-6 : i+1])))
+                
+            else: #interior  
+                
+                h_x = dm.center_first(dx, hs[i-1 : i+2])
+                h2_2x = dm.center_second(dx, list(map(neg_sqr, hs[i-1 : i+2])))
+                h3_2x = dm.center_second(dx, list(map(neg_cube, hs[i-1 : i+2])))
+                h2_3x = dm.center_third(dx, list(map(neg_sqr, hs[i-2 : i+3])))
+                h3_3x = dm.center_third(dx, list(map(neg_cube, hs[i-2 : i+3])))
             
-            h2_xx = ((h_E**-2) -2*(h**-2) +(h_W**-2))/dxx
-            h3_xx = ((h_E**-3) -2*(h**-3) +(h_W**-3))/dxx
-            
-            h2_xxx = ((h_EE**-2) -2*(h_E**-2) +2*(h_W**-2) -(h_WW**-2))/(2*dxxx)
-            h3_xxx = ((h_EE**-3) -2*(h_E**-3) +2*(h_W**-3) -(h_WW**-3))/(2*dxxx)
-            
-            c3_x  = 6 * h2_xx * h - 18/5 * h3_xx * (h**2) 
-            c3_xx = 6 * (h2_xx * h_x +  h2_xxx * h) - 18/5* (2*h*h_x * h3_xx + (h**2) * h3_xxx)
+            c3_x  = 6 * h2_2x * h - 18/5 * h3_2x * (h**2) 
+            c3_2x = 6 * (h2_2x * h_x +  h2_3x * h) - 18/5* (2*h*h_x * h3_2x + (h**2) * h3_3x)
 
             # integrate c3_x for p2(x,y), and save {c3_x, c3} for 4th order pertubation
             c3_xs[i]  = c3_x
-            c3_2xs[i] = c3_xx
+            c3_2xs[i] = c3_2x
             
             # save {h2_2x, h3_2x, h2_3x, h3_3x} for 4th order perturbation
             h_xs[i]   = h_x
-            h2_2xs[i] = h2_xx
-            h3_2xs[i] = h3_xx
-            h2_3xs[i] = h2_xxx
-            h3_3xs[i] = h3_xxx
+            h2_2xs[i] = h2_2x
+            h3_2xs[i] = h3_2x
+            h2_3xs[i] = h2_3x
+            h3_3xs[i] = h3_3x
             
             for j in range (height.Ny):
                 y = ys[j]
@@ -154,16 +171,16 @@ class PerturbedReynSol:
                 if y <= h:
                     u0_xs[j,i] = 6*h_x * (-2*y*(h**-3) + 3*(y**2)* (h**-4))
 
-                    u2_A = -2 * h2_xx * (y**3 - (h**2) * y) 
-                    u2_B = h3_xx * (y**4 - (h**3) * y)
+                    u2_A = -2 * h2_2x * (y**3 - (h**2) * y) 
+                    u2_B = h3_2x * (y**4 - (h**3) * y)
                     u2_C = (1/2) * c3_x * (y**2 - h * y)
                     u2s[j,i] = (u2_A + u2_B +  u2_C)
                     
-                    v2_A = h2_xxx * ((1/2) * (y**4) - (h**2) * (y**2))
-                    v2_B = -2 * h2_xx * h_x * h * (y**2)
-                    v2_C = -h3_xxx * ((1/5) * (y**5) - (1/2) * (h**3) * (y**2))
-                    v2_D = (3/2) * h3_xx * h_x * (h**2) * (y**2)
-                    v2_E = -(1/2)*c3_xx * ((1/3) * (y**3) - (1/2)* h *(y**2))
+                    v2_A = h2_3x * ((1/2) * (y**4) - (h**2) * (y**2))
+                    v2_B = -2 * h2_2x * h_x * h * (y**2)
+                    v2_C = -h3_3x * ((1/5) * (y**5) - (1/2) * (h**3) * (y**2))
+                    v2_D = (3/2) * h3_2x * h_x * (h**2) * (y**2)
+                    v2_E = -(1/2)*c3_2x * ((1/3) * (y**3) - (1/2)* h *(y**2))
                     v2_F = (1/4) * c3_x * h_x * (y**2)
                     v2s[j,i] = (v2_A + v2_B + v2_C + v2_D + v2_E + v2_F)
             
@@ -171,9 +188,10 @@ class PerturbedReynSol:
                 
                     
         # p2s[:1] = -u0_x + c3s = 0 (no correction at inlet)
-        
+
         c3s[0] = np.mean(u0_xs[:,0]) #u0_xs[0]
-        c3s[1] = c3s[0] + c3_xs[2]*dx
+        # print(max(u0_xs[:,0]), c3s[0]), min(u0_xs[:,0]))
+        c3s[1] = c3s[0] + c3_xs[1]*dx
         for i in range(2, height.Nx):
             c3s[i] =(4*c3s[i-1] -c3s[i-2] + 2*dx*c3_xs[i])/3
     
@@ -183,16 +201,19 @@ class PerturbedReynSol:
         self.u2s = u2s
         self.v2s = v2s
         
+        self.c3s = c3s     # integral x0, xL, d/dx [c3]
+        self.c3_xs = c3_xs # d/dx [c3]
+        self.c3_2xs = c3_2xs # d^2/dx^2 [c3] (order 2)
         
-        self.c3s = c3s
-        
-        self.c3_xs = c3_xs
-        self.c3_2xs = c3_2xs
-        self.h_xs = h_xs
-        self.h2_2xs = h2_2xs   # d^2/dx^2 [h^-2] @ xi
-        self.h3_2xs = h3_2xs   # d^2/dx^2 [h^-3] @ xi
-        self.h2_3xs = h2_3xs   # d^3/dx^3 [h^-2] @ xi
-        self.h3_3xs = h3_3xs   # d^3/dx^3 [h^-3] @ xi
+        # 
+        # graphics.plot_2D(c3_xs, height.xs,  'c3x', ['x', 'c3_xs'])  
+        # graphics.plot_2D(c3_2xs, height.xs,  'c3xx', ['x', 'c3_2xs'])    
+
+        self.h_xs = h_xs       #   d/dx   [h]    @ xi (order 2)
+        self.h2_2xs = h2_2xs   # d^2/dx^2 [h^-2] @ xi (order 2)
+        self.h3_2xs = h3_2xs   # d^2/dx^2 [h^-3] @ xi (order 2)
+        self.h2_3xs = h2_3xs   # d^3/dx^3 [h^-2] @ xi (order 2)
+        self.h3_3xs = h3_3xs   # d^3/dx^3 [h^-3] @ xi (order 2)
 
 
     def perturb_fourth(self, height):
@@ -213,130 +234,116 @@ class PerturbedReynSol:
         
         dy = height.dy/(self.y_scale)
         dx = height.dx/(self.x_scale)
-        d2x = dx**2
-        d3x = dx**3
-        d4x = dx**4
-        d5x = dx**5
+
         
         for i in range(height.Nx):
             v0_Sy_i = 0
             
+
             h = hs[i]
+            c3_x = self.c3_xs[i]
             
+            # derivatives found in round 1
             h_x = self.h_xs[i]
+            c3_2x = self.c3_2xs[i]
             h2_2x = self.h2_2xs[i]
             h3_2x = self.h3_2xs[i]
             h2_3x = self.h2_3xs[i]
             h3_3x = self.h3_3xs[i]
             
-            c3_x = self.c3_xs[i]
-            c3_2x = self.c3_2xs[i]
-
             if i < 3:
-                h_E = hs[i+1] 
-                h_2E = hs[i+2] 
-                h_3E = hs[i+3]
-                
-                c3_x_E  = self.c3_xs[i+1]
-                c3_2x_E = self.c3_2xs[i+1]
+                h2_5x = dm.right_fifth(dx,  list(map(neg_sqr, hs[i : i+7])))
+                h3_5x = dm.right_fifth(dx,  list(map(neg_cube, hs[i : i+7])))
                 
                 
-                if i == 0:
-                    # h_W = h_E
-                    # h_2W = h_2E
-                    # h_3W = h_3E
-                    h_W = h
-                    h_2W = h
-                    h_3W = h
+                if i < 2:
+                    h2_4x = dm.right_fourth(dx, list(map(neg_sqr, hs[i : i+6])))
+                    h3_4x = dm.right_fourth(dx, list(map(neg_cube, hs[i : i+6])))
                     
-                    c3_x_W  = c3_x
-                    c3_2x_W = c3_2x
-    
-                elif i == 1:
-                    h_W = hs[i-1]
-                    # h_2W = h_E
-                    # h_3W = h_2E
-
-                    h_2W = h_W
-                    h_3W = h_W
-
-                    c3_x_W  = self.c3_xs[i-1]
-                    c3_2x_W = self.c3_2xs[i-1]
+                    c3_4x = dm.right_third(dx,  self.c3_xs[i : i+5])
+                    h_3x = dm.right_third(dx,  hs[i : i+5])
                     
-                elif i == 2:
-                    h_W = hs[i-1]
-                    h_2W = hs[i-2]
-                    h_3W = h_2W
-
-                    c3_x_W  = self.c3_xs[i-1]
-                    c3_2x_W = self.c3_2xs[i-1]
+                    # h2_4x = dm.right_fourth_O4(dx, list(map(neg_sqr, hs[i : i+8])))
+                    # h3_4x = dm.right_fourth_O4(dx, list(map(neg_cube, hs[i : i+8])))
+                    
+                    # c3_4x = dm.right_third_O4(dx,  self.c3_xs[i : i+7])
+                    # h_3x = dm.right_third_O4(dx,  hs[i : i+7])
+                    
+                    if i < 1:
+                        c3_3x = dm.right_second(dx, self.c3_xs[i : i+4])
+                        h_2x = dm.right_second(dx, hs[i : i+4])
+                        
+                        # c3_3x = dm.right_second_O4(dx, self.c3_xs[i : i+6])
+                        # h_2x = dm.right_second_O4(dx, hs[i : i+6])
+                         
+                    else:
+                        c3_3x = dm.center_second(dx, self.c3_xs[i-1 : i+2])
+                        h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                        
+                else:
+                    h2_4x = dm.center_fourth(dx, list(map(neg_sqr, hs[i-2 : i+3])))
+                    h3_4x = dm.center_fourth(dx, list(map(neg_cube, hs[i-2 : i+3])))
+                    
+                    c3_4x = dm.center_third(dx, self.c3_xs[i-2 : i+3])
+                    h_3x = dm.center_third(dx, hs[i-2 : i+3])
+                    
+                    c3_3x = dm.center_second(dx, self.c3_xs[i-1 : i+2])
+                    h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                
                     
             elif i > height.Nx-4:
-                h_W = hs[i-1]
-                h_2W = hs[i-2]
-                h_3W = hs[i-3]
-
-                c3_x_W  = self.c3_xs[i-1]
-                c3_2x_W = self.c3_2xs[i-1]
+                h2_5x = dm.left_fifth(dx,  list(map(neg_sqr, hs[i-6 : i+1])))
+                h3_5x = dm.left_fifth(dx,  list(map(neg_cube, hs[i-6 : i+1])))
                 
-                if i == height.Nx-1:
-                    # h_E = h_W
-                    # h_2E = h_2W
-                    # h_3W = h_3W
-                    h_E = h
-                    h_2E = h
-                    h_3E = h
-                   
-                    c3_x_E  = c3_x
-                    c3_2x_E = c3_2x
+                if i > height.Nx-3:
+                    h2_4x = dm.left_fourth(dx, list(map(neg_sqr, hs[i-5 : i+1])))
+                    h3_4x = dm.left_fourth(dx, list(map(neg_cube, hs[i-5 : i+1])))
                     
+                    c3_4x = dm.left_third(dx,  self.c3_xs[i-4 : i+1])
+                    h_3x = dm.left_third(dx,  hs[i-4 : i+1])
                     
-                elif i == height.Nx-2:
-                    h_E = hs[i+1]
-                    # h_2E = h_W
-                    # h_3E = h_2W
+                    # h2_4x = dm.left_fourth_O4(dx, list(map(neg_sqr, hs[i-7 : i+1])))
+                    # h3_4x = dm.left_fourth_O4(dx, list(map(neg_cube, hs[i-7 : i+1])))
+                    
+                    # c3_4x = dm.left_third_O4(dx,  self.c3_xs[i-6 : i+1])
+                    # h_3x = dm.left_third_O4(dx,  hs[i-6 : i+1])
+                    
+                    if i > height.Nx-2:
+                        c3_3x = dm.left_second_O4(dx, self.c3_xs[i-5 : i+1])
+                        h_2x = dm.left_second_O4(dx, hs[i-5 : i+1])
+                        
+                        c3_3x = dm.left_second(dx, self.c3_xs[i-3 : i+1])
+                        h_2x = dm.left_second(dx, hs[i-3 : i+1])
+                        
+                    else:
+                        c3_3x = dm.center_second(dx, self.c3_xs[i-1 : i+2])
+                        h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                        
+                else:
+                    c3_3x = dm.center_second(dx, self.c3_xs[i-1 : i+2])
+                    h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                    
+                    c3_4x = dm.center_third(dx, self.c3_xs[i-2 : i+3])
+                    h_3x = dm.center_third(dx, hs[i-2 : i+3])
+                    
+                    h2_4x = dm.center_fourth(dx, list(map(neg_sqr, hs[i-2 : i+3])))
+                    h3_4x = dm.center_fourth(dx, list(map(neg_cube, hs[i-2 : i+3])))
 
-                    h_2E = h_E
-                    h_3E = h_E
-                    
-                    c3_x_E  = self.c3_xs[i+1]
-                    c3_2x_E = self.c3_2xs[i+1]
-                    
-                elif i == height.Nx-3:
-                    h_E = hs[i+1]
-                    h_2E = hs[i+2]
-                    # h_3E = h_W
-                    h_3E = h_2E
-                    
-                    c3_x_E  = self.c3_xs[i+1]
-                    c3_2x_E = self.c3_2xs[i+1]
                                     
             else:  
-                h_E  = hs[i+1] 
-                h_2E = hs[i+2]
-                h_3E = hs[i+3]
-                h_W  = hs[i-1]
-                h_2W = hs[i-2]
-                h_3W = hs[i-3]
-        
-                c3_x_E  = self.c3_xs[i+1]
-                c3_2x_E = self.c3_2xs[i+1]
-                c3_x_W  = self.c3_xs[i-1]
-                c3_2x_W = self.c3_2xs[i-1]
-    
-    ##
-            c3_3x = (c3_x_E - 2*c3_x + c3_x_W)/(d2x)
-            c3_4x = (c3_2x_E - 2*c3_2x + c3_2x_W)/(d2x)    
-    
-            h_2x = (h_E - 2*h + h_W)/(d2x)
-            h_3x = (h_2E - 2*h_E + 2*h_W - h_2W)/(2*d3x)
-
-            h2_4x = ((h_2E**-2) - 4*(h_E**-2) + 6*(h**-2) - 4*(h_W**-2) + (h_2W**-2))/(d4x)
-            h2_5x = ((h_3E**-2) - 4*(h_2E**-2) + 5*(h_E**-2) - 5*(h_W**-2) + 4*(h_2W**-2) - (h_3W**-2))/(2*d5x)
-
-            h3_4x = ((h_2E**-3) - 4*(h_E**-3) + 6*(h**-3) - 4*(h_W**-3) + (h_2W**-3))/(d4x)
-            h3_5x = ((h_3E**-3) - 4*(h_2E**-3) + 5*(h_E**-3) - 5*(h_W**-3) + 4*(h_2W**-3) - (h_3W**-3))/(2*d5x)
-    
+                c3_3x = dm.center_second(dx, self.c3_xs[i-1 : i+2])
+                h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                
+                c3_4x = dm.center_third(dx, self.c3_xs[i-2 : i+3])
+                h_3x = dm.center_third(dx, hs[i-2 : i+3])
+                
+                h2_4x = dm.center_fourth(dx, list(map(neg_sqr, hs[i-2 : i+3])))
+                h3_4x = dm.center_fourth(dx, list(map(neg_cube, hs[i-2 : i+3])))
+                
+                h2_5x = dm.center_fifth(dx, list(map(neg_sqr, hs[i-3 : i+4])))
+                h3_5x = dm.center_fifth(dx, list(map(neg_cube, hs[i-3 : i+4])))
+                    
+                    
             f1_2x_A = (6*h*(h_x**2) + 3*(h**2)*h_2x)*h3_2x
             f1_2x_B = 6*(h**2)*h_x*h3_3x + (h**3)*h3_4x
             f1_2x = f1_2x_A + f1_2x_B
@@ -369,13 +376,11 @@ class PerturbedReynSol:
             c5_2x_D = (3/10)*(c3_4x*(h**2) + 2*c3_3x*h_x*h) 
             c5_2x_E = -(1/2)*(f3_3x*h + f3_2x*h_x) 
             c5_2x = c5_2x_A + c5_2x_B + c5_2x_C + c5_2x_D + c5_2x_E 
-
- 
+            
             # save for p4
             c5_xs[i] = c5_x
             c5_2xs[i] = c5_2x
             
-            # print(f1_2x, f1_3x, f2_2x, f2_3x, f3_2x, f3_3x)
             
             for j in range (height.Ny):
                 y = ys[j]
@@ -396,6 +401,8 @@ class PerturbedReynSol:
                     u4_C = (-1/12)*c3_3x*((y**4) - (h**3)*y) + (1/2)*c5_x*((y**2)-h*y)
                     u4s[j,i] = (u4_A + u4_B + u4_C)
                     
+                    
+                    #h3_5x, h3_4x, h2_5x, h2_4x, f1_3x, f1_2x, f2_2x, f2_3x, f3_3x, f3_2x, 
                     v4_A = (-1/20)*h3_5x*((1/7)*(y**7) - (1/2)*(h**5)*(y**2)) + (1/8)*h3_4x*h_x*(h**4)*(y**2)
                     v4_B = (3/20)*h2_5x*((1/6)*(y**6) - (1/2)*(h**4)*(y**2)) - (3/10)*h2_4x*h_x*(h**3)*(y**2)
                     v4_C = (1/3)*((f1_3x - 2*f2_3x)*((1/4)*(y**4) - (1/2)*(h**2)*(y**2)) - (f1_2x - 2*f2_2x)*h_x*h*(y**2))
@@ -405,24 +412,25 @@ class PerturbedReynSol:
                     v4s[j,i] = -(v4_A + v4_B + v4_C + v4_D + v4_E + v4_F)
     
     
-        print(c5_xs, c5_2xs)
-                        
+        # print(c5_xs, c5_2xs)
+        # graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
+        # graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])    
+
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
-                
+    
         for j in range(height.Ny):
-            v0_Sy_xxs[j][4:-4] = domain.center_second_diff(v0_Sys[j], height.Nx, dx)[4:-4]
+            v0_Sy_xxs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
 
         p4s = np.zeros((height.Ny, height.Nx))
 
         c5s[0] = 0#np.mean(u2_xs[:,0]) - np.mean(v0_Sy_xxs[:,0])
-        c5s[1] = 0#c5s[0] + c5_xs[]*dx
+        c5s[1] = c5s[0] + c5_xs[2]*dx
 
         for i in range(2, height.Nx):
             c5s[i] =(4*c5s[i-1] -c5s[i-2] + 2*dx*c5_xs[i])/3
 
         p4s = -u2_xs + v0_Sy_xxs + c5s 
 
-        # p4s[:,-5:]=0
         self.p4s = p4s
         self.u4s = u4s
         self.v4s = v4s

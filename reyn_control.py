@@ -31,7 +31,7 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 1
+        self.vel_max = 5
         self.p_min=-10
         self.p_max=10
     
@@ -102,8 +102,8 @@ class Reynolds_Solver:
         solver_title = "Reynolds"
         
         if plot:
-            # self.p_plot(ex, pert.reyn_pressure, pert.reyn_velocity.flux, solver_title, zoom)
-            # self.v_plot(ex, pert.reyn_velocity, solver_title, zoom)
+            self.p_plot(ex, pert.reyn_pressure, pert.reyn_velocity.flux, solver_title, zoom)
+            self.v_plot(ex, pert.reyn_velocity, solver_title, zoom)
             if order > 1:
                 solver_title2 = solver_title + " $O(\delta^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
@@ -154,9 +154,8 @@ class Reynolds_Solver:
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-        graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
-        # graphics.plot_2D(velocity.vy[:,ex.Nx//3], ex.ys, f'$v(x_0,y)$, $x_0={ex.xs[i0]:.2f}$, $h(x)={ex.hs[i0]:.5f}$', ['y','v'])
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)

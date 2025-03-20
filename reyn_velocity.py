@@ -25,7 +25,7 @@ class Velocity:
             qs[i]= np.sum(vx[:,i])*self.height.dx
 
         
-        q = np.min(qs)
+        q = np.average(qs)
         return q
             
             

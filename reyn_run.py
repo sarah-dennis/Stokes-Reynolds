@@ -57,6 +57,9 @@ write_on=False
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 # Example = examples.BFS
+# H=2
+# l=1
+# L=4
 # args = [H,l, L]
 
 # Example = examples.BFS_noEddy
@@ -71,10 +74,10 @@ write_on=False
 # Example = examples.HexSlider
 # args = None
 
-# Example = examples.TriCavity
-# H=4
-# L=1
-# args = [H,L]
+Example = examples.TriCavity
+H=4
+L=1
+args = [H,L]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -86,11 +89,11 @@ write_on=False
 # L=4
 # args = [r, k, L]
 
-Example = examples.LambdaBump # 
-lam=0.2
-H=1
-l=1
-args=[lam, H, l]
+# Example = examples.LambdaBump # 
+# lam=0.2
+# H=1
+# l=1
+# args=[lam, H, l]
 
 # Example = examples.Cylinder
 # r=1
@@ -99,14 +102,14 @@ args=[lam, H, l]
 # #d = h0+r
 # args= [ r,h0,l]
 
-U=1
-dP=-2
+U=2
+dP=0
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=50
+N=160
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)

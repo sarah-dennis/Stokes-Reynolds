@@ -20,13 +20,13 @@ Example = examples.LambdaBump #
 H=1/2 #=h0
 l=1 #=L/2
 delta = H/l
-lam = 0.8
+lam = 0.2
 args=[lam, H, l]
 
 U=0
 dP=1
 
-n_Ns = 5
+n_Ns = 8
 Ns = np.zeros(n_Ns)
 errs_p0 = np.zeros(n_Ns)
 errs_p4 = np.zeros(n_Ns)
@@ -58,12 +58,12 @@ for k in range(n_Ns):
     if pert.order > 2:
         # print(pert.dP_pert4)
 
-        errs_p4[k] = abs(pert.dP_pert4 -analytic_pert4_dP)/abs(analytic_pert4_dP)
+        errs_p4[k] = abs(pert.dP_pert4 -analytic_pert4_dP)/abs(analytic_pert4_dP)/N
     
     N *= dN
     
 linthresh = 1e-8
-graphics.plot_log_multi([errs_p0, errs_p2, errs_p4], Ns, f'ELT-2 convergence $(\lambda={lam}, \delta={delta})$',['$\Delta P_0$', '$\Delta P_2$', '$\Delta P_4$'], ['N', 'Rel. Error '], linthresh, O1=1, O2=1e1)
+graphics.plot_log_multi([errs_p0, errs_p2, errs_p4], Ns, f'ELT convergence $(\lambda={lam}, \delta={delta})$',['$\Delta P_0$', '$\Delta P_2$', '$\Delta P_4$'], ['N', 'Rel. Error '], linthresh, O1=1, O2=1e1)
 
 
 p4_rate = convergence.convg_rate(errs_p4)
@@ -74,7 +74,7 @@ cnvg_rates = np.stack([p2_rate, p4_rate], axis=0)
     
 print("cnvg rates")
 print("p4: " + np.array2string(p4_rate))
-print("p2" + np.array2string(p2_rate))
+print("p2: " + np.array2string(p2_rate))
 
 # #------------------------------------------------------------------------------
 # # Comparison of dP with Reynolds (unadjusted) model
