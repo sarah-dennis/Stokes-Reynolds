@@ -18,7 +18,7 @@ import graphics
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
 r=1
-h0 = 0.01
+h0 = 1/2
 l=2
 d = h0+r
 args= [r,h0,l]
@@ -111,7 +111,7 @@ graphics.plot_contour_mesh(stokes_adj[:,i_start:i_stop], ex.xs[i_start:i_stop]/r
 graphics.plot_contour_mesh(reyn_adj[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-10, vmax=10,y_lim=y_max)
 
 # graphics.plot_contour_multi([stokes_ps[:,i_start:i_stop], adj_ps[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Stokes vs. Adjusted Reynolds presure', ['$p_{Stokes}$', '$p_{Adj.}$'], ['x','y'], y_lim=y_max)
-graphics.plot_contour_multi([stokes_adj[:,i_start:i_stop], reyn_adj[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, "Reynolds 'missing' pressure component", ['Stokes', 'Adj. Reyn.'], ['x','y'], y_lim=y_max)
+# graphics.plot_contour_multi([stokes_adj[:,i_start:i_stop], reyn_adj[:,i_start:i_stop]], ex.xs[i_start:i_stop]/r, ex.ys/r, "Reynolds 'missing' pressure component", ['Stokes', 'Adj. Reyn.'], ['x','y'], y_lim=y_max)
 
 x_test = 0.2
 L=ex.xf-ex.x0

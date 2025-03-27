@@ -735,11 +735,11 @@ class BFS_H2p75L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2p75L4_noEddy_Re0_Q2_U0"
          
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
         
 
 class BFS_H2p5L4_noEddy_Re0_Q2_U0(PWLinear):
@@ -754,12 +754,12 @@ class BFS_H2p5L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2p5L4_noEddy_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
         
 
 class BFS_H2p25L4_noEddy_Re0_Q2_U0(PWLinear):
@@ -774,12 +774,12 @@ class BFS_H2p25L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2p25L4_noEddy_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
         
 class BFS_H2L4_noEddy_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
@@ -793,12 +793,12 @@ class BFS_H2L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_noEddy_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 
 class BFS_H1p5L4_noEddy_Re0_Q2_U0(PWLinear):
@@ -813,12 +813,12 @@ class BFS_H1p5L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H1p5L4_noEddy_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)      
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)      
         
 class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
@@ -832,12 +832,12 @@ class BFS_H1p25L4_noEddy_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H1p25L4_noEddy_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)      
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)      
 
 #------------------------------------------------------------------------------
 # <<================= VARIATIONS OF WEDGED CORNER BFS =======================>>
@@ -858,12 +858,12 @@ class BFS_H2L4_cornerTriA_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_cornerTriA_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 class BFS_H2L4_cornerTriB_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
@@ -879,12 +879,12 @@ class BFS_H2L4_cornerTriB_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_cornerTriB_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 
 class BFS_H2L4_cornerTriC_Re0_Q2_U0(PWLinear):
@@ -899,12 +899,12 @@ class BFS_H2L4_cornerTriC_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_cornerTriC_Re0_Q2_U0"
          
 
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 class BFS_H2L4_cornerTriD_Re0_Q2_U0(PWLinear):
     def __init__(self, N):
@@ -918,11 +918,11 @@ class BFS_H2L4_cornerTriD_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_cornerTriD_Re0_Q2_U0"
          
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 
 class BFS_H2L4_cornerTriE_Re0_Q2_U0(PWLinear):
@@ -937,11 +937,11 @@ class BFS_H2L4_cornerTriE_Re0_Q2_U0(PWLinear):
         y_peaks = [[yf,yf-1],[yf-1,y_detatch],[0,0],[0,yf]]
         U = 0
         q = 2
-        p0 = 0
+          
         Re = 0
         namestr = "BFS_H2L4_cornerTriE_Re0_Q2_U0"
          
-        super().__init__(x0, xf, y0, yf, N, U, q, Re, p0,namestr, x_peaks, y_peaks)
+        super().__init__(x0, xf, y0, yf, N, U, q, Re ,namestr, x_peaks, y_peaks)
 
 #------------------------------------------------------------------------------
 #basic flat pipe

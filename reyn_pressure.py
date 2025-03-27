@@ -32,7 +32,7 @@ class Pressure:
         else:
             self.ps_2D = ps_2D
         
-        self.dP = self.ps_1D[-1]- self.ps_1D[0]
+        self.dP = self.ps_2D[0,-1]- self.ps_2D[1,0]
         
         
     def make_2D_ps(self,height,ps): # sets p(x,y) = p(x) 

@@ -28,6 +28,8 @@ BFS_stokes = np.asarray([s_exs.BFS_H2p75L4_Re0_Q2_U0,s_exs.BFS_H2p5L4_Re0_Q2_U0,
             s_exs.BFS_H1p125L4_Re0_Q2_U0])
 Ns=np.asarray([160,160,160,160,160,160,200])
 
+
+
 x_r=np.zeros(N_exs)
 y_r=np.zeros(N_exs)
 
@@ -45,7 +47,7 @@ graphics.plot_2D_multi([y_r,x_r], H, '', ['$y_r$','$x_r$'], ['$\mathcal{H}$','le
 Q_reyn = np.zeros(N_exs)
 for k in range(N_exs):
     dp = dP_stokes[k]
-    args = [H[k], l]
+    args = [H[k], l, L]
     r_solver = r_control.Reynolds_Solver(r_exs.BFS, U, dp, args)
     reyn_pres, reyn_vel = r_solver.pwl_solve(Ns[0], plot=False)
     Q_reyn[k]=reyn_vel.flux
@@ -59,7 +61,7 @@ graphics.plot_2D(res_err_pct, H, '', ['$\mathcal{H}$','$|\mathcal{R}_{Stokes}-\m
 
 
 
-# #------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------
 
 # dBFS at Re=0, Q=2, U=0, L=4, H=2, varying delta --> resistance error
 U=0
@@ -86,10 +88,10 @@ for k in range(N_exs):
     dp = dP_H2_stokes[k]
     delta=deltas_H2[k]
     if delta == 0:
-        args = [H,L/2]
+        args = [H,L/2, L]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS, U, dp, args)
     else:
-        args=[H,delta]
+        args=[H,delta, L]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS_deltaSmooth, U, dp, args)
     reyn_pres, reyn_vel = r_solver.pwl_solve(200, plot=False)
     Q_H2_reyn[k] = reyn_vel.flux
@@ -115,7 +117,7 @@ for k in range(N_exs):
     dp = dP_H1p5_stokes[k]
     delta=deltas_H1p5[k]
     if delta == 0:
-        args = [H,L/2]
+        args = [H,L/2, L]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS, U, dp, args)
     else:
         args=[H,delta]
@@ -145,7 +147,7 @@ for k in range(N_exs):
     args = [H, deltas_H1p25[k]]
     delta=deltas_H1p25[k]
     if delta == 0:
-        args = [H,L/2]
+        args = [H,L/2, L]
         r_solver = r_control.Reynolds_Solver(r_exs.BFS, U, dp, args)
     else:
         args=[H,delta]

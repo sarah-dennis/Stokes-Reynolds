@@ -79,10 +79,10 @@ def center_diff(fs, Nx, dx):
     fs_dx = D@fs 
     
     # fs_dx[0] = fs_dx[1]
-    fs_dx[0]= (-3*fs[0]+4*fs[1]-fs[2])/(2*dx)
+    fs_dx[0]= right_first(dx, fs[0 : 3]) 
     
     # fs_dx[-1] = fs_dx[-2]
-    fs_dx[Nx-1]= (3*fs[Nx-1]-4*fs[Nx-2]+fs[Nx-3])/(2*dx)
+    fs_dx[Nx-1]= left_first(dx, fs[Nx-3 : Nx])
     return np.asarray(fs_dx)
       
 def center_second_diff(fs, Nx, dx):
@@ -94,12 +94,16 @@ def center_second_diff(fs, Nx, dx):
     D = D/(dx**2)
     fs_dxx = D@fs 
     
-    fs_dxx[0]=(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
-    fs_dxx[Nx-1]=(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    fs_dxx[0]= right_second(dx, fs[0 : 4]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxx[Nx-1]= left_second(dx, fs[Nx-4 : Nx]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
     
     return np.asarray(fs_dxx)
-   
-    
+
+#----------------------------------------------------------------------------
+
+def right_first_O1(dx, uuE):
+    return  np.dot([-1, 1], uuE)/dx
+
 def right_first(dx, uu2E):
     # return (-3*u + 4*uE - u2E)/(2*dx)
     return np.dot([-3, 4, -1], uu2E) /(2*dx)
@@ -108,13 +112,16 @@ def right_first_O4(dx, uu4E):
     # return (-3*u + 4*uE - u2E)/(2*dx)
     return np.dot([-25,48,-36,16,-3], uu4E)/(12*dx)
     
+def right_second_O1(dx, uu2E):
+    return np.dot([1, -2, 1], uu2E)/(dx**2)
+
 def right_second(dx, uu3E):
     # return (2*u - 5*uE + 4*u2E - u3E)/(dx**2)
     return np.dot([2, -5, 4, -1], uu3E)/(dx**2)
 
 def right_second_O4(dx, uu5E):
     # return (2*u - 5*uE + 4*u2E - u3E)/(dx**2)
-    return np.dot([45,-154,214,-156,61,-10], uu5E)/(12*dx**2)
+    return np.dot([45, -154, 214, -156, 61,-10], uu5E)/(12*dx**2)
 
 def right_third(dx, uu4E):
     # return (-5*u + 18*uE -24*u2E + 14*u3E -3*u4E)/(2*dx**3)
@@ -134,6 +141,10 @@ def right_fifth(dx, uu6E):
     return np.dot([-7, 40, -95, 120, -85, 32, -5], uu6E)/(2*dx**5)    
 
 #----------------------------------------------------------------------------
+def left_first_O1(dx, uuW):  
+    return np.dot([-1,1], uuW)/dx
+    # return (uW-u) /(dx)
+
 def left_first(dx, uu2W):
     # return (3*u - 4*uW + u2W)/(2*dx)    
     return np.dot([1, -4, 3], uu2W) /(2*dx)
@@ -141,6 +152,10 @@ def left_first(dx, uu2W):
 def left_first_O4(dx, uu4W):
     # return (-3*u + 4*uE - u2E)/(2*dx)
     return np.dot([3, -16, 36, -48, 25], uu4W)/(12*dx)
+
+def left_second_O1(dx, uu2W):
+    # return (2*u - 5*uW + 4*u2W - u3W)/(dx**2)
+    return np.dot([1, -2, 1], uu2W)/(dx**2) 
 
 def left_second(dx, uu3W):
     # return (2*u - 5*uW + 4*u2W - u3W)/(dx**2)

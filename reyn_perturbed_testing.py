@@ -17,10 +17,10 @@ import graphics
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
 Example = examples.LambdaBump # 
-H=1/2 #=h0
+H=1 #=h0
 l=1 #=L/2
 delta = H/l
-lam = 0.2
+lam = 0.6
 args=[lam, H, l]
 
 U=0
@@ -58,7 +58,7 @@ for k in range(n_Ns):
     if pert.order > 2:
         # print(pert.dP_pert4)
 
-        errs_p4[k] = abs(pert.dP_pert4 -analytic_pert4_dP)/abs(analytic_pert4_dP)/N
+        errs_p4[k] = abs(pert.dP_pert4 -analytic_pert4_dP)/abs(analytic_pert4_dP)
     
     N *= dN
     

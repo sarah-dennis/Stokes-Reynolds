@@ -35,7 +35,7 @@ import reyn_examples as examples
 #        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
 #------------------------------------------------------------------------------
 plots_on=True
-zoom_on=False 
+zoom_on= not False 
 write_on=False
 #------------------------------------------------------------------------------
 ## space parmaters |--> args = [ ... ]
@@ -66,6 +66,8 @@ write_on=False
 # args = [H,xr,yr] 
 
 # Example = examples.BFS_deltaSmooth
+# H = 1.5
+# delta = 0.5
 # args = [H,delta]
 
 # Example = examples.TriSlider
@@ -74,10 +76,10 @@ write_on=False
 # Example = examples.HexSlider
 # args = None
 
-Example = examples.TriCavity
-H=4
-L=1
-args = [H,L]
+# Example = examples.TriCavity
+# H=1/4
+# L=2
+# args = [H,L]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -89,33 +91,43 @@ args = [H,L]
 # L=4
 # args = [r, k, L]
 
-# Example = examples.LambdaBump # 
-# lam=0.2
+# Example = examples.LambdaBump 
+# lam=0.6
 # H=1
-# l=1
-# args=[lam, H, l]
-
-# Example = examples.Cylinder
-# r=1
-# h0 = 1
 # l=2
-# #d = h0+r
-# args= [ r,h0,l]
+# args=[lam, H, l]
+# print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
 
-U=2
+Example = examples.Cylinder
+r=1
+h0 = 1/2
+l=3
+# d = h0+r
+
+print((h0+r)/r) 
+args= [ r,h0,l]
+
+
+#------------------------------------------------------------------------------
+# boundary conditions
+#------------------------------------------------------------------------------
+
+# U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
+U=2/3
+
+# dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 dP=0
 
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=160
+N=400
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
-solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
+solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)
