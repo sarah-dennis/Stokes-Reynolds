@@ -126,10 +126,12 @@ class CircleHeight(Height):
         self.h0 = h0 #clearance
         self.r = r 
         self.l = ((xf-x0)-2*r)/2
-    
+            
+        self.dxdr = 0 #r/4
         
             
         dx = (xf - x0)/(Nx-1)
+
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
         
@@ -139,8 +141,8 @@ class CircleHeight(Height):
 
     def h_fun(self, x):
         # return self.h0 + np.sqrt(self.r**2 - (x-self.r)**2)
-        if x <-self.r or x >self.r:
-            return self.h0+self.r
+        if x <-self.r+self.dxdr or x >self.r-self.dxdr:
+            return self.h0+self.r - np.sqrt(self.r**2 - (self.r-self.dxdr)**2)
         else:
             return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
     

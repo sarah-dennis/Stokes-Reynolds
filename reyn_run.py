@@ -91,21 +91,21 @@ write_on=False
 # L=4
 # args = [r, k, L]
 
-# Example = examples.LambdaBump 
-# lam=0.6
-# H=1
-# l=2
-# args=[lam, H, l]
-# print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
+Example = examples.LambdaBump 
+lam=0.4
+H=1
+l=4
+args=[lam, H, l]
+print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
 
-Example = examples.Cylinder
-r=1
-h0 = 1/2
-l=3
+# Example = examples.Cylinder
+# r=1.4
+# h0 = 1.2
+# l=1
 # d = h0+r
 
-print((h0+r)/r) 
-args= [ r,h0,l]
+# print((h0+r)/r) 
+# args= [ r,h0,l]
 
 
 #------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ dP=0
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=400
+N=100
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
