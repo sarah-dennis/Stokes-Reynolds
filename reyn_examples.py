@@ -7,7 +7,7 @@ Created on Wed Feb 22 10:01:42 2023
 
 import numpy as np
 
-from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight
+from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight, LogisticHeight
 #-----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
 #  |_____       | 
@@ -145,6 +145,17 @@ class LambdaBump(BumpHeight):
         lam = args[0]
         namestr = f'Bump_lambda{int(lam)}H{int(H)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, lam, H, U, dP, namestr)
+
+class LogisticStep(LogisticHeight):
+    def __init__(self, U, dP, N, args):
+        x0=-args[3]
+        xf=args[3]
+        center = 0
+        H = args[1]
+        h = args[2]
+        slope = args[0]
+        namestr = f'Bump_lambda{slope:.2f}H{H:.2f}_dP{dP:.1f}_U{U:.1f}'
+        super().__init__( x0, xf, N, H, h, center, slope, U, dP, namestr)
 
 
 class Cylinder(CircleHeight):

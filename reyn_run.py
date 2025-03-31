@@ -34,9 +34,9 @@ import reyn_examples as examples
 
 #        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
 #------------------------------------------------------------------------------
-plots_on=True
-zoom_on= not False 
-write_on=False
+plots_on = True
+zoom_on = False 
+write_on = False
 #------------------------------------------------------------------------------
 ## space parmaters |--> args = [ ... ]
 #------------------------------------------------------------------------------
@@ -91,43 +91,49 @@ write_on=False
 # L=4
 # args = [r, k, L]
 
-Example = examples.LambdaBump 
-lam=0.4
-H=1
-l=4
-args=[lam, H, l]
-print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
+# Example = examples.LambdaBump 
+# lam=0.4
+# H=1
+# l=4
+# args=[lam, H, l]
+# print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
 
 # Example = examples.Cylinder
 # r=1.4
 # h0 = 1.2
 # l=1
 # d = h0+r
-
-# print((h0+r)/r) 
 # args= [ r,h0,l]
+# print((h0+r)/r) 
 
+
+Example = examples.LogisticStep
+k = 1/16 # slope 1/k at x=0
+H = 3/2 # logistic height scale
+h = 1/2 # min height
+l = 3 # half length
+args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
 # boundary conditions
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U=2/3
+U=0
 
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP=0
+dP=-1
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N=100
+N =400
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
-# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

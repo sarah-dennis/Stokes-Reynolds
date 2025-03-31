@@ -27,7 +27,7 @@ class Velocity:
         for i in range(3, self.height.Nx-2):
             qs[i]= np.sum(vx[:,i])*self.height.dx
 
-        graphics.plot_2D(qs[3:-3], self.height.xs[3:-3], 'flux', ['x', 'q'])
+        # graphics.plot_2D(qs[3:-3], self.height.xs[3:-3], 'flux', ['x', 'q'])
         q = np.average(qs)
         # print(q)
         return q
@@ -89,8 +89,8 @@ class Velocity:
 
 
         inc = u_x + v_y
-        print(np.max(abs(inc)))
-        graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['I', 'x', 'y'], -1, 1)
+        # print(np.max(abs(inc)))
+        # graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['I', 'x', 'y'], -1, 1)
         return inc 
             
             
@@ -116,8 +116,7 @@ class ReynoldsVelocity(Velocity):
             hx = height.hxs[i]
 
             q = (U*h)/2 - (px*h**3)/(12*visc)
-            
-            
+
             for j in range(height.Ny):
                 y = height.ys[j]
                 if y <= height.hs[i]:
@@ -162,20 +161,16 @@ class AdjReynVelocity(Velocity):
             y = ys[j]
             pj = ps[j]
             
-            for i in range(height.Nx):
+            for i in range(3,height.Nx-3):
                  
                
                 h = hs[i]
 
                 if y <= h:
-                    if i < 3 or i > height.Nx-4:
-                        px = 0
-                        pxx = 0
-  
-                    elif y <= hs[i+1] and y <= hs[i-1]: #interior nbrs
+                    if y <= hs[i+1] and y <= hs[i-1]: #interior nbrs
                         px = domain.center_first(dx, pj[i-1 : i+2])
                         pxx = domain.center_second(dx, pj[i-1 : i+2]) 
-                            
+                    
                     elif y <= hs[i+1] and y > hs[i-1]: # West out of bounds, fwd diff (right sided)
                         if y <= hs[i+2]:
                             px = domain.right_first(dx, pj[i : i+3]) 
@@ -219,8 +214,8 @@ class AdjReynVelocity(Velocity):
                     pxx_hs[i] = pxx
 
         # print(px_hs, pxx_hs)
-        graphics.plot_contour_mesh(pxs, height.xs, height.ys, 'pxs', ['$p_{x}$', '$x$', '$y$'], vmin=-3, vmax=3)
-        graphics.plot_contour_mesh(pxxs, height.xs, height.ys, 'pxxs', ['$p_{xx}$', '$x$', '$y$'], vmin=-3, vmax=3)
+        # graphics.plot_contour_mesh(pxs, height.xs, height.ys, 'pxs', ['$p_{x}$', '$x$', '$y$'], vmin=-3, vmax=3)
+        # graphics.plot_contour_mesh(pxxs, height.xs, height.ys, 'pxxs', ['$p_{xx}$', '$x$', '$y$'], vmin=-3, vmax=3)
 
         for i in range(height.Nx):
             h = hs[i]
@@ -249,13 +244,11 @@ class AdjReynVelocity(Velocity):
                 
                     
                     
-        graphics.plot_contour_mesh(us, height.xs, height.ys, '$u(x,y)$', ['$u$', '$x$', '$y$'], vmin=-1, vmax=1)
-        graphics.plot_contour_mesh(vs, height.xs, height.ys, '$v(x,y)$', ['$v$', '$x$', '$y$'], vmin=-1, vmax=1)
+        # graphics.plot_contour_mesh(us, height.xs, height.ys, '$u(x,y)$', ['$u$', '$x$', '$y$'], vmin=-1, vmax=1)
+        # graphics.plot_contour_mesh(vs, height.xs, height.ys, '$v(x,y)$', ['$v$', '$x$', '$y$'], vmin=-1, vmax=1)
 
         uv_mag = np.sqrt(us**2 + vs**2)
         graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, '$|(u,v)|_2$', ['$|(u,v)|_2$', '$x$', '$y$'], vmin=0, vmax=3, log_cmap=False)
-
-
 
         # vy=np.flip(vy, 0)
         # vx=np.flip(vx, 0)

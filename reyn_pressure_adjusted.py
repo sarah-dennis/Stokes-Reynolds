@@ -22,7 +22,7 @@ def make_adj_ps(height, reyn_ps):
             
             dP_E = (reyn_ps[i+2]-reyn_ps[i])/(2*height.dx)
             
-            dP_W = (reyn_ps[i+1]-reyn_ps[i])/(height.dx) 
+            dP_W = 0# (reyn_ps[i+1]-reyn_ps[i])/(height.dx) 
 
             adj_E=(hs[i+1]-y)*dP_E/2 + height.U*height.visc/hs[i+1] 
             adj_W=(hs[i]-y)*dP_W/2 + height.U*height.visc/hs[i]
@@ -48,7 +48,7 @@ def make_adj_ps(height, reyn_ps):
         i = height.Nx-1 # outlet bc
         if y <= height.hs[i]:
             
-            dP_E = (reyn_ps[i] -reyn_ps[i-1])/(height.dx) 
+            dP_E = 0 #(reyn_ps[i] -reyn_ps[i-1])/(height.dx) 
             dP_W = (reyn_ps[i] -reyn_ps[i-2])/(2*height.dx)
             
             adj_E = (hs[i]-y)*dP_E/2 + height.U*height.visc/hs[i]

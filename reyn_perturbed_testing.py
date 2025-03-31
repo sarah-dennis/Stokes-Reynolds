@@ -26,7 +26,7 @@ args=[lam, H, l]
 U=0
 dP=1
 
-n_Ns = 8
+n_Ns = 6
 Ns = np.zeros(n_Ns)
 errs_p0 = np.zeros(n_Ns)
 errs_p4 = np.zeros(n_Ns)

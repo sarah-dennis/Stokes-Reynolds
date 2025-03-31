@@ -13,9 +13,9 @@ import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 
-lenx = 2
+lenx = 1
 leny = 1
-x_start = -1
+x_start = -4
 y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -31,9 +31,9 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 5
-        self.p_min=-3
-        self.p_max=3
+        self.vel_max = 1
+        self.p_min=-2
+        self.p_max=2
     
 
     
