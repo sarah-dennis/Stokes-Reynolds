@@ -209,7 +209,7 @@ class AdjReynVelocity(Velocity):
                 pxs[j,i] = px
                 pxxs[j,i] = pxx
                 
-                if y == h or (y < h and ys[j+1] >= h):
+                if y == h or (y < h and y+dx >= h):
                     px_hs[i] = px
                     pxx_hs[i] = pxx
 
@@ -247,8 +247,8 @@ class AdjReynVelocity(Velocity):
         # graphics.plot_contour_mesh(us, height.xs, height.ys, '$u(x,y)$', ['$u$', '$x$', '$y$'], vmin=-1, vmax=1)
         # graphics.plot_contour_mesh(vs, height.xs, height.ys, '$v(x,y)$', ['$v$', '$x$', '$y$'], vmin=-1, vmax=1)
 
-        uv_mag = np.sqrt(us**2 + vs**2)
-        graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, '$|(u,v)|_2$', ['$|(u,v)|_2$', '$x$', '$y$'], vmin=0, vmax=3, log_cmap=False)
+        # uv_mag = np.sqrt(us**2 + vs**2)
+        # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, '$|(u,v)|_2$', ['$|(u,v)|_2$', '$x$', '$y$'], vmin=0, vmax=3, log_cmap=False)
 
         # vy=np.flip(vy, 0)
         # vx=np.flip(vx, 0)

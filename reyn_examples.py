@@ -131,7 +131,7 @@ class Sinusoid(SinusoidalHeight):
 
         
         r=args[0]
-        h_avg=2*r + r/2
+        h_avg= r/2
         k=args[1]
         namestr = f'Sinusoid_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, h_avg, r, k, U, dP, namestr)

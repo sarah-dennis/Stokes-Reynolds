@@ -17,14 +17,14 @@ import graphics
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
-r=1
+r=1.1
 h0 = 1/2
-l=5
+l=2
 d = h0+r
 args= [r,h0,l]
 
 print(f'd/a: {d/r:.2f}')
-U=-1
+U=-1/2
 dP=0
 
     
@@ -74,7 +74,7 @@ def pressure_cylinder(ex, N):
 
 
 
-N = 200
+N = 100
 ex = Example(U, dP, N, args)
 
 
@@ -90,10 +90,10 @@ stokes_ps, _ = pressure_cylinder(ex, N)
 stokes_ps = stokes_ps/abs((U/h0))
 
 
-x_start = -0.9
+x_start = -1
 i_start = int(x_start*N) + ex.Nx//2   
 
-x_stop = 0.9
+x_stop = 1
 i_stop = int(x_stop*N) + ex.Nx//2
 
 y_max = max(ex.hs[i_start],ex.hs[i_stop])
@@ -107,7 +107,7 @@ graphics.plot_contour_mesh(reyn_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, e
 stokes_adj = stokes_ps - reyn_ps
 reyn_adj = adj_ps - reyn_ps
 
-x_test = 0.1
+x_test = 0.2
 L=ex.xf-ex.x0
 i_test = int(x_test*N) + ex.Nx//2
 p_adj_test = (adj_ps[1:,i_test]- reyn_ps[1:,i_test])

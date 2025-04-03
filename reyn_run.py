@@ -38,21 +38,6 @@ plots_on = True
 zoom_on = False 
 write_on = False
 #------------------------------------------------------------------------------
-## space parmaters |--> args = [ ... ]
-#------------------------------------------------------------------------------
-# l = 1     # inlet/outlet length        
-# h = .125        # minimum height       
-# H = 1/2           # maximum height
-# xr = 0.35       # BFS reattachment point x=l+xr
-# yr = 0.41       # BFS detachment point y=yr
-# delta = 0.5    # smoothed step slope reciprocal 0 <= delta < L/2
-# r = 0.             # radius 0 <= r < 1/2
-# lam = 0.2
-# k= 2      # period sin(kx)
-# L= 4
-## args are specific to each example and domain is initialized at solve time
-
-#------------------------------------------------------------------------------
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
@@ -63,6 +48,9 @@ write_on = False
 # args = [H,l, L]
 
 # Example = examples.BFS_noEddy
+# H = 2
+# xr = 0.3
+# yr = 0.4
 # args = [H,xr,yr] 
 
 # Example = examples.BFS_deltaSmooth
@@ -77,7 +65,7 @@ write_on = False
 # args = None
 
 # Example = examples.TriCavity
-# H=1/4
+# H=2
 # L=2
 # args = [H,L]
 
@@ -86,32 +74,32 @@ write_on = False
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
 # Example = examples.Sinusoid
-# r=0.5
-# k=2
+# r=0.8
+# k=1
 # L=4
+
 # args = [r, k, L]
 
 # Example = examples.LambdaBump 
-# lam=0.4
+# lam=0.6
 # H=1
-# l=4
+# l=1
 # args=[lam, H, l]
-# print(f'Dh / H = {lam/H:.2f}, eps^2 = {(H/l)**2:.2f}')
 
 # Example = examples.Cylinder
-# r=1.4
-# h0 = 1.2
-# l=1
+# r=1.1
+# h0 = 1/2
+# l=0
 # d = h0+r
 # args= [ r,h0,l]
 # print((h0+r)/r) 
 
 
 Example = examples.LogisticStep
-k = 1/16 # slope 1/k at x=0
-H = 3/2 # logistic height scale
-h = 1/2 # min height
-l = 3 # half length
+k = 1/10 # slope -1/k at x=0
+H = 2  # logistic height scale
+h = 1/2  # min height
+l = 4     # half length
 args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
@@ -119,15 +107,15 @@ args = [k,H,h, l]
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U=0
+U = 0
 
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP=-1
+dP = -1
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N =400
+N = 100
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)

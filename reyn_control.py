@@ -31,9 +31,9 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 1
-        self.p_min=-2
-        self.p_max=2
+        self.vel_max = 5
+        self.p_min=-5
+        self.p_max=5
     
 
     
@@ -149,7 +149,7 @@ class Reynolds_Solver:
     
     
     def v_plot(self, ex, velocity, dP, solver_title, zoom):
-        paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
+        paramstr = "$Re=0$, $Q=%.4f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)

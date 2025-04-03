@@ -46,7 +46,6 @@ class Height(Domain):
         
         self.U = U    # velocity at flat boundary
         self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
-        # Tavakol: density 848 kgm^-3, dynamic viscosity 2.45 Pas, flux 14.4mm^3/s
         self.p_ambient = 0 
         self.p0 = -dP
         self.pN = self.p_ambient
@@ -63,9 +62,8 @@ class Space(Domain):
         self.U = U    # velocity at flat boundary 
         self.visc = 1  # dynamic viscosity (Ns/m^2)
         self.dens = 1  # density (kg/m^3)
-        # kinematic viscosity nu = dynamic viscosity mu / density rho
-        
-        self.p_ambient = 0 #10^5 Pa   
+
+        self.p_ambient = 0 #pressure (outlet) Pa   
         self.flux=flux
         self.Re = Re #
 

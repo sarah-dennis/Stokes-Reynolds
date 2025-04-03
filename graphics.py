@@ -92,7 +92,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.4, 0.875))
+        fig.legend(bbox_to_anchor=(0.3, 0.875))
     else:
         fig.legend(bbox_to_anchor=(0.9, 0.275))
     return fig
@@ -183,7 +183,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     pp.minorticks_on()
     pp.show()
     
@@ -307,7 +307,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
 
     pp.minorticks_on()
     ax = pp.gca()
-    ax.set_aspect('equal')    
+    # ax.set_aspect('equal')    
     ax.set_ylim(min(ys),y_lim)
     # ax.set_facecolor('black')
     pp.show()    

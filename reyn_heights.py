@@ -146,7 +146,7 @@ class CircleHeight(Height):
         self.r = r 
         self.l = ((xf-x0)-2*r)/2
             
-        self.dxdr = r/8
+        self.dxdr = 0# r/8
         
             
         dx = (xf - x0)/(Nx-1)
