@@ -81,7 +81,7 @@ write_on = False
 # args = [r, k, L]
 
 # Example = examples.LambdaBump 
-# lam=0.6
+# lam=-0.2
 # H=1
 # l=1
 # args=[lam, H, l]
@@ -97,7 +97,7 @@ write_on = False
 
 Example = examples.LogisticStep
 k = 1/10 # slope -1/k at x=0
-H = 2  # logistic height scale
+H = 1/2  # logistic height scale
 h = 1/2  # min height
 l = 4     # half length
 args = [k,H,h, l]
@@ -110,7 +110,7 @@ args = [k,H,h, l]
 U = 0
 
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP = -1
+dP = 1
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )

@@ -98,22 +98,21 @@ class BumpHeight(Height):
         Nx = (xf-x0)*N + 1
         # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
         y0 = 0
-        yf = H
-        self.h_max=H         
+        
+        self.H=H         
         self.x_scale = (xf-x0)/2  
 
         self.lam=lam
+        
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
-
-
-        
+        yf = np.max(hs)
 
         super().__init__(x0, xf, y0, yf, N, hs, U, dP, filestr)
   
     def h_fun(self, x):
-        return self.h_max*(1-(self.lam/2)*(1+np.cos(np.pi*x/self.x_scale)))
+        return self.H*(1-(self.lam/2)*(1+np.cos(np.pi*x/self.x_scale)))
    
 class LogisticHeight(Height):
     def __init__(self, x0, xf, N, H, h, center, slope, U, dP, filestr):

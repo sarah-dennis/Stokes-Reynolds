@@ -197,12 +197,13 @@ def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthre
     
     X, Y = np.meshgrid(xs, ys)
     
-    N = 10
-    vscale=10
+    N_x = 50
+    N_y = max(int(len(ys)/len(xs)*N_x), 1)
+    vscale=1/N_x * (len(xs)/len(ys))
     
     # if log_cmap:
         # norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
-    pp.quiver(xs[:: N], ys[:: N], vx[::N, ::N], vy[::N, ::N], scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
+    pp.quiver(xs[:: N_x], ys[:: N_y], vx[::N_y, ::N_x], vy[::N_y, ::N_x], scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     # else:
         # no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
         # quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=no_norm)
@@ -222,7 +223,7 @@ def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthre
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     pp.minorticks_on()
     pp.show()
 

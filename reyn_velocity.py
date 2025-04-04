@@ -213,10 +213,6 @@ class AdjReynVelocity(Velocity):
                     px_hs[i] = px
                     pxx_hs[i] = pxx
 
-        # print(px_hs, pxx_hs)
-        # graphics.plot_contour_mesh(pxs, height.xs, height.ys, 'pxs', ['$p_{x}$', '$x$', '$y$'], vmin=-3, vmax=3)
-        # graphics.plot_contour_mesh(pxxs, height.xs, height.ys, 'pxxs', ['$p_{xx}$', '$x$', '$y$'], vmin=-3, vmax=3)
-
         for i in range(height.Nx):
             h = hs[i]
             # hx = height.hxs[i]
@@ -241,14 +237,6 @@ class AdjReynVelocity(Velocity):
                     # ux = 1/(2*height.visc) * pxxs[j,i] * (y**2) + f1x * y 
                     # v_Sj = v_Sj + -ux * height.dy 
                     # vs[j,i] = v_Sj
-                
-                    
-                    
-        # graphics.plot_contour_mesh(us, height.xs, height.ys, '$u(x,y)$', ['$u$', '$x$', '$y$'], vmin=-1, vmax=1)
-        # graphics.plot_contour_mesh(vs, height.xs, height.ys, '$v(x,y)$', ['$v$', '$x$', '$y$'], vmin=-1, vmax=1)
-
-        # uv_mag = np.sqrt(us**2 + vs**2)
-        # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, '$|(u,v)|_2$', ['$|(u,v)|_2$', '$x$', '$y$'], vmin=0, vmax=3, log_cmap=False)
 
         # vy=np.flip(vy, 0)
         # vx=np.flip(vx, 0)
