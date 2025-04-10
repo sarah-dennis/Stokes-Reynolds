@@ -41,20 +41,20 @@ write_on = False
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-# Example = examples.BFS
-# H=2
-# l=1
-# L=4
-# args = [H,l, L]
+Example = examples.BFS
+H=2
+l=1
+L=4
+args = [H,l, L]
 
 # Example = examples.BFS_noEddy
 # H = 2
-# xr = 0.3
-# yr = 0.4
+# xr = .6
+# yr = .4
 # args = [H,xr,yr] 
 
 # Example = examples.BFS_deltaSmooth
-# H = 1.5
+# H = 2
 # delta = 0.5
 # args = [H,delta]
 
@@ -65,8 +65,8 @@ write_on = False
 # args = None
 
 # Example = examples.TriCavity
-# H=2
-# L=2
+# H=1
+# L=1
 # args = [H,L]
 
 #------------------------------------------------------------------------------
@@ -80,38 +80,36 @@ write_on = False
 
 # args = [r, k, L]
 
-# Example = examples.LambdaBump 
-# lam=-0.2
-# H=1
-# l=1
-# args=[lam, H, l]
+Example = examples.LambdaBump 
+lam=-1
+H=2
+l=2
+h0 = 1
+args=[lam, H, l, h0]
 
 # Example = examples.Cylinder
-# r=1.1
+# r=3/2
 # h0 = 1/2
-# l=0
-# d = h0+r
-# args= [ r,h0,l]
-# print((h0+r)/r) 
+# l=1
+# drdx = 1/4
+# args= [ r, h0,l, drdx]
 
 
-Example = examples.LogisticStep
-k = 1/10 # slope -1/k at x=0
-H = 1/2  # logistic height scale
-h = 1/2  # min height
-l = 4     # half length
-args = [k,H,h, l]
+# Example = examples.LogisticStep
+# k = -1/8 # slope -1/k at x=0
+# H = 1  # logistic height scale
+# h = 1  # min height
+# l = 2     # half length
+# args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
 # boundary conditions
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 0
-
+U = 1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP = 1
-
+dP = -7.3
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 

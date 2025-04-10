@@ -4,9 +4,9 @@ Created on Tue May 21 16:15:37 2024
 
 @author: sarah
 """
-
+import numpy as np
 from stokes_heights import PWLinear
-
+import graphics
 #------------------------------------------------------------------------------
 # <<=============================== CAVITY ==================================>>
 #------------------------------------------------------------------------------
@@ -960,8 +960,36 @@ class pipe_Re0(PWLinear):
          
         super().__init__(x0, xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)
 
+#------------------------------------------------------------------------------
+class bump_Re0(PWLinear):
+    def __init__(self, N):
+        self.h0 = 1
+        self.H=2
+        self.slope = 1
 
-    
+        self.L = 2
+        self.x0 = -self.L
+        self.xf = self.L
+        x_peaks = [self.x0 + i/N for i in range (int(1 + 2*self.L*N))]
+               
+        y_peaks_L = [self.H+self.h0] + [self.h(x) for x in x_peaks[:-1]]
+        y_peaks_R =  [self.h(x) for x in x_peaks[1:]] + [self.H+self.h0]
+
+        y_peaks = [[y_L, y_R] for y_L,y_R in np.stack((y_peaks_L,y_peaks_R), axis=1)] 
+        y0 = np.min(y_peaks) 
+        yf =  np.max(y_peaks)
+        # graphics.plot_2D(y_peaks, x_peaks, 'bump', ['x', 'y'])
+        U = 1
+        q = 1
+        Re = 0
+        namestr = 'Bump_Re0_Q2_U0'
+         
+        super().__init__(self.x0, self.xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)
+
+
+    def h(self, x):
+        return (self.H)*(1-(self.slope/2)*(1+np.cos(np.pi*x/self.L)))
+
     
     
     

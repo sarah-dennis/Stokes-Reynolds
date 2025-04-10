@@ -34,13 +34,21 @@ class Domain:
 # Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, U, dP, namestr):
+    def __init__(self, x0, xf, y0, yf, N, hs, i_peaks, U, dP, namestr):
         dirstr = f"./reyn_examples/{namestr}"
         super().__init__(x0, xf, y0, yf, N, dirstr,namestr) # -> {dx, dy, xs, ys}
         
         self.hs = hs
+        self.i_peaks = i_peaks
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
 
+        for i in i_peaks:
+            if i > 1 and i < self.Nx-2:
+                
+                self.hxs[i] = (self.hxs[i-2] + self.hxs[i+2])/2
+                self.hxs[i-1] = (self.hxs[i-2] + self.hxs[i])/2
+                self.hxs[i+1] = (self.hxs[i] + self.hxs[i+2])/2
+                
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
         

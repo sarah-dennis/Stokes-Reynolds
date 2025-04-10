@@ -20,10 +20,10 @@ Example = examples.LambdaBump #
 H=1 #=h0
 l=1 #=L/2
 delta = H/l
-lam = 0.6
+lam = 0.3
 args=[lam, H, l]
 
-U=0
+U=-1
 dP=1
 
 n_Ns = 6

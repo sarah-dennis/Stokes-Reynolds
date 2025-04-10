@@ -17,7 +17,7 @@ class Velocity:
         
         
         self.inc = self.make_inc(height, vx, vy)
-       
+
 
      
     def get_flux(self, vx):
@@ -90,7 +90,6 @@ class Velocity:
 
         inc = u_x + v_y
         # print(np.max(abs(inc)))
-        # graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['I', 'x', 'y'], -1, 1)
         return inc 
             
             
@@ -139,14 +138,14 @@ class AdjReynVelocity(Velocity):
     def __init__(self, height, adj_ps):
         vx, vy = self.make_adj_velocity(height, adj_ps)
         
-
-        
         super().__init__(height, vx, vy)
 
     def make_adj_velocity(self, height, ps):
+        
         # ps=np.flip(ps,0)
         dx = height.dx
         hs = height.hs
+        hxs = height.hxs
         ys = height.ys
         us = np.zeros((height.Ny, height.Nx))
         vs = np.zeros((height.Ny, height.Nx))
@@ -154,7 +153,7 @@ class AdjReynVelocity(Velocity):
         pxxs = np.zeros((height.Ny, height.Nx))
         px_hs = np.zeros(height.Nx)
         pxx_hs = np.zeros(height.Nx)
-    
+        f1_x_err = np.zeros(height.Nx)
     
         for j in range(height.Ny):
            
@@ -215,15 +214,17 @@ class AdjReynVelocity(Velocity):
 
         for i in range(height.Nx):
             h = hs[i]
-            # hx = height.hxs[i]
+            hx = hxs[i]
             
             
             f1 =  -1/(2*height.visc) * h * px_hs[i] - height.U / h
             
-            # f1x = -1/(2*height.visc) * (px_hs[i]*hx + pxx_hs[i]*h) + height.U/(h**2) * hx
+            f1x = -1/(2*height.visc) * (px_hs[i]*hx + pxx_hs[i]*h) + height.U/(h**2) * hx
             # v_Sj = 0 # numerical integration dy at xi
             
-            f1x = -1/(3*height.visc)* h *pxx_hs[i] #eqn 10b
+            f1x_b = -1/(3*height.visc)* h *pxx_hs[i] #eqn 10b
+            
+            f1_x_err[i] = (f1x- f1x_b)
             
             for j in range(height.Ny):
                 
@@ -232,13 +233,15 @@ class AdjReynVelocity(Velocity):
                 if y <= h:
                     
                     us[j,i]= 1/(2*height.visc)* pxs[j,i] * (y**2) + f1* y + height.U
-                    vs[j,i] = -1/(6*height.visc) * pxxs[j,i] * y**3 - 1/2 * f1x * y**2 # eqn. 10
+                    vs[j,i] = -1/(6*height.visc) * pxxs[j,i] * y**3 - 1/2 * f1x_b * y**2 # eqn. 10
 
                     # ux = 1/(2*height.visc) * pxxs[j,i] * (y**2) + f1x * y 
                     # v_Sj = v_Sj + -ux * height.dy 
                     # vs[j,i] = v_Sj
+                    
+
 
         # vy=np.flip(vy, 0)
         # vx=np.flip(vx, 0)
-
+        # graphics.plot_2D(f1_x_err, height.xs, 'f1_x error', ['x', 'f1_x - f1_x'])
         return us, vs

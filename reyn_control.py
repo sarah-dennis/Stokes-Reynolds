@@ -13,6 +13,8 @@ import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 
+
+
 lenx = 1
 leny = 1
 x_start = -4
@@ -31,9 +33,9 @@ class Reynolds_Solver:
         self.dP = dP
 
         # colorbar min max
-        self.vel_max = 1
-        self.p_min=-5
-        self.p_max=5
+        self.vel_max = 5
+        self.p_min=-45
+        self.p_max=45
     
 
     
@@ -97,13 +99,17 @@ class Reynolds_Solver:
 
     def fd_pert_solve(self, N, order, write=False, plot=True, zoom=False, get_dPs = False):
         ex = self.Example(self.U, self.dP, N, self.args)
+
         
-        pert = rpert.PerturbedReynSol(ex, order)
+        reyn_pressure = rp.FinDiffReynPressure(ex)
+        reyn_velocity = rv.ReynoldsVelocity(ex, reyn_pressure.ps_1D)                   
+        
+        pert = rpert.PerturbedReynSol(ex, order, reyn_pressure, reyn_velocity)
         solver_title = "Reynolds"
         
         if plot:
-            self.p_plot(ex, pert.reyn_pressure, pert.reyn_velocity.flux, solver_title, zoom)
-            self.v_plot(ex, pert.reyn_velocity, pert.reyn_pressure.dP, solver_title, zoom)
+            self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
+            self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom)
             if order > 1:
                 solver_title2 = solver_title + " $O(\delta^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
@@ -149,15 +155,17 @@ class Reynolds_Solver:
     
     
     def v_plot(self, ex, velocity, dP, solver_title, zoom):
-        paramstr = "$Re=0$, $Q=%.4f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
+        paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-
-        graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-
-        graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+        # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        
+        # graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
+        # print(f' inc max: {np.max(velocity.inc) : .3f}')
+        
+        # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)

@@ -25,7 +25,8 @@ stream_cmap[:,0:3] *= 1
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
 
-mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
+# mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
+mesh_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
 mesh_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
@@ -152,7 +153,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
         
 def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=linthresh):
-    
+
     pp.rcParams['figure.dpi'] = dpi
     
     pp.figure()
@@ -183,7 +184,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
-    # ax.set_aspect('equal')
+    ax.set_aspect('equal')
     pp.minorticks_on()
     pp.show()
     
@@ -308,8 +309,8 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
 
     pp.minorticks_on()
     ax = pp.gca()
-    # ax.set_aspect('equal')    
-    ax.set_ylim(min(ys),y_lim)
+    ax.set_aspect('equal')    
+    ax.set_ylim(y_lim)
     # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   

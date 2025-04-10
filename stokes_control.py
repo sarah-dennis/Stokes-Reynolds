@@ -37,9 +37,9 @@ class Stokes_Solver:
         self.err_tol = 1e-8
         
         # plotting thresholds
-        self.vel_max = 4
-        self.p_min=-100
-        self.p_max=100
+        self.vel_max = 5
+        self.p_min=-40
+        self.p_max=40
         
 #------------------------------------------------------------------------------
     def new_run(self, N):
@@ -164,6 +164,7 @@ class Stokes_Solver:
     def load_plot(self, N,zoom=False):
         ex = self.Example(N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
+
     
     # Grid domain
         xs = ex.xs
@@ -189,12 +190,11 @@ class Stokes_Solver:
         title_p = '' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
-    
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=40)
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=40, y_lim = np.min(ex.y_peaks))
     
         if zoom:
-            p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)     
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=20)
+            p_zoom = graphics.grid_zoom_2D(p, ex, x_start, x_stop, y_start, y_stop)     
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=20, y_lim = min(ex.y_peaks))
     
     #  Velocity plot: 
     
@@ -203,10 +203,13 @@ class Stokes_Solver:
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
         
         u_2D = u.reshape((ex.Ny,ex.Nx))
-        v_2D = v.reshape((ex.Ny,ex.Nx))
-    
+
+        v_2D = v.reshape((ex.Ny,ex.Nx)) 
+
         uv_mag = np.sqrt(u_2D**2 + v_2D**2)
         
+    
+
         graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
         
         if zoom:

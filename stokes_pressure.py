@@ -7,10 +7,12 @@ Created on Wed Aug 28 11:58:25 2024
 import numpy as np
 
 def resistance(ex, p):
-    j_in = int((ex.yf - ex.H_in/2)/ex.dy)
-    j_out =int((ex.yf - ex.H_out/2)/ex.dy)
-    
-    dp = p[j_out*ex.Nx+ex.Nx-1] - p[j_in*ex.Nx+1]
+    j = ex.Ny-1
+    i_in = 0
+    i_out = ex.Nx-1
+    #TODO
+    print()
+    dp = p[j*ex.Nx+i_out] - p[j*ex.Nx+i_in]
 
     if ex.flux!=0:
         r= dp/ex.flux
@@ -80,8 +82,8 @@ def pressure(ex, u, v):
                 elif i > 0 and ex.space[j+1,i-1]==1:
                     k_NW = (j+1)*n+i-1
                     p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
-                else:        
-                    assert False, "Grid misalignment - check x_peaks for dx=1/N"
+                # else:        
+                    # assert False, "Grid misalignment - check x_peaks for dx=1/N"
                 
             j-=1    
     

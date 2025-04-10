@@ -105,7 +105,7 @@ class PWLinear(Space):
                         grid[j,i] = -1
         
         self.space = grid
-        self.slopes = slopes
+        # self.slopes = slopes
         self.hs = hs
 
 #------------------------------------------------------------------------------
