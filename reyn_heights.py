@@ -22,7 +22,7 @@ class PWL_Height(Height):
         
         y0 = 0
         yf = max(hs)  
-        print(i_peaks)
+
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
         
     def make_hs(self, x0, xf, N, x_peaks, h_peaks):

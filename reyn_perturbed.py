@@ -81,17 +81,14 @@ class PerturbedReynSol:
         h3_2xs = np.zeros(height.Nx)   # d^2/dx^2 [h^-3] @ xi
         h2_3xs = np.zeros(height.Nx)   # d^3/dx^3 [h^-2] @ xi
         h3_3xs = np.zeros(height.Nx)   # d^3/dx^3 [h^-3] @ xi
-        
-        
-        
+                
         # p2s = -u0_xs + c3s
         c3_2xs = np.zeros(height.Nx)                # d^2/dx^2 [c3(x)]
         c3_xs = np.zeros(height.Nx)                 # d/dx [c3(x)]
         c3s = np.zeros(height.Nx)                   # intS d/dx[c3(x)] dx
         u0_xs = np.zeros((height.Ny, height.Nx))    # d/dx [reyn_velx] 
         
-        
-            
+
         u2s = np.zeros((height.Ny, height.Nx)) #
         v2s = np.zeros((height.Ny, height.Nx)) #
 
@@ -134,13 +131,9 @@ class PerturbedReynSol:
 
             else: #interior  
                 h_x = dm.center_first(dx, hs[i-1 : i+2])
-                    
                 h2_2x = dm.center_second(dx, [h**-2 for h in hs[i-1 : i+2]])
-                
                 h3_2x = dm.center_second(dx, [h**-3 for h in hs[i-1 : i+2]])
-                
                 h2_3x = dm.center_third(dx, [h**-2 for h in hs[i-2 : i+3]])
-                
                 h3_3x = dm.center_third(dx, [h**-3 for h in hs[i-2 : i+3]])
             
             
@@ -151,51 +144,24 @@ class PerturbedReynSol:
             h3_3xs[i] = h3_3x
             
             # make c3_x, c3_2x
-            c3_x  = 6 * h2_2x * h - 18/5 * h3_2x * (h**2)
-            c3_2x = 6 * (h2_2x * h_x +  h2_3x * h) - 18/5* (2*h*h_x * h3_2x + (h**2) * h3_3x)
+            c3_xs[i]  = 6 * h2_2x * h - 18/5 * h3_2x * (h**2)
+            c3_2xs[i] = 6 * (h2_2x * h_x +  h2_3x * h) - 18/5* (2*h*h_x * h3_2x + (h**2) * h3_3x)
         
-            c3_xs[i]  = c3_x
-            c3_2xs[i] = c3_2x
-                    
-    
+
+
     
         # correct finite differences at discontinuities
         for i in height.i_peaks:
             if i > 3 and i < height.Nx-3:
-                
-                h_xs[i]   = (h_xs[i+2] + h_xs[i-2])/2
-                h_xs[i+1] = (h_xs[i] + h_xs[i+2])/2
-                h_xs[i-1] = (h_xs[i] + h_xs[i-2])/2
-                
-                h2_2xs[i] = (h2_2xs[i+2] + h2_2xs[i-2])/2
-                h2_2xs[i+1] = (h2_2xs[i] + h2_2xs[i+2])/2
-                h2_2xs[i-1] = (h2_2xs[i] + h2_2xs[i-2])/2
 
-                h3_2xs[i] = (h3_2xs[i+2] + h3_2xs[i-2])/2
-                h3_2xs[i+1] = (h3_2xs[i] + h3_2xs[i+2])/2
-                h3_2xs[i-1] = (h3_2xs[i] + h3_2xs[i-2])/2
+                h_xs[i-1 : i+2] = avg_x(h_xs[i-2 : i+3])
+                h2_2xs[i-1 : i+2] = avg_2x(h2_2xs[i-2 : i+3])
+                h3_2xs[i-1 : i+2] = avg_2x(h3_2xs[i-2 : i+3])
+                h2_3xs[i-2 : i+3] = avg_3x(h2_3xs[i-3 : i+4])
+                h3_3xs[i-2 : i+3] = avg_3x(h3_3xs[i-3 : i+4])
                 
-                h2_3xs[i] = (h2_3xs[i+3] + h2_3xs[i-3])/2
-                h2_3xs[i+1] = (h2_3xs[i] + h2_3xs[i+3])/2
-                h2_3xs[i-1] = (h2_3xs[i] + h2_3xs[i-3])/2
-                h2_3xs[i+2] = (h2_3xs[i+1] + h2_3xs[i+3])/2
-                h2_3xs[i-2] = (h2_3xs[i-1] + h2_3xs[i-3])/2
-                
-                h3_3xs[i] = (h3_3xs[i+3] + h3_3xs[i-3])/2
-                h3_3xs[i+1] = (h3_3xs[i] + h3_3xs[i+3])/2
-                h3_3xs[i-1] = (h3_3xs[i] + h3_3xs[i-3])/2
-                h3_3xs[i+2] = (h3_3xs[i+1] + h3_3xs[i+3])/2
-                h3_3xs[i-2] = (h3_3xs[i-1] + h3_3xs[i-3])/2
-                
-                c3_xs[i]  = (c3_xs[i+2] + c3_xs[i-2])/2 
-                c3_xs[i+1]  = (c3_xs[i] + c3_xs[i+2])/2 
-                c3_xs[i-1]  = (c3_xs[i] + c3_xs[i-2])/2 
-                
-                c3_2xs[i] = (c3_2xs[i+3] + c3_2xs[i-3])/2
-                c3_2xs[i+1] = (c3_2xs[i] + c3_2xs[i+3])/2
-                c3_2xs[i-1] = (c3_2xs[i] + c3_2xs[i-3])/2
-                c3_2xs[i+2] = (c3_2xs[i+1] + c3_2xs[i+3])/2
-                c3_2xs[i-2] = (c3_2xs[i-1] + c3_2xs[i-3])/2
+                c3_xs[i-1 : i+2] = avg_x(c3_xs[i-2 : i+3])
+                c3_2xs[i-2 : i+3] = avg_3x(c3_2xs[i-3 : i+4])
             
         # find u2, v2   
         for i in range(height.Nx):
@@ -228,9 +194,7 @@ class PerturbedReynSol:
                     v2_E = -(1/2)*c3_2x* ((1/3) * (y**3) - (1/2)* h *(y**2))
                     v2_F = (1/4) * c3_x * h_x * (y**2)
                     v2s[j,i] = (v2_A + v2_B + v2_C + v2_D + v2_E + v2_F)
-                
 
-                
                     
         # p2s[j,0] = -u0_x[j,0] + c3s[0] = 0 (no correction at inlet)
         # print(np.max(u0_xs[:,0]), np.min(u0_xs[:,0])) # all --> 0 for long enough inlet
@@ -250,7 +214,6 @@ class PerturbedReynSol:
         
         self.c3s = c3s     # intS [x0, xL] d/dx [c3] dx 
         self.c3_xs = c3_xs # d/dx [c3]
-
         self.c3_2xs = c3_2xs # d^2/dx^2 
 
         self.h_xs = h_xs       # d/dx   [h]    
@@ -282,7 +245,6 @@ class PerturbedReynSol:
         c3_4xs = np.zeros(height.Nx)
         c3_3xs = np.zeros(height.Nx)
         
-        
         # integration constant 
         f1_2xs = np.zeros(height.Nx)
         f1_3xs = np.zeros(height.Nx)
@@ -290,18 +252,17 @@ class PerturbedReynSol:
         f2_3xs = np.zeros(height.Nx)
         f3_2xs = np.zeros(height.Nx)
         f3_3xs = np.zeros(height.Nx)
-        
-        c5_2xs = np.zeros(height.Nx) # d/dx [c5(x)]
-        c5_xs = np.zeros(height.Nx) # d/dx [c5(x)]
-        c5s = np.zeros(height.Nx) # intS d/dx[c5(x)] dx
+        c5_2xs = np.zeros(height.Nx)        # d/dx [c5(x)]
+        c5_xs = np.zeros(height.Nx)         # d/dx [c5(x)]
+        c5s = np.zeros(height.Nx)           # intS d/dx[c5(x)] dx
         
         
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
-        u2_xs = np.zeros((height.Ny, height.Nx))  # d/dx [u2] 
-        v0_Sys = np.zeros((height.Ny, height.Nx)) # int_0^y [v0] dy
-        v0_Sy_xxs = np.zeros((height.Ny, height.Nx)) # d^2/dx^2 int_0^y [v0] dy
-        u4s = np.zeros((height.Ny, height.Nx)) #
-        v4s = np.zeros((height.Ny, height.Nx)) #
+        u2_xs = np.zeros((height.Ny, height.Nx))        # d/dx [u2] 
+        v0_Sys = np.zeros((height.Ny, height.Nx))       # int_0^y [v0] dy
+        v0_Sy_2xs = np.zeros((height.Ny, height.Nx))    # d^2/dx^2 int_0^y [v0] dy
+        u4s = np.zeros((height.Ny, height.Nx))          #
+        v4s = np.zeros((height.Ny, height.Nx))          #
         
         dy = height.dy/(self.y_scale)
         dx = height.dx/(self.x_scale)
@@ -326,8 +287,7 @@ class PerturbedReynSol:
                     h2_4x = dm.right_fourth(dx, [h**-2 for h in hs[i : i+6]])
                     h3_4x = dm.right_fourth(dx, [h**-3 for h in hs[i : i+6]])
                     h_3x = dm.right_third(dx,  hs[i : i+5])          
-                    
-                    
+
                     if i == 0:
                         h_2x = dm.right_second(dx, hs[i : i+4])
                     else: #i == 1
@@ -352,6 +312,7 @@ class PerturbedReynSol:
                         h_2x = dm.left_second(dx, hs[i-3 : i+1])
                     else: # i == Nx-2
                         h_2x = dm.center_second(dx, hs[i-1 : i+2])
+                        
                 else: #i == Nx-3
                     h_2x = dm.center_second(dx, hs[i-1 : i+2])
                     h_3x = dm.center_third(dx, hs[i-2 : i+3])
@@ -361,44 +322,56 @@ class PerturbedReynSol:
             else:  #interior 
                 h_2x = dm.center_second(dx, hs[i-1 : i+2])
                 h_3x = dm.center_third(dx, hs[i-2 : i+3])
-                
                 h2_4x = dm.center_fourth(dx, [h**-2 for h in hs[i-2 : i+3]])
                 h3_4x = dm.center_fourth(dx, [h**-3 for h in hs[i-2 : i+3]])
                 h2_5x = dm.center_fifth(dx, [h**-2 for h in hs[i-3 : i+4]])
                 h3_5x = dm.center_fifth(dx, [h**-3 for h in hs[i-3 : i+4]])
                
-
+            h_2xs[i] = h_2x
+            h_3xs[i] = h_3x
+            h2_4xs[i] = h2_4x
+            h3_4xs[i] = h3_4x
+            h2_5xs[i] = h2_5x
+            h3_5xs[i] = h3_5x
+            
             # make c5_x, c5_2x, c3_3x, c3_4x
-            
-            
             
             c3_3x_A = 6*(2*h2_3x*h_x + h2_2x*h_2x + h2_4x*h)
             c3_3x_B = (-18/5)*(2*(h_x**2)*h3_2x + 2*h*h_2x*h3_2x + 4*h*h_x*h3_3x + (h**2)*h3_4x)
             c3_3x = c3_3x_A + c3_3x_B
+            c3_3xs[i] = c3_3x #4x correction
             
             c3_4x_A = 6*(3*h2_4x*h_x + 3*h2_3x*h_2x + h2_2x*h_3x + h2_5x*h)
             c3_4x_B = (-18/5)*(6*(h_x*h_2x*h3_2x+ (h_x**2)*h3_3x + h*h_2x*h3_3x + h*h_x*h3_4x) + 2*h*h_3x*h3_2x + (h**2)*h3_5x)
             c3_4x = c3_4x_A + c3_4x_B
+            c3_4xs[i] = c3_4x #5x correction
             
             f1_2x = (6*h*(h_x**2) + 3*(h**2)*h_2x)*h3_2x + 6*(h**2)*h_x*h3_3x + (h**3)*h3_4x
+            f1_2xs[i] = f1_2x #4x correction
             
             f1_3x_A = (6*(h_x**3) + 18*h*h_x*h_2x + 3*(h**2)*h_3x) *h3_2x
             f1_3x_B = (9*(h**2)*h_2x + 18*h*(h_x**2)) *h3_3x + 9*(h**2)*h_x*h3_4x + (h**3)*h3_5x
             f1_3x = f1_3x_A + f1_3x_B
-        
+            f1_3xs[i] = f1_3x #5x correction
+            
             f2_2x = 2*(h_x**2 + h*h_2x)*h2_2x + 4*h*h_x*h2_3x + (h**2)*h2_4x
+            f2_2xs[i] = f2_2x #4x correction
 
             f2_3x_A = (6*h_x*h_2x + 2*h*h_3x)*h2_2x
             f2_3x_B = 6*(h*h_2x + h_x**2)*h2_3x + 6*h*h_x*h2_4x + (h**2)*h2_5x
             f2_3x = f2_3x_A + f2_3x_B 
-
+            f2_3xs[i] = f2_3x #5x correction
     
             f3_2x = h_2x*c3_x + 2*h_x*c3_2x + h*c3_3x
+            f3_2xs[i] = f3_2x #4x correction
+            
             f3_3x = h_3x*c3_x + 3*h_2x*c3_2x + 3*h_x*c3_3x + h*c3_4x
+            f3_3xs[i] = f3_3x #5x correction
     
             c5_x_A = (3/14)*h3_4x*(h**4) - (3/5)*h2_4x*(h**3)+ (3/10)*c3_3x*(h**2)
             c5_x_B = -(f1_2x - 2*f2_2x)*h  -(1/2)*f3_2x*h
             c5_x =  c5_x_A + c5_x_B
+            c5_xs[i] = c5_x #4x correction
             
             c5_2x_A = (3/14)*(h3_5x*(h**4) + 4*h3_4x*h_x*(h**3)) 
             c5_2x_B = -(3/5)*(h2_5x*(h**3) + 3*h2_4x*h_x*(h**2))
@@ -406,116 +379,33 @@ class PerturbedReynSol:
             c5_2x_D = (3/10)*(c3_4x*(h**2) + 2*c3_3x*h_x*h) 
             c5_2x_E = -(1/2)*(f3_3x*h + f3_2x*h_x) 
             c5_2x = c5_2x_A + c5_2x_B + c5_2x_C + c5_2x_D + c5_2x_E 
+            c5_2xs[i] = c5_2x #5x correction
             
-            # save for p4
-            
-            h_2xs[i] = h_2x
-            h_3xs[i] = h_3x
-            h2_4xs[i] = h2_4x
-            h3_4xs[i] = h3_4x
-            h2_5xs[i] = h2_5x
-            h3_5xs[i] = h3_5x
 
-            c3_4xs[i] = c3_4x
-            c3_3xs[i] = c3_3x
-            c5_xs[i] = c5_x
-            c5_2xs[i] = c5_2x 
-            
-            f1_2xs[i] = f1_2x
-            f1_3xs[i] = f1_3x
-            f2_2xs[i] = f2_2x
-            f2_3xs[i] = f2_3x
-            f3_2xs[i] = f3_2x
-            f3_3xs[i] = f3_3x
             
         # correct finite differences at discontinuities
         for i in height.i_peaks:
             if i > 5 and i < height.Nx-5:
-                
-                h_2xs[i] = (h_2xs[i+2] + h_2xs[i-2])/2
-                h_2xs[i+1] = (h_2xs[i] + h_2xs[i+2])/2
-                h_2xs[i-1] = (h_2xs[i] + h_2xs[i-2])/2
-                
-                h_3xs[i] = (h_3xs[i+3] + h_3xs[i-3])/2
-                h_3xs[i+1] = (h_3xs[i] + h_3xs[i+3])/2
-                h_3xs[i-1] = (h_3xs[i] + h_3xs[i-3])/2
-                h_3xs[i+2] = (h_3xs[i+1] + h_3xs[i+3])/2
-                h_3xs[i-2] = (h_3xs[i-1] + h_3xs[i-3])/2
-                
-                h2_4xs[i] = (h2_4xs[i+4] + h2_4xs[i-4])/2
-                h2_4xs[i+1] = (h2_4xs[i] + h2_4xs[i+4])/2
-                h2_4xs[i-1] = (h2_4xs[i] + h2_4xs[i-4])/2
-                h2_4xs[i+2] = (h2_4xs[i+1] + h2_4xs[i+4])/2
-                h2_4xs[i-2] = (h2_4xs[i-1] + h2_4xs[i-4])/2
-                h2_4xs[i+3] = (h2_4xs[i+2] + h2_4xs[i+4])/2
-                h2_4xs[i-3] = (h2_4xs[i-2] + h2_4xs[i-4])/2
-                
-                h3_4xs[i] = (h3_4xs[i+4] + h3_4xs[i-4])/2
-                h3_4xs[i+1] = (h3_4xs[i] + h3_4xs[i+4])/2
-                h3_4xs[i-1] = (h3_4xs[i] + h3_4xs[i-4])/2
-                h3_4xs[i+2] = (h3_4xs[i+1] + h3_4xs[i+4])/2
-                h3_4xs[i-2] = (h3_4xs[i-1] + h3_4xs[i-4])/2
-                h3_4xs[i+3] = (h3_4xs[i+2] + h3_4xs[i+4])/2
-                h3_4xs[i-3] = (h3_4xs[i-2] + h3_4xs[i-4])/2
-                
-                h2_5xs[i] = (h2_5xs[i+5] + h2_5xs[i-5])/2
-                h2_5xs[i+1] = (h2_5xs[i] + h2_5xs[i+5])/2
-                h2_5xs[i-1] = (h2_5xs[i] + h2_5xs[i-5])/2
-                h2_5xs[i+2] = (h2_5xs[i+1] + h2_5xs[i+5])/2
-                h2_5xs[i-2] = (h2_5xs[i-1] + h2_5xs[i-5])/2
-                h2_5xs[i+3] = (h2_5xs[i+2] + h2_5xs[i+5])/2
-                h2_5xs[i-3] = (h2_5xs[i-2] + h2_5xs[i-5])/2
-                h2_5xs[i+4] = (h2_5xs[i+3] + h2_5xs[i+5])/2
-                h2_5xs[i-4] = (h2_5xs[i-3] + h2_5xs[i-5])/2
-                
-                h3_5xs[i] = (h3_5xs[i+5] + h3_5xs[i-5])/2
-                h3_5xs[i+1] = (h3_5xs[i] + h3_5xs[i+5])/2
-                h3_5xs[i-1] = (h3_5xs[i] + h3_5xs[i-5])/2
-                h3_5xs[i+2] = (h3_5xs[i+1] + h3_5xs[i+5])/2
-                h3_5xs[i-2] = (h3_5xs[i-1] + h3_5xs[i-5])/2
-                h3_5xs[i+3] = (h3_5xs[i+2] + h3_5xs[i+5])/2
-                h3_5xs[i-3] = (h3_5xs[i-2] + h3_5xs[i-5])/2
-                h3_5xs[i+4] = (h3_5xs[i+3] + h3_5xs[i+5])/2
-                h3_5xs[i-4] = (h3_5xs[i-3] + h3_5xs[i-5])/2
+
+                h_2xs[i-1 : i+2] = avg_2x(h_2xs[i-2 : i+3])
+                h_3xs[i-2 : i+3] = avg_3x(h_3xs[i-3 : i+4])
+                h2_4xs[i-3 : i+4] = avg_4x(h2_4xs[i-4 : i+5])
+                h3_4xs[i-3 : i+4] = avg_4x(h3_4xs[i-4 : i+5])
+                h2_5xs[i-4 : i+5] = avg_5x(h2_5xs[i-5 : i+6])
+                h3_5xs[i-4 : i+5] = avg_5x(h3_5xs[i-5 : i+6])
                  
-                c3_3xs[i] = (c3_3xs[i+4] + c3_3xs[i-4])/2
-                c3_3xs[i+1] = (c3_3xs[i] + c3_3xs[i+4])/2
-                c3_3xs[i-1] = (c3_3xs[i] + c3_3xs[i-4])/2
-                c3_3xs[i+2] = (c3_3xs[i+1] + c3_3xs[i+4])/2
-                c3_3xs[i-2] = (c3_3xs[i-1] + c3_3xs[i-4])/2
-                c3_3xs[i+3] = (c3_3xs[i+2] + c3_3xs[i+4])/2
-                c3_3xs[i-3] = (c3_3xs[i-2] + c3_3xs[i-4])/2
+                c3_3xs[i-3 : i+4] = avg_4x(c3_3xs[i-4 : i+5])
+                c3_4xs[i-4 : i+5] = avg_5x(c3_4xs[i-5 : i+6])
+                c5_xs[i-3 : i+4] = avg_4x(c5_xs[i-4 : i+5])
+                c5_2xs[i-4 : i+5] = avg_5x(c5_2xs[i-5 : i+6])
                 
-                c3_4xs[i] = (c3_4xs[i+5] + c3_4xs[i-5])/2
-                c3_4xs[i+1] = (c3_4xs[i] + c3_4xs[i+5])/2
-                c3_4xs[i-1] = (c3_4xs[i] + c3_4xs[i-5])/2
-                c3_4xs[i+2] = (c3_4xs[i+1] + c3_4xs[i+5])/2
-                c3_4xs[i-2] = (c3_4xs[i-1] + c3_4xs[i-5])/2
-                c3_4xs[i+3] = (c3_4xs[i+2] + c3_4xs[i+5])/2
-                c3_4xs[i-3] = (c3_4xs[i-2] + c3_4xs[i-5])/2
-                c3_4xs[i+4] = (c3_4xs[i+3] + c3_4xs[i+5])/2
-                c3_4xs[i-4] = (c3_4xs[i-3] + c3_4xs[i-5])/2
-                
+                f1_2xs[i-3 : i+4] = avg_4x(f1_2xs[i-4 : i+5])
+                f1_3xs[i-4 : i+5] = avg_5x(f1_3xs[i-5 : i+6])
+                f2_2xs[i-3 : i+4] = avg_4x(f2_2xs[i-5 : i+5])
+                f2_3xs[i-4 : i+5] = avg_5x(f2_3xs[i-5 : i+6])
+                f3_2xs[i-3 : i+4] = avg_4x(f3_2xs[i-4 : i+5])
+                f3_3xs[i-4 : i+5] = avg_5x(f3_3xs[i-5 : i+6])                        
 
-                c5_xs[i] = (c5_xs[i+4] + c5_xs[i-4])/2
-                c5_xs[i+1] = (c5_xs[i] + c5_xs[i+4])/2
-                c5_xs[i-1] = (c5_xs[i] + c5_xs[i-4])/2
-                c5_xs[i+2] = (c5_xs[i+1] + c5_xs[i+4])/2
-                c5_xs[i-2] = (c5_xs[i-1] + c5_xs[i-4])/2
-                c5_xs[i+3] = (c5_xs[i+2] + c5_xs[i+4])/2
-                c5_xs[i-3] = (c5_xs[i-2] + c5_xs[i-4])/2
-
-
-                c5_2xs[i] = (c5_2xs[i+5] + c5_2xs[i-5])/2
-                c5_2xs[i+1] = (c5_2xs[i] + c5_2xs[i+5])/2
-                c5_2xs[i-1] = (c5_2xs[i] + c5_2xs[i-5])/2
-                c5_2xs[i+2] = (c5_2xs[i+1] + c5_2xs[i+5])/2
-                c5_2xs[i-2] = (c5_2xs[i-1] + c5_2xs[i-5])/2
-                c5_2xs[i+3] = (c5_2xs[i+2] + c5_2xs[i+5])/2
-                c5_2xs[i-3] = (c5_2xs[i-2] + c5_2xs[i-5])/2
-                c5_2xs[i+4] = (c5_2xs[i+3] + c5_2xs[i+5])/2
-                c5_2xs[i-4] = (c5_2xs[i-3] + c5_2xs[i-5])/2
-                
         
         # find u4, v4
         for i in range(height.Nx):
@@ -549,6 +439,7 @@ class PerturbedReynSol:
             f2_3x = f2_3xs[i]
             f3_2x = f3_2xs[i]
             f3_3x = f3_3xs[i]
+            
             # make u4, v4
             for j in range (height.Ny):
                 y = ys[j]
@@ -578,28 +469,32 @@ class PerturbedReynSol:
                     v4s[j,i] = -(v4_A + v4_B + v4_C + v4_D + v4_E + v4_F)
 
         
-        # graphics.plot_2D(h2_4xs, height.xs,  'h2_xxxx', ['x', 'h2_4xs']) 
-        # graphics.plot_2D(h2_5xs, height.xs,  'h2_xxxxx', ['x', 'h2_5xs']) 
-        # graphics.plot_2D(h3_4xs, height.xs,  'h3_xxxx', ['x', 'h3_4xs']) 
-        # graphics.plot_2D(h3_5xs, height.xs,  'h3_xxxxx', ['x', 'h3_5xs']) 
+        graphics.plot_2D(h2_4xs, height.xs,  'h2_xxxx', ['x', 'h2_4xs']) 
+        graphics.plot_2D(h2_5xs, height.xs,  'h2_xxxxx', ['x', 'h2_5xs']) 
+        graphics.plot_2D(h3_4xs, height.xs,  'h3_xxxx', ['x', 'h3_4xs']) 
+        graphics.plot_2D(h3_5xs, height.xs,  'h3_xxxxx', ['x', 'h3_5xs']) 
         
-        # graphics.plot_2D(c3_3xs, height.xs,  'c3_xxx', ['x', 'c3_3xs'])    
-        # graphics.plot_2D(c3_4xs, height.xs,  'c3_xxxx', ['x', 'c3_4xs'])  
-        # graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
-        # graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])   
+        graphics.plot_2D(c3_3xs, height.xs,  'c3_xxx', ['x', 'c3_3xs'])    
+        graphics.plot_2D(c3_4xs, height.xs,  'c3_xxxx', ['x', 'c3_4xs'])  
+        graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
+        graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])  
+
+        graphics.plot_2D(f1_2xs, height.xs,  'f1_xx', ['x', 'f1_2x'])    
+        graphics.plot_2D(f1_3xs, height.xs,  'f1_xxx', ['x', 'f1_3x'])  
+        graphics.plot_2D(f2_2xs, height.xs,  'f2_xx', ['x', 'f2_2x'])    
+        graphics.plot_2D(f2_3xs, height.xs,  'f2_xxx', ['x', 'f2_3x'])
+        graphics.plot_2D(f3_2xs, height.xs,  'f3_xx', ['x', 'f3_2x'])    
+        graphics.plot_2D(f3_3xs, height.xs,  'f3_xxx', ['x', 'f3_3x'])
         
         
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
          
         for j in range(height.Ny):
-            v0_Sy_xxs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
+            v0_Sy_2xs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
             for i in height.i_peaks:
                 if i > 2 and i < height.Nx-3:
-                    v0_Sy_xxs[j,i] = (v0_Sy_xxs[j,i-3] + v0_Sy_xxs[j,i+3])/2
-                    v0_Sy_xxs[j,i+1] = (v0_Sy_xxs[j,i] + v0_Sy_xxs[j,i+3])/2
-                    v0_Sy_xxs[j,i-1] = (v0_Sy_xxs[j,i] + v0_Sy_xxs[j,i-3])/2
-                    v0_Sy_xxs[j,i+2] = (v0_Sy_xxs[j,i+1] + v0_Sy_xxs[j,i+3])/2
-                    v0_Sy_xxs[j,i-2] = (v0_Sy_xxs[j,i-1] + v0_Sy_xxs[j,i-3])/2
+            
+                    v0_Sy_2xs[j, i-2 : i+3] = avg_3x(v0_Sy_2xs[j, i-3 : i+4])
  
         p4s = np.zeros((height.Ny, height.Nx))
 
@@ -609,10 +504,58 @@ class PerturbedReynSol:
             
             c5s[i] =(4*c5s[i-1] -c5s[i-2] + 2*dx*c5_xs[i])/3
 
-        p4s = -u2_xs + v0_Sy_xxs + c5s 
+        p4s = -u2_xs + v0_Sy_2xs + c5s 
 
         self.p4s = p4s
         self.u4s = u4s
         self.v4s = v4s
-                        
+
+        
+def avg_x(fs):
+    return avg_2x(fs)     
+                   
+def avg_2x(fs):
+    #-2,-1,0,1,2
     
+    i=2
+    f = (fs[i+2] + fs[i-2])/2 
+    f_E = (f + fs[i+2])/2
+    f_W = (f + fs[i-2])/2
+
+    return np.array([f_W, f, f_E], dtype='f8')   
+
+def avg_3x(fs):
+    #-3,-2,-1,0,1,2,3
+    i=3
+    f = (fs[i+3] + fs[i-3])/2 
+    f_E = (f + fs[i+3])/2
+    f_W = (f + fs[i-3])/2
+    f_2E = (f_E + fs[i+3])/2
+    f_2W = (f_W + fs[i-3])/2
+    return np.array([f_2W, f_W, f, f_E, f_2E]  ) 
+
+def avg_4x(fs):
+    #-4,-3,-2,-1,0,1,2,3,4
+    i=4
+    f = (fs[i+4] + fs[i-4])/2 
+    f_E = (f + fs[i+4])/2
+    f_W = (f + fs[i-4])/2
+    f_2E = (f_E + fs[i+4])/2
+    f_2W = (f_W + fs[i-4])/2
+    f_3E = (f_2E + fs[i+4])/2
+    f_3W = (f_2W + fs[i-4])/2
+    return np.array([f_3W, f_2W, f_W, f, f_E, f_2E, f_3E]   )
+
+def avg_5x(fs):
+    #-5,-4,-3,-2,-1,0,1,2,3,4,5
+    i=5
+    f = (fs[i+5] + fs[i-5])/2 
+    f_E = (f + fs[i+5])/2
+    f_W = (f + fs[i-5])/2
+    f_2E = (f_E + fs[i+5])/2
+    f_2W = (f_W + fs[i-5])/2
+    f_3E = (f_2E + fs[i+5])/2
+    f_3W = (f_2W + fs[i-5])/2
+    f_4E = (f_3E + fs[i+5])/2
+    f_4W = (f_3W + fs[i-5])/2
+    return np.array([f_4W,f_3W, f_2W, f_W, f, f_E, f_2E, f_3E,f_4E]  ) 

@@ -80,19 +80,19 @@ args = [H,l, L]
 
 # args = [r, k, L]
 
-Example = examples.LambdaBump 
-lam=-1
-H=2
-l=2
-h0 = 1
-args=[lam, H, l, h0]
+# Example = examples.LambdaBump 
+# lam=-1
+# H=2
+# l=2
+# h0 = 1
+# args=[lam, H, l, h0]
 
-# Example = examples.Cylinder
-# r=3/2
-# h0 = 1/2
-# l=1
-# drdx = 1/4
-# args= [ r, h0,l, drdx]
+Example = examples.Cylinder
+r=1
+h0 = 1/4
+l=1
+drdx = 1/4
+args= [ r, h0,l, drdx]
 
 
 # Example = examples.LogisticStep
