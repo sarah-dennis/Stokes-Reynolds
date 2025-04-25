@@ -33,7 +33,7 @@ class PWL_Height(Height):
 
             slopes[r] = (h_peaks[r+1,0] - h_peaks[r,1])/(x_peaks[r+1] - x_peaks[r])
 
-        Nx = (xf-x0)*N + 1
+        Nx = int((xf-x0)*N + 1)
         hs = np.zeros(Nx)
         dx = 1/N
         r = 0

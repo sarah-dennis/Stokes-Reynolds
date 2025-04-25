@@ -469,22 +469,22 @@ class PerturbedReynSol:
                     v4s[j,i] = -(v4_A + v4_B + v4_C + v4_D + v4_E + v4_F)
 
         
-        graphics.plot_2D(h2_4xs, height.xs,  'h2_xxxx', ['x', 'h2_4xs']) 
-        graphics.plot_2D(h2_5xs, height.xs,  'h2_xxxxx', ['x', 'h2_5xs']) 
-        graphics.plot_2D(h3_4xs, height.xs,  'h3_xxxx', ['x', 'h3_4xs']) 
-        graphics.plot_2D(h3_5xs, height.xs,  'h3_xxxxx', ['x', 'h3_5xs']) 
+        # graphics.plot_2D(h2_4xs, height.xs,  'h2_xxxx', ['x', 'h2_4xs']) 
+        # graphics.plot_2D(h2_5xs, height.xs,  'h2_xxxxx', ['x', 'h2_5xs']) 
+        # graphics.plot_2D(h3_4xs, height.xs,  'h3_xxxx', ['x', 'h3_4xs']) 
+        # graphics.plot_2D(h3_5xs, height.xs,  'h3_xxxxx', ['x', 'h3_5xs']) 
         
-        graphics.plot_2D(c3_3xs, height.xs,  'c3_xxx', ['x', 'c3_3xs'])    
-        graphics.plot_2D(c3_4xs, height.xs,  'c3_xxxx', ['x', 'c3_4xs'])  
-        graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
-        graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])  
+        # graphics.plot_2D(c3_3xs, height.xs,  'c3_xxx', ['x', 'c3_3xs'])    
+        # graphics.plot_2D(c3_4xs, height.xs,  'c3_xxxx', ['x', 'c3_4xs'])  
+        # graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
+        # graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])  
 
-        graphics.plot_2D(f1_2xs, height.xs,  'f1_xx', ['x', 'f1_2x'])    
-        graphics.plot_2D(f1_3xs, height.xs,  'f1_xxx', ['x', 'f1_3x'])  
-        graphics.plot_2D(f2_2xs, height.xs,  'f2_xx', ['x', 'f2_2x'])    
-        graphics.plot_2D(f2_3xs, height.xs,  'f2_xxx', ['x', 'f2_3x'])
-        graphics.plot_2D(f3_2xs, height.xs,  'f3_xx', ['x', 'f3_2x'])    
-        graphics.plot_2D(f3_3xs, height.xs,  'f3_xxx', ['x', 'f3_3x'])
+        # graphics.plot_2D(f1_2xs, height.xs,  'f1_xx', ['x', 'f1_2x'])    
+        # graphics.plot_2D(f1_3xs, height.xs,  'f1_xxx', ['x', 'f1_3x'])  
+        # graphics.plot_2D(f2_2xs, height.xs,  'f2_xx', ['x', 'f2_2x'])    
+        # graphics.plot_2D(f2_3xs, height.xs,  'f2_xxx', ['x', 'f2_3x'])
+        # graphics.plot_2D(f3_2xs, height.xs,  'f3_xx', ['x', 'f3_2x'])    
+        # graphics.plot_2D(f3_3xs, height.xs,  'f3_xxx', ['x', 'f3_3x'])
         
         
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s

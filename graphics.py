@@ -301,7 +301,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     cb.set_ticks(ticks)
 
     pp.rcParams["lines.linewidth"] = contour_width
-    pp.contour(X, Y, zs, n_contours, colors='black')
+    pp.contour(X, Y, zs, n_contours, colors='black', negative_linestyles='solid')
     
     pp.title(title, fontweight="bold")
     pp.xlabel(labels[1])

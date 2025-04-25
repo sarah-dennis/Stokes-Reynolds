@@ -20,7 +20,7 @@ def make_adj_ps(height, reyn_ps):
         if y <= height.hs[i]:
 
             dP_E = dm.center_first(dx, reyn_ps[i : i+3]) # centered at i+1 = 1
-            dP_W = 0 # i-1 < 0
+            dP_W = dP_E# 0 # i-1 < 0
 
             adj_E=(hs[i+1]-y)*dP_E/2 + height.U*height.visc/hs[i+1] 
             adj_W=(hs[i]-y)*dP_W/2 + height.U*height.visc/hs[i]
@@ -48,8 +48,9 @@ def make_adj_ps(height, reyn_ps):
         i = height.Nx-1 # outlet bc
         if y <= height.hs[i]:
             
-            dP_E = 0 # i + 1 > Nx-1
+            
             dP_W = dm.center_first(dx, reyn_ps[i-2 : i+1]) # centered at i-1 = Nx-2
+            dP_E = dP_W # i + 1 > Nx-1
             
             adj_E = (hs[i]-y)*dP_E/2 + height.U*height.visc/hs[i]
             adj_W = (hs[i-1]-y)*dP_W/2 + height.U*height.visc/hs[i-1]

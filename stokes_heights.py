@@ -22,7 +22,7 @@ class PWLinear(Space):
         self.N_regions = len(self.x_peaks)-1
         self.make_space()
 
-                            
+                               
         self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
         self.H_in = yf - self.hf_in
         self.H_out = yf-y_peaks[-1][0]

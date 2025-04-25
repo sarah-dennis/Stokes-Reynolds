@@ -15,9 +15,9 @@ import reyn_perturbed as rpert
 
 
 
-lenx = 1
-leny = 1
-x_start = -4
+lenx = .1
+leny = .1
+x_start = 0.5
 y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -34,8 +34,8 @@ class Reynolds_Solver:
 
         # colorbar min max
         self.vel_max = 5
-        self.p_min=-45
-        self.p_max=45
+        self.p_min=-4
+        self.p_max=4
     
 
     
@@ -160,11 +160,13 @@ class Reynolds_Solver:
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-        # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         
         # graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
-        # print(f' inc max: {np.max(velocity.inc) : .3f}')
-        
+        # # print(f' inc max: {np.max(velocity.inc) : .3f}')
+        # graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
+        # graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
+        graphics.plot_2D(velocity.vx[:,ex.Nx//2], ex.ys, 'u(L/2,y)',['u','y'])
         # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)

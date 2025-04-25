@@ -124,10 +124,12 @@ class TriCavity(PWL_Height):
         N_regions = 2
 
         H = args[0]
-        x_peaks = np.asarray([x0, xf//2, xf], float)
+
+        x_peaks = np.asarray([x0, args[3], xf], float)
 
         dx = 1/((xf-x0)*N)
-        h = dx #H/2  # dx
+        h = max(args[2],dx) #H/2  # dx
+        
         h_peaks = np.asarray(([[0, h], [H, H], [h, 0]]), float)
         namestr = f'TriCavity_H{int(H)}L{int(xf)}_U{int(U)}'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)

@@ -21,7 +21,14 @@ H=1 #=h0
 l=1 #=L/2
 delta = H/l
 lam = 0.3
-args=[lam, H, l]
+h0=1
+args=[lam, H, l,h0]
+
+# lam=1/2
+# H=2
+# l=4
+# h0 = 3/2
+# args=[lam, H, l, h0]
 
 U=-1
 dP=1

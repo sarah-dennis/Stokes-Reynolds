@@ -41,11 +41,11 @@ write_on = False
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-Example = examples.BFS
-H=2
-l=1
-L=4
-args = [H,l, L]
+# Example = examples.BFS
+# H=2
+# l=1
+# L=4
+# args = [H,l, L]
 
 # Example = examples.BFS_noEddy
 # H = 2
@@ -65,9 +65,11 @@ args = [H,l, L]
 # args = None
 
 # Example = examples.TriCavity
-# H=1
-# L=1
-# args = [H,L]
+# H=1/4
+# L=1/2
+# h=3/4
+# l=3/4
+# args = [H,L,h,l]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -75,51 +77,50 @@ args = [H,l, L]
 #------------------------------------------------------------------------------
 # Example = examples.Sinusoid
 # r=0.8
-# k=1
+# k=3.14
 # L=4
-
 # args = [r, k, L]
 
-# Example = examples.LambdaBump 
-# lam=-1
+# Example = exam ples.LambdaBump 
+# lam=-15
 # H=2
-# l=2
-# h0 = 1
-# args=[lam, H, l, h0]
+# l=4
+# h0 = 2
+# args=[lam, H, l, h0] 
 
-Example = examples.Cylinder
-r=1
-h0 = 1/4
-l=1
-drdx = 1/4
-args= [ r, h0,l, drdx]
+# Example = examples.Cylinder
+# r=1
+# h0 = 1/4
+# l=1
+# drdx = 1/4
+# args= [ r, h0,l, drdx]
 
 
-# Example = examples.LogisticStep
-# k = -1/8 # slope -1/k at x=0
-# H = 1  # logistic height scale
-# h = 1  # min height
-# l = 2     # half length
-# args = [k,H,h, l]
+Example = examples.LogisticStep
+k = 20 # slope -1/k at x=0
+H = 1  # logistic height scale
+h = 1/2  # min height 
+l = 2     # half length
+args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
 # boundary conditions
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 1
+U = -1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP = -7.3
+dP = 0
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N = 100
+N =40
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
-solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
+solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

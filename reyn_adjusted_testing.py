@@ -17,11 +17,13 @@ import graphics
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
-r=1.1
-h0 = 1/2
-l=2
+r=1/2
+h0 = 1/4
+l=1/2
+drdx = 1/8
 d = h0+r
-args= [r,h0,l]
+
+args= [ r, h0,l, drdx]
 
 print(f'd/a: {d/r:.2f}')
 U=-1/2
@@ -100,9 +102,9 @@ y_max = max(ex.hs[i_start],ex.hs[i_stop])
 
 
 
-graphics.plot_contour_mesh(stokes_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Wannier Analytic Stokes pressure', ['p','x','y'], vmin=-3, vmax=3,y_lim=y_max)
-graphics.plot_contour_mesh(adj_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3,y_lim=y_max)
-graphics.plot_contour_mesh(reyn_ps[:,i_start:i_stop], ex.xs[i_start:i_stop]/r, ex.ys/r, 'Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3,y_lim=y_max)
+graphics.plot_contour_mesh(stokes_ps, ex.xs/r, ex.ys/r, 'Wannier Analytic Stokes pressure', ['p','x','y'], vmin=-3, vmax=3)
+graphics.plot_contour_mesh(adj_ps, ex.xs/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
+graphics.plot_contour_mesh(reyn_ps, ex.xs/r, ex.ys/r, 'Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
 
 stokes_adj = stokes_ps - reyn_ps
 reyn_adj = adj_ps - reyn_ps

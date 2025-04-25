@@ -54,7 +54,7 @@ class Height(Domain):
         
         self.U = U    # velocity at flat boundary
         self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
-        self.p_ambient = 0 
+        self.p_ambient = 0
         self.p0 = -dP
         self.pN = self.p_ambient
      
