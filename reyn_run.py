@@ -41,11 +41,11 @@ write_on = False
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-# Example = examples.BFS
-# H=2
-# l=1
-# L=4
-# args = [H,l, L]
+Example = examples.BFS
+H=2
+l=1
+L=4
+args = [H, l, L]
 
 # Example = examples.BFS_noEddy
 # H = 2
@@ -65,10 +65,10 @@ write_on = False
 # args = None
 
 # Example = examples.TriCavity
-# H=1/4
-# L=1/2
-# h=3/4
-# l=3/4
+# H=4
+# L=1
+# h=1/10
+# l=1
 # args = [H,L,h,l]
 
 #------------------------------------------------------------------------------
@@ -78,29 +78,34 @@ write_on = False
 # Example = examples.Sinusoid
 # r=0.8
 # k=3.14
-# L=4
+# L=2
 # args = [r, k, L]
 
-# Example = exam ples.LambdaBump 
-# lam=-15
-# H=2
-# l=4
-# h0 = 2
+# Example = examples.LambdaBump 
+# lam=-1/4
+# H=1/2
+# l=1
+# h0 = 1/2
 # args=[lam, H, l, h0] 
 
 # Example = examples.Cylinder
+# drdx = 0
 # r=1
-# h0 = 1/4
-# l=1
-# drdx = 1/4
+# h0 = 1/2
+# l=0.05
 # args= [ r, h0,l, drdx]
+
+#d/a = 1.5
+#dP = 0
+#U0 = 1
+#h0 = 1
 
 
 Example = examples.LogisticStep
-k = 20 # slope -1/k at x=0
+k = 1/8 # slope -1/k at x=0
 H = 1  # logistic height scale
-h = 1/2  # min height 
-l = 2     # half length
+h = 1  # min height 
+l = 2  # half length
 args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
@@ -108,13 +113,13 @@ args = [k,H,h, l]
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = -1
+U =1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
-dP = 0
+dP =0
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N =40
+N =200
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on)

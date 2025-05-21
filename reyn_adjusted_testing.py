@@ -16,15 +16,25 @@ import graphics
 #------------------------------------------------------------------------------
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
+# Example = examples.Cylinder
+# r=1/2
+# h0 = 1/4
+# l=1/2
+# drdx = 1/8
+# d = h0+r
+
+# args= [ r, h0,l, drdx]
+
+
+
 Example = examples.Cylinder
-r=1/2
-h0 = 1/4
-l=1/2
-drdx = 1/8
+
+r=1
+h0 = 0.01
+l=1
 d = h0+r
 
-args= [ r, h0,l, drdx]
-
+args= [ r, h0,l, 0]
 print(f'd/a: {d/r:.2f}')
 U=-1/2
 dP=0
@@ -53,7 +63,7 @@ def p_stokes_Wa(x,y):
 
 def p_reyn_Wa(x):
     
-    return 8*(r**2)*U*x/(2*r*h0 + x**2)**2
+    return -8*(r**2)*U*x/(2*r*h0 + x**2)**2
 
 
 def pressure_cylinder(ex, N):
@@ -76,7 +86,7 @@ def pressure_cylinder(ex, N):
 
 
 
-N = 100
+N = 200
 ex = Example(U, dP, N, args)
 
 
@@ -88,7 +98,7 @@ reyn_pressure, _ = solver.fd_solve(N, write=False, plot=False)
 adj_ps = adj_pressure.ps_2D/abs((U/h0))
 reyn_ps = reyn_pressure.ps_2D/abs((U/h0))
 
-stokes_ps, _ = pressure_cylinder(ex, N)
+stokes_ps,_ = pressure_cylinder(ex, N)
 stokes_ps = stokes_ps/abs((U/h0))
 
 
@@ -106,20 +116,32 @@ graphics.plot_contour_mesh(stokes_ps, ex.xs/r, ex.ys/r, 'Wannier Analytic Stokes
 graphics.plot_contour_mesh(adj_ps, ex.xs/r, ex.ys/r, 'Takeuchi-Gu Adjusted Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
 graphics.plot_contour_mesh(reyn_ps, ex.xs/r, ex.ys/r, 'Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
 
+
+
 stokes_adj = stokes_ps - reyn_ps
 reyn_adj = adj_ps - reyn_ps
 
-x_test = 0.2
-L=ex.xf-ex.x0
+x_test = 0.2/d
 i_test = int(x_test*N) + ex.Nx//2
-p_adj_test = (adj_ps[1:,i_test]- reyn_ps[1:,i_test])
-p_anylt_test = (stokes_ps[1:,i_test]- reyn_ps[1:,i_test])
-graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'analytic stokes'], ['y', '$p(x_0,y)$'])
+p_adj_test = (reyn_adj[1:,i_test])
+p_anylt_test = (stokes_adj[1:,i_test])
+
+graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'stokes'], ['y', '$p(x_0,y)$'],loc='lower')
+
+x_test = 0.5/d
+i_test = int(x_test*N) + ex.Nx//2
+p_adj_test = (reyn_adj[1:,i_test])
+p_anylt_test = (stokes_adj[1:,i_test])
+
+graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'stokes'], ['y', '$p(x_0,y)$'],loc='lower')
 
 
+x_test = 0.8/d
+i_test = int(x_test*N) + ex.Nx//2
+p_adj_test = (reyn_adj[1:,i_test])
+p_anylt_test = (stokes_adj[1:,i_test])
 
-
-
+graphics.plot_2D_multi([p_adj_test, p_anylt_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['adjusted', 'stokes'], ['y', '$p(x_0,y)$'],loc='lower')
 
 
 

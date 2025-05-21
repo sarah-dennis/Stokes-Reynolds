@@ -133,9 +133,23 @@ class TriCavity(PWL_Height):
         h_peaks = np.asarray(([[0, h], [H, H], [h, 0]]), float)
         namestr = f'TriCavity_H{int(H)}L{int(xf)}_U{int(U)}'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
-
+        
 # -----------------------------------------------------------------------------------------------------------------------------------
+# NOT PIECEWISE LINEAR EXAMPLES...
+#-----------------------------------------------------------------------------------------------------------------------------------
 
+class Cylinder(CircleHeight):
+    def __init__(self, U, dP, N, args):
+        r = args[0]
+        h0 = args[1]
+        l = args[2]
+        x0 = -(l+r)
+        drdx = args[3]
+        xf = l+r
+        namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, r,drdx, h0, U, dP, namestr)
+        
+#-----------------------------------------------------------------------------------------------------------------------------------
 
 class Sinusoid(SinusoidalHeight):
     def __init__(self, U, dP, N, args):
@@ -148,7 +162,7 @@ class Sinusoid(SinusoidalHeight):
         namestr = f'Sinusoid_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, h_avg, r, k, U, dP, namestr)
 
-
+#-----------------------------------------------------------------------------------------------------------------------------------
 class LambdaBump(BumpHeight):
     def __init__(self, U, dP, N, args):
         x0 = -args[2]
@@ -161,7 +175,7 @@ class LambdaBump(BumpHeight):
         namestr = f'Bump_lambda{int(lam)}H{int(H)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, lam, H, h0, U, dP, namestr)
 
-
+#-----------------------------------------------------------------------------------------------------------------------------------
 class LogisticStep(LogisticHeight):
     def __init__(self, U, dP, N, args):
         x0 = -args[3]
@@ -174,14 +188,3 @@ class LogisticStep(LogisticHeight):
         super().__init__(x0, xf, N, H, h, center, slope, U, dP, namestr)
 
 
-class Cylinder(CircleHeight):
-    def __init__(self, U, dP, N, args):
-
-        r = args[0]
-        h0 = args[1]
-        l = args[2]
-        x0 = -(l+r)
-        drdx = args[3]
-        xf = l+r
-        namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
-        super().__init__(x0, xf, N, r,drdx, h0, U, dP, namestr)

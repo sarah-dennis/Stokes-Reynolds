@@ -25,17 +25,17 @@ stream_cmap[:,0:3] *= 1
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
 
-# mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
-mesh_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
+mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
+# mesh_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
 mesh_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
-# colour_bar_scale=0.015 # very long figures, H=1.25, L=4
-# colour_bar_scale=0.024 # long figures like H=2, L=4
-colour_bar_scale=0.04 # almost square figures like H=2.75, L=4 or zooms
+# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
+# colour_bar_scale=0.024 # for long figures like H=2, L=4
+colour_bar_scale=0.04 # for almost square figures like H=2.75, L=4
 
-dpi=400
-
+dpi=200
+n_contours = 50
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5
@@ -75,7 +75,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors== 'pri':
-        cs = ['r','forestgreen','b', 'darkmagenta', 'darkorgange']
+        cs = ['r','forestgreen','b', 'darkmagenta', 'darkorange']
     else: 
         cs=['forestgreen', 'darkmagenta', 'darkorgange']
     markers = ['D', 'o', 's', '*', 'H', 'X']
@@ -83,7 +83,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
-    #ax.set_xlim([0, 1])
+    # ax.set_xlim([0, 1])
     # ax.set_ylim([-1, 1])
 
     ax.set_xlabel(ax_labels[0])
@@ -93,9 +93,13 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.3, 0.875))
+        fig.legend(bbox_to_anchor=(0.35, 0.875))
+    elif loc=='lower':
+        
+        fig.legend(bbox_to_anchor=(0.35, 0.275))
     else:
         fig.legend(bbox_to_anchor=(0.9, 0.275))
+    
     return fig
 
 def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc, colors):
@@ -282,20 +286,19 @@ def plot_contour_multi(funs, xs, ys, title, fun_labels, labels, y_lim=None):
     pp.show()    
 
 
-
-def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=30, y_lim=None):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=n_contours, y_lim=None):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()
+    
     X, Y = np.meshgrid(xs, ys)
-
+       
     if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=True)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=0)#vmax, clip=False)
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
     
     cb = pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=0.025)
-    
     
     ticks = np.linspace(vmin, vmax, num=5)
     cb.set_ticks(ticks)

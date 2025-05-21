@@ -10,7 +10,7 @@ import graphics
 #------------------------------------------------------------------------------
 # <<=============================== CAVITY ==================================>>
 #------------------------------------------------------------------------------
-class TriCavity(PWLinear):
+class TriCavity_Re0_U1(PWLinear):
     def __init__ (self, N):
         x0 = 0
         xf = 2
@@ -22,7 +22,7 @@ class TriCavity(PWLinear):
         q=0
         U=1
         Re=0
-        namestr = "TriCavity_H4_Re0_Q2_U1"
+        namestr = "TriCavity_H4_Re0_Q0_U1"
         super().__init__(x0, xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)
 
 #------------------------------------------------------------------------------
@@ -99,6 +99,18 @@ class BFS_H2L4_Re0_Q2_U0(BFS):
         Re = 0
         q = 2
         namestr = "BFS_H2L4_Re0_Q2_U0"
+        super().__init__(L, l, H, h, U, q, Re, N,namestr)
+        
+class BFS_H2L4_Re0_Q1_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l = 1
+        H = 2
+        h = 1   
+        U = 0
+        Re = 0
+        q = 1
+        namestr = "BFS_H2L4_Re0_Q1_U0"
         super().__init__(L, l, H, h, U, q, Re, N,namestr)
 
 class BFS_H1p5L4_Re0_Q2_U0(BFS):

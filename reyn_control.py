@@ -15,9 +15,9 @@ import reyn_perturbed as rpert
 
 
 
-lenx = .1
-leny = .1
-x_start = 0.5
+lenx = 2
+leny = 1
+x_start = 0
 y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -34,16 +34,16 @@ class Reynolds_Solver:
 
         # colorbar min max
         self.vel_max = 5
-        self.p_min=-4
-        self.p_max=4
+        self.p_min=-3
+        self.p_max=3
     
 
     
     def pwl_solve(self, N, write=False, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
-        pressure = rp.PWLAnalyticReynPressure(ex)
-        velocity = rv.ReynoldsVelocity(ex, pressure.ps_1D)
+        pressure = rp.PwlGMRes_ReynPressure(ex)
+        velocity = rv.ReynVelocity(ex, pressure.ps_1D)
         solver_title = "Reynolds Piecewise Linear"
         if plot:
             self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
@@ -60,9 +60,9 @@ class Reynolds_Solver:
     
     def fd_solve(self, N, write=False, plot=True,zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
-        pressure = rp.FinDiffReynPressure(ex)
+        pressure = rp.FinDiff_ReynPressure(ex)
         
-        velocity = rv.ReynoldsVelocity(ex, pressure.ps_1D)
+        velocity = rv.ReynVelocity(ex, pressure.ps_1D)
         solver_title = "Reynolds Finite Difference"
         if plot:
             self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
@@ -79,8 +79,8 @@ class Reynolds_Solver:
     def fd_adj_solve(self, N, write=False, plot=True, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        adj_pressure = rp.AdjReynPressure(ex)
-        adj_velocity = rv.AdjReynVelocity(ex, adj_pressure.ps_2D)
+        adj_pressure = rp.Adjusted_ReynPressure(ex)
+        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure.ps_2D)
         solver_title = "Adjusted Reynolds"
         if plot:
             self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, zoom)
@@ -101,15 +101,15 @@ class Reynolds_Solver:
         ex = self.Example(self.U, self.dP, N, self.args)
 
         
-        reyn_pressure = rp.FinDiffReynPressure(ex)
-        reyn_velocity = rv.ReynoldsVelocity(ex, reyn_pressure.ps_1D)                   
+        reyn_pressure = rp.FinDiff_ReynPressure(ex)
+        reyn_velocity = rv.ReynVelocity(ex, reyn_pressure.ps_1D)                   
         
         pert = rpert.PerturbedReynSol(ex, order, reyn_pressure, reyn_velocity)
         solver_title = "Reynolds"
         
         if plot:
-            self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
-            self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom)
+            # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
+            # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom)
             if order > 1:
                 solver_title2 = solver_title + " $O(\delta^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
@@ -159,15 +159,22 @@ class Reynolds_Solver:
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
         uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
-        graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-        graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
         
-        # graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
-        # # print(f' inc max: {np.max(velocity.inc) : .3f}')
+        graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+
+        # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+
         # graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
         # graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
-        graphics.plot_2D(velocity.vx[:,ex.Nx//2], ex.ys, 'u(L/2,y)',['u','y'])
-        # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+        
+        graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1/1, 1/1)
+        
+        graphics.plot_2D(velocity.qs, ex.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
+
+        i_test = 3*ex.Nx//4
+        graphics.plot_2D(ex.ys,velocity.vx[:,i_test],  f'$u({ex.xs[i_test]:.2f}),y)$',[f'$u({ex.xs[i_test]:.2f},y)$','$y$'])
+        graphics.plot_2D(ex.ys,velocity.vy[:,i_test],  f'$v({ex.xs[i_test]:.2f}),y)$',[f'$v({ex.xs[i_test]:.2f},y)$','$y$'])
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)

@@ -24,7 +24,7 @@ x_stop= x_start + lenx
 y_stop = y_start + leny
 
 log_linthresh=1e-5  
-
+log_cmap_on = False
 class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         # domain 
@@ -38,8 +38,8 @@ class Stokes_Solver:
         
         # plotting thresholds
         self.vel_max = 5
-        self.p_min=-40
-        self.p_max=40
+        self.p_min=-30
+        self.p_max=30
         
 #------------------------------------------------------------------------------
     def new_run(self, N):
@@ -190,11 +190,13 @@ class Stokes_Solver:
         title_p = '' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=40, y_lim = np.min(ex.y_peaks))
+        p_ma = np.flip(p_ma, axis=0)
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=40, y_lim = np.min(ex.y_peaks))
     
         if zoom:
-            p_zoom = graphics.grid_zoom_2D(p, ex, x_start, x_stop, y_start, y_stop)     
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=False, n_contours=20, y_lim = min(ex.y_peaks))
+            p_zoom = graphics.grid_zoom_2D(p, ex, x_start, x_stop, y_start, y_stop)  
+            p_zoom = np.flip(p_zoom, axis=0)
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=20, y_lim = min(ex.y_peaks))
     
     #  Velocity plot: 
     
@@ -208,8 +210,11 @@ class Stokes_Solver:
 
         uv_mag = np.sqrt(u_2D**2 + v_2D**2)
         
-    
-
+        
+        uv_mag = np.flip(uv_mag, axis=0)
+        u_2D = np.flip(u_2D, axis=0)
+        v_2D = -np.flip(v_2D, axis=0)
+        
         graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
         
         if zoom:

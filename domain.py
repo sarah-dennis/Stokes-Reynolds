@@ -218,4 +218,109 @@ def center_fourth(dx, u2W2E):
 def center_fifth(dx, u3W3E):
     return np.dot([-1, 4, -5, 0, 5,-4, 1], u3W3E)/(2*dx**5)
 
+#------------------------------------------------------------------------------
 
+        
+def avg_x(fs):
+    return avg_2x(fs)     
+                   
+def avg_2x(fs):
+    #-2,-1,0,1,2
+    
+    i=2
+    f = (fs[i+2] + fs[i-2])/2 
+    f_E = (f + fs[i+2])/2
+    f_W = (f + fs[i-2])/2
+
+    return np.array([f_W, f, f_E], dtype='f8')   
+
+def avg_3x(fs):
+    #-3,-2,-1,0,1,2,3
+    i=3
+    f = (fs[i+3] + fs[i-3])/2 
+    f_E = (f + fs[i+3])/2
+    f_W = (f + fs[i-3])/2
+    f_2E = (f_E + fs[i+3])/2
+    f_2W = (f_W + fs[i-3])/2
+    return np.array([f_2W, f_W, f, f_E, f_2E]  ) 
+
+def avg_4x(fs):
+    #-4,-3,-2,-1,0,1,2,3,4
+    i=4
+    f = (fs[i+4] + fs[i-4])/2 
+    f_E = (f + fs[i+4])/2
+    f_W = (f + fs[i-4])/2
+    f_2E = (f_E + fs[i+4])/2
+    f_2W = (f_W + fs[i-4])/2
+    f_3E = (f_2E + fs[i+4])/2
+    f_3W = (f_2W + fs[i-4])/2
+    return np.array([f_3W, f_2W, f_W, f, f_E, f_2E, f_3E]   )
+
+def avg_5x(fs):
+    #-5,-4,-3,-2,-1,0,1,2,3,4,5
+    i=5
+    f = (fs[i+5] + fs[i-5])/2 
+    f_E = (f + fs[i+5])/2
+    f_W = (f + fs[i-5])/2
+    f_2E = (f_E + fs[i+5])/2
+    f_2W = (f_W + fs[i-5])/2
+    f_3E = (f_2E + fs[i+5])/2
+    f_3W = (f_2W + fs[i-5])/2
+    f_4E = (f_3E + fs[i+5])/2
+    f_4W = (f_3W + fs[i-5])/2
+    return np.array([f_4W,f_3W, f_2W, f_W, f, f_E, f_2E, f_3E,f_4E]  ) 
+
+
+def avg_6x(fs):
+    #-5,-4,-3,-2,-1,0,1,2,3,4,5
+    i=6
+    f = (fs[i+6] + fs[i-6])/2 
+    f_E = (f + fs[i+6])/2
+    f_W = (f + fs[i-6])/2
+    f_2E = (f_E + fs[i+6])/2
+    f_2W = (f_W + fs[i-6])/2
+    f_3E = (f_2E + fs[i+6])/2
+    f_3W = (f_2W + fs[i-6])/2
+    f_4E = (f_3E + fs[i+6])/2
+    f_4W = (f_3W + fs[i-6])/2
+    f_5E = (f_4E + fs[i+6])/2
+    f_5W = (f_4W + fs[i-6])/2
+    return np.array([f_5W,f_4W,f_3W, f_2W, f_W, f, f_E, f_2E, f_3E,f_4E,f_5E]  ) 
+
+def avg_7x(fs):
+    #-5,-4,-3,-2,-1,0,1,2,3,4,5
+    i=7
+    f = (fs[i+7] + fs[i-7])/2 
+    f_E = (f + fs[i+7])/2
+    f_W = (f + fs[i-7])/2
+    f_2E = (f_E + fs[i+7])/2
+    f_2W = (f_W + fs[i-7])/2
+    f_3E = (f_2E + fs[i+7])/2
+    f_3W = (f_2W + fs[i-7])/2
+    f_4E = (f_3E + fs[i+7])/2
+    f_4W = (f_3W + fs[i-7])/2
+    f_5E = (f_4E + fs[i+7])/2
+    f_5W = (f_4W + fs[i-7])/2
+    f_6E = (f_5E + fs[i+7])/2
+    f_6W = (f_5W + fs[i-7])/2
+    return np.array([f_6W,f_5W,f_4W,f_3W, f_2W, f_W, f, f_E, f_2E, f_3E,f_4E,f_5E,f_6E]) 
+
+def avg_8x(fs):
+    #-5,-4,-3,-2,-1,0,1,2,3,4,5
+    i=8
+    f = (fs[i+8] + fs[i-8])/2 
+    f_E = (f + fs[i+8])/2
+    f_W = (f + fs[i-8])/2
+    f_2E = (f_E + fs[i+8])/2
+    f_2W = (f_W + fs[i-8])/2
+    f_3E = (f_2E + fs[i+8])/2
+    f_3W = (f_2W + fs[i-8])/2
+    f_4E = (f_3E + fs[i+8])/2
+    f_4W = (f_3W + fs[i-8])/2
+    f_5E = (f_4E + fs[i+8])/2
+    f_5W = (f_4W + fs[i-8])/2
+    f_6E = (f_5E + fs[i+8])/2
+    f_6W = (f_5W + fs[i-8])/2
+    f_7E = (f_6E + fs[i+8])/2
+    f_7W = (f_6W + fs[i-8])/2
+    return np.array([f_7W,f_6W,f_5W,f_4W,f_3W, f_2W, f_W, f, f_E, f_2E, f_3E,f_4E,f_5E,f_6E, f_7E]) 

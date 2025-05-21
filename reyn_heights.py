@@ -46,7 +46,7 @@ class PWL_Height(Height):
             i_peaks[r+1] = i    
             widths[r] = xi - x_peaks[r]
             hs[i] = h_peaks[r,1] + slopes[r] * (xi - x_peaks[r])
-
+            
         return  hs, slopes, widths, i_peaks
     
 
@@ -87,7 +87,7 @@ class SinusoidalHeight(Height):
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
         
-        i_peaks = []
+        i_peaks = [0, Nx-1]
 
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
 
@@ -110,7 +110,7 @@ class BumpHeight(Height):
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
         yf = np.max(hs)
-        i_peaks = []
+        i_peaks = [0, Nx-1]
        
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
   
@@ -130,7 +130,7 @@ class LogisticHeight(Height):
         hs = np.asarray([self.h_fun(x) for x in xs])  
         y0 = 0
         yf = H + h
-        i_peaks = []
+        i_peaks = [0, Nx-1]
        
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
 
@@ -156,7 +156,6 @@ class CircleHeight(Height):
 
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
-        
         y0 = 0
         yf = max(hs)
         # print(self.l, self.l*N)
@@ -170,7 +169,25 @@ class CircleHeight(Height):
             return self.h0+self.r - np.sqrt(self.r**2 - (self.r-self.dxdr)**2)
         else:
             return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
-    
+        
+    # def h_fun(self, x):
+
+    #     x_r = np.sqrt(self.r**2-(1-self.r-self.h0)**2)
+    #     if x <-x_r or x >x_r:
+    #         return 1
+    #     else:
+    #         return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
+
+    # def h_fun(self, x):
+
+    #     x_r = np.sqrt(self.r**2-(1-self.r-self.h0)**2)
+    #     if x <-x_r: #1.73 = h'(x_r) when r=1, h0=1/2
+    #         return -1.73*(x+x_r)+1
+    #     elif x >x_r:
+    #         return 1.73*(x-x_r)+1
+            
+    #     else:
+    #         return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
     
 #------------------------------------------------------------------------------
 # class ConstantHeight(Height):
