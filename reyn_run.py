@@ -83,6 +83,7 @@ args = [H, l, L]
 
 # Example = examples.LambdaBump 
 
+
 # lam=-1/4
 # H=1/2
 # l=1
@@ -103,6 +104,7 @@ args = [H, l, L]
 #h0 = 1
 
 Example = examples.LogisticStep
+
 k = 1/8 # slope -1/k at x=0
 H = 1  # logistic height scale
 h = 1  # min height 
