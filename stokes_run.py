@@ -115,21 +115,26 @@ example = examples.BFS_H2L4_Re0_Q1_U0
 # example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
 # example = examples.BFS_H2L4_cornerTriD_Re0_Q2_U0
 #------------------------------------------------------------------------------
-# example = examples.TriCavity_Re0_U1
+
+# example = examples.TriCavity
 # example = examples.bump_Re0
+example=examples.logistic_Re0
+
 #------------------------------------------------------------------------------
 
 solver = control.Stokes_Solver(example, max_iters=5000)                
 
 N=160
+
        
 zoom_on=False               
 # 
 # solver.new_run(N) 
 
-# solver.load_scale(80,160) 
+# solver.load_scale(20,40) 
+# 
+solver.load_run(N)
 
-# solver.load_run(N)
 # 
 # solver.load_run_new_many(N, 2, 3)  
 

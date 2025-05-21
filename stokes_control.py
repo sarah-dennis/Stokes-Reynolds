@@ -37,9 +37,11 @@ class Stokes_Solver:
         self.err_tol = 1e-8
         
         # plotting thresholds
+
         self.vel_max = 5
         self.p_min=-30
         self.p_max=30
+
         
 #------------------------------------------------------------------------------
     def new_run(self, N):

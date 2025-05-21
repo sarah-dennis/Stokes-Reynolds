@@ -82,11 +82,13 @@ args = [H, l, L]
 # args = [r, k, L]
 
 # Example = examples.LambdaBump 
+
 # lam=-1/4
 # H=1/2
 # l=1
 # h0 = 1/2
 # args=[lam, H, l, h0] 
+
 
 # Example = examples.Cylinder
 # drdx = 0
@@ -100,12 +102,12 @@ args = [H, l, L]
 #U0 = 1
 #h0 = 1
 
-
 Example = examples.LogisticStep
 k = 1/8 # slope -1/k at x=0
 H = 1  # logistic height scale
 h = 1  # min height 
 l = 2  # half length
+
 args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
@@ -115,7 +117,9 @@ args = [k,H,h, l]
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
 U =1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
+
 dP =0
+
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 

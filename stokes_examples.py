@@ -975,9 +975,9 @@ class pipe_Re0(PWLinear):
 #------------------------------------------------------------------------------
 class bump_Re0(PWLinear):
     def __init__(self, N):
-        self.h0 = 1
+        self.h0 = .1
         self.H=2
-        self.slope = 1
+        self.slope = 4
 
         self.L = 2
         self.x0 = -self.L
@@ -1004,4 +1004,31 @@ class bump_Re0(PWLinear):
 
     
     
-    
+class logistic_Re0(PWLinear):
+    def __init__(self, N):
+       
+
+        self.h = 1
+        self.H = 2
+        self.slope = -1/8
+        self.center = 2
+        x0 = -self.center
+        xf = self.center
+        x_peaks = np.asarray([x0 + i/N for i in range(1 + N*2*self.center)])
+
+        
+        y_peaks_L = [self.H] + [self.h_fun(x) for x in x_peaks[:-1]]
+        y_peaks_R =  [self.h_fun(x) for x in x_peaks[1:]] + [self.H]
+        y_peaks = [[y_L, y_R] for y_L,y_R in np.stack((y_peaks_L,y_peaks_R), axis=1)] 
+        y0 = 0
+        yf = self.H
+        print(np.min(y_peaks))
+        U = 1
+        q = .76
+        Re = 0
+        namestr = 'Logistic_Re0_Q1_U0'
+        super().__init__(x0, xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)
+
+    def h_fun(self, x):
+        
+        return self.H -self.h- ((self.H-self.h) / ( 1 + np.exp(x/self.slope)))
