@@ -9,7 +9,7 @@ import graphics
 import domain
 
 
-i_plot = 2
+i_plot = 150
         
 def make_adj_velocity(height, ps):
     
@@ -34,7 +34,7 @@ def make_vs(height, ps):
             if y <= h:
                 vs[j,i] =  intPdys[j,i] - intPdy_hs[i]*(y/h)
             else:
-                vs[j,i] = None
+                vs[j,i] = 0
                 continue
 
     # graphics.plot_2D_multi([vs[:,i_plot-1],vs[:,i_plot],vs[:,i_plot+1],vs[:,i_plot+2]], height.ys, f'v({height.xs[i_plot]},y)',['x_{-1}','x_0','x_{+1}','x_{+2}'], ['y', 'v'])
@@ -103,7 +103,7 @@ def make_us(height, vs, ps):
             elif y < h:
             
                 if i == 0: #inlet
-                    us[j,i] = height.U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3 
+                    us[j,i] = height.U*(h-y)*(h-3*y)/h**2 + 6*q*y*(h-y)/h**3
                     
                 elif y <= height.hs[i-1]: 
                     
@@ -127,17 +127,18 @@ def make_us(height, vs, ps):
                     else:
                         x_bdry_W = x    
                     us[j,i] = ux * (x-x_bdry_W)
+                    
             else:
                 us[j,i] = 0
 
-
+            
     return us
 
 # for u(x,y)...          
 def make_dvdys(height, vs):
     vys = np.zeros((height.Ny,height.Nx))
 
-    for i in range(height.Nx):
+    for i in range(1,height.Nx):
         h = height.hs[i]
         vys[0,i]= domain.right_first(height.dy,vs[0:3,i])
 
@@ -152,11 +153,12 @@ def make_dvdys(height, vs):
                     vys[j,i] = domain.left_first(height.dy,vs[j-2:j+1,i])
             
             else:
-                vys[j,i] = None
-                # continue
+                vys[j,i] = 0
 
+            
     return vys
-   
+
+#------------------------------------------------------------------------------
 # as in Takeuchi-Gu            
 def make_adj_velocity_old(height, ps):
     dy = height.dy
@@ -171,71 +173,67 @@ def make_adj_velocity_old(height, ps):
     px_hs = np.zeros(height.Nx)
     pxx_hs = np.zeros(height.Nx)
 
-
+    # make px and pxx
     for j in range(height.Ny):
-       
         y = ys[j]
-        
         for i in range(height.Nx):
-             
-           
             h = hs[i]
 
             if y <= h:
-        
-                if i < height.Nx-1 and y <= hs[i+1] and i > 0 and y <= hs[i-1]: #interior nbrs
+    
+                if i < height.Nx-1 and y <= hs[i+1] and i > 0 and y <= hs[i-1]: # all interior nbrs
                     px = domain.center_first(dx, ps[j,i-1 : i+2])
                     pxx = domain.center_second(dx, ps[j,i-1 : i+2]) 
                 
-                elif i < height.Nx-1 and y <= hs[i+1] : # West out of bounds, fwd diff (right sided) #and y > hs[i-1]
-                    if i < height.Nx-2 and y <= hs[i+2]:
+                elif i < height.Nx-1 and y <= hs[i+1] : # West out of bounds, fwd diff 
+                
+                    if i < height.Nx-2 and y <= hs[i+2]: # 2 nbrs East
                         px = domain.right_first(dx, ps[j,i : i+3]) 
-                        if i < height.Nx-3 and y <= hs[i+3]:
+                        
+                        if i < height.Nx-3 and y <= hs[i+3]: # 3 nbrs East
                             pxx = domain.right_second(dx, ps[j,i : i+4])
-                            
-                        else:
+
+                        else: # only 2 nbrs East
                             pxx = domain.right_second_O1(dx, ps[j,i : i+3]) 
 
-                    else:
+                    else: # only 1 nbrs East
                         px = domain.right_first_O1(dx, ps[j,i: i+2]) 
                         pxx = 0
                 
-                elif i > 0 and y <= hs[i-1]: # East out of bounds, bkwd diff (left sided) #y > hs[i+1] 
-                    if i > 1 and y <= hs[i-2]:
+                elif i > 0 and y <= hs[i-1]: # East out of bounds, bkwd diff 
+                
+                    if i > 1 and y <= hs[i-2]: # 2 nbrs West
                         px = domain.left_first(dx, ps[j,i-2 : i+1]) 
                         
-                        if i > 2 and y <= hs[i-3]:
-                            pxx = domain.left_second(dx, ps[j,i-3 : i+1]) 
-                        else:
+                        if i > 2 and y <= hs[i-3]: # 3 nbrs West
+                            pxx = domain.left_second(dx, ps[j,i-3 : i+1])
+                            
+                        else: # only 2 nbrs West
                             pxx = domain.left_second_O1(dx, ps[j,i-2 : i+1])
                             
-                    else:
+                    else: # only 1 nbr West
                         px = domain.left_first_O1(dx, ps[j,i-1 : i+1]) 
                         pxx = 0
-                       
+                
                 else: # both East and West out of bounds
                     px = pxs[j-1,i] + pxxs[j-1,i]*dy
                     pxx = pxxs[j-1,i]
             
-            else: #exterior
+            else: # exterior
                 px = 0
                 pxx = 0
             
             pxs[j,i] = px
             pxxs[j,i] = pxx
         
-    # #discontinuity averaging
+    # px and pxx discontinuity averaging
     for i in height.i_peaks[1:-1]:
-        
         for j in range(height.Ny):
-
             pxs[j,i-2 : i+3] = domain.avg_3x(pxs[j,i-3 : i+4])
-            
             pxxs[j,i-5 : i+6] = domain.avg_6x(pxxs[j,i-6 : i+7])
-
-                
+        
     
-    # integration constant
+    # integration constants px(x,h) and pxx(x,h) 
     for i in range(height.Nx):
         h = height.hs[i]
         for j in range(height.Ny):
@@ -245,22 +243,36 @@ def make_adj_velocity_old(height, ps):
                 pxx_hs[i] = pxxs[j,i]
             elif (y < h and y+dy > h):
                 px_hs[i] = pxs[j,i] + pxxs[j,i]*(h-y)
-                pxxx_ij = domain.left_first(dx, pxxs[j-2 : j+1,i])
+                pxxx_ij = domain.left_first(dx, pxxs[j-2 : j+1, i])
                 pxx_hs[i] = pxxs[j,i]  + pxxx_ij*(h-y)
-    
+
+    # u and v
     for i in range(height.Nx):
         h = hs[i]
-
-        f1 =  -1/(2*height.visc) * h * px_hs[i] - height.U / h
-        f1x = -1/(3*height.visc)* h *pxx_hs[i] #eqn 10b
+        
+        f1 =  -1/(2*height.visc)*h*px_hs[i] - height.U / h
+        f1x = -1/(3*height.visc)*h*pxx_hs[i] 
         
         for j in range(height.Ny):
-        
             y = ys[j]
-
             if y <= h:
-                
                 us[j,i]= 1/(2*height.visc)* pxs[j,i] * (y**2) + f1* y + height.U
-                vs[j,i] = -1/(6*height.visc) * pxxs[j,i] * y**3 - 1/2 * f1x* y**2 # eqn. 10
-           
+                vs[j,i] = -1/(6*height.visc) * pxxs[j,i] * y**3 - 1/2 * f1x* y**2 
+    us[:,0]= us[:,4]
+    vs[:,0]= vs[:,4] 
+    us[:,1]= us[:,4]
+    vs[:,1]= vs[:,4] 
+    us[:,2]= us[:,4]
+    vs[:,2]= vs[:,4] 
+    us[:,3]= us[:,4]
+    vs[:,3]= vs[:,4]  
+
+    us[:,-1]= us[:,-5]
+    vs[:,-1]= vs[:,-5] 
+    us[:,-2]= us[:,-5]
+    vs[:,-2]= vs[:,-5] 
+    us[:,-3]= us[:,-5]
+    vs[:,-3]= vs[:,-5] 
+    us[:,-4]= us[:,-5]
+    vs[:,-4]= vs[:,-5]     
     return us, vs

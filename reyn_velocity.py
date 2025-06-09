@@ -33,11 +33,7 @@ class Velocity:
                     else:
                         continue
 
-
-        # q = np.average(qs)
-        # q = stats.mode(qs, axis=None, keepdims=False).mode
         q = qs[0]
-        print(max(qs))
         return q, qs
     
     
@@ -55,8 +51,8 @@ class Velocity:
                 h = height.hs[i]
                 
                 if y >= h:
-                    u_x[j,i] = 0#None
-                    v_y[j,i] = 0#None
+                    u_x[j,i] = 0
+                    v_y[j,i] = 0
                 
                 else: # find u_x and v_y
                     h_W = height.hs[i-1]
@@ -120,14 +116,19 @@ class ReynVelocity(Velocity):
                     vy[j,i] = -2*hx * y**2 * (h-y) *(U/h**3 - 3*q/h**4)
                     
                 else:
-                    vx[j,i] = 0#None
-                    vy[j,i] = 0#None
+                    vx[j,i] = 0
+                    vy[j,i] = 0
                     
         return vx, vy
 
-class Adjusted_ReynVelocity(Velocity):
+class Adjusted_ReynVelocity_velBC(Velocity):
     
     def __init__(self, height, adj_ps):
-        # vx, vy = adj_vel.make_adj_velocity(height, adj_ps)
         vx, vy = adj_vel.make_adj_velocity_old(height, adj_ps)
+        super().__init__(height, vx, vy)
+        
+class Adjusted_ReynVelocity_inc(Velocity):
+    
+    def __init__(self, height, adj_ps):
+        vx, vy = adj_vel.make_adj_velocity(height, adj_ps)
         super().__init__(height, vx, vy)

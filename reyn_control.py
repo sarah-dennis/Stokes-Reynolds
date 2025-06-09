@@ -13,7 +13,7 @@ import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 
-
+i_test_scale=3/4
 
 lenx = 2
 leny = 1
@@ -34,22 +34,21 @@ class Reynolds_Solver:
 
         # colorbar min max
 
-        self.vel_max = 5
-        self.p_min=-3
-        self.p_max=3
+        self.vel_max = 3
+        self.p_min=-30
+        self.p_max=30
+
 
     
-
-    
-    def pwl_solve(self, N, write=False, plot=True,zoom=False):
+    def pwl_solve(self, N, write=False, plot=True,zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         pressure = rp.PwlGMRes_ReynPressure(ex)
         velocity = rv.ReynVelocity(ex, pressure.ps_1D)
-        solver_title = "Reynolds Piecewise Linear"
+        solver_title = "Reynolds"#" Piecewise Linear"
         if plot:
             self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
-            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom)
+            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom, inc, uv)
         
         if write:
             nm = ex.Nx * ex.Ny
@@ -60,15 +59,15 @@ class Reynolds_Solver:
         
         return pressure, velocity
     
-    def fd_solve(self, N, write=False, plot=True,zoom=False):
+    def fd_solve(self, N, write=False, plot=True,zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         pressure = rp.FinDiff_ReynPressure(ex)
         
         velocity = rv.ReynVelocity(ex, pressure.ps_1D)
-        solver_title = "Reynolds Finite Difference"
+        solver_title = "Reynolds"#"Finite Difference"
         if plot:
             self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
-            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom)
+            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom,inc, uv)
 
         if write:
             nm = ex.Nx * ex.Ny
@@ -78,28 +77,29 @@ class Reynolds_Solver:
             rw.write_reyn(ex, u, v, p)
         return pressure, velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, zoom=False):
+    def fd_adj_solve(self, N, write=False, plot=True, zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
-        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure.ps_2D)
-        solver_title = "Adjusted Reynolds"
+        adj_velocity_inc = rv.Adjusted_ReynVelocity_inc(ex, adj_pressure.ps_2D)
+        adj_velocity_velBC = rv.Adjusted_ReynVelocity_velBC(ex, adj_pressure.ps_2D)
+        solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
-            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, zoom)
-            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title,zoom)
-        
+            self.p_plot(ex, adj_pressure , adj_velocity_inc.flux, solver_title, zoom)
+            self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title,zoom,inc, uv)
+            # self.v_plot(ex, adj_velocity_velBC, adj_pressure.dP, solver_title,zoom,inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
-            u = adj_velocity.vx.reshape(nm)
-            v = adj_velocity.vy.reshape(nm)
+            u = adj_velocity_inc.vx.reshape(nm)
+            v = adj_velocity_inc.vy.reshape(nm)
             p = adj_pressure.ps_2D.reshape(nm)
             rw.write_reyn(ex, u, v, p)
         
-        return adj_pressure, adj_velocity
+        return adj_pressure, adj_velocity_inc
     
     
 
-    def fd_pert_solve(self, N, order, write=False, plot=True, zoom=False, get_dPs = False):
+    def fd_pert_solve(self, N, order, write=False, plot=True, zoom=False, inc=False, uv=False, get_dPs = False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         
@@ -113,13 +113,13 @@ class Reynolds_Solver:
             # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
             # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom)
             if order > 1:
-                solver_title2 = solver_title + " $O(\delta^2)$ perturbed"
+                solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
-                self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, zoom)
+                self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, zoom, inc, uv)
             if order > 3:
-                solver_title4 = solver_title + " $O(\delta^4)$ perturbed"
+                solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
                 self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.flux, solver_title4, zoom)
-                self.v_plot(ex, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, zoom)
+                self.v_plot(ex, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, zoom, inc, uv)
         
         if write:
             if order > 1 and order < 3:
@@ -156,7 +156,7 @@ class Reynolds_Solver:
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
     
-    def v_plot(self, ex, velocity, dP, solver_title, zoom):
+    def v_plot(self, ex, velocity, dP, solver_title, zoom=False, inc=False, uv=False):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
@@ -164,19 +164,18 @@ class Reynolds_Solver:
         
         graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
-        # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-        # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
-
-        # graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
-        # graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
+        if uv:
+            
+            i_test = int(i_test_scale*ex.Nx)
+            graphics.plot_2D(ex.ys,velocity.vx[:,i_test],  f'$u({ex.xs[i_test]:.2f}),y)$',[f'$u({ex.xs[i_test]:.2f},y)$','$y$'])
+            graphics.plot_2D(ex.ys,velocity.vy[:,i_test],  f'$v({ex.xs[i_test]:.2f}),y)$',[f'$v({ex.xs[i_test]:.2f},y)$','$y$'])
         
-        graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1/1, 1/1)
-        
-        graphics.plot_2D(velocity.qs, ex.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
+            # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+            # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
 
-        i_test = 3*ex.Nx//4
-        graphics.plot_2D(ex.ys,velocity.vx[:,i_test],  f'$u({ex.xs[i_test]:.2f}),y)$',[f'$u({ex.xs[i_test]:.2f},y)$','$y$'])
-        graphics.plot_2D(ex.ys,velocity.vy[:,i_test],  f'$v({ex.xs[i_test]:.2f}),y)$',[f'$v({ex.xs[i_test]:.2f},y)$','$y$'])
+            # graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
+            # graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
+           
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
             u_2D_zoom = graphics.grid_zoom_2D(velocity.vx, ex, x_start, x_stop, y_start, y_stop)
@@ -184,7 +183,12 @@ class Reynolds_Solver:
             uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
             graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
-    def load_plot(self, N, zoom):
+        if inc:
+            graphics.plot_contour_mesh(velocity.inc, ex.xs, ex.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
+            graphics.plot_2D(velocity.qs, ex.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
+
+    
+    def load_plot(self, N, zoom=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         u, v, p = rw.read_reyn(ex.filestr+'.csv', ex.Nx, ex.Ny)
         u = u.reshape((ex.Ny, ex.Nx))
@@ -193,7 +197,7 @@ class Reynolds_Solver:
         pressure = rp.Pressure(ex, ps_2D=p)
         velocity = rv.Velocity(ex, u, v)
         self.p_plot(ex, pressure, velocity.flux, zoom)
-        self.v_plot(ex, velocity, zoom)
+        self.v_plot(ex, velocity, zoom, inc=False, uv=False)
 
     def convg_pwl_fd(self, Ns):
         l1_errs, l2_errs, inf_errs, cnvg_rates = cnvg.reyn_cnvg_pwl_fd(self, Ns)

@@ -136,7 +136,7 @@ class LogisticHeight(Height):
 
     def h_fun(self, x):
         
-        return self.h + (self.H / ( 1 + np.exp((x-self.center)/self.slope)))
+        return self.h + (self.H / ( 1 + np.exp((self.center-x)/self.slope)))
 
 #------------------------------------------------------------------------------    
 class CircleHeight(Height):

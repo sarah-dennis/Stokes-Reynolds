@@ -21,18 +21,20 @@ from matplotlib import patches
 
 # stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
 stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
-stream_cmap[:,0:3] *= 1
+# stream_cmap = pp.cm.YlGnBu_r(np.arange(pp.cm.YlGnBu_r.N))
+# stream_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
+# stream_cmap[:,0:3] *= 1
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
 
 mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
 # mesh_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
-mesh_cmap[:,0:3] *= 0.95
+# mesh_cmap[:,0:3] *= 0.95
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-# colour_bar_scale=0.024 # for long figures like H=2, L=4
-colour_bar_scale=0.04 # for almost square figures like H=2.75, L=4
+colour_bar_scale=0.024 # for long figures like H=2, L=4
+# colour_bar_scale=0.04 # for almost square figures like H=2.75, L=4
 
 dpi=200
 n_contours = 50
@@ -286,7 +288,7 @@ def plot_contour_multi(funs, xs, ys, title, fun_labels, labels, y_lim=None):
     pp.show()    
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=n_contours, y_lim=None):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=n_contours):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     
@@ -313,7 +315,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     pp.minorticks_on()
     ax = pp.gca()
     ax.set_aspect('equal')    
-    ax.set_ylim(y_lim)
+    # ax.set_ylim(y_lim)
     # ax.set_facecolor('black')
     pp.show()    
 #------------------------------------------------------------------------------   

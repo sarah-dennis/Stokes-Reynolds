@@ -50,7 +50,8 @@ def make_adj_ps(height, reyn_ps):
         if y <= height.hs[i]:
             adj_E = (hs[i+1]-y)*dP_Es[i]/2 + height.U*height.visc/hs[i+1]
             adj_W = (hs[i]-y)*dP_Ws[i]/2 + height.U*height.visc/hs[i]
-            adj = y*(adj_E - adj_W)/(2*height.dx)
+            adj = y*(adj_E - adj_W)/(height.dx)
+
             ps_adj[j,i] = reyn_ps[i] + adj
         else:
             ps_adj[j,i]=None
@@ -60,7 +61,7 @@ def make_adj_ps(height, reyn_ps):
         if y <= height.hs[i]:
             adj_E = (hs[i]-y)*dP_Es[i]/2 + height.U*height.visc/hs[i]
             adj_W = (hs[i-1]-y)*dP_Ws[i]/2 + height.U*height.visc/hs[i-1]
-            adj = y*(adj_E - adj_W)/(2*height.dx)
+            adj = y*(adj_E - adj_W)/(height.dx)
             ps_adj[j,i] = reyn_ps[i] + adj
         else:
             ps_adj[j,i]=None 

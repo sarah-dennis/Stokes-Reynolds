@@ -113,6 +113,20 @@ class BFS_H2L4_Re0_Q1_U0(BFS):
         namestr = "BFS_H2L4_Re0_Q1_U0"
         super().__init__(L, l, H, h, U, q, Re, N,namestr)
 
+
+class BFS_H2L4_Re0_Q1p21_U0(BFS):
+    def __init__(self, N):
+        L = 4
+        l = 1
+        H = 2
+        h = 1   
+        U = 0
+        Re = 0
+        q = 1.21
+        namestr = "BFS_H2L4_Re0_Q1p21_U0"
+        super().__init__(L, l, H, h, U, q, Re, N,namestr)
+
+
 class BFS_H1p5L4_Re0_Q2_U0(BFS):
     def __init__(self, N):
         L = 4
@@ -1002,33 +1016,82 @@ class bump_Re0(PWLinear):
     def h(self, x):
         return (self.H)*(1-(self.slope/2)*(1+np.cos(np.pi*x/self.L)))
 
-    
-    
-class logistic_Re0(PWLinear):
-    def __init__(self, N):
-       
+ 
 
-        self.h = 1
-        self.H = 2
-        self.slope = -1/8
-        self.center = 2
-        x0 = -self.center
-        xf = self.center
-        x_peaks = np.asarray([x0 + i/N for i in range(1 + N*2*self.center)])
+class logisticBFS(PWLinear):
+    def __init__(self, N, slope, flux, namestr):
 
         
-        y_peaks_L = [self.H] + [self.h_fun(x) for x in x_peaks[:-1]]
-        y_peaks_R =  [self.h_fun(x) for x in x_peaks[1:]] + [self.H]
+        self.slope = slope
+        
+        self.h = 1
+        self.H=1
+        self.L = 4
+        self.center=self.L/2
+        self.x0 = 0
+        self.xf = self.L
+        x_peaks = [self.x0 + i/N for i in range (int(1 + self.L*N))]
+               
+        y_peaks_L = [self.h+self.H] + [self.h_fun(x) for x in x_peaks[:-1]]
+        y_peaks_R =  [self.h_fun(x) for x in x_peaks[1:]] + [self.h+self.H]
+
         y_peaks = [[y_L, y_R] for y_L,y_R in np.stack((y_peaks_L,y_peaks_R), axis=1)] 
-        y0 = 0
-        yf = self.H
-        print(np.min(y_peaks))
-        U = 1
-        q = .76
+        y0 = np.min(y_peaks) 
+        yf =  np.max(y_peaks)
+        
+        U = 0
+        q = flux
         Re = 0
-        namestr = 'Logistic_Re0_Q1_U0'
-        super().__init__(x0, xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)
+        
+         
+        super().__init__(self.x0, self.xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)   
 
     def h_fun(self, x):
+        return self.H - (self.H / ( 1 + np.exp((self.center-x)/self.slope)))
+ 
+class logisticBFS_l1_Re0_Q1p19_U0(logisticBFS):
+    def __init__(self, N):
+        q=1.19 
+        slope=1
+        namestr = 'logisticBFS_l1_Re0_Q1p19_U0'
+        super().__init__(N, slope, q, namestr)
+
+class logisticBFS_l0p5_Re0_Q0p99_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.99 
+        slope=1/2
+        namestr = 'logisticBFS_l0p5_Re0_Q0p99_U0'
+        super().__init__(N, slope, q, namestr)
         
-        return self.H -self.h- ((self.H-self.h) / ( 1 + np.exp(x/self.slope)))
+        
+        
+class logisticBFS_l0p25_Re0_Q0p85_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.85
+        slope=1/4
+        namestr = 'logisticBFS_l0p25_Re0_Q0p85_U0'
+        super().__init__(N, slope, q, namestr)
+
+class logisticBFS_l0p125_Re0_Q0p79_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.79
+        slope=1/8
+        namestr = 'logisticBFS_l0p125_Re0_Q0p79_U0'
+        super().__init__(N, slope, q, namestr)
+
+class logisticBFS_l0p0625_Re0_Q0p77_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.77
+        slope=1/16
+        namestr = 'logisticBFS_l0p0625_Re0_Q0p77_U0'
+        super().__init__(N, slope, q, namestr)
+
+        
+
+class logisticBFS_l0p03125_Re0_Q0p75_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.75
+        slope=1/32
+        namestr = 'logisticBFS_l0p03125_Re0_Q0p75_U0'
+        super().__init__(N, slope, q, namestr)
+

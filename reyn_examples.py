@@ -178,9 +178,9 @@ class LambdaBump(BumpHeight):
 #-----------------------------------------------------------------------------------------------------------------------------------
 class LogisticStep(LogisticHeight):
     def __init__(self, U, dP, N, args):
-        x0 = -args[3]
-        xf = args[3]
-        center = 0
+        x0 = 0
+        xf = 2*args[3]
+        center = args[3]
         H = args[1]
         h = args[2]
         slope = args[0]

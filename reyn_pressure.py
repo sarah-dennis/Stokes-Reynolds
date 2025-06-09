@@ -6,13 +6,16 @@ Created on Thu Dec  5 13:28:42 2024
 @author: sarahdennis
 """
 import numpy as np
-import reyn_pressure_adjusted
+
 
 import reyn_pressure_finDiff as fd
 from numpy.linalg import solve as np_solve
-from scipy.sparse.linalg import gmres
+
 from reyn_heights import PWL_Height
 import reyn_pressure_pwlGMRes as pwlGMRes
+from scipy.sparse.linalg import gmres
+
+import reyn_pressure_adjusted
 
 class Pressure:
     def __init__(self, height, ps_1D=None, ps_2D=None):
@@ -72,7 +75,6 @@ class PwlGMRes_ReynPressure(Pressure):
         super().__init__(height, ps_1D)
     
 class Adjusted_ReynPressure(Pressure):
-    
     def __init__(self, height):
         reyn_pressure = FinDiff_ReynPressure(height)
         ps_1D = reyn_pressure.ps_1D

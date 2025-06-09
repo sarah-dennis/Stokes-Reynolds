@@ -5,14 +5,17 @@ Created on Wed Aug 28 11:58:25 2024
 @author: sarah
 """
 import numpy as np
-
+import graphics
 def resistance(ex, p):
-    j = ex.Ny-1
-    i_in = 0
-    i_out = ex.Nx-1
-    #TODO
-    print()
-    dp = p[j*ex.Nx+i_out] - p[j*ex.Nx+i_in]
+    
+    p_2D = p.reshape((ex.Ny,ex.Nx))
+    
+
+    j_mid_in = int(ex.Ny-1 - ex.y_peaks[0][1]/ex.dy/2)
+    j_mid_out = int(ex.Ny-1 - ex.y_peaks[-1][0]/ex.dy/2)
+    
+    dp= p_2D[j_mid_out,-1] - p_2D[j_mid_in,0]
+    
 
     if ex.flux!=0:
         r= dp/ex.flux
@@ -41,7 +44,7 @@ def pressure(ex, u, v):
         i-=1
      
     # set the top boundary using dy from interior row
-    # p[(m-1)*n-1] = ex.p_ambient
+    p[(m-1)*n-1] = ex.p_ambient
     i = n-1
     while i >=0:
         k   = (m-1)*n + i

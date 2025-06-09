@@ -42,7 +42,9 @@ import stokes_examples as examples
 # example = examples.BFS_H1p25L4_Re0_Q2_U0
 # example = examples.BFS_H1p125L4_Re0_Q2_U0
 
-example = examples.BFS_H2L4_Re0_Q1_U0
+# example = examples.BFS_H2L4_Re0_Q1_U0
+# example = examples.BFS_H2L4_Re0_Q1p21_U0
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # BFS Re=0.25
 #------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ example = examples.BFS_H2L4_Re0_Q1_U0
 # example = examples.BFS_H1p5L4_Re0p25_Q2_U0
 # example = examples.BFS_H1p25L4_Re0p25_Q2_U0
 # example = examples.BFS_H1p125L4_Re0p25_Q2_U0
-#------------------------------------------------------------------------------
+
 # BFS Re=0.5
 #------------------------------------------------------------------------------
 # example = examples.BFS_H2p75L4_Re0p5_Q2_U0
@@ -118,9 +120,15 @@ example = examples.BFS_H2L4_Re0_Q1_U0
 
 # example = examples.TriCavity
 # example = examples.bump_Re0
-example=examples.logistic_Re0
 
 #------------------------------------------------------------------------------
+
+example = examples.logisticBFS_l1_Re0_Q1p19_U0
+# example = examples.logisticBFS_l0p5_Re0_Q0p99_U0
+# example = examples.logisticBFS_l0p25_Re0_Q0p85_U0
+# example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
+# ------------------------------------------------------------------------------
+
 
 solver = control.Stokes_Solver(example, max_iters=5000)                
 
@@ -129,14 +137,17 @@ N=160
        
 zoom_on=False               
 # 
-# solver.new_run(N) 
+# solver.new_ run(N) 
 
 # solver.load_scale(20,40) 
 
 # 
-solver.load_run(N)
+# solver.load_run(N)
 
-# 
+
+# solver.load_run(N)
+# solver.load_run_many(20, 2, 3)
+
 # solver.load_run_new_many(N, 2, 3)  
 
 solver.load_plot(N, zoom=zoom_on)

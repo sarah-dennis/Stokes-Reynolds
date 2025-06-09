@@ -91,6 +91,7 @@ args = [H, l, L]
 # args=[lam, H, l, h0] 
 
 
+
 # Example = examples.Cylinder
 # drdx = 0
 # r=1
@@ -103,21 +104,20 @@ args = [H, l, L]
 #U0 = 1
 #h0 = 1
 
-Example = examples.LogisticStep
+# k = 1/8 # slope -1/k at x=0
+# H = 1  # logistic height scale
 
-k = 1/8 # slope -1/k at x=0
-H = 1  # logistic height scale
-h = 1  # min height 
-l = 2  # half length
+# h = 1  # min height 
+# l = 2  # half length
 
-args = [k,H,h, l]
+# args = [k,H,h, l]
 
 #------------------------------------------------------------------------------
 # boundary conditions
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U =1
+U =-1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
 dP =0
@@ -125,13 +125,13 @@ dP =0
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
-N =200
+N = 100
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-# solver.fd_solve(N, plot=plots_on, zoom=zoom_on)
-# solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on)
-# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on)
+# solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True)
+solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
+solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)
+solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

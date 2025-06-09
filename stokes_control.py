@@ -15,7 +15,10 @@ import stokes_pressure as pressure
 
 #------------------------------------------------------------------------------
 from stokes_solver import run_spLU
+#---------------------------------------------------------------------------
+# graphics args
 
+#-> zoom plot
 lenx = 0.55
 leny = 0.55
 x_start = 1
@@ -23,8 +26,11 @@ y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
+#-> log plots
 log_linthresh=1e-5  
 log_cmap_on = False
+
+#---------------------------------------------------------------------------
 class Stokes_Solver:
     def __init__(self, Example, max_iters=50000):
         # domain 
@@ -38,7 +44,7 @@ class Stokes_Solver:
         
         # plotting thresholds
 
-        self.vel_max = 5
+        self.vel_max = 3
         self.p_min=-30
         self.p_max=30
 
@@ -57,8 +63,7 @@ class Stokes_Solver:
         rw.write_stokes(ex, u, v, psi, self.max_iters)
     
     def new_run_many(self, N_0, dN, many):
-        
-        self.new_run(N_0, self.max_iters)
+        self.new_run(N_0)
         N_load = N_0
         for k in range (1, many): 
             N = N_load*dN
@@ -66,7 +71,6 @@ class Stokes_Solver:
             self.load_run(N)
             N_load = N
 
-    
     def load_run_new_many(self, N_0, dN, many):
         N_load = N_0
         self.load_run(N_load)
@@ -193,12 +197,12 @@ class Stokes_Solver:
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
         p_ma = np.flip(p_ma, axis=0)
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=40, y_lim = np.min(ex.y_peaks))
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=40)#, y_lim = np.min(ex.y_peaks))
     
         if zoom:
             p_zoom = graphics.grid_zoom_2D(p, ex, x_start, x_stop, y_start, y_stop)  
             p_zoom = np.flip(p_zoom, axis=0)
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=20, y_lim = min(ex.y_peaks))
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=20)#, y_lim = min(ex.y_peaks))
     
     #  Velocity plot: 
     
