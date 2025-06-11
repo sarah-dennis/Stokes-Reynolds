@@ -7,14 +7,11 @@ Created on Thu May  8 14:11:23 2025
 import numpy as np
 import graphics
 import domain
-
-
-i_plot = 150
         
 def make_adj_velocity(height, ps):
     
-    # v(x,y) = int_0^y[p] dy - int_0^h [p] dy * y/h
-    vs = make_vs(height, ps)
+    # v(x,y) = (int_0^y[p] dy - int_0^h [p] dy * y)/visc + v(x,0) + vy(x,0)y
+    vs= make_vs(height, ps)
 
     # u(x,y) = int_x0^x[du/dx] dx
     us = make_us(height, vs, ps)
@@ -24,27 +21,29 @@ def make_adj_velocity(height, ps):
 
 def make_vs(height, ps):
     vs = np.zeros((height.Ny, height.Nx))
-    intPdys,intPdy_hs = make_intPdys(height, ps)
+    intPdys, phis = make_intPdys(height, ps)
     
     for i in range(height.Nx):
         h = height.hs[i]
-
+        
         for j in range(height.Ny):
             y = height.ys[j]
             if y <= h:
-                vs[j,i] =  intPdys[j,i] - intPdy_hs[i]*(y/h)
+                if y == 0:
+                    vs[j,i] = 0 
+                else:
+                    vs[j,i] =  1/height.visc * (intPdys[j,i] -ps[0,i]*y - phis[i]*y)
             else:
                 vs[j,i] = 0
                 continue
 
-    # graphics.plot_2D_multi([vs[:,i_plot-1],vs[:,i_plot],vs[:,i_plot+1],vs[:,i_plot+2]], height.ys, f'v({height.xs[i_plot]},y)',['x_{-1}','x_0','x_{+1}','x_{+2}'], ['y', 'v'])
-
     return vs
 
 # for v(x,y)
+
 def make_intPdys(height, ps):
     intPdys = np.zeros((height.Ny, height.Nx)) # int_y0^y[p] dy
-    intPdy_hs = np.zeros( height.Nx) # int_y0^h[p] dy
+    phis = np.zeros( height.Nx) # int_y0^h[p] dy
 
     for i in range(height.Nx):
         h = height.hs[i]
@@ -59,15 +58,14 @@ def make_intPdys(height, ps):
             
             # integration constant: int_0^h p(x,y) dy
             if y == h:
-                intPdy_hs[i]= intPdy_i
+                phis[i] = intPdy_i/h - ps[0,i]
                 continue
             elif y < h and y + height.dy >= h : # boundary approximation 
-                intPdy_hs[i]= intPdy_i + ps[j,i]*(h-y)
+                phis[i]= intPdy_i/h - ps[0,i] + ps[j,i]*(h-y)/h
                 continue
-            
-
-    # graphics.plot_2D(intPdy_hs, height.xs, '$\int_0^h P dy$', ['$x$', '$\int_0^{h(x)} P(x) dy$'])        
-    return intPdys, intPdy_hs
+   
+    
+    return intPdys, phis
 
 
 def make_us(height, vs, ps):
@@ -78,7 +76,7 @@ def make_us(height, vs, ps):
     q = (height.U*h0)/2 - (px0*(h0**3))/(12*height.visc)
 
     us = np.zeros((height.Ny, height.Nx))
-    pwl_reg = 0 
+    pwl_reg = 0 # x=h(y)
     
     for i in range(height.Nx):
         h = height.hs[i]
@@ -139,23 +137,23 @@ def make_dvdys(height, vs):
     vys = np.zeros((height.Ny,height.Nx))
 
     for i in range(1,height.Nx):
-        h = height.hs[i]
-        vys[0,i]= domain.right_first(height.dy,vs[0:3,i])
+        h = height.hs[i] 
+        vys[0,i]= domain.right_first(height.dy,vs[0:3,i]) 
 
         for j in range(1,height.Ny):
             y = height.ys[j]    
             if y <= h:
                 if j < height.Ny-1 and height.ys[j+1] <= h:
-                    vys[j,i] = domain.center_first(height.dy,vs[j-1:j+2,i])
+                    vys[j,i] = domain.center_first(height.dy,vs[j-1:j+2,i]) 
+                    
                     
                 else:
                     
-                    vys[j,i] = domain.left_first(height.dy,vs[j-2:j+1,i])
-            
+                    vys[j,i] = domain.left_first(height.dy,vs[j-2:j+1,i]) 
+                    
             else:
                 vys[j,i] = 0
 
-            
     return vys
 
 #------------------------------------------------------------------------------
@@ -233,7 +231,7 @@ def make_adj_velocity_old(height, ps):
             pxxs[j,i-5 : i+6] = domain.avg_6x(pxxs[j,i-6 : i+7])
         
     
-    # integration constants px(x,h) and pxx(x,h) 
+    #integration constants px(x,h) and pxx(x,h) 
     for i in range(height.Nx):
         h = height.hs[i]
         for j in range(height.Ny):
@@ -247,32 +245,38 @@ def make_adj_velocity_old(height, ps):
                 pxx_hs[i] = pxxs[j,i]  + pxxx_ij*(h-y)
 
     # u and v
+    
+    
     for i in range(height.Nx):
         h = hs[i]
+        hx = height.hxs[i]
+        f1  = -1/(2*height.visc)*h*px_hs[i] - height.U / h
+        f1x = -1/(2*height.visc)*(h*pxx_hs[i] +hx*px_hs[i]) + height.U/(h**2) *hx
         
-        f1 =  -1/(2*height.visc)*h*px_hs[i] - height.U / h
-        f1x = -1/(3*height.visc)*h*pxx_hs[i] 
-        
+        f2x = -1/(6*height.visc)*(h**2)*pxx_hs[i] -h/2 * f1x
+  
         for j in range(height.Ny):
             y = ys[j]
             if y <= h:
-                us[j,i]= 1/(2*height.visc)* pxs[j,i] * (y**2) + f1* y + height.U
-                vs[j,i] = -1/(6*height.visc) * pxxs[j,i] * y**3 - 1/2 * f1x* y**2 
-    us[:,0]= us[:,4]
-    vs[:,0]= vs[:,4] 
-    us[:,1]= us[:,4]
-    vs[:,1]= vs[:,4] 
-    us[:,2]= us[:,4]
-    vs[:,2]= vs[:,4] 
-    us[:,3]= us[:,4]
-    vs[:,3]= vs[:,4]  
+                us[j,i]= 1/(2*height.visc)*px_hs[i]* y**2  + f1* y + height.U
+                vs[j,i] = -1/(6*height.visc)*pxx_hs[i]* y**3 - 1/2*f1x* y**2 -f2x*y
+     
+            else:
+                continue
 
-    us[:,-1]= us[:,-5]
-    vs[:,-1]= vs[:,-5] 
-    us[:,-2]= us[:,-5]
-    vs[:,-2]= vs[:,-5] 
-    us[:,-3]= us[:,-5]
-    vs[:,-3]= vs[:,-5] 
-    us[:,-4]= us[:,-5]
-    vs[:,-4]= vs[:,-5]     
+    # for i in range(height.Nx):
+    #     h = hs[i]
+    #     hx = height.hxs[i]
+    #     f1  = -1/(2*height.visc)*h*pxs[0,i] - height.U / h
+    #     f1x = -1/(2*height.visc)*(h*pxxs[0,i] +hx*pxs[0,i]) + height.U/(h**2) *hx
+  
+    #     for j in range(height.Ny):
+    #         y = ys[j]
+    #         if y <= h:
+    #             us[j,i]= 1/(2*height.visc)*pxs[0,i]* y**2  + f1* y + height.U
+    #             vs[j,i] = -1/(6*height.visc)*pxxs[0,i]* y**3 - 1/2*f1x* y**2 
+    #         else:
+    #             continue
+            
+            
     return us, vs

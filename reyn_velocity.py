@@ -9,6 +9,7 @@ import domain
 import graphics
 from scipy import stats
 import reyn_velocity_adjusted as adj_vel
+
 class Velocity:
     def __init__(self, height, vx, vy):
         self.height=height

@@ -77,17 +77,19 @@ class Reynolds_Solver:
             rw.write_reyn(ex, u, v, p)
         return pressure, velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, zoom=False,inc=False, uv=False):
+    def fd_adj_solve(self, N, write=False, plot=True, zoom=False, inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
         adj_velocity_inc = rv.Adjusted_ReynVelocity_inc(ex, adj_pressure.ps_2D)
+        
         adj_velocity_velBC = rv.Adjusted_ReynVelocity_velBC(ex, adj_pressure.ps_2D)
+        
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
             self.p_plot(ex, adj_pressure , adj_velocity_inc.flux, solver_title, zoom)
-            self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title,zoom,inc, uv)
-            # self.v_plot(ex, adj_velocity_velBC, adj_pressure.dP, solver_title,zoom,inc, uv)
+            self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title + "ux + vy = 0", zoom, inc, uv)
+            self.v_plot(ex, adj_velocity_velBC, adj_pressure.dP, solver_title + "u(0)=U, u(h)=0",zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
             u = adj_velocity_inc.vx.reshape(nm)
@@ -111,7 +113,7 @@ class Reynolds_Solver:
         
         if plot:
             # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
-            # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom)
+            # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom, inc, uv)
             if order > 1:
                 solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
@@ -156,7 +158,7 @@ class Reynolds_Solver:
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
     
-    def v_plot(self, ex, velocity, dP, solver_title, zoom=False, inc=False, uv=False):
+    def v_plot(self, ex, velocity, dP, solver_title, zoom=False,  inc=False,uv=False):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
