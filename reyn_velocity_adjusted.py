@@ -242,28 +242,42 @@ def make_adj_velocity_old(height, ps):
             elif (y < h and y+dy > h):
                 px_hs[i] = pxs[j,i] + pxxs[j,i]*(h-y)
                 pxxx_ij = domain.left_first(dx, pxxs[j-2 : j+1, i])
-                pxx_hs[i] = pxxs[j,i]  + pxxx_ij*(h-y)
+                pxx_hs[i] = pxxs[j,i] + pxxx_ij*(h-y)
 
     # u and v
-    
-    
+    max_re=0
+    max_err=0
+    max_hx=0
     for i in range(height.Nx):
         h = hs[i]
         hx = height.hxs[i]
         f1  = -1/(2*height.visc)*h*px_hs[i] - height.U / h
-        f1x = -1/(2*height.visc)*(h*pxx_hs[i] +hx*px_hs[i]) + height.U/(h**2) *hx
         
-        f2x = -1/(6*height.visc)*(h**2)*pxx_hs[i] -h/2 * f1x
-  
+        
+        f1x = -1/(2*height.visc)*(h*pxx_hs[i] +hx*px_hs[i]) + height.U/(h**2) *hx
+
+        
+        # f2x = -1/(6*height.visc)*(h**2)*pxx_hs[i] -h/2 * f1x
+        re = 1/(12*height.visc) * (pxx_hs[i]*(h**3) + 3*px_hs[i]*(h**2)*hx) -height.U/2 * hx
+
+        #re = f2x * h
+
+        
+        
         for j in range(height.Ny):
             y = ys[j]
-            if y <= h:
-                us[j,i]= 1/(2*height.visc)*px_hs[i]* y**2  + f1* y + height.U
-                vs[j,i] = -1/(6*height.visc)*pxx_hs[i]* y**3 - 1/2*f1x* y**2 -f2x*y
-     
+            if y < h:
+                us[j,i]= 1/(2*height.visc)*pxs[j,i]* y**2  + f1* y + height.U
+                vs[j,i] = -1/(6*height.visc)*pxxs[j,i]* y**3 - 1/2*f1x* y**2 -re*(y/h)**2
+                if y + height.dy > h:
+                    if vs[j,i]> max_err:
+                        max_re = re
+                        max_hx = hx
+                        max_err = abs(vs[j,i])
+                    
             else:
                 continue
-
+    print('max err v(x,h)=0', max_err, 're ', max_re, 'hx', max_hx)
     # for i in range(height.Nx):
     #     h = hs[i]
     #     hx = height.hxs[i]
@@ -277,6 +291,5 @@ def make_adj_velocity_old(height, ps):
     #             vs[j,i] = -1/(6*height.visc)*pxxs[0,i]* y**3 - 1/2*f1x* y**2 
     #         else:
     #             continue
-            
-            
+
     return us, vs

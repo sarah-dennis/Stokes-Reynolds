@@ -81,23 +81,23 @@ class Reynolds_Solver:
         ex = self.Example(self.U, self.dP, N, self.args)
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
-        adj_velocity_inc = rv.Adjusted_ReynVelocity_inc(ex, adj_pressure.ps_2D)
+        # adj_velocity_inc = rv.Adjusted_ReynVelocity_inc(ex, adj_pressure.ps_2D)
         
-        adj_velocity_velBC = rv.Adjusted_ReynVelocity_velBC(ex, adj_pressure.ps_2D)
+        adj_velocity = rv.Adjusted_ReynVelocity_velBC(ex, adj_pressure.ps_2D)
         
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
-            self.p_plot(ex, adj_pressure , adj_velocity_inc.flux, solver_title, zoom)
-            self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title + "ux + vy = 0", zoom, inc, uv)
-            self.v_plot(ex, adj_velocity_velBC, adj_pressure.dP, solver_title + "u(0)=U, u(h)=0",zoom, inc, uv)
+            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, zoom)
+            # self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title + "ux + vy = 0", zoom, inc, uv)
+            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title + "u(0)=U, u(h)=0",zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
-            u = adj_velocity_inc.vx.reshape(nm)
-            v = adj_velocity_inc.vy.reshape(nm)
+            u = adj_velocity.vx.reshape(nm)
+            v = adj_velocity.vy.reshape(nm)
             p = adj_pressure.ps_2D.reshape(nm)
             rw.write_reyn(ex, u, v, p)
         
-        return adj_pressure, adj_velocity_inc
+        return adj_pressure, adj_velocity
     
     
 
