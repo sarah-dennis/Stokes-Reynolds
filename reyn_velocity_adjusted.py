@@ -247,7 +247,6 @@ def make_adj_velocity_old(height, ps):
     # u and v
     max_re=0
     max_err=0
-    max_hx=0
     for i in range(height.Nx):
         h = hs[i]
         hx = height.hxs[i]
@@ -263,21 +262,19 @@ def make_adj_velocity_old(height, ps):
         #re = f2x * h
 
         
-        
         for j in range(height.Ny):
             y = ys[j]
             if y < h:
                 us[j,i]= 1/(2*height.visc)*pxs[j,i]* y**2  + f1* y + height.U
-                vs[j,i] = -1/(6*height.visc)*pxxs[j,i]* y**3 - 1/2*f1x* y**2 -re*(y/h)**2
+                vs[j,i] = -1/(6*height.visc)*pxxs[j,i]* y**3 - 1/2*f1x* y**2 -re*(y/h)
                 if y + height.dy > h:
                     if vs[j,i]> max_err:
                         max_re = re
-                        max_hx = hx
                         max_err = abs(vs[j,i])
                     
             else:
                 continue
-    print('max err v(x,h)=0', max_err, 're ', max_re, 'hx', max_hx)
+    print('max err v(x,h)=0', max_err, 'Re err ', max_re)
     # for i in range(height.Nx):
     #     h = hs[i]
     #     hx = height.hxs[i]

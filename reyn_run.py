@@ -84,7 +84,7 @@ args = [H, l, L]
 Example = examples.LambdaBump 
 
 
-lam=2
+lam=4
 H=1/4 
 l=1
 h0 = 1
@@ -101,7 +101,7 @@ args=[lam, H, l, h0]
 
 
 Example = examples.LogisticStep
-k = 1/2 # slope -1/k at x=0
+k = 8 # slope -1/k at x=0
 H = 2  # logistic height scale
 
 h = 1  # min height 
@@ -117,7 +117,7 @@ args = [k,H,h, l]
 U =-1/2
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-10
+dP =10
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )

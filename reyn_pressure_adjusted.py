@@ -140,26 +140,26 @@ def make_adj_ps(height, reyn_ps):
     hs = height.hs
     hxs = height.hxs
     dx = height.dx
-    
+    dy = height.dy
     #--------------------------------------------------------------------------
     pxs = np.zeros(height.Nx)
     pxxs = np.zeros(height.Nx)
-        
-    i=0
+
     
+    i=0
     pxs[i] =  dm.right_first(dx, reyn_ps[i : i+3])
     pxxs[i] = dm.right_second(dx, reyn_ps[i : i+4])
-    
+
  
     i=height.Nx-1
     pxs[i] = dm.left_first(dx, reyn_ps[i-2 : i+1])
     pxxs[i] = dm.left_second(dx, reyn_ps[i-3 : i+1])
-    
+
     
     for i in range(1,height.Nx-1): 
         pxs[i] = dm.center_first(dx, reyn_ps[i-1 : i+2])
         pxxs[i] = dm.center_second(dx, reyn_ps[i-1 : i+2])
-       
+
     for i in height.i_peaks[1:-1]:
         pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
         pxxs[i-1:i+2] = dm.avg_2x(pxxs[i-2 : i+3])
@@ -170,9 +170,10 @@ def make_adj_ps(height, reyn_ps):
         hx = hxs[i]
         px = pxs[i]
         pxx = pxxs[i]
+
         
         f1 = ((pxx*h + px*hx)/2 - height.U*height.visc/(h**2)*hx)
-        f2 = ((h/2)*px - height.U*height.visc/h)*hx
+        f2 = (h*px/(2*height.visc) - height.U*height.visc/h)*hx
         
         for j in range(height.Ny):
             y = height.ys[j]
@@ -180,7 +181,7 @@ def make_adj_ps(height, reyn_ps):
                 ps_adj[j,i] = None
                 continue
             else:  
-                adj = -pxx*(y**2)/2 + f1*y  -f2
+                adj = -pxx*(y**2)/2 + f1*y -f2
 
                 ps_adj[j,i] = reyn_ps[i] + adj
                             
