@@ -41,11 +41,11 @@ write_on = False
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-Example = examples.BFS
-H=2
-l=1
-L=4
-args = [H, l, L]
+# Example = examples.BFS
+# H=2
+# l=1
+# L=4
+# args = [H, l, L]
 
 # Example = examples.BFS_noEddy
 # H = 2
@@ -75,20 +75,20 @@ args = [H, l, L]
 ## Smooth examples  
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
-# Example = examples.Sinusoid
-# r=0.8
-# k=3.14
-# L=2
-# args = [r, k, L]
+Example = examples.Sinusoid
+r=0.4
+k=3.14
+L=2
+args = [r, k, L]
 
-Example = examples.LambdaBump 
+# Example = examples.LambdaBump 
 
 
-lam=4
-H=1/4 
-l=1
-h0 = 1
-args=[lam, H, l, h0] 
+# lam=4
+# H=1/4 
+# l=1
+# h0 = 1
+# args=[lam, H, l, h0] 
 
 
 
@@ -101,7 +101,7 @@ args=[lam, H, l, h0]
 
 
 Example = examples.LogisticStep
-k = 8 # slope -1/k at x=0
+k = 1/2 # slope -1/k at x=0
 H = 2  # logistic height scale
 
 h = 1  # min height 
@@ -125,7 +125,7 @@ dP =10
 N = 200
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-# solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True)
+solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
 solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
 # solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)

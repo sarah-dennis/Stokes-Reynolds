@@ -13,7 +13,7 @@ import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 
-i_test_scale=3/4
+i_test_scale=3/5
 
 lenx = 2
 leny = 1
