@@ -41,13 +41,13 @@ class Height(Domain):
         self.hs = hs
         self.i_peaks = i_peaks
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
+        self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)
+        self.h3xs = center_third_diff(self.hs, self.Nx, self.dx)
 
         for i in i_peaks:
             if i > 1 and i < self.Nx-2:
                 
-                self.hxs[i] = (self.hxs[i-2] + self.hxs[i+2])/2
-                self.hxs[i-1] = (self.hxs[i-2] + self.hxs[i])/2
-                self.hxs[i+1] = (self.hxs[i] + self.hxs[i+2])/2
+                self.hxs[i-1:i+2] = avg_2x(self.hxs[i-2:i+3])
                 
         self.h_max = max(self.hs)
         self.h_min = min(self.hs)
@@ -104,6 +104,44 @@ def center_second_diff(fs, Nx, dx):
     fs_dxx[Nx-1]= left_second(dx, fs[Nx-4 : Nx]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
     
     return np.asarray(fs_dxx)
+
+ # return np.dot([-1, 2, 0, -2, 1], u2W2E)/(2*dx**3)
+def center_third_diff(fs, Nx, dx):
+    D_llower = -1*np.ones(Nx-2)
+    D_lower = 2*np.ones(Nx-1)
+    D_upper = -2*np.ones(Nx-1)
+    D_uupper = 1*np.ones(Nx-2)
+    # D_center = -2*np.ones(Nx)
+    D = np.diagflat(D_llower, -2) +np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1) +np.diagflat(D_uupper, 2)
+
+    D = D/(2*dx**3)
+    fs_dxxx = D@fs 
+    
+    fs_dxxx[0]= right_third(dx, fs[0 : 5]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxxx[1]= right_third(dx, fs[1 : 6]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxxx[Nx-1]= left_third(dx, fs[Nx-5 : Nx]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    fs_dxxx[Nx-2]= left_third(dx, fs[Nx-6 : Nx-1]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    
+    return np.asarray(fs_dxxx)
+# [1, -4, 6, -4, 1], u2W2E)/(dx**4)
+def center_fourth_diff(fs, Nx, dx):
+    D_llower = 1*np.ones(Nx-2)
+    D_lower = -4*np.ones(Nx-1)
+    D_center = 6*np.ones(Nx)
+    D_upper = -4*np.ones(Nx-1)
+    D_uupper = 1*np.ones(Nx-2)
+    
+    D = np.diagflat(D_llower, -2) +np.diagflat(D_lower, -1) + np.diagflat(D_center, 0)+np.diagflat(D_upper, 1) +np.diagflat(D_uupper, 2)
+
+    D = D/(dx**4)
+    fs_dxxxx = D@fs 
+    
+    fs_dxxxx[0]= right_fourth(dx, fs[0 : 6]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxxxx[1]= right_fourth(dx, fs[1 : 7]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    fs_dxxxx[Nx-1]= left_fourth(dx, fs[Nx-6 : Nx]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    fs_dxxxx[Nx-2]= left_fourth(dx, fs[Nx-7 : Nx-1]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    
+    return np.asarray(fs_dxxxx)
 
 #----------------------------------------------------------------------------
 

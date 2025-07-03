@@ -84,7 +84,7 @@ args = [r, k, L]
 # Example = examples.LambdaBump 
 
 
-# lam=4
+# lam=1
 # H=1/4 
 # l=1
 # h0 = 1
@@ -104,8 +104,8 @@ Example = examples.LogisticStep
 k = 1/2 # slope -1/k at x=0
 H = 2  # logistic height scale
 
-h = 1  # min height 
-l = 4  # half length
+h = 1  # min height 6
+l = 2  # half length
 
 args = [k,H,h, l]
 
@@ -114,10 +114,10 @@ args = [k,H,h, l]
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U =-1/2
+U =1
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =10
+dP =-10
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
@@ -125,7 +125,7 @@ dP =10
 N = 200
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True)
+# solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
 solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
 # solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)

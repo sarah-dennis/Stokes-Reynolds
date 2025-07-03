@@ -47,7 +47,7 @@ class Velocity:
            
             y = height.ys[j]
             
-            for i in range(4, height.Nx-4):
+            for i in range(2, height.Nx-2):
                 
                 h = height.hs[i]
                 
@@ -122,14 +122,21 @@ class ReynVelocity(Velocity):
                     
         return vx, vy
 
-class Adjusted_ReynVelocity_velBC(Velocity):
+class Adjusted_ReynVelocity_TG(Velocity):
     
-    def __init__(self, height, adj_ps):
-        vx, vy = adj_vel.make_adj_velocity_old(height, adj_ps)
+    def __init__(self, height, adj_pressure):
+        vx, vy = adj_vel.make_adj_velocity_TG(height, adj_pressure)
         super().__init__(height, vx, vy)
         
-class Adjusted_ReynVelocity_inc(Velocity):
+# class Adjusted_ReynVelocity_inc(Velocity):
     
-    def __init__(self, height, adj_ps):
-        vx, vy = adj_vel.make_adj_velocity(height, adj_ps)
+#     def __init__(self, height, adj_ps):
+#         vx, vy = adj_vel.make_adj_velocity(height, adj_ps)
+#         super().__init__(height, vx, vy)
+        
+class Adjusted_ReynVelocity(Velocity):
+    
+    def __init__(self, height, adj_pressure):
+        vx, vy = adj_vel.make_adj_velocity(height, adj_pressure)
         super().__init__(height, vx, vy)
+        

@@ -126,7 +126,7 @@ import stokes_examples as examples
 example = examples.logisticBFS_l1_Re0_Q1p19_U0
 # example = examples.logisticBFS_l0p5_Re0_Q0p99_U0
 # example = examples.logisticBFS_l0p25_Re0_Q0p85_U0
-# example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
+example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
 # ------------------------------------------------------------------------------
 
 

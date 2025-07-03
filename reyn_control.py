@@ -81,9 +81,9 @@ class Reynolds_Solver:
         ex = self.Example(self.U, self.dP, N, self.args)
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
-        # adj_velocity_inc = rv.Adjusted_ReynVelocity_inc(ex, adj_pressure.ps_2D)
         
-        adj_velocity = rv.Adjusted_ReynVelocity_velBC(ex, adj_pressure.ps_2D)
+        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
+        # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
@@ -175,8 +175,9 @@ class Reynolds_Solver:
             # graphics.plot_contour_mesh(uv_mag, ex.xs, ex.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
             # graphics.plot_quiver(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
 
-            # graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
-            # graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
+            graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
+            graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
+            print('vy max',np.max(np.abs(velocity.vy)))
            
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)

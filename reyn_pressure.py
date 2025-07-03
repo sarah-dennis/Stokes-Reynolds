@@ -79,7 +79,7 @@ class Adjusted_ReynPressure(Pressure):
         reyn_pressure = FinDiff_ReynPressure(height)
         ps_1D = reyn_pressure.ps_1D
         
-        ps_2D = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
+        ps_2D, self.pxs, self.p2xs, self.p3xs, self.p4xs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
 
         super().__init__(height, ps_1D, ps_2D)
 

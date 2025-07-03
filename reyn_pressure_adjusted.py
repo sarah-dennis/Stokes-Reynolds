@@ -8,38 +8,24 @@ import numpy as np
 import domain as dm
 import graphics
 
-
 def make_adj_ps(height, reyn_ps):
     ps_adj = np.zeros((height.Ny, height.Nx))
 
-    errs = np.zeros(height.Nx)
-    
     hs = height.hs
     hxs = height.hxs
     dx = height.dx
     dy = height.dy
     #--------------------------------------------------------------------------
-    pxs = np.zeros(height.Nx)
-    pxxs = np.zeros(height.Nx)
-
-    
-    i=0
-    pxs[i] =  dm.right_first(dx, reyn_ps[i : i+3])
-    pxxs[i] = dm.right_second(dx, reyn_ps[i : i+4])
-
- 
-    i=height.Nx-1
-    pxs[i] = dm.left_first(dx, reyn_ps[i-2 : i+1])
-    pxxs[i] = dm.left_second(dx, reyn_ps[i-3 : i+1])
-
-    
-    for i in range(1,height.Nx-1): 
-        pxs[i] = dm.center_first(dx, reyn_ps[i-1 : i+2])
-        pxxs[i] = dm.center_second(dx, reyn_ps[i-1 : i+2])
-
+    pxs = dm.center_diff(reyn_ps, height.Nx, height.dx)
+    p2xs = dm.center_second_diff(reyn_ps, height.Nx, height.dx)
+    p3xs = dm.center_third_diff(reyn_ps, height.Nx, height.dx)
+    p4xs = dm.center_fourth_diff(reyn_ps, height.Nx, height.dx)
+  
     for i in height.i_peaks[1:-1]:
         pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
-        pxxs[i-1:i+2] = dm.avg_2x(pxxs[i-2 : i+3])
+        p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
+        p3xs[i-2:i+3] = dm.avg_4x(p3xs[i-3 : i+4])
+        p4xs[i-2:i+3] = dm.avg_4x(p4xs[i-3 : i+4])
    #---------------------------------------------------------------------------
     visc = height.visc
     U = height.U
@@ -47,24 +33,21 @@ def make_adj_ps(height, reyn_ps):
         h = hs[i]
         hx = hxs[i]
         px = pxs[i]
-        pxx = pxxs[i]
+        pxx = p2xs[i]
         
         phi1x = -(pxx*h + px*hx)/2 + U*visc/(h**2)*hx
-                
-        vy = (h/(2*visc)*px - U/h)*hx
-        
+            
+        # vy = -(px*h/(2*visc) - U/h)*hx       
+
         for j in range(height.Ny):
             y = height.ys[j]
             if y > h:
                 ps_adj[j,i] = None
                 continue
             else:  
-                adj = -pxx*(y**2)/2 - phi1x*y - vy*visc
+                adj = -pxx*(y**2)/2 - phi1x*y #+ vy*visc
 
                 ps_adj[j,i] = reyn_ps[i] + adj
                             
-                if y + height.dy > h:
-                    
-                    errs[i] = abs(adj)
-    print('max err p(x,h)=p_re(x): ', np.max(errs))
-    return ps_adj 
+
+    return ps_adj, pxs, p2xs, p3xs, p4xs
