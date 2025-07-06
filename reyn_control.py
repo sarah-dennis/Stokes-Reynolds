@@ -82,8 +82,8 @@ class Reynolds_Solver:
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
         
-        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
-        # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
+        # adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
+        adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:

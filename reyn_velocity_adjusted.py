@@ -242,7 +242,7 @@ def make_us_vs(height, pxs, pxxs, px_hs, pxx_hs, pxy_hs):
         
         phi1x = -1/(2*visc)*(h*(pxx_h + pxy_h*hx) + hx*px_h) + U/(h**2) *hx
 
-        re = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -height.U/2 * hx
+        # re = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -height.U/2 * hx
 
 
         
@@ -254,7 +254,7 @@ def make_us_vs(height, pxs, pxxs, px_hs, pxx_hs, pxy_hs):
             if y < h:
                 us[j,i]= 1/(2*visc)*px* y**2  + phi1* y + U
                 
-                vs[j,i] = -1/(6*visc)*pxx* y**3 - 1/2*phi1x* y**2 -re*y/h            
+                vs[j,i] = -1/(6*visc)*pxx* y**3 - 1/2*phi1x* y**2 #-re*y/h            
 
             else:
                 continue
