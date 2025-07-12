@@ -6,6 +6,7 @@ Created on Wed Jan 25 17:33:35 2023
 @author: sarahdennis
 """
 import numpy as np
+import graphics
 #------------------------------------------------------------------------------
 # Domain: 2D grid on [x0, xf] and [y0, yf] on Nx and Ny grid points
 
@@ -46,10 +47,9 @@ class Height(Domain):
 
         for i in i_peaks:
             if i > 1 and i < self.Nx-2:
-                
                 self.hxs[i-1:i+2] = avg_2x(self.hxs[i-2:i+3])
-                
-        self.h_max = max(self.hs)
+                self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
+                self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])
         self.h_min = min(self.hs)
         
         self.U = U    # velocity at flat boundary

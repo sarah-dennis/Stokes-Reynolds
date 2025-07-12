@@ -13,7 +13,7 @@ import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 
-i_test_scale=3/5
+i_test_scale=4/5
 
 lenx = 2
 leny = 1
@@ -82,8 +82,8 @@ class Reynolds_Solver:
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
         
-        # adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
-        adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
+        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
+        # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
@@ -177,7 +177,6 @@ class Reynolds_Solver:
 
             graphics.plot_contour_mesh(velocity.vx, ex.xs, ex.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
             graphics.plot_contour_mesh(velocity.vy, ex.xs, ex.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
-            print('vy max',np.max(np.abs(velocity.vy)))
            
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)

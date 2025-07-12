@@ -14,8 +14,7 @@ def make_adj_ps(height, reyn_ps):
 
     hs = height.hs
     hxs = height.hxs
-    dx = height.dx
-    dy = height.dy
+    
     #--------------------------------------------------------------------------
     pxs = dm.center_diff(reyn_ps, height.Nx, height.dx)
     p2xs = dm.center_second_diff(reyn_ps, height.Nx, height.dx)
@@ -25,8 +24,9 @@ def make_adj_ps(height, reyn_ps):
     for i in height.i_peaks[1:-1]:
         pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
         p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
-        p3xs[i-2:i+3] = dm.avg_4x(p3xs[i-3 : i+4])
-        p4xs[i-2:i+3] = dm.avg_4x(p4xs[i-3 : i+4])
+        p3xs[i-2:i+3] = dm.avg_3x(p3xs[i-3 : i+4])
+        p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
+ 
    #---------------------------------------------------------------------------
     M = fd.make_mat(height)
     rhs = adj_rhs(height, pxs, p2xs, p3xs)
@@ -41,20 +41,18 @@ def make_adj_ps(height, reyn_ps):
         pxx = p2xs[i]
         
         phi1x = -(pxx*h + px*hx)/2 + U*visc/(h**2)*hx
-            
-        # vy = -(px*h/(2*visc) - U/h)*hx       
-
+        
         for j in range(height.Ny):
             y = height.ys[j]
             if y > h:
                 ps_adj[j,i] = None
                 continue
             else:  
-                adj = -pxx*(y**2)/2 - phi1x*y #+ vy*visc
+                adj = -pxx*(y**2)/2 - phi1x*y 
 
-                ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]
+                ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc
                             
-
+    graphics.plot_2D(sigmas, height.xs, 'sigmas', ['$x$','$\sigma(x)$'])
     return ps_adj, pxs, p2xs, p3xs, p4xs
 
 def adj_rhs(height, pxs, p2xs, p3xs):
@@ -69,12 +67,12 @@ def adj_rhs(height, pxs, p2xs, p3xs):
         px = pxs[i]
         
         p2x = p2xs[i]
-        p3x = p3xs[i]
         
-        v_a = (h**2)/2 *(px*h3x + 3*(p2x*h2x + p3x*hx) - p3x) 
-        v_b = (1/2) * (px*h2x + 2*p2x*hx) * (1 + 3*hx)
-        v_c = -U*visc*(h3x - h2x*(1-hx)/h - 2*hx/(h**2))
-        vs[i] = -(height.dx**2)*(h**2)/visc * (v_a + v_b + v_c)
+        v_a = (h**4)/2 *(3*p2x*h2x + px*h3x) 
+        v_b = 3*(h**3)* (2*p2x*(hx**2) + px*h2x*hx)
+        v_c = -U*visc*((h**2)*h3x - 6*(hx**3))
+        vs[i] = -1/visc * (v_a + v_b + v_c)
+        
     vs[0] = 0
     vs[-1] = 0
     return vs
