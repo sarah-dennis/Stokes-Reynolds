@@ -82,8 +82,8 @@ class Reynolds_Solver:
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
         
-        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
-        # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
+        # adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
+        adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
@@ -158,7 +158,7 @@ class Reynolds_Solver:
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
     
-    def v_plot(self, ex, velocity, dP, solver_title, zoom=False,  inc=False,uv=False):
+    def v_plot(self, ex, velocity, dP, solver_title, zoom=False,  inc=False, uv=False):
         paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 

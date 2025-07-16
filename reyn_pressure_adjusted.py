@@ -39,18 +39,25 @@ def make_adj_ps(height, reyn_ps):
         hx = hxs[i]
         px = pxs[i]
         pxx = p2xs[i]
-        
+
         phi1x = -(pxx*h + px*hx)/2 + U*visc/(h**2)*hx
-        
+
+        # vy = -(px*h/(2*visc) - U/h)*hx       
+
+
         for j in range(height.Ny):
             y = height.ys[j]
             if y > h:
                 ps_adj[j,i] = None
                 continue
+
             else:  
                 adj = -pxx*(y**2)/2 - phi1x*y 
 
-                ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc
+                ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc 
+
+#               ps_adj[j,i] = reyn_ps[i] + adj  #+ vy*visc
+
                             
     graphics.plot_2D(sigmas, height.xs, 'sigmas', ['$x$','$\sigma(x)$'])
     return ps_adj, pxs, p2xs, p3xs, p4xs
@@ -67,12 +74,12 @@ def adj_rhs(height, pxs, p2xs, p3xs):
         px = pxs[i]
         
         p2x = p2xs[i]
-        
+
         v_a = (h**4)/2 *(3*p2x*h2x + px*h3x) 
         v_b = 3*(h**3)* (2*p2x*(hx**2) + px*h2x*hx)
         v_c = -U*visc*((h**2)*h3x - 6*(hx**3))
         vs[i] = -1/visc * (v_a + v_b + v_c)
-        
+
     vs[0] = 0
     vs[-1] = 0
     return vs

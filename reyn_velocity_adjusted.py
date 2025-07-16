@@ -10,19 +10,16 @@ import domain as dm
 
 
 def make_adj_velocity(height, adj_pressure):
-    # ps = p_reyn + p_adj
-    # ps = adj_pressure.ps_2D
+
     # derivatives of the reynolds pressure
     pxs = adj_pressure.reyn_pxs
     p2xs = adj_pressure.reyn_p2xs
     p3xs = adj_pressure.reyn_p3xs
     p4xs = adj_pressure.reyn_p4xs
+    
     us = make_us(height, pxs, p2xs, p3xs)
     vs = make_vs(height,  pxs, p2xs, p3xs, p4xs)
-    # vs = make_vs_inc(height,  us)
-   
-    
-   
+      
     return us, vs
 
 def make_us(height, pxs, p2xs, p3xs):
@@ -78,51 +75,14 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs):
                 vD = U *((vDa + vDb)/6 - hx/(h**2)/2)*(y**2)
                 vs[j,i] = vA+vB+vC+vD
                 
-                ## v(x,y) = iintegral dp/dy dyy
+                # v(x,y) = iintegral dp/dy dyy
                 # vs[j,i] = (-1/6)*p2x*(y**3-h**2*y)+(1/2)*((1/2)*(p2x*h+px*hx)-U*visc*hx/h**2)*(y**2-h*y)
                 
-
     return vs
 
-def make_vs_inc(height, us):
-    vs = np.zeros((height.Ny, height.Nx))
-    U = height.U
-    hs = height.hs
-    visc = height.visc
-    dx=height.dx
     
-    uxs =np.zeros((height.Ny, height.Nx))
-    for j in range(height.Ny):
-        y = height.ys[j]
-        for i in range(height.Nx):
-            h = hs[i]
-            if y <= h:
-                if i == 0 or y > hs[i-1] and i < height.Nx-2:
-                    ux = dm.right_first(dx,us[j, i : i+3])
-                    
-                elif i == height.Nx-1 or y > hs[i+1] and i > 1:
-                    ux = dm.left_first(dx, us[j, i-2 : i+1])
-                    
-                else:
-                    ux = dm.center_first(dx, us[j, i-1:i+2])
-                    
-                uxs[j,i] = ux
+# # ------------------------------------------------------------------------------
 
-    dy = height.dy
-    vys = -uxs
-    for i in range(height.Nx):
-        h = hs[i]
-        for j in range(1,height.Ny):   
-            y = height.ys[j]
-            if y >= h:
-                continue
-            else:
-                vs[j,i] = vs[j-1,i] +vys[j,i]*dy
-    return vs
-
-
-
-#------------------------------------------------------------------------------
 # as in Takeuchi-Gu            
 def make_adj_velocity_TG(height, adj_pressure):
     ps = adj_pressure.ps_2D #ps = reyn_ps + adj_ps
@@ -228,7 +188,6 @@ def make_pxh_pxxh_pxyh(height,pxs,pxxs):
 
 def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
     
-    
     us = np.zeros((height.Ny, height.Nx))
     vs = np.zeros((height.Ny, height.Nx))
 
@@ -259,6 +218,7 @@ def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
                 vs[j,i] = -1/(6*visc)*pxx* y**3 - 1/2*phi1x* y**2 #-v_h*y/h            
 
             else:
+                # print((pxx_h + pxy_h*hx)*(h**3)+ 3*px_h*hx*(h**2) - 6*U*visc*hx)
                 continue
 
     return us, vs

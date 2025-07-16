@@ -101,10 +101,12 @@ write_on = False
 
 
 Example = examples.LogisticStep
+
 k = 1/2 # slope -1/k at x=0
 H = 1  # logistic height scale
 
-h = 1  # min height 6
+
+h = 1/2  # min height 6
 l = 2  # half length
 
 args = [k,H,h, l]
@@ -121,8 +123,10 @@ dP =-10
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
-# 
+
+
 N = 200
+
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 # solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
