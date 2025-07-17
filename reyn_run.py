@@ -129,9 +129,9 @@ N = 200
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
+# solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
 # solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-# solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
+solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
 # solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)
 
 #------------------------------------------------------------------------------

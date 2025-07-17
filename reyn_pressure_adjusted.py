@@ -20,7 +20,7 @@ def make_adj_ps(height, reyn_ps):
     p2xs = dm.center_second_diff(reyn_ps, height.Nx, height.dx)
     p3xs = dm.center_third_diff(reyn_ps, height.Nx, height.dx)
     p4xs = dm.center_fourth_diff(reyn_ps, height.Nx, height.dx)
-  
+    
     for i in height.i_peaks[1:-1]:
         pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
         p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
@@ -29,9 +29,9 @@ def make_adj_ps(height, reyn_ps):
  
    #---------------------------------------------------------------------------
     M = fd.make_mat(height)
-    rhs = adj_rhs(height, pxs, p2xs, p3xs)
+    # rhs = adj_rhs(height, pxs, p2xs)
+    rhs = adj_rhs_new(height, pxs, p2xs, p3xs, p4xs)
     sigmas  = np.linalg.solve(M, rhs)
-
     U = height.U
     visc = height.visc
     for i in range(height.Nx): 
@@ -60,9 +60,9 @@ def make_adj_ps(height, reyn_ps):
 
                             
     graphics.plot_2D(sigmas, height.xs, 'sigmas', ['$x$','$\sigma(x)$'])
-    return ps_adj, pxs, p2xs, p3xs, p4xs
+    return ps_adj, pxs, p2xs, p3xs, p4xs, sigmas
 
-def adj_rhs(height, pxs, p2xs, p3xs):
+def adj_rhs(height, pxs, p2xs):
     vs = np.zeros(height.Nx)
     U = height.U
     visc = height.visc
@@ -79,6 +79,32 @@ def adj_rhs(height, pxs, p2xs, p3xs):
         v_b = 3*(h**3)* (2*p2x*(hx**2) + px*h2x*hx)
         v_c = -U*visc*((h**2)*h3x - 6*(hx**3))
         vs[i] = -1/visc * (v_a + v_b + v_c)
+
+    vs[0] = 0
+    vs[-1] = 0
+    return vs
+
+
+def adj_rhs_new(height, pxs, p2xs, p3xs, p4xs):
+    vs = np.zeros(height.Nx)
+    U = height.U
+    visc = height.visc
+    for i in range(height.Nx):
+        h = height.hs[i]
+        hx = height.hxs[i]
+        h2x = height.h2xs[i]
+        h3x = height.h3xs[i]
+        px = pxs[i]
+        p2x = p2xs[i]
+        p3x = p3xs[i]
+        p4x = p4xs[i]
+
+        v_a =(h**5)*p4x + 5*(h**4)*p3x*hx 
+        v_b = (h3x*px + 3*h2x*p2x)*(h**4) 
+        v_c = (2*p3x*hx + 8*(hx**2)*p2x + 4*hx*h2x*px)*(h**3)
+        v_d = ((h**2)*h3x-2*h*hx*h2x-2*(hx**3))
+    
+        vs[i] = v_a/(40*visc) - (v_b + v_c)/(24*visc) + v_d*U/12
 
     vs[0] = 0
     vs[-1] = 0

@@ -16,13 +16,15 @@ def make_adj_velocity(height, adj_pressure):
     p2xs = adj_pressure.reyn_p2xs
     p3xs = adj_pressure.reyn_p3xs
     p4xs = adj_pressure.reyn_p4xs
-    
-    us = make_us(height, pxs, p2xs, p3xs)
-    vs = make_vs(height,  pxs, p2xs, p3xs, p4xs)
+    sigmas = adj_pressure.sigmas
+    sigma_xs = dm.center_diff(sigmas, height.Nx, height.dx)
+    sigma_2xs = dm.center_second_diff(sigmas, height.Nx, height.dx)
+    us = make_us(height, pxs, p2xs, p3xs, sigma_xs)
+    vs = make_vs(height,  pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
     return us, vs
 
-def make_us(height, pxs, p2xs, p3xs):
+def make_us(height, pxs, p2xs, p3xs, sigmaxs):
     us = np.zeros((height.Ny, height.Nx))
     U = height.U
     visc = height.visc
@@ -33,19 +35,22 @@ def make_us(height, pxs, p2xs, p3xs):
         px = pxs[i]
         p2x = p2xs[i]
         p3x = p3xs[i]
+        sigmax = sigmaxs[i]
         for j in range(height.Ny):
             y = height.ys[j]
             if y >= h:
                 continue
             else:
-                uA = 1/(2*visc)*px * (y**2-h*y) - 1/(24*visc)*p3x * (y**4+(h**3)*y-2*h*(y**3))
+                uA = 1/(2*visc)*px * (y**2-h*y) +U*(1-y/h)
+                uB = - 1/(24*visc)*p3x * (y**4+(h**3)*y-2*h*(y**3))
                 uB = 1/(12*visc)*(2*p2x*hx+px*h2x) * (y**3-(h**2)*y)
-                uC = -U/6*(-2*(h**2)/(h**3)+h2x/(h**2))*((y**3)-(h**2)*y)+U*(1-y/h)
-                us[j,i] = (uA+uB+uC)
+                uC = -U/6*(-2*(hx**2)/(h**3)+h2x/(h**2))*((y**3)-(h**2)*y)
+                uD = (1/2)*sigmax*((y**2)-h*y)
+                us[j,i] = (uA+uB+uC+uD)
     return us
 
 
-def make_vs(height, pxs, p2xs, p3xs, p4xs):
+def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
     vs = np.zeros((height.Ny, height.Nx))
     U = height.U
     visc = height.visc
@@ -58,6 +63,8 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs):
         p2x = p2xs[i]
         p3x = p3xs[i]
         p4x =  p4xs[i]
+        sigmax = sigmaxs[i]
+        sigma2x = sigma2xs[i]
         for j in range(height.Ny):
             y = height.ys[j]
             if y >= h:
@@ -70,10 +77,12 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs):
                 vCa = (2*p3x*hx+3*p2x*h2x+px*h3x)*((y**2)/4 - (h**2)/2)
                 vCb = -(2*p2x*hx+px*h2x)*hx*h
                 vC = -1/(12*visc)*(vCa+vCb)*(y**2)
-                vDa = (h3x/(h**2)+6*(hx**3)/(h**4)-6*hx*h2x/(h**3))*((y**2)/4-(h**2)/2)
-                vDb = -(h2x/h - 2*(hx**2)/(h**2))*hx
-                vD = U *((vDa + vDb)/6 - hx/(h**2)/2)*(y**2)
-                vs[j,i] = vA+vB+vC+vD
+                vDa = ((y**4)-2*(h**2)*(y**2))*h3x/(4*(h**2))
+                vDb = (3*(y**4)-2*(h**2)*(y**2))*(hx**3)/(2*(h**4))
+                vDc = (4*(h**2)*(y**2)-3*(y**4))*hx*h2x/(2*(h**3))
+                vD = U *(vDa+vDb+vDc)/6 
+                vE = -sigma2x*((y**3)/6 -h*(y**2)/4) + sigmax*hx*(y**2)/4
+                vs[j,i] = vA+vB+vC+vD+vE
                 
                 # v(x,y) = iintegral dp/dy dyy
                 # vs[j,i] = (-1/6)*p2x*(y**3-h**2*y)+(1/2)*((1/2)*(p2x*h+px*hx)-U*visc*hx/h**2)*(y**2-h*y)

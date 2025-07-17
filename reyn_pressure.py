@@ -79,11 +79,9 @@ class Adjusted_ReynPressure(Pressure):
         reyn_pressure = FinDiff_ReynPressure(height)
         ps_1D = reyn_pressure.ps_1D
         
-# <<<<<<< Updated upstream
-        ps_2D, self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
-# =======
-#         ps_2D, self.pxs, self.p2xs, self.p3xs, self.p4xs= reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
-# >>>>>>> Stashed changes
+
+        ps_2D, self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs, self.sigmas = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
+
 
         super().__init__(height, ps_1D, ps_2D)
 
