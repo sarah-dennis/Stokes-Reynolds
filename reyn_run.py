@@ -102,11 +102,11 @@ write_on = False
 
 Example = examples.LogisticStep
 
-k = 1/2 # slope -1/k at x=0
+k = -1/8 # slope -1/k at x=0
 H = 1  # logistic height scale
 
 
-h = 1/2  # min height 6
+h = 1  # min height 6
 l = 2  # half length
 
 args = [k,H,h, l]
@@ -116,10 +116,10 @@ args = [k,H,h, l]
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U =1
+U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-10
+dP =-24
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )

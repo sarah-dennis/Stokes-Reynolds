@@ -36,17 +36,28 @@ def make_us(height, pxs, p2xs, p3xs, sigmaxs):
         p2x = p2xs[i]
         p3x = p3xs[i]
         sigmax = sigmaxs[i]
+        
+        h2 = h**2
+        h3 = h**3
+        hx2 = hx**2
         for j in range(height.Ny):
             y = height.ys[j]
-            if y >= h:
+            y2 = y**2
+            y3 = y**3
+            y4 = y**4
+            
+            if y > h:
                 continue
             else:
-                uA = 1/(2*visc)*px * (y**2-h*y) +U*(1-y/h)
-                uB = - 1/(24*visc)*p3x * (y**4+(h**3)*y-2*h*(y**3))
-                uB = 1/(12*visc)*(2*p2x*hx+px*h2x) * (y**3-(h**2)*y)
-                uC = -U/6*(-2*(hx**2)/(h**3)+h2x/(h**2))*((y**3)-(h**2)*y)
-                uD = (1/2)*sigmax*((y**2)-h*y)
-                us[j,i] = (uA+uB+uC+uD)
+              # reynolds u
+                uA = 1/(2*visc)  * px                   * (y2 - h*y) + U*(1 - y/h)
+              # adjusted u
+                uB = -1/(24*visc)* p3x                  * (y4 - h3*y)
+                uC = 1/(12*visc) * (h*p3x + 2*p2x*hx + px*h2x)  * (y3 - h2*y)
+                uD = -U/6        * (-2*hx2/h3 + h2x/h2) * (y3 - h2*y)
+                uE = (1/2)       * sigmax               * (y2 - h*y)
+                
+                us[j,i] = (uA+uB+uC+uD+uE)
     return us
 
 
@@ -58,30 +69,39 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
         h = height.hs[i]
         hx = height.hxs[i]
         h2x = height.h2xs[i]
-        h3x=height.h3xs[i]
+        h3x = height.h3xs[i]
         px = pxs[i]
         p2x = p2xs[i]
         p3x = p3xs[i]
         p4x =  p4xs[i]
         sigmax = sigmaxs[i]
         sigma2x = sigma2xs[i]
+        
+        h2 = h**2
+        h3 = h**3
+        h4 = h**4
+        hx2 = hx**2
+        hx3 = hx**3
         for j in range(height.Ny):
             y = height.ys[j]
-            if y >= h:
+            y2 = y**2
+            y3 = y**3
+            y4 = y**4
+            y5 = y**5
+            if y > h:
                 continue
             else:
                 
                 # v(x,y) = integral -du/dx  dy
-                vA = -1/(2*visc)*(p2x*(y/3-h/2) - px*hx/2)*(y**2)
-                vB = 1/(24*visc)*(p4x*((y**3)/5+(h**3)/2-h*(y**2)/2) + p3x*hx*(3*(h**2)/2-(y**2)/2))*(y**2)
-                vCa = (2*p3x*hx+3*p2x*h2x+px*h3x)*((y**2)/4 - (h**2)/2)
-                vCb = -(2*p2x*hx+px*h2x)*hx*h
-                vC = -1/(12*visc)*(vCa+vCb)*(y**2)
-                vDa = ((y**4)-2*(h**2)*(y**2))*h3x/(4*(h**2))
-                vDb = (3*(y**4)-2*(h**2)*(y**2))*(hx**3)/(2*(h**4))
-                vDc = (4*(h**2)*(y**2)-3*(y**4))*hx*h2x/(2*(h**3))
-                vD = U *(vDa+vDb+vDc)/6 
-                vE = -sigma2x*((y**3)/6 -h*(y**2)/4) + sigmax*hx*(y**2)/4
+                vA = -1/(2*visc)* (p2x*(y3/3-h*y2/2) - px*hx*y2/2) - U*hx*y2/(2*h2) 
+                vB = 1/(24*visc)*(p4x*(y5/5-h3*y2/2) - 3*h2*y2*p3x*hx/2 )
+                vCa = (h*p4x + 3*p3x*hx + 3*p2x*h2x + px*h3x)*(y4/4 - h2*y2/2)
+                vCb = -(h*p3x + 2*p2x*hx + px*h2x)*h*hx*y2
+                vC = -1/(12*visc)*(vCa+vCb)
+                vDa = (y4-2*h2*y2)/(4*h2)*h3x + (3*y4-2*h2*y2)/(2*h4)*hx3 + (4*h2*y2-3*y4)/(2*h3)*hx*h2x
+
+                vD = U/6 * vDa
+                vE = -1/2 * (sigma2x*(y3/3 -h*y2/2) - sigmax*hx*y2/2)
                 vs[j,i] = vA+vB+vC+vD+vE
                 
                 # v(x,y) = iintegral dp/dy dyy

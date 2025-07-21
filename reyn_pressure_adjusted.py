@@ -29,8 +29,8 @@ def make_adj_ps(height, reyn_ps):
  
    #---------------------------------------------------------------------------
     M = fd.make_mat(height)
-    # rhs = adj_rhs(height, pxs, p2xs)
-    rhs = adj_rhs_new(height, pxs, p2xs, p3xs, p4xs)
+    # rhs = adj_rhs(height, pxs, p2xs) #t & g velocity
+    rhs = adj_rhs_new(height, pxs, p2xs, p3xs, p4xs) #new velocity
     sigmas  = np.linalg.solve(M, rhs)
     U = height.U
     visc = height.visc
@@ -100,11 +100,11 @@ def adj_rhs_new(height, pxs, p2xs, p3xs, p4xs):
         p4x = p4xs[i]
 
         v_a =(h**5)*p4x + 5*(h**4)*p3x*hx 
-        v_b = (h3x*px + 3*h2x*p2x)*(h**4) 
-        v_c = (2*p3x*hx + 8*(hx**2)*p2x + 4*hx*h2x*px)*(h**3)
-        v_d = ((h**2)*h3x-2*h*hx*h2x-2*(hx**3))
+        v_b = (h*p4x+ 3*hx*p3x + h3x*px + 3*h2x*p2x)*(h**4) 
+        v_c = 4*(h*p3x + 2*hx*p2x + h2x*px)*(h**3)*hx
+        v_d = ((h**2)*h3x-2*(hx**3)-2*h*hx*h2x)
     
-        vs[i] = v_a/(40*visc) - (v_b + v_c)/(24*visc) + v_d*U/12
+        vs[i] = 3*v_a/(20*visc) - (v_b + v_c)/(4*visc) + v_d*U/2
 
     vs[0] = 0
     vs[-1] = 0

@@ -193,7 +193,7 @@ class Stokes_Solver:
 
     
         ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
-        title_p = '' + ex.spacestr + dp_str
+        title_p = 'Stokes\n' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
         p_ma = np.flip(p_ma, axis=0)
@@ -207,7 +207,7 @@ class Stokes_Solver:
     #  Velocity plot: 
     
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-        title = '' + ex.spacestr + dp_str
+        title = 'Stokes\n' + ex.spacestr + dp_str
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
         
         u_2D = u.reshape((ex.Ny,ex.Nx))

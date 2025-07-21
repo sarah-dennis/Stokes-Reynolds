@@ -88,8 +88,7 @@ class Reynolds_Solver:
         solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
         if plot:
             self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, zoom)
-            # self.v_plot(ex, adj_velocity_inc, adj_pressure.dP, solver_title + "ux + vy = 0", zoom, inc, uv)
-            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title + "u(0)=U, u(h)=0",zoom, inc, uv)
+            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title,zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
             u = adj_velocity.vx.reshape(nm)
