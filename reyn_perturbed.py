@@ -484,12 +484,13 @@ class PerturbedReynSol:
         
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
          
-        for j in range(height.Ny): #TODO
+        for j in range(height.Ny): #TODO height dependent averaging?
             v0_Sy_2xs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
             for i in height.i_peaks:
                 if i > 2 and i < height.Nx-3:
-            
                     v0_Sy_2xs[j, i-2 : i+3] = dm.avg_3x(v0_Sy_2xs[j, i-3 : i+4])
+        
+        # countour integral c5s for p4
         p4s = np.zeros((height.Ny, height.Nx))
 
         c5s[0] = 0 # np.mean(u2_xs[:,0]) - np.mean(v0_Sy_xxs[:,0])

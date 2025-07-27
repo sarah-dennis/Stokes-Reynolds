@@ -40,15 +40,15 @@ class Reynolds_Solver:
 
 
     
-    def pwl_solve(self, N, write=False, plot=True,zoom=False,inc=False, uv=False):
+    def pwl_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         pressure = rp.PwlGMRes_ReynPressure(ex)
         velocity = rv.ReynVelocity(ex, pressure.ps_1D)
         solver_title = "Reynolds"#" Piecewise Linear"
         if plot:
-            self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
-            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom, inc, uv)
+            self.p_plot(ex, pressure, velocity.flux, solver_title, scaled, zoom)
+            self.v_plot(ex, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
         
         if write:
             nm = ex.Nx * ex.Ny
@@ -59,15 +59,15 @@ class Reynolds_Solver:
         
         return pressure, velocity
     
-    def fd_solve(self, N, write=False, plot=True,zoom=False,inc=False, uv=False):
+    def fd_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         pressure = rp.FinDiff_ReynPressure(ex)
         
         velocity = rv.ReynVelocity(ex, pressure.ps_1D)
         solver_title = "Reynolds"#"Finite Difference"
         if plot:
-            self.p_plot(ex, pressure, velocity.flux, solver_title, zoom)
-            self.v_plot(ex, velocity, pressure.dP, solver_title, zoom,inc, uv)
+            self.p_plot(ex, pressure, velocity.flux, solver_title, scaled, zoom)
+            self.v_plot(ex, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
 
         if write:
             nm = ex.Nx * ex.Ny
@@ -77,7 +77,7 @@ class Reynolds_Solver:
             rw.write_reyn(ex, u, v, p)
         return pressure, velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, zoom=False, inc=False, uv=False):
+    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
         
         adj_pressure = rp.Adjusted_ReynPressure(ex)
@@ -85,10 +85,10 @@ class Reynolds_Solver:
         adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
         # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
-        solver_title = "Reynolds Adjusted ($\Delta h/L \ll 1$)"
+        solver_title = "Reynolds Adjusted"
         if plot:
-            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, zoom)
-            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title,zoom, inc, uv)
+            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, scaled, zoom)
+            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
             u = adj_velocity.vx.reshape(nm)
@@ -100,7 +100,7 @@ class Reynolds_Solver:
     
     
 
-    def fd_pert_solve(self, N, order, write=False, plot=True, zoom=False, inc=False, uv=False, get_dPs = False):
+    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_dPs = False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         
@@ -111,16 +111,18 @@ class Reynolds_Solver:
         solver_title = "Reynolds"
         
         if plot:
-            # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, zoom)
-            # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, zoom, inc, uv)
+            
+            self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, scaled, zoom)
+            self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
+
             if order > 1:
                 solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
-                self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, zoom)
-                self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, zoom, inc, uv)
+                self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, scaled, zoom)
+                self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
             if order > 3:
                 solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
-                self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.flux, solver_title4, zoom)
-                self.v_plot(ex, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, zoom, inc, uv)
+                self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.flux, solver_title4, scaled, zoom)
+                self.v_plot(ex, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
         
         if write:
             if order > 1 and order < 3:
@@ -145,25 +147,55 @@ class Reynolds_Solver:
                 return pert.pert4_pressure, pert.pert4_velocity
     
     
-    def p_plot(self, ex, pressure, flux, solver_title, zoom):
-        paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, pressure.dP)
-        p_title = solver_title +'\n' + paramstr
-        p_labels = ["$p(x)$", "$x$","$y$"]
-        graphics.plot_contour_mesh(pressure.ps_2D, ex.xs, ex.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+    def p_plot(self, ex, pressure, flux, solver_title, scaled=False, zoom=False):
+        if scaled:
+            x_scale = ex.xs[-1]-ex.xs[0]
+            y_scale = min(ex.hs)
+            p_scale = flux*ex.visc*x_scale/y_scale
+            paramstr = "$Re=0$, $ Q=%.2f$, $U=%.1f$, $\Delta   P=%.2f$"%(flux, self.U, pressure.dP/p_scale)
+            p_title = solver_title +'\n' + paramstr
+            p_labels = ["$  p$", "$  x$","$  y$"]
+            graphics.plot_contour_mesh(pressure.ps_2D/p_scale, ex.xs/x_scale, ex.ys/y_scale, p_title, p_labels, vmin=self.p_min/p_scale, vmax=self.p_max/p_scale, log_cmap=False)
+        
+        else:
+            paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.U, pressure.dP)
+            p_title = solver_title +'\n' + paramstr
+            p_labels = ["$p$", "$x$","$y$"]
+            graphics.plot_contour_mesh(pressure.ps_2D, ex.xs, ex.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
         if zoom:
-            xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
-            p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, ex, x_start, x_stop, y_start, y_stop)
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+            if scaled:
+                xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
+                p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, ex, x_start, x_stop, y_start, y_stop)
+                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+            
+            else:
+                xs_zoom, ys_zoom = graphics.grid_zoom_1D(ex.xs, ex.ys, ex, x_start, x_stop, y_start, y_stop)
+                p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, ex, x_start, x_stop, y_start, y_stop)
+                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+            
+      
     
-    
-    def v_plot(self, ex, velocity, dP, solver_title, zoom=False,  inc=False, uv=False):
-        paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
-        v_title = solver_title + '\n' + paramstr
-        v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
-        uv_mag = np.sqrt(velocity.vx**2 + velocity.vy**2)
-        
-        graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+    def v_plot(self, ex, velocity, dP, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
+        if scaled:
+            x_scale = ex.xs[-1]-ex.xs[0]
+            y_scale = min(ex.hs)
+            u_scale = velocity.flux/y_scale
+            v_scale = velocity.flux/x_scale
+            p_scale = velocity.flux*ex.visc*x_scale/y_scale
+            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.flux, self.U, dP/p_scale)
+            v_title = solver_title + '\n' + paramstr
+            v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
+            uv_mag = np.sqrt((velocity.vx/u_scale)**2 + (velocity.vy/v_scale)**2)
+            graphics.plot_stream_heat(velocity.vx/u_scale, velocity.vy/y_scale, ex.xs/x_scale, ex.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max/velocity.flux, log_cmap=False)
+
+        else:
+           
+            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
+            v_title = solver_title + '\n' + paramstr
+            v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
+            uv_mag = np.sqrt((velocity.vx)**2 + (velocity.vy)**2)
+            graphics.plot_stream_heat(velocity.vx, velocity.vy, ex.xs, ex.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
         if uv:
             

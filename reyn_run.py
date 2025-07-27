@@ -35,17 +35,20 @@ import reyn_examples as examples
 #        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
 #------------------------------------------------------------------------------
 plots_on = True
+uv_on = False
+inc_on=not False
 zoom_on = False 
 write_on = False
+scaled_on=False#True
 #------------------------------------------------------------------------------
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-# Example = examples.BFS
-# H=2
-# l=1
-# L=4
-# args = [H, l, L]
+Example = examples.BFS
+H=2
+l=2
+L=4
+args = [H, l, L]
 
 # Example = examples.BFS_noEddy
 # H = 2
@@ -58,8 +61,15 @@ write_on = False
 # delta = 0.5
 # args = [H,delta]
 
-# Example = examples.TriSlider
-# args = None
+Example = examples.TriSlider
+h_in=1
+h=1/2
+h_out = 1
+l_in = 1
+l_out = 1
+l_a = 1.25
+l_b = 0.75
+args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 # Example = examples.HexSlider
 # args = None
@@ -84,7 +94,7 @@ write_on = False
 # Example = examples.LambdaBump 
 
 
-# lam=1
+# lam=-1
 # H=1/4 
 # l=1
 # h0 = 1
@@ -102,7 +112,7 @@ write_on = False
 
 Example = examples.LogisticStep
 
-k = -1/8 # slope -1/k at x=0
+k = 1 # slope -1/k at x=0
 H = 1  # logistic height scale
 
 
@@ -119,20 +129,20 @@ args = [k,H,h, l]
 U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-24
+dP =-20
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 200
+N = 100
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-# solver.fd_solve(N, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
-# solver.pwl_solve(N, plot=plots_on, zoom=zoom_on)
-solver.fd_adj_solve(N, write=write_on, plot=plots_on, zoom=zoom_on, uv=True, inc=True)
-# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, zoom=zoom_on, uv=True)
+# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
+solver.fd_adj_solve(N, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

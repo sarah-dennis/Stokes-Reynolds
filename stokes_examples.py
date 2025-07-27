@@ -421,7 +421,22 @@ class BFS_H1p125L4_Re0p25_Q2_U0(BFS):
         namestr = "BFS_H1p125L4_Re0p25_Q2_U0"
          
         super().__init__(L, l, H, h, U, q, Re, N,namestr)
-         
+        
+
+class BFS_centered_Re0_Q0p74_U0(BFS):
+    def __init__ (self, N):
+        L=4
+        l=2
+        H=2
+        h=1
+        U=0 
+        Re=0 
+        q=0.74
+        namestr = "cBFS_H1p125L4_Re0p25_Q2_U0"
+        super().__init__(L, l, H, h, U, q, Re, N,namestr)
+        
+        
+
 #------------------------------------------------------------------------------
 # <<======================== Smoothed Step  =================================>>
 #------------------------------------------------------------------------------
@@ -1019,7 +1034,7 @@ class bump_Re0(PWLinear):
  
 
 class logisticBFS(PWLinear):
-    def __init__(self, N, slope, flux, namestr):
+    def __init__(self, N, slope, flux, Re, namestr):
 
         
         self.slope = slope
@@ -1041,8 +1056,6 @@ class logisticBFS(PWLinear):
         
         U = 0
         q = flux
-        Re = 0
-        
          
         super().__init__(self.x0, self.xf, y0, yf, N, U, q, Re,namestr, x_peaks, y_peaks)   
 
@@ -1053,45 +1066,83 @@ class logisticBFS_l1_Re0_Q1p19_U0(logisticBFS):
     def __init__(self, N):
         q=1.19 
         slope=1
+        Re=0
         namestr = 'logisticBFS_l1_Re0_Q1p19_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
 
+class logisticBFS_l1_Re1_Q1p19_U0(logisticBFS):
+    def __init__(self, N):
+        q=1.19 
+        slope=1
+        Re=1
+        namestr = 'logisticBFS_l1_Re1_Q1p19_U0'
+        super().__init__(N, slope, q, Re, namestr)
+        
 class logisticBFS_l0p5_Re0_Q0p99_U0(logisticBFS):
     def __init__(self, N):
         q=0.99 
         slope=1/2
+        Re=0
         namestr = 'logisticBFS_l0p5_Re0_Q0p99_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
+        
+class logisticBFS_l0p5_Re1_Q0p99_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.99 
+        slope=1/2
+        Re=1
+        namestr = 'logisticBFS_l0p5_Re1_Q0p99_U0'
+        super().__init__(N, slope, q, Re, namestr)
         
         
         
 class logisticBFS_l0p25_Re0_Q0p85_U0(logisticBFS):
     def __init__(self, N):
         q=0.85
+        Re=0
         slope=1/4
         namestr = 'logisticBFS_l0p25_Re0_Q0p85_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
+        
+class logisticBFS_l0p25_Re1_Q0p85_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.85
+        Re=1
+        slope=1/4
+        namestr = 'logisticBFS_l0p25_Re1_Q0p85_U0'
+        super().__init__(N, slope, q, Re, namestr)
 
 class logisticBFS_l0p125_Re0_Q0p79_U0(logisticBFS):
     def __init__(self, N):
         q=0.79
+        Re=0
         slope=1/8
         namestr = 'logisticBFS_l0p125_Re0_Q0p79_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
+        
+class logisticBFS_l0p125_Re1_Q0p79_U0(logisticBFS):
+    def __init__(self, N):
+        q=0.79
+        Re=1
+        slope=1/8
+        namestr = 'logisticBFS_l0p125_Re1_Q0p79_U0'
+        super().__init__(N, slope, q, Re, namestr)
 
 class logisticBFS_l0p0625_Re0_Q0p77_U0(logisticBFS):
     def __init__(self, N):
+        Re=0
         q=0.77
         slope=1/16
         namestr = 'logisticBFS_l0p0625_Re0_Q0p77_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
 
         
 
 class logisticBFS_l0p03125_Re0_Q0p75_U0(logisticBFS):
     def __init__(self, N):
         q=0.75
+        Re=0
         slope=1/32
         namestr = 'logisticBFS_l0p03125_Re0_Q0p75_U0'
-        super().__init__(N, slope, q, namestr)
+        super().__init__(N, slope, q, Re, namestr)
 

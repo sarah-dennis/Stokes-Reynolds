@@ -19,6 +19,13 @@ def make_adj_velocity(height, adj_pressure):
     sigmas = adj_pressure.sigmas
     sigma_xs = dm.center_diff(sigmas, height.Nx, height.dx)
     sigma_2xs = dm.center_second_diff(sigmas, height.Nx, height.dx)
+    
+    for i in height.i_peaks[1:-1]:
+        sigma_xs[i-3:i+4] = dm.avg_4x(sigma_xs[i-4:i+5])
+        sigma_2xs[i-3:i+4] = dm.avg_4x(sigma_2xs[i-4:i+5])
+    
+    # graphics.plot_2D_multi([sigma_xs,sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
+
     us = make_us(height, pxs, p2xs, p3xs, sigma_xs)
     vs = make_vs(height,  pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
@@ -58,6 +65,7 @@ def make_us(height, pxs, p2xs, p3xs, sigmaxs):
                 uE = (1/2)       * sigmax               * (y2 - h*y)
                 
                 us[j,i] = (uA+uB+uC+uD+uE)
+
     return us
 
 
@@ -80,7 +88,6 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
         h2 = h**2
         h3 = h**3
         h4 = h**4
-        hx2 = hx**2
         hx3 = hx**3
         for j in range(height.Ny):
             y = height.ys[j]
@@ -103,10 +110,7 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
                 vD = U/6 * vDa
                 vE = -1/2 * (sigma2x*(y3/3 -h*y2/2) - sigmax*hx*y2/2)
                 vs[j,i] = vA+vB+vC+vD+vE
-                
-                # v(x,y) = iintegral dp/dy dyy
-                # vs[j,i] = (-1/6)*p2x*(y**3-h**2*y)+(1/2)*((1/2)*(p2x*h+px*hx)-U*visc*hx/h**2)*(y**2-h*y)
-                
+
     return vs
 
     
@@ -184,10 +188,11 @@ def make_px_pxx(height, ps):
             
     #TODO: make height dependent     
     # discontinuity averaging 
-    # for i in height.i_peaks[1:-1]:
-    #     for j in range(height.Ny):
-    #         pxs[j,i-1 : i+2] = dm.avg_2x(pxs[j,i-2 : i+3])
-    #         pxxs[j,i-2 : i+3] = dm.avg_3x(pxxs[j,i-3 : i+4])
+    for i in height.i_peaks[1:-1]:
+        for j in range(height.Ny):
+            
+            pxs[j,i-1 : i+2] = dm.avg_2x(pxs[j,i-2 : i+3])
+            pxxs[j,i-2 : i+3] = dm.avg_3x(pxxs[j,i-3 : i+4])
             
     return pxs, pxxs     
 

@@ -25,8 +25,9 @@ def make_adj_ps(height, reyn_ps):
         pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
         p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
         p3xs[i-2:i+3] = dm.avg_3x(p3xs[i-3 : i+4])
-        p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
- 
+        p4xs[i-3:i+4] = dm.avg_4x(p4xs[i-4 : i+5])
+    
+    # graphics.plot_2D_multi([pxs,p2xs,p3xs,p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_{*}'])
    #---------------------------------------------------------------------------
     M = fd.make_mat(height)
     # rhs = adj_rhs(height, pxs, p2xs) #t & g velocity
@@ -59,7 +60,7 @@ def make_adj_ps(height, reyn_ps):
 #               ps_adj[j,i] = reyn_ps[i] + adj  #+ vy*visc
 
                             
-    graphics.plot_2D(sigmas, height.xs, 'sigmas', ['$x$','$\sigma(x)$'])
+    # graphics.plot_2D(sigmas, height.xs, 'sigmas', ['$x$','$\sigma(x)$'])
     return ps_adj, pxs, p2xs, p3xs, p4xs, sigmas
 
 def adj_rhs(height, pxs, p2xs):

@@ -123,34 +123,43 @@ import stokes_examples as examples
 
 #------------------------------------------------------------------------------
 
-# example = examples.logisticBFS_l1_Re0_Q1p19_U0
+example = examples.logisticBFS_l1_Re0_Q1p19_U0
 # example = examples.logisticBFS_l0p5_Re0_Q0p99_U0
 # example = examples.logisticBFS_l0p25_Re0_Q0p85_U0
-example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
+# example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
+# example = examples.BFS_centered_Re0_Q0p74_U0
+
+
+example = examples.logisticBFS_l1_Re1_Q1p19_U0
+# example = examples.logisticBFS_l0p5_Re1_Q0p99_U0
+# example = examples.logisticBFS_l0p25_Re1_Q0p85_U0
+# example = examples.logisticBFS_l0p125_Re1_Q0p79_U0
+
+
 # ------------------------------------------------------------------------------
 
 
-solver = control.Stokes_Solver(example, max_iters=5000)                
+solver = control.Stokes_Solver(example, max_iters=10000)                
 
-N=160
+N=80
 
        
 zoom_on=False               
 # 
-# solver.new_ run(N) 
+# solver.new_run(N) 
 
-# solver.load_scale(20,40) 
+# solver.load_scale(80,160) 
 
 # 
 # solver.load_run(N)
 
+# solver.new_run(N)
+solver.load_run(N)
+# solver.load_run_many(40, 2, 4)
 
-# solver.load_run(N)
-# solver.load_run_many(20, 2, 3)
-
-# solver.load_run_new_many(N, 2, 3)  
-
-solver.load_plot(N, zoom=zoom_on)
+# solver.new_run_many(N, 2, 3)  
+# solver.load_run_new_many(N, 2, 1)
+# solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)

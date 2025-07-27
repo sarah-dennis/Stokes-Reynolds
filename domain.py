@@ -45,11 +45,13 @@ class Height(Domain):
         self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)
         self.h3xs = center_third_diff(self.hs, self.Nx, self.dx)
 
-        for i in i_peaks:
-            if i > 1 and i < self.Nx-2:
-                self.hxs[i-1:i+2] = avg_2x(self.hxs[i-2:i+3])
-                self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
-                self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])
+        for i in i_peaks[1:-1]:
+            self.hxs[i-1:i+2] = avg_2x(self.hxs[i-2:i+3])
+            self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
+            self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])
+                
+        # graphics.plot_2D_multi([self.hxs,self.h2xs,self.h3xs], self.xs, 'Height gradients', ['$h_x$','$h_{xx}$','$h_{xxx}$'], ['$x$','$h_{*}$'])
+
         self.h_min = min(self.hs)
         
         self.U = U    # velocity at flat boundary
