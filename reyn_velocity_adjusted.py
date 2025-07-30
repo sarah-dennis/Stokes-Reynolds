@@ -16,20 +16,18 @@ def make_adj_velocity(height, adj_pressure):
     p2xs = adj_pressure.reyn_p2xs
     p3xs = adj_pressure.reyn_p3xs
     p4xs = adj_pressure.reyn_p4xs
-    sigmas = adj_pressure.sigmas
-    sigma_xs = dm.center_diff(sigmas, height.Nx, height.dx)
-    sigma_2xs = dm.center_second_diff(sigmas, height.Nx, height.dx)
-    
-    for i in height.i_peaks[1:-1]:
-        sigma_xs[i-3:i+4] = dm.avg_4x(sigma_xs[i-4:i+5])
-        sigma_2xs[i-3:i+4] = dm.avg_4x(sigma_2xs[i-4:i+5])
-    
-    # graphics.plot_2D_multi([sigma_xs,sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
+    # sigmas = adj_pressure.sigmas
+    sigma_xs = adj_pressure.sigma_xs
+    sigma_2xs = adj_pressure.sigma_2xs
+
 
     us = make_us(height, pxs, p2xs, p3xs, sigma_xs)
     vs = make_vs(height,  pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
     return us, vs
+
+
+
 
 def make_us(height, pxs, p2xs, p3xs, sigmaxs):
     us = np.zeros((height.Ny, height.Nx))

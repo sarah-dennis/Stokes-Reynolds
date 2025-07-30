@@ -73,16 +73,16 @@ class RandomHeight(Height):
 #------------------------------------------------------------------------------   
 class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, h_avg, r, k, U, dP, filestr):
+    def __init__(self, x0, xf, N, H, h, U, dP, filestr):
         Nx = (xf-x0)*N + 1
-        self.h_mid = h_avg
-        self.r = r 
-        self.k = k
-
+        self.H = H
+        self.h = h
+        self.L = (xf-x0)
+        
         # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
         y0 = 0
-        yf = h_avg + r
-        self.h_max=yf    
+        yf =max(h, H+h)
+        
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
@@ -92,7 +92,7 @@ class SinusoidalHeight(Height):
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
 
     def h_fun(self, x):
-        return self.h_mid * (1 + self.r * np.cos(self.k*x))
+        return self.H/2 * (1 + np.cos(2*np.pi/self.L*(self.L/2 - x))) + self.h
     
 class BumpHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
@@ -118,25 +118,25 @@ class BumpHeight(Height):
         return self.H*(1-(self.lam/2)*(1+np.cos(np.pi*x/self.x_scale)))-(self.H-self.h0)
    
 class LogisticHeight(Height):
-    def __init__(self, x0, xf, N, H, h, center, slope, U, dP, filestr):
+    def __init__(self, x0, xf, N, H, h, center, delta, U, dP, filestr):
        
         Nx = (xf-x0)*N + 1
         dx = 1/N
         self.h = h
         self.H = H
-        self.slope = slope
+        self.delta = delta #slope = delta*(H-h)/4
         self.center = center
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])  
         y0 = 0
-        yf = H + h
+        yf = np.max(hs)
         i_peaks = [0, Nx-1]
        
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
 
     def h_fun(self, x):
         
-        return self.h + (self.H / ( 1 + np.exp((self.center-x)/self.slope)))
+        return (self.h + (self.H-self.h) / ( 1 + np.exp(-self.delta*(self.center-x))))  
 
 #------------------------------------------------------------------------------    
 class CircleHeight(Height):

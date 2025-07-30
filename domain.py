@@ -67,7 +67,7 @@ class Height(Domain):
 # Domain for Stokes solver
 class Space(Domain):
     def __init__(self, x0, xf, y0, yf, N, U, flux, Re, namestr):
-        dirstr = f"./examples/{namestr}"
+        dirstr = f"./stokes_examples/{namestr}"
         super().__init__(x0, xf, y0, yf, N, dirstr, namestr)
         self.U = U    # velocity at flat boundary 
         self.visc = 1  # dynamic viscosity (Ns/m^2)

@@ -32,9 +32,13 @@ log_cmap_on = False
 
 #---------------------------------------------------------------------------
 class Stokes_Solver:
-    def __init__(self, Example, max_iters=50000):
+    def __init__(self, Example, args, U, Q, Re, max_iters=50000):
         # domain 
         self.Example = Example
+        self.args = args
+        self.U = U
+        self.Q = Q
+        self.Re = Re
         
         # iterative solution args
         self.max_iters = max_iters
@@ -51,7 +55,7 @@ class Stokes_Solver:
         
 #------------------------------------------------------------------------------
     def new_run(self, N):
-        ex = self.Example(N)
+        ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         
         u_init = np.zeros(ex.Nx * ex.Ny)
         v_init = np.zeros(ex.Nx * ex.Ny)
@@ -87,14 +91,14 @@ class Stokes_Solver:
             N *= dN 
                                                                                                                                                                                                                                                                        
     def load_run(self, N):                                
-        ex = self.Example(N)
+        ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx*ex.Ny)
         u, v, psi = run_spLU(ex, u, v, psi, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
         rw.write_stokes(ex, u, v, psi, self.max_iters+past_iters)
 
     def load_scale(self, N_load, N_scale):
-        ex_load = self.Example(N_load)
-        ex_scale = self.Example(N_scale)
+        ex_load = self.Example(self.args, self.U, self.Q, self.Re, N_load)
+        ex_scale = self.Example(self.args, self.U, self.Q, self.Re, N_scale)
         
         points_load = (ex_load.ys, ex_load.xs)
         
@@ -117,14 +121,14 @@ class Stokes_Solver:
         
 #------------------------------------------------------------------------------    
     def get_dP(self,N):
-        ex = self.Example(N)
+        ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         p = pressure.pressure(ex, u, v)
         dp, res = pressure.resistance(ex, p) 
         return dp
     
     def get_attachments(self,N):
-        ex=self.Example(N)
+        ex=self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         
         y_xr = 0 
@@ -168,7 +172,7 @@ class Stokes_Solver:
 # PLOTTING 
 #------------------------------------------------------------------------------
     def load_plot(self, N,zoom=False):
-        ex = self.Example(N)
+        ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
 
     
@@ -193,7 +197,7 @@ class Stokes_Solver:
 
     
         ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
-        title_p = 'Stream-Velocity Navier-Stokes\n' + ex.spacestr + dp_str
+        title_p = 'Stokes\n' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
         p_ma = np.flip(p_ma, axis=0)
@@ -207,7 +211,8 @@ class Stokes_Solver:
     #  Velocity plot: 
     
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
-        title = 'Stream-Velocity Navier-Stokes\n' + ex.spacestr + dp_str
+        
+        title = 'Stokes\n' + ex.spacestr + dp_str
         ax_labels = ['$|(u,v)|_2$','$x$', '$y$']
         
         u_2D = u.reshape((ex.Ny,ex.Nx))

@@ -157,11 +157,10 @@ class Sinusoid(SinusoidalHeight):
         x0 = 0
         xf = args[2]
 
-        r = args[0]
-        h_avg = r/2
-        k = args[1]
-        namestr = f'Sinusoid_r{int(r)}k{int(k)}_dP{int(dP)}_U{int(U)}'
-        super().__init__(x0, xf, N, h_avg, r, k, U, dP, namestr)
+        H = args[0]
+        h = args[1]
+        namestr = f'Sinusoid_H{H}h{h}_dP{int(dP)}_U{int(U)}'
+        super().__init__(x0, xf, N, H, h, U, dP, namestr)
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 class LambdaBump(BumpHeight):
@@ -184,8 +183,8 @@ class LogisticStep(LogisticHeight):
         center = args[3]
         H = args[1]
         h = args[2]
-        slope = args[0]
-        namestr = f'Bump_lambda{slope:.2f}H{H:.2f}_dP{dP:.1f}_U{U:.1f}'
-        super().__init__(x0, xf, N, H, h, center, slope, U, dP, namestr)
+        delta = args[0]
+        namestr = f'Bump_lambda{delta:.2f}H{H:.2f}_dP{dP:.1f}_U{U:.1f}'
+        super().__init__(x0, xf, N, H, h, center, delta, U, dP, namestr)
 
 

@@ -8,35 +8,10 @@ Created on Thu Oct 24 13:23:27 2024
 import reyn_control as control
 import reyn_examples as examples
 
-#------------------------------------------------------------------------------
-## Instructions: 
-#------------------------------------------------------------------------------
-
-# I. Set up the example. 
-#       for examples, see reyn_examples, and reyn_heights superclass
-#       set args (geometric parameters) H, L, h, r, etc.
-#       
-#       /> Example = examples.BFS
-#       /> args = [H=2,l=4] 
-
-# II. Initialize the solver 
-#       set the boundary conditions (U, dP)
-
-#        /> U, dP = [100, 1 , 0]
-#        /> solver = control.Reynolds_Solver(Example, U, dP, args)
-
-# III. Choose a method for the solver, provide a grid size N to run or load 
-#       the solver in reyn_control has several solution, graphing and convergence methods,
-
-#        /> solver.fd_solve(N, plot=plots_on)    # Finite difference solve
-
-#        /> solver.pwl_solve(N, plot=plots_on)   # Analytic solve for piecewise-linear heights
-
-#        /> solver.fd_adj_solve(N, plot=plots_on) #Finite difference solve for *adjusted Reynolds equation*
-#------------------------------------------------------------------------------
+#----------------
 plots_on = True
 uv_on = False
-inc_on=not False
+inc_on=False
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -45,40 +20,33 @@ scaled_on=False#True
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 Example = examples.BFS
-H=2
+H=1.25
 l=2
 L=4
 args = [H, l, L]
-
-# Example = examples.BFS_noEddy
-# H = 2
-# xr = .6
-# yr = .4
-# args = [H,xr,yr] 
+ 
 
 # Example = examples.BFS_deltaSmooth
 # H = 2
-# delta = 0.5
+# delta = 1.5
 # args = [H,delta]
 
-Example = examples.TriSlider
-h_in=1
-h=1/2
-h_out = 1
-l_in = 1
-l_out = 1
-l_a = 1.25
-l_b = 0.75
-args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
+# Example = examples.TriSlider
+# h_in=1
+# h=0.5
+# h_out = 1
+# l_in = 1
+# l_out = 1
+# l_a = 1
+# l_b = 1
+# args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
-# Example = examples.HexSlider
-# args = None
 
 # Example = examples.TriCavity
 # H=4
 # L=1
-# h=1/10
-# l=1
+# h=1
+# l=2
 # args = [H,L,h,l]
 
 #------------------------------------------------------------------------------
@@ -86,13 +54,13 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
 # Example = examples.Sinusoid
-# r=0.4
-# k=3.14
-# L=2
-# args = [r, k, L]
+
+# H=-0.95
+# h = 1
+# L=4
+# args = [H,h, L]
 
 # Example = examples.LambdaBump 
-
 
 # lam=-1
 # H=1/4 
@@ -112,14 +80,13 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 Example = examples.LogisticStep
 
-k = 1 # slope -1/k at x=0
-H = 1  # logistic height scale
+lam = -16  # slope: -lam*(H-h)/4
+H = 2   # outlet height
 
+h = 1   # inlet height
+l = 2   # half length
 
-h = 1  # min height 6
-l = 2  # half length
-
-args = [k,H,h, l]
+args = [lam,H,h, l]
 
 #------------------------------------------------------------------------------
 # boundary conditions
@@ -129,20 +96,21 @@ args = [k,H,h, l]
 U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-20
+dP =-26.2
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 100
+N = 200
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
-solver.fd_adj_solve(N, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on)
+
+solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

@@ -9,157 +9,54 @@ link to sd_run.sh
 
 import stokes_control as control
 import stokes_examples as examples
-#------------------------------------------------------------------------------
-# Instructions: 
-#------------------------------------------------------------------------------
- 
-# I. Uncomment and select an example. 
-#    class structure: examples < stokes_examples < stokes_heights < domain
-#           examples sets fluid parameters Re, Q, U, 
-#           stokes_examples sets geometric parameters H, L, h, delta, etc. 
-#           stokes_heights sets grid size N=1/dx and discretizes the height function
-#        /> example = examples.BFS_H2L4_Re0_Q2_U0
 
-# II. Look in ./examples/[example_name] for precomputed solutions to each example at various N
+U=0
+Q=1
+Re=0
 
-# III. Initialize the solver with the selected example
-#        /> solver = control.Stokes_Solver(example)  
+H=2
+h=1
+L=4
 
-# IV. Choose a method from the solver, provide a grid size N to run or load 
-#       the solver in stokes_control has several solution, graphing and convergence methods,
-#     For basic use... 
-#        /> solver.new_run(N) 
-#        /> solver.load_run(N) 
-#        /> solver.load_plot(N)
+delta = -1  #slope: -delta*(H-h)/4
 
-#------------------------------------------------------------------------------
-# BFS Re=0
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2p75L4_Re0_Q2_U0
-# example = examples.BFS_H2p5L4_Re0_Q2_U0
-# example = examples.BFS_H2p25L4_Re0_Q2_U0
-# example = examples.BFS_H2L4_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=320****
-# example = examples.BFS_H1p25L4_Re0_Q2_U0
-# example = examples.BFS_H1p125L4_Re0_Q2_U0
+# args = [H, L]
+# example = examples.BFS
 
-# example = examples.BFS_H2L4_Re0_Q1_U0
-# example = examples.BFS_H2L4_Re0_Q1p21_U0
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-# BFS Re=0.25
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2p75L4_Re0p25_Q2_U0
-# example = examples.BFS_H2p5L4_Re0p25_Q2_U0
-# example = examples.BFS_H2p25L4_Re0p25_Q2_U0
-# example = examples.BFS_H2L4_Re0p25_Q2_U0
-# example = examples.BFS_H1p5L4_Re0p25_Q2_U0
-# example = examples.BFS_H1p25L4_Re0p25_Q2_U0
-# example = examples.BFS_H1p125L4_Re0p25_Q2_U0
+# args = [H, L, delta]
+# example = examples.BFS_pwl
 
-# BFS Re=0.5
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2p75L4_Re0p5_Q2_U0
-# example = examples.BFS_H2p5L4_Re0p5_Q2_U0
-# example = examples.BFS_H2p25L4_Re0p5_Q2_U0
-# example = examples.BFS_H2L4_Re0p5_Q2_U0
-# example = examples.BFS_H1p5L4_Re0p5_Q2_U0
-# example = examples.BFS_H1p25L4_Re0p5_Q2_U0
-# example = examples.BFS_H1p125L4_Re0p5_Q2_U0
-#------------------------------------------------------------------------------
-# BFS Re=1
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2p75L4_Re1_Q2_U0
-# example = examples.BFS_H2p5L4_Re1_Q2_U0
-# example = examples.BFS_H2p25L4_Re1_Q2_U0
-# example = examples.BFS_H2L4_Re1_Q2_U0
-# example = examples.BFS_H1p5L4_Re1_Q2_U0
-# example = examples.BFS_H1p25L4_Re1_Q2_U0
-# example = examples.BFS_H1p125L4_Re1_Q2_U0
-#------------------------------------------------------------------------------
-# smoothed-step H=2 Re=0
-#------------------------------------------------------------------------------
-# example = examples.dBFS_H2L4_d1p25_Re0_Q2_U0 
-# example = examples.dBFS_H2L4_d1_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0p75_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0p5_Re0_Q2_U0 
-# example = examples.dBFS_H2L4_d0p25_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0p125_Re0_Q2_U0
-# example = examples.dBFS_H2L4_d0_Re0_Q2_U0
-#------------------------------------------------------------------------------
-## smoothed-step H=1.5 Re=0
-#------------------------------------------------------------------------------
-# example = examples.dBFS_H1p5L4_d0p75_Re0_Q2_U0
-# example = examples.dBFS_H1p5L4_d0p5_Re0_Q2_U0
-# example = examples.dBFS_H1p5L4_d0p25_Re0_Q2_U0 # ***convergence N0=20,dN=2,Nmax=320****
-# example = examples.dBFS_H1p5L4_d0p125_Re0_Q2_U0
-# example = examples.dBFS_H1p5L4_d0_Re0_Q2_U0
-#------------------------------------------------------------------------------
-## smoothed-step H=1.25 Re=0
-#------------------------------------------------------------------------------
-# example = examples.dBFS_H1p25L4_d0_Re0_Q2_U0    
-# example = examples.dBFS_H1p25L4_d0p05_Re0_Q2_U0                                      
-# example = examples.dBFS_H1p25L4_d0p125_Re0_Q2_U0 
-# example = examples.dBFS_H1p25L4_d0p25_Re0_Q2_U0
-#------------------------------------------------------------------------------
-## wedged corner BFS Re=0
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2p75L4_noEddy_Re0_Q2_U0
-# example = examples.BFS_H2p5L4_noEddy_Re0_Q2_U0
-# example = examples.BFS_H2p25L4_noEddy_Re0_Q2_U0
-# example = examples.BFS_H2L4_noEddy_Re0_Q2_U0
-# example = examples.BFS_H1p5L4_noEddy_Re0_Q2_U0
-# example = examples.BFS_H1p25L4_noEddy_Re0_Q2_U0
-#------------------------------------------------------------------------------
-## wedged corner variationds Re=0
-#------------------------------------------------------------------------------
-# example = examples.BFS_H2L4_cornerTriA_Re0_Q2_U0
-# example = examples.BFS_H2L4_cornerTriC_Re0_Q2_U0
-# example = examples.BFS_H2L4_cornerTriB_Re0_Q2_U0
-# example = examples.BFS_H2L4_cornerTriD_Re0_Q2_U0
-#------------------------------------------------------------------------------
+# args = [H, h, L, delta]
+# example = examples.Logistic
 
+args = [H,h, L, delta]
+example = examples.Sinusoid
+
+# args = [H, L]
 # example = examples.TriCavity
-# example = examples.bump_Re0
-
-#------------------------------------------------------------------------------
-
-example = examples.logisticBFS_l1_Re0_Q1p19_U0
-# example = examples.logisticBFS_l0p5_Re0_Q0p99_U0
-# example = examples.logisticBFS_l0p25_Re0_Q0p85_U0
-# example = examples.logisticBFS_l0p125_Re0_Q0p79_U0
-# example = examples.BFS_centered_Re0_Q0p74_U0
-
-
-example = examples.logisticBFS_l1_Re1_Q1p19_U0
-# example = examples.logisticBFS_l0p5_Re1_Q0p99_U0
-# example = examples.logisticBFS_l0p25_Re1_Q0p85_U0
-# example = examples.logisticBFS_l0p125_Re1_Q0p79_U0
 
 
 # ------------------------------------------------------------------------------
 
 
-solver = control.Stokes_Solver(example, max_iters=10000)                
+solver = control.Stokes_Solver(example, args, U, Q, Re, max_iters=50000)                
 
-N=80
+N=20
 
        
 zoom_on=False               
-# 
+
 # solver.new_run(N) 
 
 # solver.load_scale(80,160) 
 
-# 
-# solver.load_run(N)
-
-# solver.new_run(N)
-solver.load_run(N)
+# solver.load_run(160)
 # solver.load_run_many(40, 2, 4)
 
-# solver.new_run_many(N, 2, 3)  
-# solver.load_run_new_many(N, 2, 1)
-# solver.load_plot(N, zoom=zoom_on)
+# solver.new_run_many(N, 2, 4)  
+# solver.load_run_new_many(N, 2, 2)
+
+solver.load_plot(20, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
