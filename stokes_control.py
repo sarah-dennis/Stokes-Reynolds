@@ -118,6 +118,20 @@ class Stokes_Solver:
         psi_scaled = psi_scaled_2D.ravel(order='F')
     
         rw.write_stokes(ex_scale, u_scaled, v_scaled, psi_scaled, 0)
+    
+    def load(self,N):
+        ex = self.Example(self.args, self.U, self.Q, self.Re, N)
+        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx*ex.Ny)
+        p = pressure.pressure(ex, u, v)
+        p = p.reshape((ex.Ny,ex.Nx))
+        u = u.reshape((ex.Ny,ex.Nx))
+        v = v.reshape((ex.Ny,ex.Nx))
+        
+        p = np.flip(p, axis=0)        
+        u = np.flip(u, axis=0)
+        v = -np.flip(v, axis=0) 
+        
+        return p, u, v
         
 #------------------------------------------------------------------------------    
     def get_dP(self,N):

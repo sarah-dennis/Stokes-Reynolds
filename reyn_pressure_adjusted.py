@@ -9,7 +9,7 @@ import domain as dm
 import graphics
 import reyn_pressure_finDiff as fd
 
-def make_adj_ps(height, reyn_ps):
+def make_adj_ps(height, reyn_ps, reynFlux=True):
     ps_adj = np.zeros((height.Ny, height.Nx))
 
     hs = height.hs
@@ -29,9 +29,10 @@ def make_adj_ps(height, reyn_ps):
     
     # graphics.plot_2D_multi([pxs,p2xs,p3xs,p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_{*}'])
    #---------------------------------------------------------------------------
-    # sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,pxs,p2xs,p3xs,p4xs)
-    sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,pxs,p2xs,p3xs,p4xs)
-
+    if reynFlux:
+        sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,pxs,p2xs,p3xs,p4xs)
+    else: #reyn dP
+        sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,pxs,p2xs,p3xs,p4xs)
     # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
@@ -47,8 +48,6 @@ def make_adj_ps(height, reyn_ps):
 
         phi1x = -(pxx*h + px*hx)/2 + U*visc/(h**2)*hx
 
-        # vy = -(px*h/(2*visc) - U/h)*hx       
-
 
         for j in range(height.Ny):
             y = height.ys[j]
@@ -61,10 +60,11 @@ def make_adj_ps(height, reyn_ps):
 
                 ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc 
 
-#               ps_adj[j,i] = reyn_ps[i] + adj  #+ vy*visc
 
 
-    return ps_adj, pxs, p2xs, p3xs, p4xs, sigmas, sigma_xs, sigma_2xs
+    reyn_derivs = [pxs, p2xs, p3xs, p4xs]
+    sigma_derivs = [sigmas, sigma_xs, sigma_2xs]
+    return ps_adj, reyn_derivs, sigma_derivs
 
 
 def adj_rhs(height, pxs, p2xs, p3xs, p4xs):

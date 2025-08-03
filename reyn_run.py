@@ -80,7 +80,7 @@ args = [H, l, L]
 
 Example = examples.LogisticStep
 
-lam = -16  # slope: -lam*(H-h)/4
+lam = -4  # slope: -lam*(H-h)/4
 H = 2   # outlet height
 
 h = 1   # inlet height
@@ -102,15 +102,15 @@ dP =-26.2
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 200
+N = 160
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
 
-solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

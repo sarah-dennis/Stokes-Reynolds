@@ -14,9 +14,9 @@ U=0
 Q=1
 Re=0
 
-H=2
+H=4
 h=1
-L=4
+L=1
 
 delta = -1  #slope: -delta*(H-h)/4
 
@@ -26,14 +26,14 @@ delta = -1  #slope: -delta*(H-h)/4
 # args = [H, L, delta]
 # example = examples.BFS_pwl
 
-# args = [H, h, L, delta]
-# example = examples.Logistic
+args = [H, h, L, delta]
+example = examples.Logistic
 
-args = [H,h, L, delta]
-example = examples.Sinusoid
+# args = [H,h, L, delta]
+# example = examples.Sinusoid
 
-# args = [H, L]
-# example = examples.TriCavity
+args = [H, L]
+example = examples.TriCavity
 
 
 # ------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ N=20
        
 zoom_on=False               
 
-# solver.new_run(N) 
+solver.new_run(N) 
 
 # solver.load_scale(80,160) 
 

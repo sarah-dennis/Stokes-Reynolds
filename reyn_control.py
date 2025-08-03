@@ -35,8 +35,8 @@ class Reynolds_Solver:
         # colorbar min max
 
         self.vel_max = 3
-        self.p_min=-800
-        self.p_max=800
+        self.p_min=-30
+        self.p_max=30
 
 
     
@@ -77,10 +77,10 @@ class Reynolds_Solver:
             rw.write_reyn(ex, u, v, p)
         return pressure, velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, reynFlux=True):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        adj_pressure = rp.Adjusted_ReynPressure(ex)
+        adj_pressure = rp.Adjusted_ReynPressure(ex,reynFlux)
         
         adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
         # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
@@ -100,7 +100,7 @@ class Reynolds_Solver:
     
     
 
-    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_dPs = False):
+    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         
@@ -138,7 +138,7 @@ class Reynolds_Solver:
                 p = pert.pert4_pressure.ps_2D.reshape(nm)
                 rw.write_reyn(ex, u, v, p)
             
-        if get_dPs:
+        if get_all:
             return pert
         else:
             if order <3:

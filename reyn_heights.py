@@ -159,7 +159,10 @@ class CircleHeight(Height):
         y0 = 0
         yf = max(hs)
         # print(self.l, self.l*N)
-        i_peaks = np.asarray([0, (self.l+self.dxdr)*N, Nx-1-(self.l+self.dxdr)*N, Nx-1], int)
+        if self.l != 0:
+            i_peaks = np.asarray([0, (self.l+self.dxdr)*N, Nx-1-(self.l+self.dxdr)*N, Nx-1], int)
+        else:
+            i_peaks = [0, Nx-1]
        
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
 

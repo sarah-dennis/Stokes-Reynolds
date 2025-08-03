@@ -53,8 +53,8 @@ class Pressure:
                     
 class FinDiff_ReynPressure(Pressure):
     def __init__(self, height):
-        rhs = fd.make_rhs(height)
-        mat = fd.make_mat(height)
+        rhs = fd.make_rhs_Q(height)
+        mat = fd.make_mat_Q(height)
         ps_1D = np_solve(mat, rhs)
         super().__init__(height, ps_1D)
 
@@ -75,14 +75,12 @@ class PwlGMRes_ReynPressure(Pressure):
         super().__init__(height, ps_1D)
     
 class Adjusted_ReynPressure(Pressure):
-    def __init__(self, height):
+    def __init__(self, height, reynFlux):
         reyn_pressure = FinDiff_ReynPressure(height)
         ps_1D = reyn_pressure.ps_1D
-        
-
-        ps_2D, self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs, self.sigmas,self.sigma_xs,self.sigma_2xs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D)
+        ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D, reynFlux)
+        self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs = reyn_derivs
+        self.sigmas,self.sigma_xs,self.sigma_2xs = sigma_derivs
 
 
         super().__init__(height, ps_1D, ps_2D)
-
-    
