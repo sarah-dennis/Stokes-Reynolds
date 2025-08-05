@@ -31,15 +31,13 @@ class Reynolds_Solver:
         self.args=args
         self.U = U
         self.dP = dP
-
         # colorbar min max
 
         self.vel_max = 3
-        self.p_min=-30
-        self.p_max=30
+        self.p_min=0
+        self.p_max=200
 
 
-    
     def pwl_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
@@ -61,7 +59,8 @@ class Reynolds_Solver:
     
     def fd_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         ex = self.Example(self.U, self.dP, N, self.args)
-        pressure = rp.FinDiff_ReynPressure(ex)
+        # pressure = rp.FinDiff_ReynPressure(ex)
+        pressure = rp.FinDiff_ReynPressure_Q(ex)
         
         velocity = rv.ReynVelocity(ex, pressure.ps_1D)
         solver_title = "Reynolds"#"Finite Difference"
@@ -75,14 +74,16 @@ class Reynolds_Solver:
             v = velocity.vy.reshape(nm)
             p= pressure.ps_2D.reshape(nm)
             rw.write_reyn(ex, u, v, p)
+        
         return pressure, velocity
     
     def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, reynFlux=True):
         ex = self.Example(self.U, self.dP, N, self.args)
         
-        adj_pressure = rp.Adjusted_ReynPressure(ex,reynFlux)
+        adj_pressure = rp.Adjusted_ReynPressure(ex, reynFlux)
         
         adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
+        
         # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
         
         solver_title = "Reynolds Adjusted"
@@ -98,13 +99,31 @@ class Reynolds_Solver:
         
         return adj_pressure, adj_velocity
     
-    
+    def fd_adj_TG_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+        ex = self.Example(self.U, self.dP, N, self.args)
+        
+        adj_pressure = rp.Adjusted_ReynPressure_TG(ex)
+                
+        adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
+        
+        solver_title = "Reynolds Adjusted T. & G."
+        if plot:
+            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, scaled, zoom)
+            self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
+        if write:
+            nm = ex.Nx * ex.Ny
+            u = adj_velocity.vx.reshape(nm)
+            v = adj_velocity.vy.reshape(nm)
+            p = adj_pressure.ps_2D.reshape(nm)
+            rw.write_reyn(ex, u, v, p)
+        
+        return adj_pressure, adj_velocity
 
     def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
         ex = self.Example(self.U, self.dP, N, self.args)
 
         
-        reyn_pressure = rp.FinDiff_ReynPressure(ex)
+        reyn_pressure = rp.FinDiff_ReynPressure_Q(ex)
         reyn_velocity = rv.ReynVelocity(ex, reyn_pressure.ps_1D)                   
         
         pert = rpert.PerturbedReynSol(ex, order, reyn_pressure, reyn_velocity)
@@ -112,13 +131,14 @@ class Reynolds_Solver:
         
         if plot:
             
-            self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, scaled, zoom)
-            self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
+            # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, scaled, zoom)
+            # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
 
             if order > 1:
                 solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
                 self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, scaled, zoom)
                 self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
+           
             if order > 3:
                 solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
                 self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.flux, solver_title4, scaled, zoom)
@@ -131,6 +151,7 @@ class Reynolds_Solver:
                 v = pert.pert2_velocity.vy.reshape(nm)
                 p = pert.pert2_pressure.ps_2D.reshape(nm)
                 rw.write_reyn(ex, u, v, p)
+                
             if order > 1 and order < 5:
                 nm = ex.Nx * ex.Ny
                 u = pert.pert4_velocity.vx.reshape(nm)
@@ -141,8 +162,9 @@ class Reynolds_Solver:
         if get_all:
             return pert
         else:
-            if order <3:
+            if order < 3:
                 return pert.pert2_pressure, pert.pert2_velocity
+            
             else:
                 return pert.pert4_pressure, pert.pert4_velocity
     

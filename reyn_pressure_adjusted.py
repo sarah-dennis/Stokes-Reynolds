@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+4# -*- coding: utf-8 -*-
 """
 Created on Tue Feb 25 15:16:58 2025
 
@@ -9,7 +9,7 @@ import domain as dm
 import graphics
 import reyn_pressure_finDiff as fd
 
-def make_adj_ps(height, reyn_ps, reynFlux=True):
+def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
     ps_adj = np.zeros((height.Ny, height.Nx))
 
     hs = height.hs
@@ -29,10 +29,14 @@ def make_adj_ps(height, reyn_ps, reynFlux=True):
     
     # graphics.plot_2D_multi([pxs,p2xs,p3xs,p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_{*}'])
    #---------------------------------------------------------------------------
-    if reynFlux:
-        sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,pxs,p2xs,p3xs,p4xs)
-    else: #reyn dP
-        sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,pxs,p2xs,p3xs,p4xs)
+    if not TG: 
+       if reynFlux:
+           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,pxs,p2xs,p3xs,p4xs)
+       else: #reyn dP
+           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,pxs,p2xs,p3xs,p4xs)
+       sigma_derivs = [sigmas, sigma_xs, sigma_2xs]
+    else:
+       sigma_derivs = [0, 0, 0]  
     # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
@@ -57,13 +61,16 @@ def make_adj_ps(height, reyn_ps, reynFlux=True):
 
             else:  
                 adj = -pxx*(y**2)/2 - phi1x*y 
-
-                ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc 
+                if TG: 
+                    ps_adj[j,i] = reyn_ps[i] + adj
+                    
+                else:
+                    ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc 
 
 
 
     reyn_derivs = [pxs, p2xs, p3xs, p4xs]
-    sigma_derivs = [sigmas, sigma_xs, sigma_2xs]
+    
     return ps_adj, reyn_derivs, sigma_derivs
 
 

@@ -29,10 +29,12 @@ import graphics
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
+
 r=2
 h0 = 0.05
 l=0
 drdx = 0
+
 d = h0+r
 print(d/r)
 args= [ r, h0,l, drdx]

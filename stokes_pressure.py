@@ -34,7 +34,8 @@ def pressure(ex, u, v):
     p = np.zeros(shape)
 
     # set the ambient pressure at outlet 
-    p[(m-2)*n + n-1] = ex.p_ambient    
+    p[(m-2)*n + n-1] = ex.p_ambient   
+    
     # contour the first interior row (backwards) using px
     i=n-2
     while i >= 0:
@@ -43,7 +44,7 @@ def pressure(ex, u, v):
         p[k] = p[k_E]-px[k]*dx
         i-=1
      
-    # set the top boundary using dy from interior row
+    # contour the flat boundary using dy from interior row
     p[(m-1)*n-1] = ex.p_ambient
     i = n-1
     while i >=0:
@@ -52,6 +53,8 @@ def pressure(ex, u, v):
         p[k] = p[k_S] + py[k_S]*dy
         i-=1
 
+    
+    # contour each xi from flat boundary to y=h
     for i in range(n):
         j=m-3
         while j >= 0:
@@ -61,6 +64,7 @@ def pressure(ex, u, v):
                 p[k] = p[k_N] - py[k_N]*dy
             j-=1    
     
+    # contour the boundary
     for i in range(n):
         j=m-3
         while j >= 0:
@@ -88,7 +92,7 @@ def pressure(ex, u, v):
                 # else:        
                     # assert False, "Grid misalignment - check x_peaks for dx=1/N"
                 
-            j-=1    
+            j-=1
     
     return p
             

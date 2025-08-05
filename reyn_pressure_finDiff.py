@@ -64,7 +64,8 @@ def make_rhs_Q(height):
 
     rhs = 6 * height.visc * height.U * height.hxs
     h0 = height.hs[0]
-    dp0 = -12*height.visc*height.Q /h0**3 + 6*height.visc*height.U/h0**2
+    Q = 1
+    dp0 = -12*height.visc*Q/h0**3 + 6*height.visc*height.U/h0**2
     
     rhs[0] = dp0
     rhs[N-1] = height.pN

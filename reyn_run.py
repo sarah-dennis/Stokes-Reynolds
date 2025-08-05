@@ -19,11 +19,12 @@ scaled_on=False#True
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-Example = examples.BFS
-H=1.25
-l=2
-L=4
-args = [H, l, L]
+# Example = examples.BFS
+# H=1.25
+# h=1
+# l=2
+# L=4
+# args =  [h, H, l, L]
  
 
 # Example = examples.BFS_deltaSmooth
@@ -32,22 +33,21 @@ args = [H, l, L]
 # args = [H,delta]
 
 # Example = examples.TriSlider
-# h_in=1
-# h=0.5
-# h_out = 1
+# h_in=0.01
+# h=1/4
+# h_out = 0.01
 # l_in = 1
 # l_out = 1
-# l_a = 1
-# l_b = 1
+# l_a = 1.25
+# l_b = 0.75
 # args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 
-# Example = examples.TriCavity
-# H=4
-# L=1
-# h=1
-# l=2
-# args = [H,L,h,l]
+Example = examples.TriCavity
+H=0.25 # apex height
+l_a = 1.25
+l_b = 0.75
+args = [H,l_a, l_b]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -78,15 +78,16 @@ args = [H, l, L]
 # args= [ r, h0,l, drdx]
 
 
-Example = examples.LogisticStep
+Example = examples.Logistic
 
-lam = -4  # slope: -lam*(H-h)/4
+delta = -4  # slope: -lam*(H-h)/4
 H = 2   # outlet height
-
 h = 1   # inlet height
-l = 2   # half length
+L = 4   #  length
 
-args = [lam,H,h, l]
+
+args = [ H, h, L, delta]
+
 
 #------------------------------------------------------------------------------
 # boundary conditions
@@ -96,18 +97,19 @@ args = [lam,H,h, l]
 U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-26.2
+dP =-29.2
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160
+N = 150
 
 
 solver = control.Reynolds_Solver(Example, U, dP, args)
 solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
+# solver.fd_adj_TG_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 # solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)

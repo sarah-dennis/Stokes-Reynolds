@@ -11,37 +11,50 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-# colour_map_stream = 'viridis' 
-# colour_map_stream = 'Spectral_r' 
-# colour_map_mesh = 'plasma'
-# colour_map_mesh='PiYG'
-# colour_map_mesh='RdYlBu_r'
-# colour_map_mesh = 'Spectral_r'
-# colour_map_stream = 'plasma'
+#------------------------------------------------------------------------------
+# COLOURINGS
+#------------------------------------------------------------------------------
 
+# -------- 2D field u(x,y),v(x,y) ----------------velocity---------------------
+
+# stream_cmap = pp.cm.viridis(np.arange(pp.cm.viridis.N))
 # stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
 stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
 # stream_cmap = pp.cm.YlGnBu_r(np.arange(pp.cm.YlGnBu_r.N))
 # stream_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
-# stream_cmap[:,0:3] *= 1
+
+
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
+# -------- Value p(x,y):= ------------pressure/incompressiblity/error----------
+# colour_map_mesh='PiYG'
+# colour_map_mesh = 'Spectral_r'
 
 mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
 # mesh_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
-# mesh_cmap[:,0:3] *= 0.95
+
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
-# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-colour_bar_scale=0.024 # for long figures like H=2, L=4
-# colour_bar_scale=0.04 # for almost square figures like H=2.75, L=4
 
+#---------LEGEND---------------------------------------------------------------
+
+colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
+# colour_bar_scale=0.025 # for long figures like H=2, L=4
+# colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
+ 
+#------------------------------------------------------------------------------
+# RESOLUTION
+#------------------------------------------------------------------------------
 dpi=200
+
 n_contours = 50
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5
 
+linthresh = 1e-4
+
+# FONTS
 SMALL_SIZE = 10
 MEDIUM_SIZE = 12
 BIGGER_SIZE = 16
@@ -54,7 +67,10 @@ pp.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 pp.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 pp.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-linthresh = 1e-4
+
+
+#------------------------------------------------------------------------------
+# LINE PLOTS
 #------------------------------------------------------------------------------
 def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     fig = pp.figure()
@@ -86,7 +102,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
     # ax.set_xlim([0, 1])
-    ax.set_ylim([-1, 1])
+    # ax.set_ylim([-1, 1])
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -131,6 +147,56 @@ def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc, colors):
     pp.minorticks_on()
     return fig
 
+#------------------------------------------------------------------------------   
+# LOG LINE PLOTS
+#------------------------------------------------------------------------------
+
+def plot_log(fs, xs, title, ax_labels):
+    fig = pp.figure()
+    pp.rcParams['figure.dpi'] = dpi
+    pp.loglog(xs, fs, color='b')   
+
+    pp.title(title)
+    
+    pp.xlabel(ax_labels[0])
+    pp.ylabel(ax_labels[1])
+    
+    return fig
+
+
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1,O2=1e1):
+    pp.rcParams['figure.dpi'] = dpi
+    fig = pp.figure()
+    
+    
+    ax = fig.add_subplot()
+    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']    
+    markers = ['D', 'o', 's', '*', 'H', 'X']
+
+    pp.rcParams["lines.linewidth"] =line_width
+    for i in range(len(fs)):
+        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker=markers[i], markevery=1)
+    
+    
+    # reference lines
+    # ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
+    # ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
+    
+    # ax.set_xscale('log')
+    ax.set_yscale('symlog', linthresh=linthresh)
+
+    ax.set_ylim(0, np.max([O1,2*np.max(fs)]))
+
+    ax.set_xlabel(ax_labels[0])
+    ax.set_ylabel(ax_labels[1])
+    
+    pp.title(title,  fontweight ="bold")
+    # fig.legend(bbox_to_anchor=(0.3, 0.325))
+    fig.legend(bbox_to_anchor=(0.3, 0.425))    
+    return fig
+
+#------------------------------------------------------------------------------
+# STREAMLINE & QUIVER PLOTS 
 #------------------------------------------------------------------------------
 def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
@@ -158,7 +224,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     pp.show()
     
         
-def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, log_cmap=False, linthresh=linthresh):
+def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vscale=None, log_cmap=False, linthresh=linthresh):
 
     pp.rcParams['figure.dpi'] = dpi
     
@@ -167,6 +233,12 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     X, Y = np.meshgrid(xs, ys)
     
     stream_density=[xs.shape[0]/ys.shape[0],1]
+    
+    if vscale is not None:
+        vx/= vscale
+        vy/=vscale
+        vmin/= vscale
+        vmax/= vscale
     
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
@@ -193,34 +265,20 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, lo
     ax.set_aspect('equal')
     pp.minorticks_on()
     pp.show()
-    
-    
        
 def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthresh=linthresh):
-    
     pp.rcParams['figure.dpi'] = dpi
-    
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    
+
     N_x = 50
     N_y = max(int(len(ys)/len(xs)*N_x), 1)
     vscale=1/N_x * (len(xs)/len(ys))
     
-    # if log_cmap:
-        # norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
     pp.quiver(xs[:: N_x], ys[:: N_y], vx[::N_y, ::N_x], vy[::N_y, ::N_x], scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
-    # else:
-        # no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2)
-        # quiver_plot=pp.quiver(xs, ys, vx, vy, scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=no_norm)
-
-    # cb=pp.colorbar(quiver_plot, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
-    # ticks = np.linspace(vmin, vmax, num=5)
-    # cb.set_ticks(ticks)
-
-    # remove contours arrows
-    ax = pp.gca()
+   
+    # ax = pp.gca()
     # for art in ax.get_children():
     #     if not isinstance(art, patches.FancyArrowPatch):
     #         continue
@@ -235,7 +293,8 @@ def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthre
     pp.show()
 
 #------------------------------------------------------------------------------       
-
+# VALUE PLOTS F(X,Y)
+#------------------------------------------------------------------------------
 def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh):
     pp.rcParams["lines.linewidth"] = .5
     pp.rcParams['figure.dpi'] = dpi
@@ -288,11 +347,15 @@ def plot_contour_multi(funs, xs, ys, title, fun_labels, labels, y_lim=None):
     pp.show()    
 
 
-def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, linthresh=linthresh, n_contours=n_contours):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cmap=False, linthresh=linthresh, n_contours=n_contours):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
+    if vscale is not None:
+        zs/= vscale
+        vmin/= vscale
+        vmax/= vscale
        
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=0)#vmax, clip=False)
@@ -318,51 +381,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, log_cmap=False, lin
     # ax.set_ylim(y_lim)
     # ax.set_facecolor('black')
     pp.show()    
-#------------------------------------------------------------------------------   
 
-def plot_log(fs, xs, title, ax_labels):
-    fig = pp.figure()
-    pp.rcParams['figure.dpi'] = dpi
-    pp.loglog(xs, fs, color='b')   
-
-    pp.title(title)
-    
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-    
-    return fig
-
-
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1,O2=1e1):
-    pp.rcParams['figure.dpi'] = dpi
-    fig = pp.figure()
-    
-    
-    ax = fig.add_subplot()
-    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']    
-    markers = ['D', 'o', 's', '*', 'H', 'X']
-
-    pp.rcParams["lines.linewidth"] =line_width
-    for i in range(len(fs)):
-        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker=markers[i], markevery=1)
-    
-    
-    # reference lines
-    ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
-    ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
-    
-    ax.set_xscale('log')
-    ax.set_yscale('symlog', linthresh=linthresh)
-
-    ax.set_ylim(0, np.max([O1,2*np.max(fs)]))
-
-    ax.set_xlabel(ax_labels[0])
-    ax.set_ylabel(ax_labels[1])
-    
-    pp.title(title,  fontweight ="bold")
-    # fig.legend(bbox_to_anchor=(0.3, 0.325))
-    fig.legend(bbox_to_anchor=(0.3, 0.425))    
-    return fig
 #------------------------------------------------------------------------------------
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
     i_0 = int((x_start - ex.x0)/ex.dx)

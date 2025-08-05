@@ -17,13 +17,11 @@ from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight,
 
 class BFS(PWL_Height):
     def __init__(self, U, dP, N, args):
-        H = args[0]
-        l = args[1]
-        h = 1
+        h, H, l, L = args
         x0 = 0
-        xf = args[2]
+        xf = L
         N_regions = 2
-        x_peaks = np.asarray([x0, l, xf], float)
+        x_peaks = np.asarray([0, l, L], float)
         h_peaks = np.asarray([[0, h], [h, H], [H, 0]], float)
         namestr = f'BFS_H{int(H)}L{int(xf)}_dP{int(dP)}_U{int(U)}'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
@@ -120,18 +118,19 @@ class TriSlider(PWL_Height):
 
 class TriCavity(PWL_Height):
     def __init__(self, U, dP, N, args):
+        H, l_a, l_b = args
         x0 = 0
-        xf = x0 + 2*args[1]
+        xf = x0 + l_a + l_b
         N_regions = 2
 
         H = args[0]
 
-        x_peaks = np.asarray([x0, args[3], xf], float)
+        x_peaks = np.asarray([x0, x0 + l_a, xf], float)
 
-        dx = 1/((xf-x0)*N)
-        h = max(args[2],dx) #H/2  # dx
+        dx = 0.01
+        # h = max(args[2],dx) #H/2  # dx
         
-        h_peaks = np.asarray(([[0, h], [H, H], [h, 0]]), float)
+        h_peaks = np.asarray(([[0, dx], [H, H], [dx, 0]]), float)
         namestr = f'TriCavity_H{int(H)}L{int(xf)}_U{int(U)}'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, namestr)
         
@@ -176,14 +175,14 @@ class LambdaBump(BumpHeight):
         super().__init__(x0, xf, N, lam, H, h0, U, dP, namestr)
 
 #-----------------------------------------------------------------------------------------------------------------------------------
-class LogisticStep(LogisticHeight):
+class Logistic(LogisticHeight):
     def __init__(self, U, dP, N, args):
         x0 = 0
-        xf = 2*args[3]
-        center = args[3]
-        H = args[1]
-        h = args[2]
-        delta = args[0]
+        xf = args[2]
+        center = args[2]/2
+        H = args[0]
+        h = args[1]
+        delta = args[3]
         namestr = f'Bump_lambda{delta:.2f}H{H:.2f}_dP{dP:.1f}_U{U:.1f}'
         super().__init__(x0, xf, N, H, h, center, delta, U, dP, namestr)
 

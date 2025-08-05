@@ -237,7 +237,7 @@ def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
         phi1x = -1/(2*visc)*(h*(pxx_h + pxy_h*hx) + hx*px_h) + U/(h**2) *hx
 
         # when using sigmas = 0 in p_adj, v_h corrects the velocity boundary
-        # v_h = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -height.U/2 * hx
+        v_h = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -height.U/2 * hx
         
         for j in range(height.Ny):
             y = height.ys[j]
@@ -247,10 +247,9 @@ def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
             if y < h:
                 us[j,i]= 1/(2*visc)*px* y**2  + phi1* y + U
                 
-                vs[j,i] = -1/(6*visc)*pxx* y**3 - 1/2*phi1x* y**2 #-v_h*y/h            
+                vs[j,i] = -1/(6*visc)*pxx* y**3 - 1/2*phi1x* y**2 -v_h*y/h            
 
             else:
-                # print((pxx_h + pxy_h*hx)*(h**3)+ 3*px_h*hx*(h**2) - 6*U*visc*hx)
                 continue
 
     return us, vs

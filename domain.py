@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jan 25 17:33:35 2023
@@ -53,9 +53,12 @@ class Height(Domain):
         # graphics.plot_2D_multi([self.hxs,self.h2xs,self.h3xs], self.xs, 'Height gradients', ['$h_x$','$h_{xx}$','$h_{xxx}$'], ['$x$','$h_{*}$'])
 
         self.h_min = min(self.hs)
-        self.Q=1
+        
+        # self.Q=1
+        
         self.U = U    # velocity at flat boundary
         self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
+        
         self.p_ambient = 0
         self.p0 = -dP
         self.pN = self.p_ambient

@@ -14,16 +14,18 @@ U=0
 Q=1
 Re=0
 
-H=4
+H=2
 h=1
-L=1
+L=4
+l=1
 
-delta = -1  #slope: -delta*(H-h)/4
+
+delta = -32 #slope: -delta*(H-h)/4
 
 # args = [H, L]
 # example = examples.BFS
 
-# args = [H, L, delta]
+# args = [H, L, delta]-
 # example = examples.BFS_pwl
 
 args = [H, h, L, delta]
@@ -32,8 +34,11 @@ example = examples.Logistic
 # args = [H,h, L, delta]
 # example = examples.Sinusoid
 
-args = [H, L]
-example = examples.TriCavity
+# args = [H, L]
+# example = examples.TriCavity
+
+# args =  [H, h, H, l, 1.25*l, 0.75*l, l]
+# example = examples.TriSlider
 
 
 # ------------------------------------------------------------------------------
@@ -42,22 +47,21 @@ example = examples.TriCavity
 solver = control.Stokes_Solver(example, args, U, Q, Re, max_iters=50000)                
 
 N=20
-
        
 zoom_on=False               
 
-solver.new_run(N) 
+# solver.new_run(N) 
 
 # solver.load_scale(80,160) 
 
-# solver.load_run(160)
+# solver.load_run(N)
 # solver.load_run_many(40, 2, 4)
 
-# solver.new_run_many(N, 2, 4)  
+# solver.new_run_many(N, 2, 3)  
 # solver.load_run_new_many(N, 2, 2)
 
-solver.load_plot(20, zoom=zoom_on)
-
+solver.load_plot(40, zoom=zoom_on)
+# 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
 

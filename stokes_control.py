@@ -49,8 +49,8 @@ class Stokes_Solver:
         # plotting thresholds
 
         self.vel_max = 3
-        self.p_min=-30
-        self.p_max=30
+        self.p_min=-0
+        self.p_max=200
 
         
 #------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ class Stokes_Solver:
         # graphics.plot_contour_mesh(ex.space, xs, ys, 'space',['space', 'x', 'y'],log_cmap=False)
     
 
-    # zoom domain
+    # Zoom domain
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(xs, ys, ex, x_start, x_stop, y_start, y_stop)
 

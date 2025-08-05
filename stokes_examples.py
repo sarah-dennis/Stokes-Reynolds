@@ -10,14 +10,12 @@ from stokes_heights import PWLinear
 
 class BFS(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
-        H, L = args
+        h, H, l, L = args
         x0 = 0
         xf = L
         y0 = 0
         yf = H
-        h=1
-        l=L/2
-        x_peaks = [x0, x0+l, xf]
+        x_peaks = [0, l, L]
         y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
         namestr= f'BFS_H{H}L{L}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
@@ -104,5 +102,22 @@ class TriCavity(PWLinear):
         yf = H
         x_peaks = [x0, x0+l, xf]
         y_peaks=[[yf,yf],[0,0],[yf,yf]]
-        namestr = "TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
+        namestr = f"TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
+        
+        
+class TriSlider(PWLinear):
+    def __init__ (self, args, U, Q, Re, N):
+        Hin, H,  Hout, Lin, La, Lb, Lout = args
+        x0 = 0
+        xf =Lin+La+Lb+Lout
+        y0 = 0
+        yf = max(Hin, Hout, H)
+        
+        # x_peaks = [x0, l-delta, l, l+delta, xf]
+        # y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-h-(H-h)/2,yf-h-(H-h)/2],[0,0],[0,yf]]
+        
+        x_peaks = [x0, x0+Lin, x0+Lin+La, x0+Lin+La+Lb, xf]
+        y_peaks=[[yf,yf-Hin],[yf-Hin,yf-Hin],[yf-H,yf-H],[yf-Hout,yf-Hout], [yf-Hout, yf]]
+        namestr = f"TriCavity_H{H}L{xf}_Re{Re}_Q{Q}_U{U}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
