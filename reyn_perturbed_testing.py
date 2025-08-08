@@ -54,7 +54,7 @@ for k in range(n_Ns):
     Ns[k] = N 
     
     solver = control.Reynolds_Solver(Example, U, dP, args)
-    pert = solver.fd_pert_solve(N,order=4, write=False, plot=False, get_dPs=True)
+    pert = solver.fd_pert_solve(N,order=4, write=False, plot=False, get_all=True)
 
     
     if pert.order >1:

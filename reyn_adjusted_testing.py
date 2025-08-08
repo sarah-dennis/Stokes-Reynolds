@@ -12,33 +12,19 @@ import numpy as np
 import graphics
 
 
-
-
-
-# Example = examples.LogisticStep
-
-# lam = -3  # slope: -lam*(H-h)/4
-# H = 2   # outlet height
-
-# h = 1   # inlet height
-# l = 2   # half length
-
-# args = [lam,H,h, l]
 #------------------------------------------------------------------------------
 # Convergence to analytic solution
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
 
 r=2
-h0 = 0.05
+h0 = 1
 l=0
 drdx = 0
 
 d = h0+r
 print(d/r)
 args= [ r, h0,l, drdx]
-
-
 
 
 U=-1/2
@@ -145,7 +131,7 @@ for x in test_xs:
     # pert4_ps_test = (pert4_ps_nml[1:,i_test])
     p_stokes_test = (stokes_ps_nml[1:,i_test])
     
-    graphics.plot_2D_multi([p_adj_test, p_adj_TG_test,  p_stokes_test], ex.ys[1:], f'$p(x_0,y)$, $x_0/r={ex.xs[i_test]/r:.1f}$', ['V.A.','T & G', 'Stokes'], ['y/r', '$p(x_0,y) h_0/U$'],loc='lower')
+    graphics.plot_2D_multi([p_adj_test, p_adj_TG_test,  p_stokes_test], ex.ys[1:], f'$p(x_0,y)$, $x_0/r={ex.xs[i_test]/r:.1f}$, $d/r={d/r:.2f}$', ['V.A.','T & G', 'Stokes'], ['y/r', '$p(x_0,y) h_0/U$'],loc='lower')
     # graphics.plot_2D_multi([p_adj_test, p_adj_TG_test, pert2_ps_test, p_stokes_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['V.A.','T & G','p2', 'Stokes'], ['y/r', '$p(x_0,y)\frac{h_0}{U}$'],loc='lower')
     # graphics.plot_2D_multi([p_adj_test, p_adj_TG_test, pert2_ps_test, pert4_ps_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['V.A.','T & G','p2', 'p4'], ['y/r', '$p(x_0,y)\frac{h_0}{U}$'],loc='lower')
     # graphics.plot_2D_multi([p_adj_test, p_adj_TG_test], ex.ys[1:], f'$p(x_0,y)$, $x_0={ex.xs[i_test]:.1f}$', ['V.A.','T & G'], ['y/r', '$p(x_0,y)\frac{h_0}{U}$'],loc='lower')

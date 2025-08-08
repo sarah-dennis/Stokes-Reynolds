@@ -16,16 +16,16 @@ from reyn_heights import PWL_Height
 # slope_k = 1/10
  
 class PerturbedReynSol:
-    def __init__(self, height, order, reyn_pressure, reyn_velocity):
+    def __init__(self, height, U, dP, Q, order, reyn_pressure, reyn_velocity):
         self.order = order
         if order < 0 or order > 4:
             return Exception(f"order {order} not in range [0,4]")
-
+        
         self.x_scale = (height.xf - height.x0)/2 
         self.y_scale = height.yf - height.y0
-        self.Q_scale = reyn_velocity.flux
+        self.Q_scale = Q
 
-        self.P_scale = height.visc * self.Q_scale * self.x_scale * (self.y_scale**-3)
+        self.P_scale = self.Q_scale * self.x_scale * (self.y_scale**-3) #*visc
         
         self.U_scale = self.Q_scale/self.y_scale
         self.V_scale = self.Q_scale/self.x_scale                      
@@ -34,7 +34,7 @@ class PerturbedReynSol:
         self.v0s = reyn_velocity.vy /self.V_scale
         self.p0s = reyn_pressure.ps_2D /self.P_scale
         
-        self.dP_reyn = (self.p0s[0,-1]-self.p0s[0,0])
+        self.dP_reyn = dP
         
         delta = self.y_scale/self.x_scale
 
@@ -48,8 +48,8 @@ class PerturbedReynSol:
             pert2_ps_2D = (self.p0s + (delta**2) * self.p2s) *self.P_scale
             pert2_us_2D = (self.u0s + (delta**2) * self.u2s) *self.U_scale
             pert2_vs_2D = (self.v0s + (delta**2) * self.v2s) *self.V_scale
-            self.pert2_pressure = Pressure(height, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
-            self.pert2_velocity = Velocity(height, pert2_us_2D, pert2_vs_2D)
+            self.pert2_pressure = Pressure(height, U, dP,Q, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
+            self.pert2_velocity = Velocity(height, U, Q, pert2_us_2D, pert2_vs_2D)
             self.dP_pert2 = (self.p2s[0,-1]-self.p2s[0,0])
 
         if order > 2: 
@@ -61,8 +61,8 @@ class PerturbedReynSol:
             pert4_us_2D = pert2_us_2D + (delta**4) * self.u4s *self.U_scale
             pert4_vs_2D = pert2_vs_2D + (delta**4) * self.v4s *self.V_scale
         
-            self.pert4_pressure = Pressure(height, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
-            self.pert4_velocity = Velocity(height, pert4_us_2D, pert4_vs_2D)
+            self.pert4_pressure = Pressure(height, U, dP, Q, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
+            self.pert4_velocity = Velocity(height, U, Q, pert4_us_2D, pert4_vs_2D)
             self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
     
     

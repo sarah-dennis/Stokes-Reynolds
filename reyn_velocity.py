@@ -6,16 +6,16 @@ Created on Wed Aug 30 12:20:23 2023
 """
 import numpy as np
 import domain
-import graphics
-from scipy import stats
 import reyn_velocity_adjusted as adj_vel
 
 class Velocity:
-    def __init__(self, height, vx, vy):
+    def __init__(self, height, U, Q, vx, vy):
         self.height=height
         self.vx = vx
         self.vy = vy
-        self.flux, self.qs = self.get_flux(vx)
+        self.U = U
+        self.Q = Q
+        self.qs = self.get_flux(vx)
 
         self.inc = self.make_inc(height, vx, vy)
 
@@ -26,16 +26,12 @@ class Velocity:
         for i in range(self.height.Nx):
             h = self.height.hs[i]
             for j in range (self.height.Ny):
-                
                     y = self.height.ys[j]    
-                
                     if y <= h:
                         qs[i]+= vx[j,i]*self.height.dy
                     else:
                         continue
-
-        q = qs[0]
-        return q, qs
+        return qs
     
     
     def make_inc(self, height, u, v):
@@ -89,21 +85,20 @@ class Velocity:
         return inc 
             
 class ReynVelocity(Velocity):
-    def __init__(self, height, ps):
-        vx, vy = self.make_velocity(height, ps)
-        super().__init__(height, vx, vy)
+    def __init__(self, height, U, Q=None, ps=None) :
+        if Q is None:
+            h0=height.hs[0]
+            px0 = domain.right_first(height.dx, ps[0:3])
+            Q = (U*h0)/2 - (px0*(h0**3))/12 #/visc
+        vx, vy = self.make_velocity(height, U, Q)
+        super().__init__(height, U, Q, vx, vy)
         
     # 2D velocity field from 1D pressure 
-    def make_velocity(self, height, ps):
-        U = height.U
-        visc = height.visc
+    def make_velocity(self, height, U, Q):
+        # visc = height.visc
         vx = np.zeros((height.Ny, height.Nx))
         vy = np.zeros((height.Ny, height.Nx))
 
-        h0=height.hs[0]
-        px0 = domain.right_first(height.dx, ps[0:3])
-        q = (U*h0)/2 - (px0*(h0**3))/(12*visc)
-        # print('Reyn flux:', q)
 
         for i in range(height.Nx):
 
@@ -113,8 +108,8 @@ class ReynVelocity(Velocity):
             for j in range(height.Ny):
                 y = height.ys[j]
                 if y <= height.hs[i]:
-                    vx[j,i] = (h-y)*(U*(h-3*y)/h**2 + 6*q*y/h**3)
-                    vy[j,i] = -2*hx * y**2 * (h-y) *(U/h**3 - 3*q/h**4)
+                    vx[j,i] = (h-y)*(U*(h-3*y)/h**2 + 6*Q*y/h**3)
+                    vy[j,i] = -2*hx * y**2 * (h-y) *(U/h**3 - 3*Q/h**4)
                     
                 else:
                     vx[j,i] = 0
@@ -122,21 +117,23 @@ class ReynVelocity(Velocity):
                     
         return vx, vy
 
-class Adjusted_ReynVelocity_TG(Velocity):
+class TGAdj_ReynVelocity(Velocity):
     
-    def __init__(self, height, adj_pressure):
-        vx, vy = adj_vel.make_adj_velocity_TG(height, adj_pressure)
-        super().__init__(height, vx, vy)
-        
-# class Adjusted_ReynVelocity_inc(Velocity):
+    def __init__(self, height, U, Q, adj_pressure):
+        vx, vy = adj_vel.make_adj_velocity_TG(height, U, adj_pressure)
+        if Q is None:
+            h0=height.hs[0]
+            px0 = domain.right_first(height.dx, adj_pressure.ps_2D[0,0:3])
+            Q = (U*h0)/2 - (px0*(h0**3))/12 #/visc
+        super().__init__(height, U, Q, vx, vy)
+     
+class VelAdj_ReynVelocity(Velocity):
     
-#     def __init__(self, height, adj_ps):
-#         vx, vy = adj_vel.make_adj_velocity(height, adj_ps)
-#         super().__init__(height, vx, vy)
-        
-class Adjusted_ReynVelocity(Velocity):
-    
-    def __init__(self, height, adj_pressure):
-        vx, vy = adj_vel.make_adj_velocity(height, adj_pressure)
-        super().__init__(height, vx, vy)
+    def __init__(self, height, U, Q, adj_pressure):
+        vx, vy = adj_vel.make_adj_velocity(height, U, adj_pressure)
+        if Q is None:
+            h0=height.hs[0]
+            px0 = domain.right_first(height.dx, adj_pressure.ps_2D[0,0:3])
+            Q = (U*h0)/2 - (px0*(h0**3))/12 #/visc
+        super().__init__(height, U, Q, vx, vy)
         

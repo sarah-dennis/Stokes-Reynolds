@@ -18,7 +18,7 @@ import numpy as np
 #----------------
 plots_on = True
 uv_on = False
-inc_on=False
+inc_on=True
 zoom_on = False 
 write_on = False
 scaled_on=False
@@ -49,6 +49,11 @@ def l1(ax,ay,bx,by):
 def l2(ax,ay,bx,by):
     return np.sum((ax-bx)**2 + (ay-by)**2) **(1/2)
 
+def get_dp(ps):
+    dp = ps[0,0]-ps[0,-1]
+    # print(dp)
+    return dp
+
 #------------------------------------------------------------------------------
 
 Reyn_Example = reyn_examples.Logistic
@@ -58,7 +63,7 @@ H = 2   # outlet height
 h = 1   # inlet height
 l = 4   #  length
 
-tests = [-1, -2, -4, -8]
+tests = [-1, -2,- 4, -8, -16,-32]
 
 #------------------------------------------------------------------------------
 
@@ -73,13 +78,13 @@ tests = [-1, -2, -4, -8]
 # l_a = 1.25  # base length A  
 # l_b = 0.75  # base length B 
 
-# tests = [1/16, 1/8, 1/4, 1/2]
+# tests = [1/16, 1/8]#, 1/4, 1/2]
 #------------------------------------------------------------------------------
 
 k = 0
 num_tests=len(tests)
 
-fun_labels= ['reyn', 'VA-TG', 'TG', '$\epsilon^2$ pert', '$\epsilon^4$ pert']
+fun_labels= ['Reyn', 'VA-ELT', 'TG-ELT', '$\epsilon^2$-PLT', '$\epsilon^4$-PLT']
 num_models = 5 #reyn, VA-TG adj, e2 pert, e4 pert 
 
 l1_V_errs= np.zeros((num_models,num_tests))
@@ -90,6 +95,7 @@ l2_V_errs = np.zeros((num_models,num_tests))
 l1_P_errs = np.zeros((num_models,num_tests))
 linf_P_errs = np.zeros((num_models,num_tests))
 l2_P_errs = np.zeros((num_models,num_tests))
+dP_errs = np.zeros((num_models, num_tests))
 
 #------------------------------------------------------------------------------
 
@@ -98,7 +104,7 @@ l2_P_errs = np.zeros((num_models,num_tests))
 #     args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 
-label = '$\delta$'
+label = '$\lambda$'
 for delta in tests:
     args = [ H, h, l, delta]
 #------------------------------------------------------------------------------
@@ -109,23 +115,27 @@ for delta in tests:
     
     reyn_P, reyn_V = reyn_solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     reyn_ps = np.nan_to_num(reyn_P.ps_2D)
+    reyn_dp = get_dp(reyn_ps)
     reyn_us = reyn_V.vx
     reyn_vs = reyn_V.vy
     
     adj_P, adj_V= reyn_solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on, reynFlux=True)
     adj_ps = np.nan_to_num(adj_P.ps_2D)
+    adj_dp = get_dp(adj_ps)
     adj_us = adj_V.vx
     adj_vs = adj_V.vy
     
     adj_TG_P, adj_TG_V= reyn_solver.fd_adj_TG_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     adj_TG_ps = np.nan_to_num(adj_TG_P.ps_2D)
+    adj_TG_dp = get_dp(adj_TG_ps)
     adj_TG_us = adj_TG_V.vx
     adj_TG_vs = adj_TG_V.vy
     
     pert = reyn_solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on, get_all=True)
     e2_ps, e2_us, e2_vs =  np.nan_to_num(pert.pert2_pressure.ps_2D), pert.pert2_velocity.vx, pert.pert2_velocity.vy
+    e2_dp = get_dp(e2_ps)
     e4_ps, e4_us, e4_vs =  np.nan_to_num(pert.pert4_pressure.ps_2D), pert.pert4_velocity.vx, pert.pert4_velocity.vy
-    
+    e4_dp = get_dp(e4_ps)
 #------------------------------------------------------------------------------
 # Stokes 
 #------------------------------------------------------------------------------
@@ -133,17 +143,16 @@ for delta in tests:
     stokes_solver = stokes_control.Stokes_Solver(Stokes_Example, args, U, Q, Re)
     stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
     stokes_ps =  np.nan_to_num(stokes_ps)
+    stokes_dp = get_dp(stokes_ps)
+    
     if plots_on:
         stokes_solver.load_plot(N)   
     
     
     #------------------------------------------------------------------------------
-    
-
     l1_stokes_V = l1(stokes_us, stokes_vs, 0, 0)
     linf_stokes_V = linf(stokes_us, stokes_vs, 0, 0)
     l2_stokes_V = l2(stokes_us, stokes_vs, 0, 0)
-
 
     l1_stokes_P = l1(stokes_ps, 0, 0, 0)
     linf_stokes_P = linf(stokes_ps, 0, 0, 0)
@@ -185,18 +194,25 @@ for delta in tests:
     linf_P_errs[3,k] = linf(stokes_ps, 0, e2_ps, 0)/linf_stokes_P *100
     linf_P_errs[4,k] = linf(stokes_ps, 0, e4_ps, 0)/linf_stokes_P *100
 
+    dP_errs[0,k] = np.abs(stokes_dp - reyn_dp)/np.abs(stokes_dp)*100
+    dP_errs[1,k] = np.abs(stokes_dp - adj_dp)/np.abs(stokes_dp)*100
+    dP_errs[2,k] = np.abs(stokes_dp - adj_TG_dp)/np.abs(stokes_dp)*100
+    dP_errs[3,k] = np.abs(stokes_dp - e2_dp)/np.abs(stokes_dp)*100
+    dP_errs[4,k] = np.abs(stokes_dp - e4_dp)/np.abs(stokes_dp)*100
+    
     k+=1
     
     
     
-graphics.plot_2D_multi(l1_V_errs, tests, 'L1 error % Velocity', fun_labels, [label, 'L1 % error'])
-graphics.plot_2D_multi(l2_V_errs, tests, 'L2 error % Velocity', fun_labels, [label, 'L2 % error'])
-graphics.plot_2D_multi(linf_V_errs, tests, 'Linf error % Velocity',  fun_labels,  [label, 'Linf % error'])
+graphics.plot_log_multi(l1_V_errs, tests, 'L1 error % Velocity', fun_labels, [label, 'L1 % error'])
+graphics.plot_log_multi(l2_V_errs, tests, 'L2 error % Velocity', fun_labels, [label, 'L2 % error'])
+graphics.plot_log_multi(linf_V_errs, tests, 'Linf error % Velocity',  fun_labels,  [label, 'Linf % error'])
 
 
-graphics.plot_2D_multi(l1_P_errs, tests, 'L1 error % Pressure', fun_labels, [label, 'Linf % error'])
-graphics.plot_2D_multi(l2_P_errs, tests, 'L2 error % Pressure',  fun_labels, [label, 'Linf % error'])
-graphics.plot_2D_multi(linf_P_errs, tests, 'Linf error % Pressure',  fun_labels,  [label, 'Linf % error'])
+graphics.plot_log_multi(l1_P_errs, tests, 'L1 error % Pressure', fun_labels, [label, 'Linf % error'])
+graphics.plot_log_multi(l2_P_errs, tests, 'L2 error % Pressure',  fun_labels, [label, 'Linf % error'])
+graphics.plot_log_multi(linf_P_errs, tests, 'Linf error % Pressure',  fun_labels,  [label, 'Linf % error'])
+graphics.plot_log_multi(dP_errs, tests, 'dP error %',  fun_labels,  [label, 'dP % error'])
 
 
 

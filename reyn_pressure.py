@@ -18,22 +18,31 @@ from scipy.sparse.linalg import gmres
 import reyn_pressure_adjusted
 
 class Pressure:
-    def __init__(self, height, ps_1D=None, ps_2D=None):
+    def __init__(self, height, U, dP=None, Q=None, ps_1D=None, ps_2D=None):
         # initializing for adjusted solutions generates both ps_1D and ps_2D
     
         # reading in data for any adjusted solution, ps_1D will be missing
-        if ps_1D is None:
-            rhs = fd.make_rhs(height)
-            mat = fd.make_mat(height)
-            self.ps_1D = np_solve(mat, rhs)
-        else:
+        if ps_1D is not None:
             self.ps_1D = ps_1D
+        else:
+            if dP is not None:
+                rhs = fd.make_rhs(height, U, dP)
+                mat = fd.make_mat(height)
+            elif Q is not None:
+                rhs = fd.make_rhs_Q(height, U, Q)
+                mat = fd.make_mat_Q(height)
+            else:
+                raise Exception("Prescribe Q or dP")
+            
+            self.ps_1D = np_solve(mat, rhs)
         
         # initializing for any 1D Reynolds solution, ps_2D will be missing
-        if ps_2D is None:
-            self.ps_2D = self.make_2D_ps(height, ps_1D)
-        else:
+        if ps_2D is not None:
             self.ps_2D = ps_2D
+        else:
+            
+            self.ps_2D = self.make_2D_ps(height, ps_1D)
+        
         
         self.dP = self.ps_2D[0,-1]- self.ps_2D[0,0]
         
@@ -52,57 +61,71 @@ class Pressure:
         return ps_2D
                     
 class FinDiff_ReynPressure(Pressure):
-    def __init__(self, height):
-        rhs = fd.make_rhs(height)
-        mat = fd.make_mat(height)
-        # rhs = fd.make_rhs_Q(height)
-        # mat = fd.make_mat_Q(height)
-        ps_1D = np_solve(mat, rhs)
-        super().__init__(height, ps_1D)
-        
-class FinDiff_ReynPressure_Q(Pressure):
-    def __init__(self, height):
-        rhs = fd.make_rhs_Q(height)
-        mat = fd.make_mat_Q(height)
+    def __init__(self, height, U, dP=None, Q=None):
+        if dP is not None:
+            rhs = fd.make_rhs(height, U, dP)
+            mat = fd.make_mat(height)
+        elif Q is not None:
+            rhs = fd.make_rhs_Q(height, U, Q)
+            mat = fd.make_mat_Q(height)
+        else:
+            raise Exception("Prescribe Q or dP")
         
         ps_1D = np_solve(mat, rhs)
-        super().__init__(height, ps_1D)
-        
+        super().__init__(height, U, dP, Q, ps_1D)
+
 
 class PwlGMRes_ReynPressure(Pressure):
-    def __init__(self, height):
+    def __init__(self, height, U, dP):
             
         if not isinstance(height, PWL_Height):
             raise TypeError('Example is not piecewise linear')
         
-        rhs = pwlGMRes.make_rhs(height)
+        rhs = pwlGMRes.make_rhs(height, U, dP)
         linOp = pwlGMRes.pwlLinOp(height)
         sol_coefs, exit_code = gmres(linOp, rhs, tol=1e-10)
          
         if exit_code != 0:
             raise Exception('gmres did not converge')
             
-        ps_1D, flux = pwlGMRes.make_ps(height, sol_coefs)
-        super().__init__(height, ps_1D)
+        ps_1D, Q = pwlGMRes.make_ps(height, sol_coefs, U)
+        super().__init__(height, U, dP, Q, ps_1D)
     
-class Adjusted_ReynPressure(Pressure):
-    def __init__(self, height, reynFlux):
-        reyn_pressure = FinDiff_ReynPressure_Q(height)
-        ps_1D = reyn_pressure.ps_1D
-        ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D, reynFlux, TG=False)
+class VelAdj_ReynPressure(Pressure):
+    def __init__(self, height, U, dP=None, Q=None):
+        if dP is not None:
+            reyn_pressure = FinDiff_ReynPressure(height, U, dP, Q)
+            ps_1D = reyn_pressure.ps_1D
+            ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, U, ps_1D, reynFlux=False, TG=False)
+        elif Q is not None:
+            reyn_pressure = FinDiff_ReynPressure(height, U, dP, Q)
+            ps_1D = reyn_pressure.ps_1D
+            ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, U, ps_1D, reynFlux=True, TG=False)
+        else:
+            raise Exception("Prescribe Q or dP")
+        
+            
         self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs = reyn_derivs
         self.sigmas,self.sigma_xs,self.sigma_2xs = sigma_derivs
 
 
-        super().__init__(height, ps_1D, ps_2D)
+        super().__init__(height, U, dP, Q, ps_1D, ps_2D)
 
-class Adjusted_ReynPressure_TG(Pressure):
-    def __init__(self, height):
-        reyn_pressure = FinDiff_ReynPressure_Q(height)
-        ps_1D = reyn_pressure.ps_1D
-        ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, ps_1D, TG=True)
+
+class TGAdj_ReynPressure(Pressure):
+    def __init__(self, height, U, dP, Q):
+        if dP is not None:
+            reyn_pressure = FinDiff_ReynPressure(height, U, dP)
+
+            ps_1D = reyn_pressure.ps_1D
+            ps_2D, reyn_derivs, _ = reyn_pressure_adjusted.make_adj_ps(height, U, ps_1D, TG=True)
+            
+        elif Q is not None:
+            reyn_pressure = FinDiff_ReynPressure(height, U, Q)
+
+            ps_1D = reyn_pressure.ps_1D
+            ps_2D, reyn_derivs, _ = reyn_pressure_adjusted.make_adj_ps(height, U, ps_1D, TG=True)
+
         self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs = reyn_derivs
-        self.sigmas,self.sigma_xs,self.sigma_2xs = sigma_derivs
-
-
-        super().__init__(height, ps_1D, ps_2D)
+       
+        super().__init__(height, U, dP, Q, ps_1D, ps_2D)

@@ -9,7 +9,7 @@ import graphics
 import domain as dm
 
 
-def make_adj_velocity(height, adj_pressure):
+def make_adj_velocity(height, U, adj_pressure):
 
     # derivatives of the reynolds pressure
     pxs = adj_pressure.reyn_pxs
@@ -21,18 +21,18 @@ def make_adj_velocity(height, adj_pressure):
     sigma_2xs = adj_pressure.sigma_2xs
 
 
-    us = make_us(height, pxs, p2xs, p3xs, sigma_xs)
-    vs = make_vs(height,  pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
+    us = make_us(height, U, pxs, p2xs, p3xs, sigma_xs)
+    vs = make_vs(height,  U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
     return us, vs
 
 
 
 
-def make_us(height, pxs, p2xs, p3xs, sigmaxs):
+def make_us(height, U, pxs, p2xs, p3xs, sigmaxs):
     us = np.zeros((height.Ny, height.Nx))
-    U = height.U
-    visc = height.visc
+
+    visc = 1#height.visc
     for i in range(height.Nx):
         h = height.hs[i]
         hx = height.hxs[i]
@@ -67,10 +67,10 @@ def make_us(height, pxs, p2xs, p3xs, sigmaxs):
     return us
 
 
-def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
+def make_vs(height, U, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
     vs = np.zeros((height.Ny, height.Nx))
-    U = height.U
-    visc = height.visc
+    # U = height.U
+    visc = 1# height.visc
     for i in range(height.Nx):
         h = height.hs[i]
         hx = height.hxs[i]
@@ -115,12 +115,12 @@ def make_vs(height, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
 # # ------------------------------------------------------------------------------
 
 # as in Takeuchi-Gu            
-def make_adj_velocity_TG(height, adj_pressure):
+def make_adj_velocity_TG(height, U, adj_pressure):
     ps = adj_pressure.ps_2D #ps = reyn_ps + adj_ps
     pxs, p2xs = make_px_pxx(height, ps)
     px_hs, p2x_hs, pxy_hs = make_pxh_pxxh_pxyh(height, pxs, p2xs)
         
-    us, vs = make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs)
+    us, vs = make_us_vs(height, U, pxs, px_hs, p2xs, p2x_hs, pxy_hs)
     return us, vs
 
 def make_px_pxx(height, ps):  
@@ -218,13 +218,13 @@ def make_pxh_pxxh_pxyh(height,pxs,pxxs):
 
     return px_hs, pxx_hs, pxy_hs
 
-def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
+def make_us_vs(height, U, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
     
     us = np.zeros((height.Ny, height.Nx))
     vs = np.zeros((height.Ny, height.Nx))
 
-    U = height.U
-    visc = height.visc
+    # U = height.U
+    visc = 1# height.visc
     for i in range(height.Nx):
         h = height.hs[i]
         hx = height.hxs[i]
@@ -237,7 +237,7 @@ def make_us_vs(height, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
         phi1x = -1/(2*visc)*(h*(pxx_h + pxy_h*hx) + hx*px_h) + U/(h**2) *hx
 
         # when using sigmas = 0 in p_adj, v_h corrects the velocity boundary
-        v_h = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -height.U/2 * hx
+        v_h = 1/(12*visc)*(h**3) * (pxx_h+ 3*pxy_h*hx  + 3*px_h*hx/h) -U/2 * hx
         
         for j in range(height.Ny):
             y = height.ys[j]

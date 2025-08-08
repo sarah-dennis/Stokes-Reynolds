@@ -9,7 +9,7 @@ import domain as dm
 import graphics
 import reyn_pressure_finDiff as fd
 
-def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
+def make_adj_ps(height, U, reyn_ps, reynFlux=True, TG=False):
     ps_adj = np.zeros((height.Ny, height.Nx))
 
     hs = height.hs
@@ -31,9 +31,9 @@ def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
    #---------------------------------------------------------------------------
     if not TG: 
        if reynFlux:
-           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,pxs,p2xs,p3xs,p4xs)
+           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynFlux(height,U, pxs,p2xs,p3xs,p4xs)
        else: #reyn dP
-           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,pxs,p2xs,p3xs,p4xs)
+           sigmas, sigma_xs, sigma_2xs = make_sigmas_reynDP(height,U, pxs,p2xs,p3xs,p4xs)
        sigma_derivs = [sigmas, sigma_xs, sigma_2xs]
     else:
        sigma_derivs = [0, 0, 0]  
@@ -41,16 +41,13 @@ def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
 
     #---------------------------------------------------------------------------
 
-    
-    U = height.U
-    visc = height.visc
     for i in range(height.Nx): 
         h = hs[i]
         hx = hxs[i]
         px = pxs[i]
         pxx = p2xs[i]
 
-        phi1x = -(pxx*h + px*hx)/2 + U*visc/(h**2)*hx
+        phi1x = -(pxx*h + px*hx)/2 + U/(h**2)*hx #*visc
 
 
         for j in range(height.Ny):
@@ -65,7 +62,7 @@ def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
                     ps_adj[j,i] = reyn_ps[i] + adj
                     
                 else:
-                    ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i]*visc 
+                    ps_adj[j,i] = reyn_ps[i] + adj + sigmas[i] #*visc 
 
 
 
@@ -74,10 +71,9 @@ def make_adj_ps(height, reyn_ps, reynFlux=True, TG=False):
     return ps_adj, reyn_derivs, sigma_derivs
 
 
-def adj_rhs(height, pxs, p2xs, p3xs, p4xs):
+def adj_rhs(height, U, pxs, p2xs, p3xs, p4xs):
     vs = np.zeros(height.Nx)
-    U = height.U
-    visc = height.visc
+    visc =1# height.visc
     for i in range(height.Nx):
         h = height.hs[i]
         hx = height.hxs[i]
@@ -88,7 +84,7 @@ def adj_rhs(height, pxs, p2xs, p3xs, p4xs):
         p3x = p3xs[i]
         p4x = p4xs[i]
 
-        v_a =(h**5)*p4x + 5*(h**4)*p3x*hx 
+        v_a = (h**5)*p4x + 5*(h**4)*p3x*hx 
         v_b = (h*p4x+ 3*hx*p3x + h3x*px + 3*h2x*p2x)*(h**4) 
         v_c = 4*(h*p3x + 2*hx*p2x + h2x*px)*(h**3)*hx
         v_d = ((h**2)*h3x-2*(hx**3)-2*h*hx*h2x)
@@ -99,13 +95,12 @@ def adj_rhs(height, pxs, p2xs, p3xs, p4xs):
     vs[-1] = 0
     return vs
  
-def make_sigmas_reynFlux(height, pxs, p2xs, p3xs, p4xs):
+def make_sigmas_reynFlux(height, U, pxs, p2xs, p3xs, p4xs):
     s = np.zeros( height.Nx)
     sx = np.zeros( height.Nx)
     sxx = np.zeros( height.Nx)
-    U = height.U
     dx=height.dx
-    visc = height.visc
+    visc = 1
     for i in range(height.Nx):
         h = height.hs[i]
         hx = height.hxs[i]
@@ -128,9 +123,9 @@ def make_sigmas_reynFlux(height, pxs, p2xs, p3xs, p4xs):
                 
     return s, sx, sxx   
 
-def make_sigmas_reynDP(height, pxs, p2xs, p3xs, p4xs):
+def make_sigmas_reynDP(height, U, pxs, p2xs, p3xs, p4xs):
     M = fd.make_mat(height)
-    rhs = adj_rhs(height, pxs, p2xs, p3xs, p4xs) #new velocity
+    rhs = adj_rhs(height, U, pxs, p2xs, p3xs, p4xs) #new velocity
     s  = np.linalg.solve(M, rhs)
 
     sx = dm.center_diff(s, height.Nx, height.dx)

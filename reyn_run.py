@@ -11,7 +11,7 @@ import reyn_examples as examples
 #----------------
 plots_on = True
 uv_on = False
-inc_on=False
+inc_on=not False
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -21,10 +21,12 @@ scaled_on=False#True
 #------------------------------------------------------------------------------
 # Example = examples.BFS
 # H=1.25
+
 # h=1
 # l=2
 # L=4
 # args =  [h, H, l, L]
+
  
 
 # Example = examples.BFS_deltaSmooth
@@ -32,22 +34,24 @@ scaled_on=False#True
 # delta = 1.5
 # args = [H,delta]
 
-# Example = examples.TriSlider
-# h_in=0.01
-# h=1/4
-# h_out = 0.01
-# l_in = 1
-# l_out = 1
-# l_a = 1.25
-# l_b = 0.75
-# args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
-
-Example = examples.TriCavity
-H=0.25 # apex height
+Example = examples.TriSlider
+h_in=1
+h=1/4
+h_out = 1
+l_in = 1
+l_out = 1
 l_a = 1.25
 l_b = 0.75
-args = [H,l_a, l_b]
+args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
+
+
+
+# Example = examples.TriCavity
+# H=0.25 # apex height
+# l_a = 1.25
+# l_b = 0.75
+# args = [H,l_a, l_b]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -78,15 +82,15 @@ args = [H,l_a, l_b]
 # args= [ r, h0,l, drdx]
 
 
-Example = examples.Logistic
+# Example = examples.Logistic
 
-delta = -4  # slope: -lam*(H-h)/4
-H = 2   # outlet height
-h = 1   # inlet height
-L = 4   #  length
+# delta = -4  # slope: -lam*(H-h)/4
+# H = 2   # outlet height
+# h = 1   # inlet height
+# L = 4   #  length
 
 
-args = [ H, h, L, delta]
+# args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
@@ -97,22 +101,22 @@ args = [ H, h, L, delta]
 U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =-29.2
+dP =None
+Q = 1
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 150
+N = 200
 
 
-solver = control.Reynolds_Solver(Example, U, dP, args)
-solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver = control.Reynolds_Solver(Example, U, dP, Q, args)
+# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
 # solver.fd_adj_TG_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-
 # solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

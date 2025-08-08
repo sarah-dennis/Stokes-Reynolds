@@ -35,7 +35,7 @@ class Domain:
 # Domain for Reynolds solver
 class Height(Domain):
 
-    def __init__(self, x0, xf, y0, yf, N, hs, i_peaks, U, dP, namestr):
+    def __init__(self, x0, xf, y0, yf, N, hs, i_peaks, namestr):
         dirstr = f"./reyn_examples/{namestr}"
         super().__init__(x0, xf, y0, yf, N, dirstr,namestr) # -> {dx, dy, xs, ys}
         
@@ -54,16 +54,16 @@ class Height(Domain):
 
         self.h_min = min(self.hs)
         
-        # self.Q=1
+        # # self.Q=1
         
-        self.U = U    # velocity at flat boundary
-        self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
+        # self.U = U    # velocity at flat boundary
+        # self.visc = 1#2.45/8.48 # kinematic viscosity (m^2/s)
         
-        self.p_ambient = 0
-        self.p0 = -dP
-        self.pN = self.p_ambient
+        # self.p_ambient = 0
+        # self.p0 = -dP
+        # self.pN = self.p_ambient
      
-        self.Re = 0
+        # self.Re = 0
 
 
     

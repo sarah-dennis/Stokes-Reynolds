@@ -102,7 +102,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
     # ax.set_xlim([0, 1])
-    # ax.set_ylim([-1, 1])
+    # ax.set_ylim([-100,100])
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -114,7 +114,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         fig.legend(bbox_to_anchor=(0.35, 0.875))
     elif loc=='lower':
         
-        fig.legend(bbox_to_anchor=(0.35, 0.275))
+        fig.legend(bbox_to_anchor=(0.35, 0.35))
     else:
         fig.legend(bbox_to_anchor=(0.9, 0.275))
     
@@ -185,14 +185,14 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0, np.max([O1,2*np.max(fs)]))
+    # ax.set_ylim(0, np.max([O1,2*np.max(fs)]))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     
     pp.title(title,  fontweight ="bold")
     # fig.legend(bbox_to_anchor=(0.3, 0.325))
-    fig.legend(bbox_to_anchor=(0.3, 0.425))    
+    fig.legend(bbox_to_anchor=(0.9, 0.875))    
     return fig
 
 #------------------------------------------------------------------------------

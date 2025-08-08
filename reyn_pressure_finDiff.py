@@ -8,15 +8,18 @@ Created on Tue Jun 21 09:43:24 2022
 import numpy as np
 
 # Reynolds rhs
-def make_rhs(height):
+def make_rhs(height, U, dP):
     N = height.Nx
 
     rhs = np.zeros(N)    
 
-    rhs = 6 * height.visc * height.U * height.hxs
+    rhs = 6 * U * height.hxs #*visc
     
-    rhs[0] = height.p0
-    rhs[N-1] = height.pN
+    
+    p0=-dP
+    pN = 0
+    rhs[0] = p0
+    rhs[N-1] = pN
     
     return rhs
 
@@ -57,18 +60,18 @@ def make_mat(height):
 
     return D
         
-def make_rhs_Q(height):
+def make_rhs_Q(height, U, Q):
     N = height.Nx
 
     rhs = np.zeros(N)    
 
-    rhs = 6 * height.visc * height.U * height.hxs
+    rhs = 6 * U * height.hxs  #*visc
     h0 = height.hs[0]
-    Q = 1
-    dp0 = -12*height.visc*Q/h0**3 + 6*height.visc*height.U/h0**2
     
-    rhs[0] = dp0
-    rhs[N-1] = height.pN
+    dp0 = -12*Q/h0**3 + 6*U/h0**2
+    
+    rhs[0] = dp0#*visc
+    rhs[N-1] = 0
     
     return rhs
 
@@ -101,10 +104,7 @@ def make_mat_Q(height):
     D = np.diagflat(D_center) + np.diagflat(D_lower[1:N], -1) + np.diagflat(D_upper[0:N-1], 1)
     D /= (2*height.dx**2)
     
-    # -- set top row D to [-1, 1, ...] and rhs[0] = p(x0)
-    # D[0,0] = -1/height.dx
-    # D[0,1] = 1/height.dx
-    
+    # -- set top row D to [-3/2, 2, -1/2 ...] and rhs[0] = p(x0)
     D[0,0] = -3/(2*height.dx)
     D[0,1] = 4/(2*height.dx)
     D[0,2] = -1/(2*height.dx)

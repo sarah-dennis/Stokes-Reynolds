@@ -108,7 +108,9 @@ class TriCavity(PWLinear):
         
 class TriSlider(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
+
         Hin, H,  Hout, Lin, La, Lb, Lout = args
+
         x0 = 0
         xf =Lin+La+Lb+Lout
         y0 = 0

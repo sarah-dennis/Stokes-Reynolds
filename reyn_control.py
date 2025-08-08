@@ -26,26 +26,43 @@ y_stop = y_start + leny
 log_linthresh=1e-8  
 
 class Reynolds_Solver: 
-    def __init__(self, Example, U, dP, args=None):
-        self.Example = Example #initialize ex = Example(U, dP, args) in the solver
+    def __init__(self, Example, U, dP=None, Q=None, args=None):
+        self.Example = Example #initialize ex = Example(args) in the solver
         self.args=args
-        self.U = U
-        self.dP = dP
-        # colorbar min max
+        
+        self.U = U # velocity at flat boundary
+        
+        self.Q = Q
+        
 
+        self.dP = dP
+            # self.p0 = -dP
+            # self.pN = 0
+     
+        self.Re = 0   # Re = U Ly / visc
+        # self.visc = 1 # 2.45/8.48 # kinematic viscosity (m^2/s)
+        
+        # colorbar min max
         self.vel_max = 3
         self.p_min=0
         self.p_max=200
 
 
     def pwl_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        ex = self.Example(self.U, self.dP, N, self.args)
-
-        pressure = rp.PwlGMRes_ReynPressure(ex)
-        velocity = rv.ReynVelocity(ex, pressure.ps_1D)
-        solver_title = "Reynolds"#" Piecewise Linear"
+        ex = self.Example(self.args,N)
+        solver_title = "Reynolds" #" Piecewise Linear"
+        
+        if self.dP is None:
+            raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
+        else:
+        
+            pressure = rp.PwlGMRes_ReynPressure(ex, self.U, self.dP)
+        
+        velocity = rv.ReynVelocity(ex, self.U, self.Q, pressure.ps_1D)
+    
+        
         if plot:
-            self.p_plot(ex, pressure, velocity.flux, solver_title, scaled, zoom)
+            self.p_plot(ex, pressure, velocity.Q, solver_title, scaled, zoom)
             self.v_plot(ex, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
         
         if write:
@@ -58,37 +75,39 @@ class Reynolds_Solver:
         return pressure, velocity
     
     def fd_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        ex = self.Example(self.U, self.dP, N, self.args)
-        # pressure = rp.FinDiff_ReynPressure(ex)
-        pressure = rp.FinDiff_ReynPressure_Q(ex)
-        
-        velocity = rv.ReynVelocity(ex, pressure.ps_1D)
+        ex = self.Example(self.args, N)
         solver_title = "Reynolds"#"Finite Difference"
+
+        reyn_pressure = rp.FinDiff_ReynPressure(ex, self.U, self.dP, self.Q)
+        
+        
+        reyn_velocity = rv.ReynVelocity(ex, self.U, self.Q, reyn_pressure.ps_1D)
+        
+        
+        
         if plot:
-            self.p_plot(ex, pressure, velocity.flux, solver_title, scaled, zoom)
-            self.v_plot(ex, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
+            self.p_plot(ex, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
+            self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
 
         if write:
             nm = ex.Nx * ex.Ny
-            u = velocity.vx.reshape(nm)
-            v = velocity.vy.reshape(nm)
-            p= pressure.ps_2D.reshape(nm)
+            u = reyn_velocity.vx.reshape(nm)
+            v = reyn_velocity.vy.reshape(nm)
+            p = reyn_pressure.ps_2D.reshape(nm)
             rw.write_reyn(ex, u, v, p)
         
-        return pressure, velocity
+        return reyn_pressure, reyn_velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, reynFlux=True):
-        ex = self.Example(self.U, self.dP, N, self.args)
+    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+        ex = self.Example(self.args, N)
         
-        adj_pressure = rp.Adjusted_ReynPressure(ex, reynFlux)
-        
-        adj_velocity = rv.Adjusted_ReynVelocity(ex, adj_pressure)
-        
-        # adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
-        
-        solver_title = "Reynolds Adjusted"
+        adj_pressure = rp.VelAdj_ReynPressure(ex, self.U, self.dP, self.Q)
+
+        adj_velocity = rv.VelAdj_ReynVelocity(ex, self.U, self.Q, adj_pressure)
+                
+        solver_title = "Reynolds Velocity Adjusted"
         if plot:
-            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, scaled, zoom)
+            self.p_plot(ex, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
@@ -100,15 +119,19 @@ class Reynolds_Solver:
         return adj_pressure, adj_velocity
     
     def fd_adj_TG_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
-        ex = self.Example(self.U, self.dP, N, self.args)
+        ex = self.Example(self.args, N)
         
-        adj_pressure = rp.Adjusted_ReynPressure_TG(ex)
-                
-        adj_velocity = rv.Adjusted_ReynVelocity_TG(ex, adj_pressure)
+        if self.dP is None:
+            raise Exception("No prescribed flux for T.G.-ELT")
+        else:
+            adj_pressure = rp.TGAdj_ReynPressure(ex, self.U, self.dP, self.Q) 
+               
+        adj_velocity = rv.TGAdj_ReynVelocity(ex, self.U, self.Q, adj_pressure)
         
         solver_title = "Reynolds Adjusted T. & G."
+        
         if plot:
-            self.p_plot(ex, adj_pressure , adj_velocity.flux, solver_title, scaled, zoom)
+            self.p_plot(ex, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(ex, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
         if write:
             nm = ex.Nx * ex.Ny
@@ -119,29 +142,33 @@ class Reynolds_Solver:
         
         return adj_pressure, adj_velocity
 
-    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
-        ex = self.Example(self.U, self.dP, N, self.args)
 
+    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
+        ex = self.Example(self.args, N)
+
+        if self.Q is None:
+            raise Exception("No prescribed dP for PLT")
         
-        reyn_pressure = rp.FinDiff_ReynPressure_Q(ex)
-        reyn_velocity = rv.ReynVelocity(ex, reyn_pressure.ps_1D)                   
+        reyn_pressure = rp.FinDiff_ReynPressure(ex, self.U, self.dP, self.Q)
+    
+        reyn_velocity = rv.ReynVelocity(ex,self.U, self.Q, reyn_pressure.ps_1D)                   
         
-        pert = rpert.PerturbedReynSol(ex, order, reyn_pressure, reyn_velocity)
+        pert = rpert.PerturbedReynSol(ex,self.U, reyn_pressure.dP, reyn_velocity.Q, order, reyn_pressure, reyn_velocity)
         solver_title = "Reynolds"
         
         if plot:
             
-            # self.p_plot(ex, reyn_pressure, reyn_velocity.flux, solver_title, scaled, zoom)
+            # self.p_plot(ex, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
             # self.v_plot(ex, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
 
             if order > 1:
                 solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
-                self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.flux, solver_title2, scaled, zoom)
+                self.p_plot(ex, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
                 self.v_plot(ex, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
            
             if order > 3:
                 solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
-                self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.flux, solver_title4, scaled, zoom)
+                self.p_plot(ex, pert.pert4_pressure, pert.pert4_velocity.Q, solver_title4, scaled, zoom)
                 self.v_plot(ex, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
         
         if write:
@@ -173,7 +200,7 @@ class Reynolds_Solver:
         if scaled:
             x_scale = ex.xs[-1]-ex.xs[0]
             y_scale = min(ex.hs)
-            p_scale = flux*ex.visc*x_scale/y_scale
+            p_scale = flux*x_scale/y_scale #*visc
             paramstr = "$Re=0$, $ Q=%.2f$, $U=%.1f$, $\Delta   P=%.2f$"%(flux, self.U, pressure.dP/p_scale)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$  p$", "$  x$","$  y$"]
@@ -202,18 +229,18 @@ class Reynolds_Solver:
         if scaled:
             x_scale = ex.xs[-1]-ex.xs[0]
             y_scale = min(ex.hs)
-            u_scale = velocity.flux/y_scale
-            v_scale = velocity.flux/x_scale
-            p_scale = velocity.flux*ex.visc*x_scale/y_scale
-            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.flux, self.U, dP/p_scale)
+            u_scale = velocity.Q/y_scale
+            v_scale = velocity.Q/x_scale
+            p_scale = velocity.Q*x_scale/y_scale #*visc
+            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.U, dP/p_scale)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
             uv_mag = np.sqrt((velocity.vx/u_scale)**2 + (velocity.vy/v_scale)**2)
-            graphics.plot_stream_heat(velocity.vx/u_scale, velocity.vy/y_scale, ex.xs/x_scale, ex.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max/velocity.flux, log_cmap=False)
+            graphics.plot_stream_heat(velocity.vx/u_scale, velocity.vy/y_scale, ex.xs/x_scale, ex.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max/velocity.Q, log_cmap=False)
 
         else:
            
-            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.flux, self.U, dP)
+            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.Q, self.U, dP)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
             uv_mag = np.sqrt((velocity.vx)**2 + (velocity.vy)**2)
@@ -251,7 +278,7 @@ class Reynolds_Solver:
         p = p.reshape((ex.Ny, ex.Nx))
         pressure = rp.Pressure(ex, ps_2D=p)
         velocity = rv.Velocity(ex, u, v)
-        self.p_plot(ex, pressure, velocity.flux, zoom)
+        self.p_plot(ex, pressure, velocity.Q, zoom)
         self.v_plot(ex, velocity, zoom, inc=False, uv=False)
 
     def convg_pwl_fd(self, Ns):

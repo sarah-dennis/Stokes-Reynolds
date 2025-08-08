@@ -13,7 +13,7 @@ from domain import Height
 # PWL Height
 #------------------------------------------------------------------------------
 class PWL_Height(Height):
-    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, U, dP, filestr):
+    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, filestr):
         self.h_peaks = h_peaks
         self.x_peaks = x_peaks
         self.N_regions = N_regions # = len(h_peaks)-1
@@ -23,7 +23,7 @@ class PWL_Height(Height):
         y0 = 0
         yf = max(hs)  
 
-        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
         
     def make_hs(self, x0, xf, N, x_peaks, h_peaks):
         slopes = np.zeros(self.N_regions)
@@ -56,7 +56,7 @@ class PWL_Height(Height):
 #------------------------------------------------------------------------------
 
 class RandomHeight(Height):
-    def __init__(self, x0, xf, N, h_min, h_max, U, dP, filestr):
+    def __init__(self, x0, xf, N, h_min, h_max, filestr):
         # h_str = "./examples/" +f"Rand_H{h_max}_U{U}_dP{dP}_N{N}"
 
         Nx = (xf-x0)*N + 1
@@ -67,13 +67,13 @@ class RandomHeight(Height):
         y0 = 0
         yf = max(hs)
         i_peaks = np.asarray(range(Nx))
-        super().__init__(x0, xf, y0, yf, Nx-1, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, Nx-1, hs, i_peaks,filestr)
   
 
 #------------------------------------------------------------------------------   
 class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, H, h, U, dP, filestr):
+    def __init__(self, x0, xf, N, H, h, filestr):
         Nx = (xf-x0)*N + 1
         self.H = H
         self.h = h
@@ -89,14 +89,14 @@ class SinusoidalHeight(Height):
         
         i_peaks = [0, Nx-1]
 
-        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
     def h_fun(self, x):
         return self.H/2 * (1 + np.cos(2*np.pi/self.L*(self.L/2 - x))) + self.h
     
 class BumpHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, lam, H, h0, U, dP, filestr):
+    def __init__(self, x0, xf, N, lam, H, h0, filestr):
         Nx = (xf-x0)*N + 1
         # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
         y0 = 0
@@ -112,13 +112,13 @@ class BumpHeight(Height):
         yf = np.max(hs)
         i_peaks = [0, Nx-1]
        
-        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
   
     def h_fun(self, x):
         return self.H*(1-(self.lam/2)*(1+np.cos(np.pi*x/self.x_scale)))-(self.H-self.h0)
    
 class LogisticHeight(Height):
-    def __init__(self, x0, xf, N, H, h, center, delta, U, dP, filestr):
+    def __init__(self, x0, xf, N, H, h, center, delta, filestr):
        
         Nx = (xf-x0)*N + 1
         dx = 1/N
@@ -132,7 +132,7 @@ class LogisticHeight(Height):
         yf = np.max(hs)
         i_peaks = [0, Nx-1]
        
-        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
     def h_fun(self, x):
         
@@ -141,7 +141,7 @@ class LogisticHeight(Height):
 #------------------------------------------------------------------------------    
 class CircleHeight(Height):
     
-    def __init__(self, x0, xf, N, r, dxdr, h0, U, dP, filestr):
+    def __init__(self, x0, xf, N, r, dxdr, h0, filestr):
         Nx = int((xf-x0)*N + 1)
         dx = 1/N
         
@@ -164,7 +164,7 @@ class CircleHeight(Height):
         else:
             i_peaks = [0, Nx-1]
        
-        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
     def h_fun(self, x):
         # return self.h0 + np.sqrt(self.r**2 - (x-self.r)**2)
@@ -194,7 +194,7 @@ class CircleHeight(Height):
     
 #------------------------------------------------------------------------------
 # class ConstantHeight(Height):
-#     def __init__(self, x0, xf, N, h0, U, dP, filestr):
+#     def __init__(self, x0, xf, N, h0, filestr):
 #         # h_str = "./examples/" +f"Cnsnt_H{h0}_L{xf-x0}_N{N}"
 #         Nx = (xf-x0)*N + 1
 #         hs = np.ones(Nx)*h0
@@ -203,7 +203,7 @@ class CircleHeight(Height):
 #         yf = h0
 #         i_peaks = []
        
-#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
 #------------------------------------------------------------------------------
 # class StepHeight(Height):
@@ -219,7 +219,7 @@ class CircleHeight(Height):
 #         hs= self.make_hs(x0, xf, N, Nx, self.N_steps, self.h_steps, self.step_width)  
 #         i_peaks = [self.step_width*N]
         
-#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, U, dP, filestr)
+#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
 #     def make_hs(self, x0, xf, N, Nx, n_steps, h_steps, step_width):
 #         hs = np.zeros(Nx)
