@@ -10,7 +10,7 @@ import numpy as np
 from scipy.sparse.linalg import LinearOperator 
     
 
-def make_ps(height, cs, U):
+def make_ps(height, BC, cs):
     slopes = height.slopes
     hs = height.hs
     x_peaks = height.x_peaks
@@ -20,7 +20,7 @@ def make_ps(height, cs, U):
     k = 0
     cq = cs[-1]
     flux = -cq/12 #/visc
-    cu = 6 * U #*visc
+    cu = 6 * BC.U #*visc
     
     for i in range(height.Nx):
         
@@ -38,21 +38,19 @@ def make_ps(height, cs, U):
     return ps, flux
 
 
-def make_rhs(height, U, dP):
+def make_rhs(height, BC):
     N = height.N_regions
-    p0 = -dP
-    pN = 0
     hs = height.h_peaks
     slopes = height.slopes
     widths = height.widths
     
     rhs = np.zeros(N+1)
-    c = 6*U #*visc
+    c = 6*BC.U #*visc
     
     if slopes[0] != 0:
-        rhs[0] = c / (hs[0,1] * slopes[0]) + p0
+        rhs[0] = c / (hs[0,1] * slopes[0]) + BC.p0
     else: 
-        rhs[0] = p0 
+        rhs[0] = BC.p0 
     
     for i in range(1, N):
         
@@ -69,9 +67,9 @@ def make_rhs(height, U, dP):
             rhs[i] = c * hs[i,0]**-2 * widths[i-1]
             
     if slopes[N-1] != 0:
-        rhs[N] = c / (hs[N,0]*slopes[N-1]) +pN
+        rhs[N] = c / (hs[N,0]*slopes[N-1]) + BC.pN
     else:
-        rhs[N] = -c * hs[N,0]**-2 * widths[N-1]+ pN
+        rhs[N] = -c * hs[N,0]**-2 * widths[N-1] + BC.pN
         
     return rhs
 
