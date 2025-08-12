@@ -6,6 +6,7 @@ Created on Thu Oct 24 13:23:27 2024
 """
 
 import reyn_control as control
+import reyn_boundary as bc
 import reyn_examples as examples
 
 #----------------
@@ -29,10 +30,10 @@ scaled_on=False#True
 
  
 
-Example = examples.BFS_deltaSmooth
-H = 2
-delta = 1.5
-args = [H,delta]
+# Example = examples.BFS_deltaSmooth
+# H = 2
+# delta = 1.5
+# args = [H,delta]
 
 
 # Example = examples.TriSlider
@@ -75,48 +76,53 @@ args = [H,delta]
 
 
 # Example = examples.Cylinder
-# drdx = 0
-# r=1
-# h0 = 1/2
-# l=0.5
+
+# r = 1      # radius
+# h0 = 1/2   # cleareance: Hin=Hout = h0 + r 
+# l = 0.5    # length: inlet=outlet 
+# drdx = 0   # depth: inlet=outlet = l+drdx & Hin=Hout = h0+r-drdx
+
 # args= [ r, h0,l, drdx]
 
 
-# Example = examples.Logistic
+Example = examples.Logistic
 
-# delta = -4  # slope: -lam*(H-h)/4
-# H = 2   # outlet height
-# h = 1   # inlet height
-# L = 4   #  length
+delta = 16  # max slope: -delta*(H-h)/4
+H = 2       # outlet height
+h = 1       # inlet height
+L = 4       # total length
 
-
-# args = [ H, h, L, delta]
+args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
 # boundary conditions
 #------------------------------------------------------------------------------
 
-# U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U =0
-# dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
+## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
+U = 0
 
-dP =  -20#None
-Q = None
+## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+dP =  -24.31
+BC = bc.Fixed(U,dP)
+
+## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
+# Q = 1
+# BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 100
+N = 80
 
 
-solver = control.Reynolds_Solver(Example, U, dP, Q, args)
-solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver = control.Reynolds_Solver(Example, BC, args)
+# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
-# solver.fd_adj_TG_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=2,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

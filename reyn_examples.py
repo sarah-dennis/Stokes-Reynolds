@@ -23,7 +23,8 @@ class BFS(PWL_Height):
         N_regions = 2
         x_peaks = np.asarray([0, l, L], float)
         h_peaks = np.asarray([[0, h], [h, H], [H, 0]], float)
-        namestr = f'BFS_H{int(H)}L{int(xf)}'
+        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
+        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -35,19 +36,18 @@ class BFS(PWL_Height):
 
 class BFS_deltaSmooth(PWL_Height):
     def __init__(self, args, N):
-        H = args[0]
-        delta = args[1]
-
+        H, delta = args
         l = 2
         h = 1
         x0 = 0
         xf = 4
+        L = xf
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf], float)
         h_peaks = np.asarray(
             [[0, h], [h, h], [h+(H-h)/2, h+(H-h)/2], [H, H], [H, 0]], float)
-        namestr = f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}'
-
+        namestr = ''#f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}'
+        titlestr = ''#f'$\delta$-BFS $\delta={delta :.3f}$, $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
@@ -69,7 +69,8 @@ class BFS_noEddy(PWL_Height):
         N_regions = 3
         x_peaks = np.asarray([x0, 1, x_reattatch, xf], float)
         h_peaks = np.asarray( [[0, 1], [1, y_reattatch], [H, H], [H, 0]], float)
-        namestr = f'cBFS_H{int(H)}L{int(xf)}_xr{int(xr)}yr{int(yr)}'
+        namestr = ''#f'cBFS_H{int(H)}L{int(xf)}_xr{int(xr)}yr{int(yr)}'
+        titlestr = ''#f'Corner removed BFS $H/h={H/h : .3f}$, $x_r = {x_reattatch:.2f}$, $y_r = {y_reattatch:.2f}$, $L={L : .1f}$ '
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -89,7 +90,8 @@ class TriSlider(PWL_Height):
         x_peaks = np.asarray([x0, l_in, l_in+l_a, l_in+l_a+l_b, xf], float)
 
         h_peaks = np.asarray(([[0, h_in], [h_in, h_in], [h, h], [h_out, h_out], [h_out, 0]]), float)
-        namestr = f'Tri'
+        namestr = ''#f'TriSlider_h{int(h)}L{int(xf)}'
+        titlestr =''# f'Triangular Textured Slider $h_{in}={h_in:.2f}$, $h_{out}={h_out:.2f}$, $h={h:.2f}$, $l_{a}={l_a:.2f}$, $l_b={l_b:.2f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -114,7 +116,8 @@ class TriCavity(PWL_Height):
         # h = max(args[2],dx) #H/2  # dx
         
         h_peaks = np.asarray(([[0, dx], [H, H], [dx, 0]]), float)
-        namestr = f'TriCavity_H{int(H)}L{int(xf)}'
+        namestr ='' #'TriCavity_H{int(H)}L{int(xf)}'
+        titlestr = 'Triangular Cavity'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
         
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +132,9 @@ class Cylinder(CircleHeight):
         x0 = -(l+r)
         drdx = args[3]
         xf = l+r
-        namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}'
+        namestr = ''
+        # namestr = f'Circ_r{int(r)}h{int(h0)}L{int(xf)}'
+        titlestr= 'Cylinder'
         super().__init__(x0, xf, N, r,drdx, h0, namestr)
         
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -141,7 +146,8 @@ class Sinusoid(SinusoidalHeight):
 
         H = args[0]
         h = args[1]
-        namestr = f'Sinusoid_H{H}h{h}'
+        namestr = ''
+        # namestr = f'Sinusoid_H{H}h{h}'
         super().__init__(x0, xf, N, H, h, namestr)
 
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +160,7 @@ class LambdaBump(BumpHeight):
         lam = args[0]
         h0 = args[3]
         
-        namestr = f'Bump_lambda{int(lam)}H{int(H)}'
+        namestr = ''#f'Bump_lambda{int(lam)}H{int(H)}'
         super().__init__(x0, xf, N, lam, H, h0, namestr)
 
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -164,7 +170,8 @@ class Logistic(LogisticHeight):
         x0 = 0
         xf = L
         center = L/2
-        namestr = f'Bump_lambda{delta:.2f}H{H:.2f}'
+        namestr = '' #f'Logistic{delta:.2f}H{H:.2f}'
+        titlestr =''# f'Logistic Step'#' $\lambda={delta}$, $dh/dx={-delta/4}$'
         super().__init__(x0, xf, N, H, h, center, delta, namestr)
 
 

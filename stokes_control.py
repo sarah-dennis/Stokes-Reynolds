@@ -48,9 +48,9 @@ class Stokes_Solver:
         
         # plotting thresholds
 
-        self.vel_max = 3
+        self.vel_max = 5
         self.p_min=-0
-        self.p_max=200
+        self.p_max=50
 
         
 #------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class Stokes_Solver:
         u = np.flip(u, axis=0)
         v = -np.flip(v, axis=0) 
         
-        return p, u, v
+        return ex, p, u, v
         
 #------------------------------------------------------------------------------    
     def get_dP(self,N):

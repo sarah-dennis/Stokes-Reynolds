@@ -6,12 +6,11 @@ Created on Tue May 21 16:05:05 2024
 """
 import numpy as np
 import graphics
-# import convergence as cnvg
 
 import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
-import reyn_boundary as rbc
+import reyn_boundary as bc
 
 i_test_scale=4/5
 
@@ -25,40 +24,29 @@ y_stop = y_start + leny
 
 log_linthresh=1e-8  
 
+warnings_on=False
         
 class Reynolds_Solver: 
-    def __init__(self, Example, U, dP=None, Q=None, args=None):
-        self.Example = Example #initialize height= Example(args) in the solver
+    def __init__(self, Example, BC, args=None):
+        self.Example = Example #initialize height = Example(args) in the solver
         self.args = args
+        
+        self.BC = BC
 
         # self.U = U # velocity at flat boundary
-        if dP is not None:
-            self.BC = rbc.Fixed(U, dP)
-            if Q is not None:
-                raise Exception('prescribe {dP: Fixed BC} or {Q : Mixed BC}')
-        elif Q is not None:
-            self.BC = rbc.Mixed(U, Q)
-        else: 
-            raise Exception('prescribe {dP: Fixed BC} or {Q : Mixed BC}')
-
-        # self.dP = dP
-            # self.p0 = -dP
-            # self.pN = 0
-     
-         
-        # self.visc = 1 # 2.45/8.48 # kinematic viscosity (m^2/s)
+        
         
         # colorbar min max
-        self.vel_max = 3
+        self.vel_max = 5
         self.p_min=0
-        self.p_max=20
+        self.p_max=50
         self.Re = 0   #for plotting only
 
-    def pwl_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
+    def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args,N)
         solver_title = "Reynolds" #" Piecewise Linear"
         
-        if isinstance(self.BC, rbc.Mixed):
+        if isinstance(self.BC, bc.Mixed):
             raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
         else:
         
@@ -72,9 +60,9 @@ class Reynolds_Solver:
             self.v_plot(height, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
 
         
-        return pressure, velocity
+        return height, pressure, velocity
     
-    def fd_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
+    def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args, N)
         solver_title = "Reynolds"#"Finite Difference"
 
@@ -89,9 +77,9 @@ class Reynolds_Solver:
             self.p_plot(height, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
 
-        return reyn_pressure, reyn_velocity
+        return height, reyn_pressure, reyn_velocity
     
-    def fd_adj_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+    def fd_adj_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
         
         adj_pressure = rp.VelAdj_ReynPressure(height, self.BC)
@@ -103,16 +91,19 @@ class Reynolds_Solver:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
        
-        return adj_pressure, adj_velocity
+        return height, adj_pressure, adj_velocity
     
-    def fd_adj_TG_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+    def fd_adj_TG_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
-        
-        if isinstance(self.BC, rbc.Mixed):
-            print("Prescribing flux Q for P_Reyn; resulting Q for P_adj will differ")
-            # raise Exception("No prescribed flux for T.G.-ELT")
-        # else:
-        adj_pressure = rp.TGAdj_ReynPressure(height, self.BC) 
+        try:
+            adj_pressure = rp.TGAdj_ReynPressure(height, self.BC)
+            if isinstance(self.BC, bc.Mixed):
+                raise Exception(f"adj.-TG solver prescribed Q={self.BC.Q:.1f} for P_Reyn; Q for P_adj + P_reyn will differ")
+        except Exception as e:
+            if warnings_on:
+                print(e)
+
+         
                
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
         
@@ -122,17 +113,21 @@ class Reynolds_Solver:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
        
-        return adj_pressure, adj_velocity
+        return height, adj_pressure, adj_velocity
 
 
-    def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
+    def fd_pert_solve(self, N, order,  plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
         height = self.Example(self.args, N)
         
-        if isinstance(self.BC, rbc.Fixed):
-            print("Prescribing dP for P_Reyn; resulting dP for P_adj will differ")
-            # raise Exception("No prescribed dP for PLT")
-        # else:
-        reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
+        try:
+            reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
+            if isinstance(self.BC, bc.Fixed):
+                raise Exception(f"pert. solver prescribed dP={self.BC.dP:.1f} for P_0; dP for P_k>0 will differ")
+        except Exception as e:
+            if warnings_on:
+                print(e)
+
+        
     
         reyn_velocity = rv.ReynVelocity(height, self.BC, reyn_pressure.ps_1D)                   
         
@@ -140,30 +135,26 @@ class Reynolds_Solver:
         solver_title = "Reynolds"
         
         if plot:
-            
-            # self.p_plot(height, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
-            # self.v_plot(height, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
-
-            if order > 1:
-                solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
-                self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
-                self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
-           
+    
             if order > 3:
                 solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
                 self.p_plot(height, pert.pert4_pressure, pert.pert4_velocity.Q, solver_title4, scaled, zoom)
                 self.v_plot(height, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
         
-     
+            elif order > 1:
+                solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
+                self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
+                self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
+           
             
         if get_all:
             return pert
         else:
             if order < 3:
-                return pert.pert2_pressure, pert.pert2_velocity
+                return height, pert.pert2_pressure, pert.pert2_velocity
             
             else:
-                return pert.pert4_pressure, pert.pert4_velocity
+                return height, pert.pert4_pressure, pert.pert4_velocity
     
     
     def p_plot(self, height, pressure, flux, solver_title, scaled=False, zoom=False):
@@ -240,14 +231,3 @@ class Reynolds_Solver:
             qs = velocity.get_flux(height)
             graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             graphics.plot_2D(qs, height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
-
-
-    # def convg_pwl_fd(self, Ns):
-    #     l1_errs, l2_errs, inf_errs, cnvg_rates = cnvg.reyn_cnvg_pwl_fd(self, Ns)
-    #     title ='' #'Grid Convergence for Reynolds pressure \n Finite-Difference to Piecewise-Linear-Analytic'
-    #     ax_labels=['$N$',  '$||p_{FD} - p_{PLA}||$']
-    #     fun_labels=['$L_1$', '$L_2$', '$L_\infty$']
-    #     O1 = 1
-    #     O2 = 1
-    #     graphics.plot_log_multi([l1_errs, l2_errs,inf_errs],Ns,title,fun_labels,ax_labels,log_linthresh, O1, O2)
-   

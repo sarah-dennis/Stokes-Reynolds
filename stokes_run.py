@@ -14,12 +14,12 @@ U=0
 Q=1
 Re=0
 
-H=1
-h=2
-L=2
+H=2
+h=1
+L=4
 l=1
 
-delta = -64 #slope: -delta*(H-h)/4
+delta = 16 #slope: -delta*(H-h)/4
 
 
 # args = [H, L]
@@ -28,8 +28,8 @@ delta = -64 #slope: -delta*(H-h)/4
 # args = [H, L, delta]-
 # example = examples.BFS_pwl
 
-# args = [H, h, L, delta]
-# example = examples.Logistic
+args = [H, h, L, delta]
+example = examples.Logistic
 
 # args = [H,h, L, delta]
 # example = examples.Sinusoid
@@ -37,8 +37,8 @@ delta = -64 #slope: -delta*(H-h)/4
 # args = [H, L]
 # example = examples.TriCavity
 
-args =  [H, h, H, l, 1.25*l, 0.75*l, l]
-example = examples.TriSlider
+# args =  [H, h, H, l, 1.25*l, 0.75*l, l]
+# example = examples.TriSlider
 
 
 
@@ -47,21 +47,22 @@ example = examples.TriSlider
 
 solver = control.Stokes_Solver(example, args, U, Q, Re, max_iters=50000)                
 
-N=20
+N=80
        
 zoom_on=False               
 
 # solver.new_run(N) 
 
+
 # solver.load_scale(80,160) 
-
 # solver.load_run(N)
-# solver.load_run_many(40, 2, 4)
 
-solver.new_run_many(N, 2, 3)  
+# solver.load_run_many(20, 2, 2)
+
+# solver.new_run_many(N, 2, 3)  
 # solver.load_run_new_many(N, 2, 2)
 
-solver.load_plot(80, zoom=zoom_on)
+solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)

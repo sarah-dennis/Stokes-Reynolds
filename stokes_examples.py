@@ -64,7 +64,7 @@ class Logistic(PWLinear):
         super().__init__(self.x0, self.xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)   
 
     def h_fun(self, x):
-        return self.h_max - (self.h + (self.H-self.h) / ( 1 + np.exp(-self.delta*(self.center-x))))
+        return self.h_max - (self.h + (self.H-self.h) / ( 1 + np.exp(self.delta*(self.center-x))))
      
 class Sinusoid(PWLinear):
     def __init__(self, args, U, Q, Re, N):
@@ -112,7 +112,8 @@ class TriSlider(PWLinear):
         Hin, H,  Hout, Lin, La, Lb, Lout = args
 
         x0 = 0
-        xf =Lin+La+Lb+Lout
+        L = Lin+La+Lb+Lout
+        xf = L
         y0 = 0
         yf = max(Hin, Hout, H)
         
@@ -121,5 +122,5 @@ class TriSlider(PWLinear):
         
         x_peaks = [x0, x0+Lin, x0+Lin+La, x0+Lin+La+Lb, xf]
         y_peaks=[[yf,yf-Hin],[yf-Hin,yf-Hin],[yf-H,yf-H],[yf-Hout,yf-Hout], [yf-Hout, yf]]
-        namestr = f"TriCavity_H{H}L{xf}_Re{Re}_Q{Q}_U{U}"
+        namestr = f"TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)

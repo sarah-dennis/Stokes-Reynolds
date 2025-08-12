@@ -10,7 +10,7 @@ import numpy as np
 from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
-
+from matplotlib.ticker import MultipleLocator
 #------------------------------------------------------------------------------
 # COLOURINGS
 #------------------------------------------------------------------------------
@@ -164,13 +164,13 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
 
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1,O2=1e1):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left'):
     pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
     
     ax = fig.add_subplot()
-    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']    
+    colors = [ 'forestgreen', 'darkorchid',  'firebrick','royalblue','darkorange']    
     markers = ['D', 'o', 's', '*', 'H', 'X']
 
     pp.rcParams["lines.linewidth"] =line_width
@@ -185,14 +185,24 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, O1=1
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    # ax.set_ylim(0, np.max([O1,2*np.max(fs)]))
+    ax.set_ylim(0.8*np.min(fs), 1.2*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
+    # ax.minorticks_on()
+    # ax.yaxis.set_minor_locator(MultipleLocator(10))
     
-    pp.title(title,  fontweight ="bold")
-    # fig.legend(bbox_to_anchor=(0.3, 0.325))
-    fig.legend(bbox_to_anchor=(0.9, 0.875))    
+    pp.title(title)
+    
+    if loc== 'upper': #upper-right
+        fig.legend(bbox_to_anchor=(0.9, 0.875))
+    elif loc=='left': #upper-left
+        fig.legend(bbox_to_anchor=(0.25, 0.875))
+    elif loc=='lower': #lower-right
+        fig.legend(bbox_to_anchor=(0.35, 0.35))
+    else: #lower left
+        fig.legend(bbox_to_anchor=(0.9, 0.275))  
+        
     return fig
 
 #------------------------------------------------------------------------------

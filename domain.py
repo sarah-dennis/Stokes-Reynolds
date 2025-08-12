@@ -17,7 +17,7 @@ class Domain:
         self.xf = xf            # right boundary x = xf 
         self.y0 = y0            # lower surface y = y0
         self.yf = yf            # upper boundary y = max h = yf-y0
-
+        
         self.N = N  # scale: number of grid points in [0,1]
         self.Nx = int((xf-x0)*N + 1) #total number of x grid points
         self.Ny = int((yf-y0)*N + 1) #total number of y grid points
@@ -37,9 +37,11 @@ class Height(Domain):
 
     def __init__(self, x0, xf, y0, yf, N, hs, i_peaks, namestr):
         dirstr = f"./reyn_examples/{namestr}"
-        super().__init__(x0, xf, y0, yf, N, dirstr,namestr) # -> {dx, dy, xs, ys}
+        super().__init__(x0, xf, y0, yf, N, dirstr, namestr) # -> {dx, dy, xs, ys}
         
         self.hs = hs
+        self.H_in=hs[0]
+        self.H_out=hs[-1]
         self.i_peaks = i_peaks
         self.hxs = center_diff(self.hs, self.Nx, self.dx)
         self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)

@@ -41,33 +41,7 @@ def write_stokes(dmn, u, v, psi, cnvg_err):
         writer.writerow([cnvg_err])
         file.close()    
 
-def read_reyn(filename, n, m):
-    u = np.zeros(n*m)
-    v = np.zeros(n*m)
-    p_adj = np.zeros(n*m)
-    with open(filename, newline='') as file:
-        reader = csv.reader(file)
 
-        for i in range(n*m):
-            line = next(reader)
-            ui, vi, pi = line[0].split(' ')
-            u[i] = float(ui)
-            v[i] = float(vi)
-            p_adj[i] = float(pi)
-
-        file.close()
-    return u, v, p_adj
-    
-def write_reyn(dmn, u, v,  p_adj):
-    filename = dmn.filestr + ".csv"
-    Path(dmn.dirstr).mkdir(parents=True, exist_ok=True)
-    with open(filename, 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=' ')
-        for i in range(dmn.Nx * dmn.Ny):
-            writer.writerow([u[i], v[i], p_adj[i]])
-        file.close()
-        
-    
     
     
     
