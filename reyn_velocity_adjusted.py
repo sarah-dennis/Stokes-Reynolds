@@ -9,24 +9,24 @@ import graphics
 import domain as dm
 
 
-def make_adj_velocity(height, U, adj_pressure):
+def make_adj_velocity(height, BC, adj_pressure):
 
     # derivatives of the reynolds pressure
     pxs = adj_pressure.reyn_pxs
     p2xs = adj_pressure.reyn_p2xs
     p3xs = adj_pressure.reyn_p3xs
     p4xs = adj_pressure.reyn_p4xs
+    
     # sigmas = adj_pressure.sigmas
     sigma_xs = adj_pressure.sigma_xs
     sigma_2xs = adj_pressure.sigma_2xs
 
+# 
 
-    us = make_us(height, U, pxs, p2xs, p3xs, sigma_xs)
-    vs = make_vs(height,  U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
+    us = make_us(height, BC.U, pxs, p2xs, p3xs, sigma_xs)
+    vs = make_vs(height,  BC.U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
     return us, vs
-
-
 
 
 def make_us(height, U, pxs, p2xs, p3xs, sigmaxs):
@@ -69,7 +69,6 @@ def make_us(height, U, pxs, p2xs, p3xs, sigmaxs):
 
 def make_vs(height, U, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
     vs = np.zeros((height.Ny, height.Nx))
-    # U = height.U
     visc = 1# height.visc
     for i in range(height.Nx):
         h = height.hs[i]
@@ -115,19 +114,21 @@ def make_vs(height, U, pxs, p2xs, p3xs, p4xs, sigmaxs, sigma2xs):
 # # ------------------------------------------------------------------------------
 
 # as in Takeuchi-Gu            
-def make_adj_velocity_TG(height, U, adj_pressure):
+def make_adj_velocity_TG(height, BC, adj_pressure):
     ps = adj_pressure.ps_2D #ps = reyn_ps + adj_ps
+    
     pxs, p2xs = make_px_pxx(height, ps)
+    
     px_hs, p2x_hs, pxy_hs = make_pxh_pxxh_pxyh(height, pxs, p2xs)
         
-    us, vs = make_us_vs(height, U, pxs, px_hs, p2xs, p2x_hs, pxy_hs)
+    us, vs = make_us_vs(height, BC, pxs, px_hs, p2xs, p2x_hs, pxy_hs)
     return us, vs
 
 def make_px_pxx(height, ps):  
     ys = height.ys
     hs = height.hs
     dx = height.dx
-    
+    dy = height.dy
     pxs = np.zeros((height.Ny, height.Nx))
     pxxs = np.zeros((height.Ny, height.Nx))
     
@@ -145,6 +146,7 @@ def make_px_pxx(height, ps):
                     pxx = dm.center_second(dx, ps[j,i-1 : i+2]) 
                 
                 elif i < height.Nx-1 and y <= hs[i+1] : # West out of bounds, fwd diff 
+                    
                     if i < height.Nx-2 and y <= hs[i+2]: # 2 nbrs East
                         px = dm.right_first(dx, ps[j,i : i+3]) 
                         
@@ -159,7 +161,7 @@ def make_px_pxx(height, ps):
                         pxx = 0
                 
                 elif i > 0 and y <= hs[i-1]: # East out of bounds, bkwd diff 
-                
+                    
                     if i > 1 and y <= hs[i-2]: # 2 nbrs West
                         px = dm.left_first(dx, ps[j,i-2 : i+1]) 
                         
@@ -174,8 +176,11 @@ def make_px_pxx(height, ps):
                         pxx = 0
                 
                 else: # both East and West out of bounds
-                    px = pxs[j-1,i] + pxxs[j-1,i]*dx
-                    pxx = pxxs[j-1,i]
+                    pxy =  (pxs[j-1,i] - pxs[j-3,i])/(2*dy)
+                    px = pxs[j-1,i] + pxy*dy
+                    
+                    pxxy =  (pxxs[j-1,i] - pxxs[j-3,i])/(2*dy)
+                    pxx = pxxs[j-1,i] + pxxy*dy
             
             else: # exterior
                 continue
@@ -183,15 +188,14 @@ def make_px_pxx(height, ps):
             
             pxs[j,i] = px
             pxxs[j,i] = pxx
-            
-    #TODO: make height dependent     
+               
     # discontinuity averaging 
     for i in height.i_peaks[1:-1]:
         for j in range(height.Ny):
-            
-            pxs[j,i-1 : i+2] = dm.avg_2x(pxs[j,i-2 : i+3])
-            pxxs[j,i-2 : i+3] = dm.avg_3x(pxxs[j,i-3 : i+4])
-            
+            h = height.ys[j]
+            pxs[j,i-2: i+3] = dm.avg_3x(pxs[j,i-3 : i+4])
+            pxxs[j,i-3 : i+4] = dm.avg_4x(pxxs[j,i-4 : i+5])
+   
     return pxs, pxxs     
 
 def make_pxh_pxxh_pxyh(height,pxs,pxxs):
@@ -218,12 +222,12 @@ def make_pxh_pxxh_pxyh(height,pxs,pxxs):
 
     return px_hs, pxx_hs, pxy_hs
 
-def make_us_vs(height, U, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
+def make_us_vs(height, BC, pxs, px_hs, p2xs, p2x_hs, pxy_hs):
     
     us = np.zeros((height.Ny, height.Nx))
     vs = np.zeros((height.Ny, height.Nx))
 
-    # U = height.U
+    U = BC.U
     visc = 1# height.visc
     for i in range(height.Nx):
         h = height.hs[i]

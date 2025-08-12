@@ -51,18 +51,18 @@ class Reynolds_Solver:
         # colorbar min max
         self.vel_max = 3
         self.p_min=0
-        self.p_max=200
+        self.p_max=20
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, write=False, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args,N)
         solver_title = "Reynolds" #" Piecewise Linear"
         
-        if self.dP is None:
+        if isinstance(self.BC, rbc.Mixed):
             raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
         else:
         
-            pressure = rp.PwlGMRes_ReynPressure(height)
+            pressure = rp.PwlGMRes_ReynPressure(height, self.BC)
         
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
     
@@ -96,7 +96,7 @@ class Reynolds_Solver:
         
         adj_pressure = rp.VelAdj_ReynPressure(height, self.BC)
 
-        adj_velocity = rv.VelAdj_ReynVelocity(height, self.BC, ps=adj_pressure)
+        adj_velocity = rv.VelAdj_ReynVelocity(height,self.BC, adj_pressure)
                 
         solver_title = "Reynolds Velocity-Adjusted"
         if plot:
@@ -108,10 +108,11 @@ class Reynolds_Solver:
     def fd_adj_TG_solve(self, N, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
         
-        if not isinstance(self.BC, rbc.Mixed):
-            raise Exception("No prescribed flux for T.G.-ELT")
-        else:
-            adj_pressure = rp.TGAdj_ReynPressure(height, self.BC) 
+        if isinstance(self.BC, rbc.Mixed):
+            print("Prescribing flux Q for P_Reyn; resulting Q for P_adj will differ")
+            # raise Exception("No prescribed flux for T.G.-ELT")
+        # else:
+        adj_pressure = rp.TGAdj_ReynPressure(height, self.BC) 
                
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
         
@@ -127,14 +128,15 @@ class Reynolds_Solver:
     def fd_pert_solve(self, N, order, write=False, plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
         height = self.Example(self.args, N)
         
-        if not isinstance(self.BC, rbc.Fixed):
-            raise Exception("No prescribed dP for PLT")
-        else:
-            reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
+        if isinstance(self.BC, rbc.Fixed):
+            print("Prescribing dP for P_Reyn; resulting dP for P_adj will differ")
+            # raise Exception("No prescribed dP for PLT")
+        # else:
+        reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
     
-        reyn_velocity = rv.ReynVelocity(height,self.BC, reyn_pressure.ps_1D)                   
+        reyn_velocity = rv.ReynVelocity(height, self.BC, reyn_pressure.ps_1D)                   
         
-        pert = rpert.PerturbedReynSol(height,self.BC, order, reyn_pressure, reyn_velocity)
+        pert = rpert.PerturbedReynSol(height, self.BC, order, reyn_pressure, reyn_velocity)
         solver_title = "Reynolds"
         
         if plot:
@@ -235,7 +237,7 @@ class Reynolds_Solver:
 
         if inc:
             inc = velocity.make_inc(height)
-            qs = velocity.make_qs(height)
+            qs = velocity.get_flux(height)
             graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             graphics.plot_2D(qs, height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
 

@@ -23,8 +23,8 @@ class Velocity:
     
         for i in range(height.Nx):
             h = height.hs[i]
-            for j in range (self.height.Ny):
-                    y = self.height.ys[j]    
+            for j in range (height.Ny):
+                    y = height.ys[j]    
                     if y <= h:
                         qs[i]+= self.u[j,i]*height.dy
                     else:
@@ -122,21 +122,25 @@ class ReynVelocity(Velocity):
 
 class TGAdj_ReynVelocity(Velocity):
     
-    def __init__(self, height, U, Q, adj_pressure):
-        u, v = adj_vel.make_adj_velocity_TG(height, U, adj_pressure)
-        if Q is None:
+    def __init__(self, height, BC, adj_pressure):
+        u, v = adj_vel.make_adj_velocity_TG(height, BC, adj_pressure)
+        if isinstance(BC, rbc.Mixed):
+            Q = BC.Q
+        else:
             h0=height.hs[0]
             px0 = domain.right_first(height.dx, adj_pressure.ps_2D[0,0:3])
-            Q = (U*h0)/2 - (px0*(h0**3))/12 #/visc
+            Q = (BC.U*h0)/2 - (px0*(h0**3))/12 #/visc
         super().__init__(Q, u, v)
      
 class VelAdj_ReynVelocity(Velocity):
     
-    def __init__(self, height, U, Q, adj_pressure):
-        u, v = adj_vel.make_adj_velocity(height, U, adj_pressure)
-        if Q is None:
+    def __init__(self, height, BC, adj_pressure):
+        u, v = adj_vel.make_adj_velocity(height, BC, adj_pressure)
+        if isinstance(BC, rbc.Mixed):
+            Q = BC.Q
+        else:
             h0=height.hs[0]
             px0 = domain.right_first(height.dx, adj_pressure.ps_2D[0,0:3])
-            Q = (U*h0)/2 - (px0*(h0**3))/12 #/visc
+            Q = (BC.U*h0)/2 - (px0*(h0**3))/12 #/visc
         super().__init__(Q, u, v)
         

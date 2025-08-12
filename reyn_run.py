@@ -11,7 +11,7 @@ import reyn_examples as examples
 #----------------
 plots_on = True
 uv_on = False
-inc_on=not False
+inc_on= False
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -29,21 +29,21 @@ scaled_on=False#True
 
  
 
-# Example = examples.BFS_deltaSmooth
-# H = 2
-# delta = 1.5
-# args = [H,delta]
+Example = examples.BFS_deltaSmooth
+H = 2
+delta = 1.5
+args = [H,delta]
 
 
-Example = examples.TriSlider
-h_in=1
-h=1/4
-h_out = 1
-l_in = 1
-l_out = 1
-l_a = 1.25
-l_b = 0.75
-args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
+# Example = examples.TriSlider
+# h_in=1
+# h=1/4
+# h_out = 1
+# l_in = 1
+# l_out = 1
+# l_a = 1.25
+# l_b = 0.75
+# args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 
 
@@ -101,21 +101,21 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 U =0
 # dP: 1D pressure {p(x0,y)=, u(x,h(x))=0} 
 
-dP =None
-Q = 1
+dP =  -20#None
+Q = None
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 200
+N = 100
 
 
 solver = control.Reynolds_Solver(Example, U, dP, Q, args)
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
 # solver.fd_adj_TG_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_adj_solve(N, write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 solver.fd_pert_solve(N, order=4, write=write_on, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------

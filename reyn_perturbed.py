@@ -8,6 +8,7 @@ Created on Wed Feb 26 14:30:05 2025
 import numpy as np
 import domain as dm
 import graphics
+import reyn_boundary as bc
 
 from reyn_pressure import Pressure
 from reyn_velocity import Velocity
@@ -16,25 +17,28 @@ from reyn_heights import PWL_Height
 # slope_k = 1/10
  
 class PerturbedReynSol:
-    def __init__(self, height, U, dP, Q, order, reyn_pressure, reyn_velocity):
+    def __init__(self, height, BC, order, reyn_pressure, reyn_velocity):
         self.order = order
         if order < 0 or order > 4:
             return Exception(f"order {order} not in range [0,4]")
         
         self.x_scale = (height.xf - height.x0)/2 
         self.y_scale = height.yf - height.y0
-        self.Q_scale = Q
+        
+
+    
+        self.Q_scale = reyn_velocity.Q
 
         self.P_scale = self.Q_scale * self.x_scale * (self.y_scale**-3) #*visc
         
         self.U_scale = self.Q_scale/self.y_scale
         self.V_scale = self.Q_scale/self.x_scale                      
 
-        self.u0s = reyn_velocity.vx /self.U_scale
-        self.v0s = reyn_velocity.vy /self.V_scale
+        self.u0s = reyn_velocity.u /self.U_scale
+        self.v0s = reyn_velocity.v /self.V_scale
         self.p0s = reyn_pressure.ps_2D /self.P_scale
         
-        self.dP_reyn = dP
+        self.dP_reyn = reyn_pressure.dP
         
         delta = self.y_scale/self.x_scale
 
@@ -48,8 +52,8 @@ class PerturbedReynSol:
             pert2_ps_2D = (self.p0s + (delta**2) * self.p2s) *self.P_scale
             pert2_us_2D = (self.u0s + (delta**2) * self.u2s) *self.U_scale
             pert2_vs_2D = (self.v0s + (delta**2) * self.v2s) *self.V_scale
-            self.pert2_pressure = Pressure(height, U, dP,Q, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
-            self.pert2_velocity = Velocity(height, U, Q, pert2_us_2D, pert2_vs_2D)
+            self.pert2_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
+            self.pert2_velocity = Velocity(reyn_velocity.Q, pert2_us_2D, pert2_vs_2D)
             self.dP_pert2 = (self.p2s[0,-1]-self.p2s[0,0])
 
         if order > 2: 
@@ -61,8 +65,8 @@ class PerturbedReynSol:
             pert4_us_2D = pert2_us_2D + (delta**4) * self.u4s *self.U_scale
             pert4_vs_2D = pert2_vs_2D + (delta**4) * self.v4s *self.V_scale
         
-            self.pert4_pressure = Pressure(height, U, dP, Q, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
-            self.pert4_velocity = Velocity(height, U, Q, pert4_us_2D, pert4_vs_2D)
+            self.pert4_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
+            self.pert4_velocity = Velocity(reyn_velocity.Q, pert4_us_2D, pert4_vs_2D)
             self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
     
     
@@ -486,7 +490,7 @@ class PerturbedReynSol:
          
         for j in range(height.Ny): #TODO height dependent averaging?
             v0_Sy_2xs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
-            for i in height.i_peaks:
+            for i in height.i_peaks[1:-1]:
                 if i > 2 and i < height.Nx-3:
                     v0_Sy_2xs[j, i-2 : i+3] = dm.avg_3x(v0_Sy_2xs[j, i-3 : i+4])
         
@@ -499,6 +503,8 @@ class PerturbedReynSol:
         for i in range(2, height.Nx):
             
             c5s[i] =(4*c5s[i-1] -c5s[i-2] + 2*dx*c5_xs[i])/3
+        
+        # graphics.plot_2D(c5s, height.xs,  'c5', ['x', 'c5'])
 
         p4s = -u2_xs + v0_Sy_2xs + c5s 
 

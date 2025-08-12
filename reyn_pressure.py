@@ -84,10 +84,7 @@ class VelAdj_ReynPressure(Pressure):
         
         reyn_pressure = FinDiff_ReynPressure(height, BC)
         ps_1D = reyn_pressure.ps_1D
-        if isinstance(BC, bc.Fixed):
-            ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, BC, ps_1D, reynFlux=False, TG=False)
-        elif isinstance(BC, bc.Mixed):
-            ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, BC, ps_1D, reynFlux=True, TG=False)
+        ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, BC, ps_1D, TG=False)
     
         
             

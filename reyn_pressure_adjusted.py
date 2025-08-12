@@ -1,4 +1,4 @@
-4# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Tue Feb 25 15:16:58 2025
 
@@ -23,21 +23,22 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
     p4xs = dm.center_fourth_diff(reyn_ps, height.Nx, height.dx)
     
     for i in height.i_peaks[1:-1]:
-        pxs[i-1:i+2] = dm.avg_2x(pxs[i-2 : i+3])
+        pxs[i-1:i+2] = dm.avg_x(pxs[i-2 : i+3])
         p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
         p3xs[i-2:i+3] = dm.avg_3x(p3xs[i-3 : i+4])
         p4xs[i-3:i+4] = dm.avg_4x(p4xs[i-4 : i+5])
     
     # graphics.plot_2D_multi([pxs,p2xs,p3xs,p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_{*}'])
    #---------------------------------------------------------------------------
+   
     if TG:
-        sigma_derivs = [0, 0, 0]  
+        sigmas, sigma_xs, sigma_2xs = 0, 0, 0 
     else:
         sigmas, sigma_xs, sigma_2xs = make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
+    
         
 
-        
-    # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
+        # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
 
@@ -109,6 +110,11 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
         sx = dm.center_diff(s, height.Nx, height.dx)
         sxx = dm.center_second_diff(s, height.Nx, height.dx)
         
+        for i in height.i_peaks[1:-1]:
+            s[i-1:i+2] = dm.avg_2x(s[i-2 : i+3])
+            sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
+            sxx[i-3:i+4] = dm.avg_4x(sxx[i-4 : i+5])
+
     elif isinstance(BC, bc.Mixed): #match reyn Flux
         for i in range(height.Nx):
             h = height.hs[i]
