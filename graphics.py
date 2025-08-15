@@ -185,7 +185,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.8*np.min(fs), 1.2*np.max(fs))
+    ax.set_ylim(0.5*np.min(fs), 5*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -197,7 +197,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     if loc== 'upper': #upper-right
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left': #upper-left
-        fig.legend(bbox_to_anchor=(0.25, 0.875))
+        fig.legend(bbox_to_anchor=(0.3, 0.89))
     elif loc=='lower': #lower-right
         fig.legend(bbox_to_anchor=(0.35, 0.35))
     else: #lower left

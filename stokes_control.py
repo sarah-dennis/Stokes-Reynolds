@@ -50,7 +50,7 @@ class Stokes_Solver:
 
         self.vel_max = 5
         self.p_min=-0
-        self.p_max=50
+        self.p_max=400
 
         
 #------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class Stokes_Solver:
         u = np.flip(u, axis=0)
         v = -np.flip(v, axis=0) 
         
-        return ex, p, u, v
+        return p, u, v
         
 #------------------------------------------------------------------------------    
     def get_dP(self,N):

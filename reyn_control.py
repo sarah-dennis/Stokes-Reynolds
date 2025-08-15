@@ -60,7 +60,7 @@ class Reynolds_Solver:
             self.v_plot(height, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
 
         
-        return height, pressure, velocity
+        return pressure, velocity
     
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args, N)
@@ -77,7 +77,7 @@ class Reynolds_Solver:
             self.p_plot(height, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
 
-        return height, reyn_pressure, reyn_velocity
+        return reyn_pressure, reyn_velocity
     
     def fd_adj_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
@@ -91,7 +91,7 @@ class Reynolds_Solver:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
        
-        return height, adj_pressure, adj_velocity
+        return adj_pressure, adj_velocity
     
     def fd_adj_TG_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
@@ -113,7 +113,7 @@ class Reynolds_Solver:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
        
-        return height, adj_pressure, adj_velocity
+        return  adj_pressure, adj_velocity
 
 
     def fd_pert_solve(self, N, order,  plot=True, scaled=False, zoom=False, inc=False, uv=False, get_all = False):
@@ -141,7 +141,7 @@ class Reynolds_Solver:
                 self.p_plot(height, pert.pert4_pressure, pert.pert4_velocity.Q, solver_title4, scaled, zoom)
                 self.v_plot(height, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
         
-            elif order > 1:
+            # elif order > 1:
                 solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
                 self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
                 self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
@@ -151,10 +151,10 @@ class Reynolds_Solver:
             return pert
         else:
             if order < 3:
-                return height, pert.pert2_pressure, pert.pert2_velocity
+                return pert.pert2_pressure, pert.pert2_velocity
             
             else:
-                return height, pert.pert4_pressure, pert.pert4_velocity
+                return pert.pert4_pressure, pert.pert4_velocity
     
     
     def p_plot(self, height, pressure, flux, solver_title, scaled=False, zoom=False):

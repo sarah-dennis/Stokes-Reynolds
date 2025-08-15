@@ -122,5 +122,5 @@ class TriSlider(PWLinear):
         
         x_peaks = [x0, x0+Lin, x0+Lin+La, x0+Lin+La+Lb, xf]
         y_peaks=[[yf,yf-Hin],[yf-Hin,yf-Hin],[yf-H,yf-H],[yf-Hout,yf-Hout], [yf-Hout, yf]]
-        namestr = f"TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
+        namestr = f"TriCavity_Hin{Hin}H{H}Hout{Hout}La{La}Lb{Lb}Lin{Lin}Lout{Lout}_Re{Re}_Q{Q}_U{U}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)

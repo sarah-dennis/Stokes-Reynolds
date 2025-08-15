@@ -21,8 +21,6 @@ def make_adj_velocity(height, BC, adj_pressure):
     sigma_xs = adj_pressure.sigma_xs
     sigma_2xs = adj_pressure.sigma_2xs
 
-# 
-
     us = make_us(height, BC.U, pxs, p2xs, p3xs, sigma_xs)
     vs = make_vs(height,  BC.U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
@@ -37,6 +35,7 @@ def make_us(height, U, pxs, p2xs, p3xs, sigmaxs):
         h = height.hs[i]
         hx = height.hxs[i]
         h2x = height.h2xs[i]
+        
         px = pxs[i]
         p2x = p2xs[i]
         p3x = p3xs[i]
