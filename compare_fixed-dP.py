@@ -16,7 +16,7 @@ import graphics
 import numpy as np
 
 #----------------
-plots_on = True # plots p(x,y) contour-mesh and (u,v) streamlines
+plots_on = not True # plots p(x,y) contour-mesh and (u,v) streamlines
 uv_on = False   # plots u(x,y) contour-mesh and v(x,y) contour-mesh
 inc_on= False   # plots u_x + v_y contour mesh and Q(x) line
 zoom_on = False # plot a zoomed frame (set params in control)
@@ -58,30 +58,34 @@ def get_dp(ps):
     return dp
 #------------------------------------------------------------------------------
 
-Reyn_Example = reyn_examples.Logistic
-Stokes_Example = stokes_examples.Logistic
-#delta = -4  # slope: -lam*(H-h)/4
-h_out = 2   # outlet height
-h_in = 1   # inlet height
-l = 4   #  length
+# Reyn_Example = reyn_examples.Logistic
+# Stokes_Example = stokes_examples.Logistic
+# #delta = -4  # slope: -lam*(H-h)/4
+# h_out = 2   # outlet height
+# h_in = 1   # inlet height
+# l = 4   #  length
 
-tests =  [     2,     3,     4,     6,     8,    16] #1
-e2_dps = [-20.61,-23.47,-25.35,-26.14,-26.06,-24.18] #-18.96
-e4_dps = [-20.65,-23.61,-25.69,-27.28,-28.74,-66.04] #-18.95
+# tests = [2, 3, 4, 6, 8, 16]
+# test_args = [[h_out , h_in, l, lam] for lam in tests]
+# e2_dps = [-20.61,-23.47,-25.35,-26.14,-26.06,-24.18] #-18.96
+# e4_dps = [-20.65,-23.61,-25.69,-27.28,-28.74,-66.04] #-18.95
+# label = '$\lambda$'
 #------------------------------------------------------------------------------
 
-# Reyn_Example = reyn_examples.TriSlider
-# Stokes_Example = stokes_examples.TriSlider
+Reyn_Example = reyn_examples.TriSlider
+Stokes_Example = stokes_examples.TriSlider
 
-# h_in=1  # inlet height
-# # h=1/4   # apex height 
-# h_out = 1  #oulet height
-# l_in = 1  # inlet length
-# l_out = 1  #outlet length
-# l_a = 1.25  # base length A  
-# l_b = 0.75  # base length B 
+h_in=1  # inlet height
+# h=1/4   # apex height 
+h_out = 1  #oulet height
+l_in = 1  # inlet length
+l_out = 1  #outlet length
+l_a = 1.25  # base length A  
+l_b = 0.75  # base length B 
 
-# tests = [1/16, 1/8]#, 1/4, 1/2]
+tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4]#, 2]
+test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
+label = '$h_{min}$'
 #------------------------------------------------------------------------------
 
 k = 0
@@ -101,14 +105,7 @@ l2_P_errs = np.zeros((num_models,num_tests))
 
 #------------------------------------------------------------------------------
 
-# label = '$h_{min}$'
-# for h in tests:
-#     args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
-
-label = '$\lambda$'
-for delta in tests:
-    
-    args = [h_out, h_in, l, delta]
+for args in test_args:
     
 #------------------------------------------------------------------------------
 # Stokes 
@@ -140,13 +137,13 @@ for delta in tests:
     adj_TG_ps = np.nan_to_num(adj_TG_P.ps_2D)
     adj_TG_Q, adj_TG_us, adj_TG_vs = adj_TG_V.Q, adj_TG_V.u, adj_TG_V.v
     
-    BC_e2 = rbc.Fixed(U, e2_dps[k])
+    BC_e2 = rbc.Fixed(U, stokes_dp)
     reyn_solver = reyn_control.Reynolds_Solver(Reyn_Example, BC_e2, args)
     e2_P, e2_V = reyn_solver.fd_pert_solve(N, order=2, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     e2_ps = np.nan_to_num(e2_P.ps_2D)
     e2_us, e2_vs, e2_Q = e2_V.u, e2_V.v, e2_V.Q
     
-    BC_e4 = rbc.Fixed(U, e4_dps[k])
+    BC_e4 = rbc.Fixed(U, stokes_dp)
     reyn_solver = reyn_control.Reynolds_Solver(Reyn_Example, BC_e4, args)
     e4_P, e4_V = reyn_solver.fd_pert_solve(N, order=4, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     e4_ps = np.nan_to_num(e4_P.ps_2D)
@@ -185,15 +182,15 @@ for delta in tests:
     
     
     
-graphics.plot_log_multi(l1_V_errs, tests, '$L_1$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, 'L1 % error'])
-graphics.plot_log_multi(l2_V_errs, tests, '$L_2$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, 'L2 % error'])
-graphics.plot_log_multi(linf_V_errs, tests, '$L_\infty$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$',  fun_labels,  [label, 'Linf % error'])
+graphics.plot_log_multi(l1_V_errs, tests, '$L_1$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, '$L_1$ %-error'])
+graphics.plot_log_multi(l2_V_errs, tests, '$L_2$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, '$L_2$ %-error'])
+graphics.plot_log_multi(linf_V_errs, tests, '$L_\infty$ %-error Velocity, $\Delta P = \Delta P_{Stokes}$',  fun_labels,  [label, '$L_\infty$ %-error'])
 graphics.plot_log_multi(Q_errs, tests, '$Q$ error %, $\Delta P = \Delta P_{Stokes}$',  fun_labels,  [label, 'Q % error'])
 
 
-graphics.plot_log_multi(l1_P_errs, tests, '$L_1$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, 'Linf % error'])
-graphics.plot_log_multi(l2_P_errs, tests, '$L_2$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$',  fun_labels, [label, 'Linf % error'])
-graphics.plot_log_multi(linf_P_errs, tests, '$L_\infty$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$',  fun_labels,  [label, 'Linf % error'])
+graphics.plot_log_multi(l1_P_errs, tests, '$L_1$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$', fun_labels, [label, '$L_1$ %-error'])
+graphics.plot_log_multi(l2_P_errs, tests, '$L_2$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$',  fun_labels, [label, '$L_2$ %-error'])
+graphics.plot_log_multi(linf_P_errs, tests, '$L_\infty$ %-error Pressure, $\Delta P = \Delta P_{Stokes}$',  fun_labels,  [label, '$L_\infty$ %-error'])
 
 
 

@@ -7,7 +7,7 @@ Created on Tue Mar 11 09:40:38 2025
 
 import reyn_control as control
 import reyn_examples as examples
-
+import reyn_boundary as bc
 import numpy as np
 import graphics
 
@@ -17,8 +17,8 @@ import graphics
 #------------------------------------------------------------------------------
 Example = examples.Cylinder
 
-r=2
-h0 = 1
+r=1
+h0 = 1/4
 l=0
 drdx = 0
 
@@ -73,22 +73,32 @@ def pressure_cylinder(ex, N):
                 ps_stokes[j,i]=None
     return ps_stokes
 
+def linf(ax, ay, bx, by):
+    return np.max((np.max(np.abs(ax-bx)), np.max(np.abs(ay-by))))
 
+def l1(ax,ay,bx,by):
+    return np.sum(np.abs(ax-bx)) + np.sum(np.abs(ay-by))
+
+
+def l2(ax,ay,bx,by):
+    return np.sum((ax-bx)**2 + (ay-by)**2) **(1/2)
 
 N = 100
-ex = Example(U, dP, N, args)
+
+BC = bc.Fixed(U, dP)
 
 
-
-solver = control.Reynolds_Solver(Example, U, dP, args)
-adj_pressure, _ = solver.fd_adj_solve(N, write=False, plot=False, reynFlux=False)
+solver = control.Reynolds_Solver(Example, BC, args)
+adj_pressure, _ = solver.fd_adj_solve(N, plot=False)
 adj_pressure_old = adj_pressure.ps_2D - adj_pressure.sigmas
 adj_ps = adj_pressure.ps_2D/abs(U/h0)
 adj_ps_old = adj_pressure_old/abs(U/h0)
 
-reyn_pressure, _ = solver.fd_solve(N, write=False, plot=False)
+reyn_pressure, _ = solver.fd_solve(N, plot=False)
 reyn_ps = reyn_pressure.ps_2D/abs(U/h0)
 
+
+ex = Example(args, N)
 stokes_ps = pressure_cylinder(ex, N)/abs(U/h0)
 
 # pert_pressure = solver.fd_pert_solve(N, 4, write=False, plot=False, get_all=True)
@@ -111,9 +121,17 @@ graphics.plot_contour_mesh(adj_ps, ex.xs/r, ex.ys/r, 'New Adjusted-Reynolds pres
 graphics.plot_contour_mesh(reyn_ps, ex.xs/r, ex.ys/r, 'Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
 # graphics.plot_contour_mesh(pert2_ps, ex.xs/r, ex.ys/r, '2nd Perturbed Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
 # graphics.plot_contour_mesh(pert4_ps, ex.xs/r, ex.ys/r, '4th perturbed Reynolds pressure', ['p','x','y'], vmin=-3, vmax=3)
+stokes_ps = np.nan_to_num(stokes_ps)
+adj_ps_old=np.nan_to_num(adj_ps_old)
+adj_ps = np.nan_to_num(adj_ps)
+# errors
+l1_stokes = l1(stokes_ps,0,0,0)
+l1_err_tg = l1(stokes_ps,adj_ps_old,0,0)/l1_stokes*100
+l1_err_va = l1(stokes_ps,adj_ps,0,0)/l1_stokes*100
+print('l1 tg:',l1_err_tg)
+print('l1 va:',l1_err_va)
 
-
-
+# p(x0,y)
 stokes_ps_nml = stokes_ps - reyn_ps
 adj_ps_nml = adj_ps - reyn_ps
 adj_ps_TG_nml = adj_ps_old - reyn_ps

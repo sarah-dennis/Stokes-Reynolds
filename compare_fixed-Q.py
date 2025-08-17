@@ -19,6 +19,12 @@ import numpy as np
 def linf(ax, ay, bx, by):
     return np.max((np.max(np.abs(ax-bx)), np.max(np.abs(ay-by))))
 
+def linf_(ax, ay, bx, by):
+    norm_x = np.max(np.abs(ax-bx))
+    norm_y = np.max(np.abs(ay-by))
+    return np.max((norm_x, norm_y))
+
+
 def l1(ax,ay,bx,by):
     return np.sum(np.abs(ax-bx)) + np.sum(np.abs(ay-by))
 
@@ -35,9 +41,9 @@ def get_dp(ps):
     return dp
 
 #----------------
-plots_on = True # plots p(x,y) contour-mesh and (u,v) streamlines
+plots_on = not True # plots p(x,y) contour-mesh and (u,v) streamlines
 uv_on = False   # plots u(x,y) contour-mesh and v(x,y) contour-mesh
-inc_on= not False   # plots u_x + v_y contour mesh and Q(x) line
+inc_on= False   # plots u_x + v_y contour mesh and Q(x) line
 zoom_on = False # plot a zoomed frame (set params in control)
 scaled_on=False # plot on scaled axis (set params in control)
 
@@ -57,21 +63,21 @@ BC = rbc.Mixed(U, Q)
 Re=0
 
 
-N = 320 # grid size |1|= N
+N = 80 # grid size |1|= N
 #------------------------------------------------------------------------------
-
+#TODO: select example
+#------------------------------------------------------------------------------
 # Reyn_Example = reyn_examples.Logistic
 # Stokes_Example= stokes_examples.Logistic
-# #delta = -4  # slope: -lam*(H-h)/4
 # h_out = 2   # outlet height
 # h_in = 1   # inlet height
 # l = 4   #  length
 
-# tests = [2, 3, 4, 6, 8, 16]
+# tests = [2, 3, 4, 6, 8, 16]'
+# test_args = [[h_out , h_in, l, lam] for lam in tests]
 # exstr = 'Logistic Step'
 # label = '$\lambda$'
 #------------------------------------------------------------------------------
-
 Reyn_Example = reyn_examples.TriSlider
 Stokes_Example = stokes_examples.TriSlider
 
@@ -83,13 +89,16 @@ l_out = 1  #outlet length
 l_a = 1.25  # base length A  
 l_b = 0.75  # base length B 
 
-tests = [1/16, 1/8, 1/4, 1/2]
-exstr = 'Triangular Slider'
-label = '$h_{min}$'
-#------------------------------------------------------------------------------
+#test h0
+tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
+test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
 
+exstr = 'Triangular Slider'
+label = '$h_{min} = 1-\lambda$'
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 k = 0
-num_tests=len(tests)
+num_tests=len(test_args)
 
 fun_labels= ['Reyn',  '$\epsilon^2$-PLT', '$\epsilon^4$-PLT','VA-ELT', 'TG-ELT']
 num_models = 5 #reyn, VA-TG adj, e2 pert, e4 pert
@@ -104,44 +113,29 @@ linf_P_errs = np.zeros((num_models,num_tests))
 l2_P_errs = np.zeros((num_models,num_tests))
 dP_errs = np.zeros((num_models, num_tests))
 
-#------------------------------------------------------------------------------
-
-
-for h in tests:
-    args =  [h_in, h0, h_out, l_in, l_a, l_b, l_out]
-
-
-# for delta in tests:
-#     args = [h_out , h_in, l, delta]
+for args in test_args:
 #------------------------------------------------------------------------------
 # Reynolds 
 #------------------------------------------------------------------------------
-    
     reyn_solver = reyn_control.Reynolds_Solver(Reyn_Example, BC, args)
-    
     reyn_P, reyn_V = reyn_solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    reyn_ps = np.nan_to_num(reyn_P.ps_2D)
+    reyn_ps,reyn_us, reyn_vs = np.nan_to_num(reyn_P.ps_2D),reyn_V.u,reyn_V.v
     reyn_dp = get_dp(reyn_ps)
-    reyn_us = reyn_V.u
-    reyn_vs = reyn_V.v
     
-    adj_P, adj_V= reyn_solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    adj_ps = np.nan_to_num(adj_P.ps_2D)
+    adj_P, adj_V = reyn_solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+    adj_ps,adj_us, adj_vs = np.nan_to_num(adj_P.ps_2D),adj_V.u,adj_V.v
     adj_dp = get_dp(adj_ps)
-    adj_us = adj_V.u
-    adj_vs = adj_V.v
     
     adj_TG_P, adj_TG_V= reyn_solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    adj_TG_ps = np.nan_to_num(adj_TG_P.ps_2D)
+    adj_TG_ps,adj_TG_us,adj_TG_vs = np.nan_to_num(adj_TG_P.ps_2D),adj_TG_V.u,adj_TG_V.v
     adj_TG_dp = get_dp(adj_TG_ps)
-    adj_TG_us = adj_TG_V.u
-    adj_TG_vs = adj_TG_V.v
-    
+
     pert = reyn_solver.fd_pert_solve(N, order=4, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on, get_all=True)
     e2_ps, e2_us, e2_vs =  np.nan_to_num(pert.pert2_pressure.ps_2D), pert.pert2_velocity.u, pert.pert2_velocity.v
     e2_dp = get_dp(e2_ps)
     e4_ps, e4_us, e4_vs =  np.nan_to_num(pert.pert4_pressure.ps_2D), pert.pert4_velocity.u, pert.pert4_velocity.v
     e4_dp = get_dp(e4_ps)
+    
 #------------------------------------------------------------------------------
 # Stokes 
 #------------------------------------------------------------------------------
@@ -150,13 +144,11 @@ for h in tests:
     stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
     stokes_ps =  np.nan_to_num(stokes_ps)
     stokes_dp = get_dp(stokes_ps)
-    #print(f'delta={delta}, dp_stokes={stokes_dp:.2f}')
-    print(f'h0={h0}, dp_stokes={stokes_dp:.2f}')
+    # print(f'delta={delta}, dp_stokes={stokes_dp:.2f}')
+    # print(f'h0={h0}, dp_stokes={stokes_dp:.2f}')
 
     if plots_on:
         stokes_solver.load_plot(N)   
-    
-    
     #------------------------------------------------------------------------------
     l1_stokes_V = l1(stokes_us, stokes_vs, 0, 0)
     linf_stokes_V = linf(stokes_us, stokes_vs, 0, 0)
@@ -188,19 +180,15 @@ for h in tests:
     k+=1
     
     
-# tests = [-1*lam for lam in tests]
+# tests = [1-lam for lam in tests]
 graphics.plot_log_multi(l1_V_errs, tests, f'$L_1$ %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ %-error'],loc='left')
 graphics.plot_log_multi(l2_V_errs, tests, f'$L_2$ %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_2$ %-error'],loc='left')
 graphics.plot_log_multi(linf_V_errs, tests, f'$L_\infty$ %-error Velocity, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ %-error'],loc='left')
 
 
 graphics.plot_log_multi(l1_P_errs, tests, f'$L_1$ %-error Pressure, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ %-error'],loc='left')
-graphics.plot_log_multi(l2_P_errs, tests, f'$L_2$ %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels, [label, '$L2$ %-error'],loc='left')
+graphics.plot_log_multi(l2_P_errs, tests, f'$L_2$ %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels, [label, '$L_2$ %-error'],loc='left')
 graphics.plot_log_multi(linf_P_errs, tests, f'$L_\infty$ %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ %-error'],loc='left')
 graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ %-error, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$\Delta P$ %-error'],loc='left')
-
-
-
-
 
 

@@ -94,6 +94,7 @@ class TriSlider(PWL_Height):
         titlestr =''# f'Triangular Textured Slider $h_{in}={h_in:.2f}$, $h_{out}={h_out:.2f}$, $h={h:.2f}$, $l_{a}={l_a:.2f}$, $l_b={l_b:.2f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
+
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ______
 #   \    /

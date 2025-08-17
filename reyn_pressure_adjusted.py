@@ -28,7 +28,7 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
         p3xs[i-2:i+3] = dm.avg_3x(p3xs[i-3 : i+4])
         p4xs[i-3:i+4] = dm.avg_4x(p4xs[i-4 : i+5])
     
-    graphics.plot_2D_multi([pxs, p2xs, p3xs, p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
+    # graphics.plot_2D_multi([pxs, p2xs, p3xs, p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
    #---------------------------------------------------------------------------
    
     if TG:
@@ -36,7 +36,7 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
     else:
         sigmas, sigma_xs, sigma_2xs = make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
     
-        graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
+        # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
 

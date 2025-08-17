@@ -19,7 +19,7 @@ h=1
 L=4
 l=1
 
-delta = 6#slope: -delta*(H-h)/4
+delta = 6 #slope: -delta*(H-h)/4
 
 
 # args = [H, L]
@@ -37,7 +37,7 @@ delta = 6#slope: -delta*(H-h)/4
 # args = [H, L]
 # example = examples.TriCavity
 
-args =  [h, h/8, h, l, 1.25*l, 0.75*l, l]
+args =  [h, h*2, h, l, 1.25*l, 0.75*l, l]
 example = examples.TriSlider
 
 
@@ -51,18 +51,18 @@ N=20
        
 zoom_on=False               
 
-# solver.5new_run(N) 
+# solver.new_run(N) 
 
 
 # solver.load_scale(80,160) 
-# solver.load_run(N)
+# solver.load_run(160)
 
 # solver.load_run_many(20, 2, 2)
 
-solver.new_run_many(N, 2, 4)  
-# solver.load_run_new_many(N, 2, 2)
+# solver.new_run_many(N, 2, 4)  
+# solver.load_run_new_many(N, 2, 3)
 
-# solver.load_plot(N, zoom=zoom_on)
+solver.load_plot(160, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
