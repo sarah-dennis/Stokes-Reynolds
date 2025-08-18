@@ -142,9 +142,9 @@ class Reynolds_Solver:
                 self.v_plot(height, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
         
             # elif order > 1:
-                solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
-                self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
-                self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
+            solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
+            self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
+            self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
            
             
         if get_all:

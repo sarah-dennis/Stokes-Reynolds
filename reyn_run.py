@@ -12,7 +12,7 @@ import reyn_examples as examples
 #----------------
 plots_on = True
 uv_on = False
-inc_on= True #False
+inc_on= False
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -38,7 +38,7 @@ scaled_on=False#True
 
 Example = examples.TriSlider
 h_in=1
-h=1/4
+h=1/8
 h_out = 1
 l_in = 1
 l_out = 1
@@ -67,9 +67,9 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 # Example = examples.LambdaBump 
 
-# lam=-1
-# H=1/4 
-# l=1
+# lam=3/4
+# H=1/2 
+# l=2
 # h0 = 1
 # args=[lam, H, l, h0] 
 
@@ -102,27 +102,27 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
 U = 0
 
-## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
-# dP = -350#-29.61
-# BC = bc.Fixed(U,dP)
+# fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+dP = -862.98
+BC = bc.Fixed(U,dP)
 
 ## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-Q = 1
-BC = bc.Mixed(U, Q)
+# Q = 1
+# BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 320
+N = 160
 
 
 solver = control.Reynolds_Solver(Example, BC, args)
 # solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=2,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

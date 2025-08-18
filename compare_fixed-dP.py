@@ -58,34 +58,36 @@ def get_dp(ps):
     return dp
 #------------------------------------------------------------------------------
 
-# Reyn_Example = reyn_examples.Logistic
-# Stokes_Example = stokes_examples.Logistic
-# #delta = -4  # slope: -lam*(H-h)/4
-# h_out = 2   # outlet height
-# h_in = 1   # inlet height
-# l = 4   #  length
+Reyn_Example = reyn_examples.Logistic
+Stokes_Example = stokes_examples.Logistic
+#delta = -4  # slope: -lam*(H-h)/4
+h_out = 2   # outlet height
+h_in = 1   # inlet height
+l = 4   #  length
 
-# tests = [2, 3, 4, 6, 8, 16]
-# test_args = [[h_out , h_in, l, lam] for lam in tests]
-# e2_dps = [-20.61,-23.47,-25.35,-26.14,-26.06,-24.18] #-18.96
-# e4_dps = [-20.65,-23.61,-25.69,-27.28,-28.74,-66.04] #-18.95
-# label = '$\lambda$'
+tests = [2, 3, 4, 6, 8, 16]
+test_args = [[h_out , h_in, l, lam] for lam in tests]
+e2_dps = [-20.61,-23.47,-25.35,-26.14,-26.06,-24.18] #-18.96
+e4_dps = [-20.65,-23.61,-25.69,-27.28,-28.74,-66.04] #-18.95
+label = '$\lambda$'
 #------------------------------------------------------------------------------
 
-Reyn_Example = reyn_examples.TriSlider
-Stokes_Example = stokes_examples.TriSlider
+# Reyn_Example = reyn_examples.TriSlider
+# Stokes_Example = stokes_examples.TriSlider
 
-h_in=1  # inlet height
-# h=1/4   # apex height 
-h_out = 1  #oulet height
-l_in = 1  # inlet length
-l_out = 1  #outlet length
-l_a = 1.25  # base length A  
-l_b = 0.75  # base length B 
+# h_in=1  # inlet height
+# # h=1/4   # apex height 
+# h_out = 1  #oulet height
+# l_in = 1  # inlet length
+# l_out = 1  #outlet length
+# l_a = 1.25  # base length A  
+# l_b = 0.75  # base length B 
 
-tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4]#, 2]
-test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
-label = '$h_{min}$'
+# tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
+# test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
+e2_dps = [-862.98] 
+e4_dps = [-882.92] 
+# label = '$h_{min}$'
 #------------------------------------------------------------------------------
 
 k = 0
@@ -115,6 +117,7 @@ for args in test_args:
     stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
     stokes_ps = np.nan_to_num(stokes_ps)
     stokes_dp = get_dp(stokes_ps)
+    print(f'h0:{args[1]}, dp:{stokes_dp}')
     if plots_on:
         stokes_solver.load_plot(N)   
     
