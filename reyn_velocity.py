@@ -8,6 +8,7 @@ import numpy as np
 import domain
 import reyn_boundary as rbc
 import reyn_velocity_adjusted as adj_vel
+import reyn_pressure_adjusted as adj_p
 
 class Velocity:
     def __init__(self, Q, u, v):
@@ -18,19 +19,67 @@ class Velocity:
         
     
     def get_flux(self, height):
-        lenx = self.u.shape[1]
-        qs = np.zeros(lenx)
-    
+        qs = np.zeros(height.Nx)
         for i in range(height.Nx):
             h = height.hs[i]
-            for j in range (height.Ny):
-                    y = height.ys[j]    
-                    if y <= h:
-                        qs[i]+= self.u[j,i]*height.dy
-                    else:
-                        continue
+            for j in range(height.Ny):
+                y = height.ys[j]    
+                if y <= h:
+                    qs[i] += self.u[j,i]*height.dy
+                else:
+                    continue
         return qs
     
+    def get_reyn_flux(self, height, pressure):
+        ps = pressure.ps_1D
+        qs = np.zeros(height.Nx)
+        
+        U = self.u[0,0]
+        for i in range(1,height.Nx-1):
+            h = height.hs[i]
+            px = domain.center_first(height.dx, ps[i-1:i+2])
+            qs[i] = (U*h)/2 - (px*(h**3))/12 #/visc
+        return qs
+    
+    def get_adj_flux(self, BC, height, pressure):
+        ps = pressure.ps_2D
+        reyn_ps = pressure.ps_1D
+
+
+        
+        qs = np.zeros(height.Nx)
+        U = BC.U
+        
+        
+        pxs = domain.center_diff(reyn_ps, height.Nx, height.dx)
+        p2xs = domain.center_second_diff(reyn_ps, height.Nx, height.dx)
+        p3xs = domain.center_third_diff(reyn_ps, height.Nx, height.dx)
+        p4xs = domain.center_fourth_diff(reyn_ps, height.Nx, height.dx)
+        
+        for i in height.i_peaks[1:-1]:
+            p3xs[i-1:i+2] =domain.avg_2x(p3xs[i-2 : i+3]) 
+            p4xs[i-1:i+2] = domain.avg_2x(p4xs[i-2 : i+3])     
+        sigmas, sxs, s2xs = adj_p.make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
+        
+        for i in range(height.Nx):
+            
+            if i in height.i_peaks and i > 0:
+                qs[i]=qs[i-1]
+                continue
+            h = height.hs[i]
+            hx = height.hxs[i]
+            h2x = height.h2xs[i]
+            px = pxs[i]
+            p2x = p2xs[i]
+            p3x = p3xs[i]
+            sx = sxs[i]
+            
+            q_re = (U*h)/2 - (px*(h**3))/12 #/visc
+            q_padj = p3x*(h**5)/80 -(h*p3x +2*p2x*hx + px*h2x)*(h**4)/48
+            q_uadj = U*(h2x*(h**2)-2*(hx**2)*h)/24 
+            qs[i] = q_re + q_padj + q_uadj - sx*(h**3)/12
+            #/visc    
+        return qs
     
     def make_inc(self,height):
         u = self.u
@@ -88,8 +137,9 @@ class ReynVelocity(Velocity):
     def __init__(self, height, BC, ps=None) :
         if isinstance(BC, rbc.Fixed):
             h0=height.hs[0]
-            px0 = domain.right_first(height.dx, ps[0:3])
+            px0 = domain.center_first(height.dx, ps[0:3])
             Q = (BC.U*h0)/2 - (px0*(h0**3))/12 #/visc
+            
         elif isinstance(BC, rbc.Mixed):
             Q = BC.Q
             

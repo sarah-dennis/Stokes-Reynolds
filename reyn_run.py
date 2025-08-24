@@ -11,8 +11,8 @@ import reyn_examples as examples
 
 #----------------
 plots_on = True
-uv_on = False
-inc_on= False
+uv_on = not True
+inc_on= not False
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -36,15 +36,15 @@ scaled_on=False#True
 # args = [H,delta]
 
 
-Example = examples.TriSlider
-h_in=1
-h=1/8
-h_out = 1
-l_in = 1
-l_out = 1
-l_a = 1.25
-l_b = 0.75
-args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
+# Example = examples.TriSlider
+# h_in=1
+# h=2
+# h_out = h_in
+# l_in = 1
+# l_out = 1
+# l_a = 1
+# l_b = 1
+# args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 
 
@@ -80,19 +80,19 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 # r = 1      # radius
 # h0 = 1/2   # cleareance: Hin=Hout = h0 + r 
 # l = 0.5    # length: in let=outlet 
-# drdx = 0   # depth: inlet=outlet = l+drdx & Hin=Hout = h0+r-drdx
+# drdx = 0   # depth: inlet=outlet = l6+drdx & Hin=Hout = h0+r-drdx
 
 # args= [ r, h0,l, drdx]
 
 
-# Example = examples.Logistic
+Example = examples.Logistic
 
-# delta = 6  # max slope: -delta*(H-h)/4
-# H = 2       # outlet height
-# h = 1       # inlet height
-# L = 4       # total length
+delta = 6  # max slope: -delta*(H-h)/4
+H = 2       # outlet height
+h = 1       # inlet height
+L = 4       # total length
 
-# args = [ H, h, L, delta]
+args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
@@ -102,28 +102,28 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
 U = 0
 
-# fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
-dP = -862.98
-BC = bc.Fixed(U,dP)
+ # fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+# dP = -30.51
+# BC = bc.Fixed(U,dP)
 
 ## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-# Q = 1
-# BC = bc.Mixed(U, Q)
+Q = 1.16
+BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160
+N = 200
 
 
 solver = control.Reynolds_Solver(Example, BC, args)
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_pert_solve(N, order=2,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-
+solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)
 

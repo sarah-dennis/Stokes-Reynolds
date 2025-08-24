@@ -205,6 +205,7 @@ class PerturbedReynSol:
         for i in range(2, height.Nx):
             c3s[i] =(4*c3s[i-1] -c3s[i-2] + 2*dx*c3_xs[i])/3
     
+        c3s-=c3s[-1]
         p2s = -u0_xs + c3s 
         
         
@@ -503,7 +504,7 @@ class PerturbedReynSol:
         for i in range(2, height.Nx):
             
             c5s[i] =(4*c5s[i-1] -c5s[i-2] + 2*dx*c5_xs[i])/3
-        
+        c5s-=c5s[-1]
         # graphics.plot_2D(c5s, height.xs,  'c5', ['x', 'c5'])
 
         p4s = -u2_xs + v0_Sy_2xs + c5s 

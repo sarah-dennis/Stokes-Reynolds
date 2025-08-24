@@ -12,7 +12,7 @@ import reyn_pressure as rp
 import reyn_perturbed as rpert
 import reyn_boundary as bc
 
-i_test_scale=4/5
+i_test_scale=3/8
 
 lenx = 2
 leny = 1
@@ -57,7 +57,7 @@ class Reynolds_Solver:
         
         if plot:
             self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(height, velocity, pressure.dP, solver_title, scaled, zoom, inc, uv)
+            self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
         
         return pressure, velocity
@@ -75,7 +75,7 @@ class Reynolds_Solver:
         
         if plot:
             self.p_plot(height, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(height, reyn_velocity, reyn_pressure.dP, solver_title, scaled, zoom, inc, uv)
+            self.v_plot(self.BC, height, reyn_velocity, reyn_pressure, solver_title, scaled, zoom, inc, uv)
 
         return reyn_pressure, reyn_velocity
     
@@ -89,7 +89,7 @@ class Reynolds_Solver:
         solver_title = "Reynolds Velocity-Adjusted"
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
+            self.v_plot(self.BC, height, adj_velocity, adj_pressure, solver_title, scaled, zoom, inc, uv)
        
         return adj_pressure, adj_velocity
     
@@ -111,7 +111,7 @@ class Reynolds_Solver:
         
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(height, adj_velocity, adj_pressure.dP, solver_title, scaled, zoom, inc, uv)
+            self.v_plot(self.BC, height, adj_velocity, adj_pressure, solver_title, scaled, zoom, inc, uv)
        
         return  adj_pressure, adj_velocity
 
@@ -139,12 +139,12 @@ class Reynolds_Solver:
             if order > 3:
                 solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
                 self.p_plot(height, pert.pert4_pressure, pert.pert4_velocity.Q, solver_title4, scaled, zoom)
-                self.v_plot(height, pert.pert4_velocity, pert.pert4_pressure.dP, solver_title4, scaled, zoom, inc, uv)
+                self.v_plot(self.BC, height, pert.pert4_velocity, pert.pert4_pressure, solver_title4, scaled, zoom, inc, uv)
         
             # elif order > 1:
             solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
             self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
-            self.v_plot(height, pert.pert2_velocity, pert.pert2_pressure.dP, solver_title2, scaled, zoom, inc, uv)
+            self.v_plot(self.BC, height, pert.pert2_velocity, pert.pert2_pressure, solver_title2, scaled, zoom, inc, uv)
            
             
         if get_all:
@@ -158,6 +158,8 @@ class Reynolds_Solver:
     
     
     def p_plot(self, height, pressure, flux, solver_title, scaled=False, zoom=False):
+        print(pressure.ps_2D[0,0])
+        print(pressure.ps_2D[0,-1])
         if scaled:
             x_scale = height.xs[-1]-height.xs[0]
             y_scale = min(height.hs)
@@ -186,7 +188,8 @@ class Reynolds_Solver:
             
       
     
-    def v_plot(self, height, velocity, dP, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
+    def v_plot(self, BC, height, velocity, pressure, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
+        dP = pressure.dP
         if scaled:
             x_scale = height.xs[-1]-height.xs[0]
             y_scale = min(height.hs)
@@ -212,8 +215,7 @@ class Reynolds_Solver:
             i_test = int(i_test_scale*height.Nx)
             graphics.plot_2D(height.ys,velocity.u[:,i_test],  f'$u({height.xs[i_test]:.2f}),y)$',[f'$u({height.xs[i_test]:.2f},y)$','$y$'])
             graphics.plot_2D(height.ys,velocity.v[:,i_test],  f'$v({height.xs[i_test]:.2f}),y)$',[f'$v({height.xs[i_test]:.2f},y)$','$y$'])
-        
-            # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+           
             # graphics.plot_quiver(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
 
             graphics.plot_contour_mesh(velocity.u, height.xs, height.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
@@ -228,6 +230,11 @@ class Reynolds_Solver:
 
         if inc:
             inc = velocity.make_inc(height)
-            qs = velocity.get_flux(height)
+            
             graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
+            
+            # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+           
+            qs = velocity.get_adj_flux(BC,height, pressure) #adj
+            # qs = velocity.get_flux(height) #reyn
             graphics.plot_2D(qs, height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])

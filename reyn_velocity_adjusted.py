@@ -188,7 +188,7 @@ def make_px_pxx(height, ps):
             pxs[j,i] = px
             pxxs[j,i] = pxx
                
-    # discontinuity averaging 
+    
     for i in height.i_peaks[1:-1]:
         for j in range(height.Ny):
             h = height.ys[j]

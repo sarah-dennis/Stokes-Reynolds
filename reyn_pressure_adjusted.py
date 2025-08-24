@@ -23,19 +23,18 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
     p4xs = dm.center_fourth_diff(reyn_ps, height.Nx, height.dx)
     
     for i in height.i_peaks[1:-1]:
-        pxs[i-1:i+2] = dm.avg_x(pxs[i-2 : i+3])
-        p2xs[i-1:i+2] = dm.avg_2x(p2xs[i-2 : i+3])
-        p3xs[i-2:i+3] = dm.avg_3x(p3xs[i-3 : i+4])
-        p4xs[i-3:i+4] = dm.avg_4x(p4xs[i-4 : i+5])
+        p3xs[i-1:i+2] =dm.avg_2x(p3xs[i-2 : i+3]) 
+        p4xs[i-1:i+2] = dm.avg_2x(p4xs[i-2 : i+3])
     
-    # graphics.plot_2D_multi([pxs, p2xs, p3xs, p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
+    # graphics.plot_2D_multi([pxs, p2xs,p3xs, p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
    #---------------------------------------------------------------------------
    
     if TG:
         sigmas, sigma_xs, sigma_2xs = 0, 0, 0 
     else:
+        
         sigmas, sigma_xs, sigma_2xs = make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
-    
+        print(sigmas[0])
         # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
@@ -110,11 +109,12 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
         
             
         for i in height.i_peaks[1:-1]:
-            s[i-1:i+2] = dm.avg_2x(s[i-2 : i+3])
-            sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
-            sxx[i-3:i+4] = dm.avg_4x(sxx[i-4 : i+5])
+            # s[i-1:i+2] = dm.avg_2x(s[i-2 : i+3])
+            # sx[i-1:i+2] = dm.avg_2x(sx[i-2 : i+3])
+            sxx[i-2:i+3] = dm.avg_3x(sxx[i-4 : i+5])
 
     elif isinstance(BC, bc.Mixed): #match reyn Flux
+      
         for i in range(height.Nx):
             h = height.hs[i]
             hx = height.hxs[i]
@@ -124,7 +124,8 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
             px = pxs[i]
             p2x = p2xs[i]
             p3x = p3xs[i]
-            
+
+                
             sx_A = 3/(20)*p3x*(h**2)-1/(4)*(h*p3x + 2*p2x*hx+px*h2x)*h 
             sx_B = BC.U/2*(-2/(h**2)*(hx**2)+1/h *h2x)
             sx[i] = sx_A + sx_B #/visc
@@ -136,5 +137,5 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
             
             if i > 0:
                 s[i] = s[i-1] + sx[i]*height.dx
-                
+    s -= s[-1]            
     return s, sx, sxx   

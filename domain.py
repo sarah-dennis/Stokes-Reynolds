@@ -47,15 +47,11 @@ class Height(Domain):
         self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)
         self.h3xs = center_third_diff(self.hs, self.Nx, self.dx)
 
+
         for i in i_peaks[1:-1]:
-            
-            self.hxs[i-1:i+2] = avg_2x(self.hxs[i-2:i+3])
-            self.h2xs[i-2:i+3] = avg_3x(self.h2xs[i-3:i+4])
-            self.h3xs[i-3:i+4] = avg_4x(self.h3xs[i-4:i+5])
-        # for i in i_peaks[1:-1]:
-        #     self.hxs[i-1:i+2] = avg_x(self.hxs[i-2:i+3])
-        #     self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
-        #     self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])  
+            # self.hxs[i-1:i+2] = avg_x(self.hxs[i-2:i+3])
+            self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
+            self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])  
                 
         # graphics.plot_2D_multi([self.hxs,self.h2xs,self.h3xs], self.xs, 'Height gradients', ['$h_x$','$h_{xx}$','$h_{xxx}$'], ['$x$','$h_{*}$'])
 
@@ -107,6 +103,18 @@ def center_second_diff(fs, Nx, dx):
 
  # return np.dot([-1, 2, 0, -2, 1], u2W2E)/(2*dx**3)
 def center_third_diff(fs, Nx, dx):
+    # D_lllower = 1*np.ones(Nx-3)
+    # D_llower = -8*np.ones(Nx-2)
+    # D_lower = 13*np.ones(Nx-1)
+    # D_upper = -13*np.ones(Nx-1)
+    # D_uupper = 8*np.ones(Nx-2)
+    # D_uuupper = -1*np.ones(Nx-3)
+
+    # D = np.diagflat(D_lllower, -3) +np.diagflat(D_llower, -2) +np.diagflat(D_lower, -1) + np.diagflat(D_upper, 1) +np.diagflat(D_uupper, 2)+np.diagflat(D_uuupper, 3)
+
+    # D = D/(8*dx**3)
+    # fs_dxxx = D@fs 
+    
     D_llower = -1*np.ones(Nx-2)
     D_lower = 2*np.ones(Nx-1)
     D_upper = -2*np.ones(Nx-1)
@@ -119,8 +127,11 @@ def center_third_diff(fs, Nx, dx):
     
     fs_dxxx[0]= right_third(dx, fs[0 : 5]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
     fs_dxxx[1]= right_third(dx, fs[1 : 6]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    # fs_dxxx[2]= right_third(dx, fs[2 : 7]) #(2*fs[0]-5*fs[1]+4*fs[2]-fs[3])/(dx**2)
+    
     fs_dxxx[Nx-1]= left_third(dx, fs[Nx-5 : Nx]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
     fs_dxxx[Nx-2]= left_third(dx, fs[Nx-6 : Nx-1]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2)
+    # fs_dxxx[Nx-3]= left_third(dx, fs[Nx-7 : Nx-2]) #(2*fs[Nx-1]-5*fs[Nx-2]+4*fs[Nx-3]-fs[Nx-4])/(dx**2) 
     
     return np.asarray(fs_dxxx)
 # [1, -4, 6, -4, 1], u2W2E)/(dx**4)
@@ -260,7 +271,10 @@ def center_fifth(dx, u3W3E):
 
         
 def avg_x(fs):
-    return avg_2x(fs)     
+    # i=1
+    # f = (fs[i+1] + fs[i-1])/2 
+    # return f   
+    return avg_2x(fs)
                    
 def avg_2x(fs):
     #-2,-1,0,1,2
