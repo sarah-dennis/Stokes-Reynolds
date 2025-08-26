@@ -12,12 +12,12 @@ import reyn_pressure as rp
 import reyn_perturbed as rpert
 import reyn_boundary as bc
 
-i_test_scale=3/8
+i_test_scale=2.249/4
 
-lenx = 2
-leny = 1
-x_start = 0
-y_start = 0
+lenx = 1/2
+leny = 3/2
+x_start = 2
+y_start = 1/2
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
@@ -39,7 +39,7 @@ class Reynolds_Solver:
         # colorbar min max
         self.vel_max = 5
         self.p_min=0
-        self.p_max=50
+        self.p_max = 40
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
@@ -86,7 +86,7 @@ class Reynolds_Solver:
 
         adj_velocity = rv.VelAdj_ReynVelocity(height,self.BC, adj_pressure)
                 
-        solver_title = "Reynolds Velocity-Adjusted"
+        solver_title = "Velocity Adjusted ELT"
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(self.BC, height, adj_velocity, adj_pressure, solver_title, scaled, zoom, inc, uv)
@@ -107,7 +107,7 @@ class Reynolds_Solver:
                
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
         
-        solver_title = "Reynolds Adjusted T. & G."
+        solver_title = "Takeuchi & Gu ELT"
         
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
@@ -132,17 +132,17 @@ class Reynolds_Solver:
         reyn_velocity = rv.ReynVelocity(height, self.BC, reyn_pressure.ps_1D)                   
         
         pert = rpert.PerturbedReynSol(height, self.BC, order, reyn_pressure, reyn_velocity)
-        solver_title = "Reynolds"
+        solver_title = ""
         
         if plot:
     
             if order > 3:
-                solver_title4 = solver_title + " $O(\epsilon^4)$ perturbed"
+                solver_title4 = solver_title + " $\epsilon^4$ PLT"
                 self.p_plot(height, pert.pert4_pressure, pert.pert4_velocity.Q, solver_title4, scaled, zoom)
                 self.v_plot(self.BC, height, pert.pert4_velocity, pert.pert4_pressure, solver_title4, scaled, zoom, inc, uv)
         
             # elif order > 1:
-            solver_title2 = solver_title + " $O(\epsilon^2)$ perturbed"
+            solver_title2 = solver_title + " $\epsilon^2$ PLT"
             self.p_plot(height, pert.pert2_pressure, pert.pert2_velocity.Q, solver_title2, scaled, zoom)
             self.v_plot(self.BC, height, pert.pert2_velocity, pert.pert2_pressure, solver_title2, scaled, zoom, inc, uv)
            
@@ -158,19 +158,18 @@ class Reynolds_Solver:
     
     
     def p_plot(self, height, pressure, flux, solver_title, scaled=False, zoom=False):
-        print(pressure.ps_2D[0,0])
-        print(pressure.ps_2D[0,-1])
+
         if scaled:
             x_scale = height.xs[-1]-height.xs[0]
             y_scale = min(height.hs)
             p_scale = flux*x_scale/y_scale #*visc
-            paramstr = "$Re=0$, $ Q=%.2f$, $U=%.1f$, $\Delta   P=%.2f$"%(flux, self.BC.U, pressure.dP/p_scale)
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta   P=%.2f$"%(flux, self.BC.U, -pressure.dP/p_scale)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$  p$", "$  x$","$  y$"]
             graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=self.p_min/p_scale, vmax=self.p_max/p_scale, log_cmap=False)
         
         else:
-            paramstr = "$Re=0$, $Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, pressure.dP)
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, -pressure.dP)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
@@ -196,7 +195,7 @@ class Reynolds_Solver:
             u_scale = velocity.Q/y_scale
             v_scale = velocity.Q/x_scale
             p_scale = velocity.Q*x_scale/y_scale #*visc
-            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.BC.U, dP/p_scale)
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.BC.U, -dP/p_scale)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
             uv_mag = np.sqrt((velocity.u/u_scale)**2 + (velocity.v/v_scale)**2)
@@ -204,7 +203,7 @@ class Reynolds_Solver:
 
         else:
            
-            paramstr = "$Re=0$, $Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.Q, self.BC.U, dP)
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.Q, self.BC.U, -dP)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
             uv_mag = np.sqrt((velocity.u)**2 + (velocity.v)**2)
@@ -229,12 +228,13 @@ class Reynolds_Solver:
             graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
 
         if inc:
-            inc = velocity.make_inc(height)
+            # inc = velocity.make_inc(height)
             
-            graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
+            # graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             
             # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
-           
-            qs = velocity.get_adj_flux(BC,height, pressure) #adj
-            # qs = velocity.get_flux(height) #reyn
+            
+            qs = velocity.get_flux(height)
+            # qs = velocity.get_adj_flux(BC,height, pressure) #adj
+            # qs = velocity.get_reyn_flux(BC, height, pressure) #reyn
             graphics.plot_2D(qs, height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])

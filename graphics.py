@@ -39,9 +39,10 @@ colour_map_mesh = colors.ListedColormap(mesh_cmap)
 #---------LEGEND---------------------------------------------------------------
 
 colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-# colour_bar_scale=0.025 # for long figures like H=2, L=4
+# colour_bar_scale=0.02 # for long figures like H=2, L=4
 # colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
- 
+
+colour_bar_pad = 0.05
 #------------------------------------------------------------------------------
 # RESOLUTION
 #------------------------------------------------------------------------------
@@ -185,7 +186,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.5*np.min(fs), 5*np.max(fs))
+    ax.set_ylim(0.5*np.min(fs),10*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -215,7 +216,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
 
-    stream_density=[1,1]
+    stream_density=[ys.shape[0]/xs.shape[0],1]
     pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows
@@ -242,7 +243,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
     
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[xs.shape[0]/ys.shape[0],1]
+    stream_density=[1,1]
+    # stream_density=[xs.shape[0]/ys.shape[0],1]
     
     if vscale is not None:
         vx/= vscale
@@ -257,7 +259,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
         no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=True)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=no_norm)
 
-    cb=pp.colorbar(stream_plot.lines, label=ax_labels[0], fraction=colour_bar_scale, pad=0.025)
+    cb=pp.colorbar(stream_plot.lines, label=ax_labels[0], fraction=colour_bar_scale, pad=colour_bar_pad)
     ticks = np.linspace(vmin, vmax, num=5)
     cb.set_ticks(ticks)
 
@@ -373,7 +375,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cma
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
     
-    cb = pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=0.025)
+    cb = pp.colorbar(color_plot, label=labels[0], fraction=colour_bar_scale, pad=colour_bar_pad)
     
     ticks = np.linspace(vmin, vmax, num=5)
     cb.set_ticks(ticks)

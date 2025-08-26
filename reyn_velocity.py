@@ -28,25 +28,26 @@ class Velocity:
                     qs[i] += self.u[j,i]*height.dy
                 else:
                     continue
+        for i in height.i_peaks[1:-1]:
+            qs[i-3:i+4] = domain.avg_4x(qs[i-4: i+5])
+            
         return qs
     
-    def get_reyn_flux(self, height, pressure):
+    def get_reyn_flux(self, BC, height, pressure):
         ps = pressure.ps_1D
         qs = np.zeros(height.Nx)
         
-        U = self.u[0,0]
+        U = BC.U
         for i in range(1,height.Nx-1):
             h = height.hs[i]
             px = domain.center_first(height.dx, ps[i-1:i+2])
             qs[i] = (U*h)/2 - (px*(h**3))/12 #/visc
+        qs[0] = qs[1]
+        qs[-1] = qs[-2]
         return qs
     
     def get_adj_flux(self, BC, height, pressure):
-        ps = pressure.ps_2D
         reyn_ps = pressure.ps_1D
-
-
-        
         qs = np.zeros(height.Nx)
         U = BC.U
         
@@ -57,15 +58,14 @@ class Velocity:
         p4xs = domain.center_fourth_diff(reyn_ps, height.Nx, height.dx)
         
         for i in height.i_peaks[1:-1]:
-            p3xs[i-1:i+2] =domain.avg_2x(p3xs[i-2 : i+3]) 
-            p4xs[i-1:i+2] = domain.avg_2x(p4xs[i-2 : i+3])     
+            p2xs[i-1:i+2] =domain.avg_2x(p2xs[i-2 : i+3]) 
+            p3xs[i-2:i+3] =domain.avg_3x(p3xs[i-3 : i+4]) 
+            p4xs[i-2:i+3] = domain.avg_3x(p4xs[i-3 : i+4])
         sigmas, sxs, s2xs = adj_p.make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
         
         for i in range(height.Nx):
             
-            if i in height.i_peaks and i > 0:
-                qs[i]=qs[i-1]
-                continue
+
             h = height.hs[i]
             hx = height.hxs[i]
             h2x = height.h2xs[i]
@@ -78,7 +78,10 @@ class Velocity:
             q_padj = p3x*(h**5)/80 -(h*p3x +2*p2x*hx + px*h2x)*(h**4)/48
             q_uadj = U*(h2x*(h**2)-2*(hx**2)*h)/24 
             qs[i] = q_re + q_padj + q_uadj - sx*(h**3)/12
-            #/visc    
+            #/visc  
+        for i in height.i_peaks[1:-1]:
+            qs[i-2:i+3] = domain.avg_3x(qs[i-3 : i+4])
+            
         return qs
     
     def make_inc(self,height):

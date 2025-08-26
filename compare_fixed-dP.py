@@ -85,8 +85,6 @@ label = '$\lambda$'
 
 # tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
 # test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
-e2_dps = [-862.98] 
-e4_dps = [-882.92] 
 # label = '$h_{min}$'
 #------------------------------------------------------------------------------
 
@@ -117,7 +115,6 @@ for args in test_args:
     stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
     stokes_ps = np.nan_to_num(stokes_ps)
     stokes_dp = get_dp(stokes_ps)
-    print(f'h0:{args[1]}, dp:{stokes_dp}')
     if plots_on:
         stokes_solver.load_plot(N)   
     

@@ -41,9 +41,9 @@ def get_dp(ps):
     return dp
 
 #----------------
-plots_on = not True # plots p(x,y) contour-mesh and (u,v) streamlines
+plots_on =  not True # plots p(x,y) contour-mesh and (u,v) streamlines
 uv_on = False   # plots u(x,y) contour-mesh and v(x,y) contour-mesh
-inc_on= False   # plots u_x + v_y contour mesh and Q(x) line
+inc_on= not True   # plots u_x + v_y contour mesh and Q(x) line
 zoom_on = False # plot a zoomed frame (set params in control)
 scaled_on=False # plot on scaled axis (set params in control)
 
@@ -63,7 +63,8 @@ BC = rbc.Mixed(U, Q)
 Re=0
 
 
-N = 80 # grid size |1|= N
+N = 160 # grid size |1|= N
+
 #------------------------------------------------------------------------------
 #TODO: select example
 #------------------------------------------------------------------------------
@@ -73,7 +74,7 @@ h_out = 2   # outlet height
 h_in = 1   # inlet height
 l = 4   #  length
 
-tests = [2, 3, 4, 6, 8, 16]
+tests = [2, 3, 4, 6, 8, 16, 32]
 test_args = [[h_out , h_in, l, lam] for lam in tests]
 exstr = 'Logistic Step'
 label = '$\lambda$'
@@ -103,9 +104,9 @@ num_tests=len(test_args)
 fun_labels= ['Reyn',  '$\epsilon^2$-PLT', '$\epsilon^4$-PLT','VA-ELT', 'TG-ELT']
 num_models = 5 #reyn, VA-TG adj, e2 pert, e4 pert
 
-l1_V_errs= np.zeros((num_models-1,num_tests))
-linf_V_errs = np.zeros((num_models-1,num_tests))
-l2_V_errs = np.zeros((num_models-1,num_tests))
+l1_V_errs= np.zeros((num_models,num_tests))
+linf_V_errs = np.zeros((num_models,num_tests))
+l2_V_errs = np.zeros((num_models,num_tests))
 
 
 l1_P_errs = np.zeros((num_models,num_tests))
@@ -144,8 +145,6 @@ for args in test_args:
     stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
     stokes_ps =  np.nan_to_num(stokes_ps)
     stokes_dp = get_dp(stokes_ps)
-    # print(f'delta={delta}, dp_stokes={stokes_dp:.2f}')
-    # print(f'h0={h0}, dp_stokes={stokes_dp:.2f}')
 
     if plots_on:
         stokes_solver.load_plot(N)   
@@ -159,10 +158,11 @@ for args in test_args:
     l2_stokes_P = l2(stokes_ps, 0, 0, 0)
     #------------------------------------------------------------------------------
     # fun_labels= ['Reyn',  '$\epsilon^2$-PLT', '$\epsilon^4$-PLT','VA-ELT', 'TG-ELT']
-    test_us = [[reyn_us, reyn_vs], [e2_us,e2_vs], [e4_us,e4_vs], [adj_us, adj_vs]]
+    test_us = [[reyn_us, reyn_vs], [e2_us,e2_vs], [e4_us,e4_vs], [adj_us, adj_vs],  [adj_TG_us, adj_TG_vs]]
     test_ps = [reyn_ps, e2_ps, e4_ps, adj_ps, adj_TG_ps]
 
     test_dps = [reyn_dp, e2_dp, e4_dp, adj_dp, adj_TG_dp]
+    
     for i in range(len(test_us)):
         l1_V_errs[i,k] = l1(stokes_us, stokes_vs, test_us[i][0], test_us[i][1])/l1_stokes_V *100
         l2_V_errs[i,k] = l2(stokes_us, stokes_vs, test_us[i][0], test_us[i][1])/l2_stokes_V *100
@@ -173,22 +173,22 @@ for args in test_args:
         l1_P_errs[i,k] = l1(stokes_ps, 0, test_ps[i], 0)/l1_stokes_P *100
         l2_P_errs[i,k] = l2(stokes_ps, 0, test_ps[i], 0)/l2_stokes_P *100
         linf_P_errs[i,k] = linf(stokes_ps, 0, test_ps[i], 0)/linf_stokes_P *100
-        
+    for i in range(len(test_dps)):
+         
         dP_errs[i,k] = np.abs(stokes_dp - test_dps[i])/np.abs(stokes_dp)*100
-    
     
     k+=1
     
     
 # tests = [1-lam for lam in tests]
-graphics.plot_log_multi(l1_V_errs, tests, f'$L_1$ %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ %-error'],loc='left')
-graphics.plot_log_multi(l2_V_errs, tests, f'$L_2$ %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_2$ %-error'],loc='left')
-graphics.plot_log_multi(linf_V_errs, tests, f'$L_\infty$ %-error Velocity, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ %-error'],loc='left')
+# graphics.plot_log_multi(l1_V_errs, tests, f'$L_1$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ rel. %-error'],loc='left')
+graphics.plot_log_multi(l2_V_errs[:-1], tests, f'$L_2$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_2$ rel. %-error'],loc='left')
+# graphics.plot_log_multi(linf_V_errs, tests, f'$L_\infty$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ rel. %-error'],loc='left')
 
 
-graphics.plot_log_multi(l1_P_errs, tests, f'$L_1$ %-error Pressure, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ %-error'],loc='left')
-graphics.plot_log_multi(l2_P_errs, tests, f'$L_2$ %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels, [label, '$L_2$ %-error'],loc='left')
-graphics.plot_log_multi(linf_P_errs, tests, f'$L_\infty$ %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ %-error'],loc='left')
-graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ %-error, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$\Delta P$ %-error'],loc='left')
+# graphics.plot_log_multi(l1_P_errs, tests, f'$L_1$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ rel. %-error'],loc='left')
+graphics.plot_log_multi(l2_P_errs, tests, f'$L_2$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels, [label, '$L_2$ rel. %-error'],loc='left')
+# graphics.plot_log_multi(linf_P_errs, tests, f'$L_\infty$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ rel. %-error'],loc='left')
+graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ rel. %-error, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$\Delta P$ rel. %-error'],loc='left')
 
 

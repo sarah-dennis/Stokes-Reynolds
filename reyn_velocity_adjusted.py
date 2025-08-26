@@ -24,6 +24,19 @@ def make_adj_velocity(height, BC, adj_pressure):
     us = make_us(height, BC.U, pxs, p2xs, p3xs, sigma_xs)
     vs = make_vs(height,  BC.U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
       
+    
+    
+    # for i in height.i_peaks[1:-1]:
+    #     for j in range(height.Ny):
+    #         y = height.ys[j]
+    #         h = height.hs[i]
+    #         h_2W = height.hs[i-2]
+    #         h_2E = height.hs[i+2]
+    #         if y < h_2E and y < h and y< h_2W:
+    #             us[j,i-1:i+2] = dm.avg_2x(us[j,i-2:i+3])
+    #             vs[j,i-1:i+2] = dm.avg_2x(vs[j,i-2:i+3])
+   
+    
     return us, vs
 
 
@@ -192,9 +205,13 @@ def make_px_pxx(height, ps):
     for i in height.i_peaks[1:-1]:
         for j in range(height.Ny):
             h = height.ys[j]
-            pxs[j,i-2: i+3] = dm.avg_3x(pxs[j,i-3 : i+4])
-            pxxs[j,i-3 : i+4] = dm.avg_4x(pxxs[j,i-4 : i+5])
-   
+            pxxs[j,i-4: i+5] = dm.avg_5x(pxxs[j,i-5 : i+6])
+            pxs[j,i-3 : i+4] = dm.avg_4x(pxs[j,i-4 : i+5])
+            # pxxs[j,i-1:i+2] = dm.avg_2x(pxxs[j,i-2 : i+3]) 
+            # p3xs[i-2:i+3] =dm.avg_3x(p3xs[i-3 : i+4]) 
+            # p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
+    # graphics.plot_2D_multi([pxs[5], pxxs[5]], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
+
     return pxs, pxxs     
 
 def make_pxh_pxxh_pxyh(height,pxs,pxxs):
@@ -209,11 +226,11 @@ def make_pxh_pxxh_pxyh(height,pxs,pxxs):
         for j in range(height.Ny):
             y = height.ys[j]
             
-            if y == h :
+            if y == h and j > 1:
                 px_hs[i] = pxs[j,i]
                 pxx_hs[i] = pxxs[j,i]
                 pxy_hs[i] = dm.left_first(dy, pxs[j-2 : j+1, i])
-            elif (y < h and y+dy > h):
+            elif (y < h and y+dy > h) and j > 1:
                 px_hs[i] = pxs[j,i] + pxxs[j,i]*(h-y)
                 pxxy_i = dm.left_first(dy, pxxs[j-2 : j+1, i])
                 pxx_hs[i] = pxxs[j,i] + pxxy_i*(h-y)

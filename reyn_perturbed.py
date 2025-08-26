@@ -151,17 +151,15 @@ class PerturbedReynSol:
 
     
         # correct finite differences at discontinuities
-        for i in height.i_peaks:
-            if i > 3 and i < height.Nx-3:
-
-                h_xs[i-1 : i+2] = dm.avg_x(h_xs[i-2 : i+3])
-                h2_2xs[i-1 : i+2] = dm.avg_2x(h2_2xs[i-2 : i+3])
-                h3_2xs[i-1 : i+2] = dm.avg_2x(h3_2xs[i-2 : i+3])
-                h2_3xs[i-2 : i+3] = dm.avg_3x(h2_3xs[i-3 : i+4])
-                h3_3xs[i-2 : i+3] = dm.avg_3x(h3_3xs[i-3 : i+4])
-                
-                c3_xs[i-1 : i+2] = dm.avg_x(c3_xs[i-2 : i+3])
-                c3_2xs[i-2 : i+3] = dm.avg_3x(c3_2xs[i-3 : i+4])
+        for i in height.i_peaks[1:-1]:
+            h_xs[i-1 : i+2] = dm.avg_x(h_xs[i-2 : i+3])
+            h2_2xs[i-1 : i+2] = dm.avg_2x(h2_2xs[i-2 : i+3])
+            h3_2xs[i-1 : i+2] = dm.avg_2x(h3_2xs[i-2 : i+3])
+            h2_3xs[i-2 : i+3] = dm.avg_3x(h2_3xs[i-3 : i+4])
+            h3_3xs[i-2 : i+3] = dm.avg_3x(h3_3xs[i-3 : i+4])
+            
+            c3_xs[i-1 : i+2] = dm.avg_x(c3_xs[i-2 : i+3])
+            c3_2xs[i-2 : i+3] = dm.avg_3x(c3_2xs[i-3 : i+4])
             
         # find u2, v2   
         for i in range(height.Nx):
@@ -385,27 +383,25 @@ class PerturbedReynSol:
 
             
         # correct finite differences at discontinuities
-        for i in height.i_peaks:
-            if i > 5 and i < height.Nx-5:
-
-                h_2xs[i-1 : i+2] = dm.avg_2x(h_2xs[i-2 : i+3])
-                h_3xs[i-2 : i+3] = dm.avg_3x(h_3xs[i-3 : i+4])
-                h2_4xs[i-3 : i+4] = dm.avg_4x(h2_4xs[i-4 : i+5])
-                h3_4xs[i-3 : i+4] = dm.avg_4x(h3_4xs[i-4 : i+5])
-                h2_5xs[i-4 : i+5] = dm.avg_5x(h2_5xs[i-5 : i+6])
-                h3_5xs[i-4 : i+5] = dm.avg_5x(h3_5xs[i-5 : i+6])
-                 
-                c3_3xs[i-3 : i+4] = dm.avg_4x(c3_3xs[i-4 : i+5])
-                c3_4xs[i-4 : i+5] = dm.avg_5x(c3_4xs[i-5 : i+6])
-                c5_xs[i-3 : i+4] = dm.avg_4x(c5_xs[i-4 : i+5])
-                c5_2xs[i-4 : i+5] = dm.avg_5x(c5_2xs[i-5 : i+6])
-                
-                f1_2xs[i-3 : i+4] = dm.avg_4x(f1_2xs[i-4 : i+5])
-                f1_3xs[i-4 : i+5] = dm.avg_5x(f1_3xs[i-5 : i+6])
-                f2_2xs[i-3 : i+4] = dm.avg_4x(f2_2xs[i-5 : i+5])
-                f2_3xs[i-4 : i+5] = dm.avg_5x(f2_3xs[i-5 : i+6])
-                f3_2xs[i-3 : i+4] = dm.avg_4x(f3_2xs[i-4 : i+5])
-                f3_3xs[i-4 : i+5] = dm.avg_5x(f3_3xs[i-5 : i+6])                        
+        for i in height.i_peaks[1:-1]:
+            h_2xs[i-1 : i+2] = dm.avg_2x(h_2xs[i-2 : i+3])
+            h_3xs[i-2 : i+3] = dm.avg_3x(h_3xs[i-3 : i+4])
+            h2_4xs[i-3 : i+4] = dm.avg_4x(h2_4xs[i-4 : i+5])
+            h3_4xs[i-3 : i+4] = dm.avg_4x(h3_4xs[i-4 : i+5])
+            h2_5xs[i-4 : i+5] = dm.avg_5x(h2_5xs[i-5 : i+6])
+            h3_5xs[i-4 : i+5] = dm.avg_5x(h3_5xs[i-5 : i+6])
+             
+            c3_3xs[i-3 : i+4] = dm.avg_4x(c3_3xs[i-4 : i+5])
+            c3_4xs[i-4 : i+5] = dm.avg_5x(c3_4xs[i-5 : i+6])
+            c5_xs[i-3 : i+4] = dm.avg_4x(c5_xs[i-4 : i+5])
+            c5_2xs[i-4 : i+5] = dm.avg_5x(c5_2xs[i-5 : i+6])
+            
+            f1_2xs[i-3 : i+4] = dm.avg_4x(f1_2xs[i-4 : i+5])
+            f1_3xs[i-4 : i+5] = dm.avg_5x(f1_3xs[i-5 : i+6])
+            f2_2xs[i-3 : i+4] = dm.avg_4x(f2_2xs[i-5 : i+5])
+            f2_3xs[i-4 : i+5] = dm.avg_5x(f2_3xs[i-5 : i+6])
+            f3_2xs[i-3 : i+4] = dm.avg_4x(f3_2xs[i-4 : i+5])
+            f3_3xs[i-4 : i+5] = dm.avg_5x(f3_3xs[i-5 : i+6])                        
 
         
         # find u4, v4
@@ -492,10 +488,9 @@ class PerturbedReynSol:
         for j in range(height.Ny): #TODO height dependent averaging?
             v0_Sy_2xs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
             for i in height.i_peaks[1:-1]:
-                if i > 2 and i < height.Nx-3:
-                    v0_Sy_2xs[j, i-2 : i+3] = dm.avg_3x(v0_Sy_2xs[j, i-3 : i+4])
-        
-        # countour integral c5s for p4
+                
+                v0_Sy_2xs[j, i-2 : i+3] = dm.avg_3x(v0_Sy_2xs[j, i-3 : i+4])
+                
         p4s = np.zeros((height.Ny, height.Nx))
 
         c5s[0] = 0 # np.mean(u2_xs[:,0]) - np.mean(v0_Sy_xxs[:,0])

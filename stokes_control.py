@@ -21,8 +21,8 @@ from stokes_solver import run_spLU
 #-> zoom plot
 lenx = 0.55
 leny = 0.55
-x_start = 1
-y_start = 0
+x_start = 2
+y_start = 1.5
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
@@ -50,7 +50,7 @@ class Stokes_Solver:
 
         self.vel_max = 5
         self.p_min=-0
-        self.p_max=400
+        self.p_max=40
 
         
 #------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ class Stokes_Solver:
         dp, res = pressure.resistance(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta P =%.2f$'%dp
+        dp_str = ', $\Delta P =%.2f$'%(-dp)
 
     
         ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
@@ -218,8 +218,7 @@ class Stokes_Solver:
         graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=40)#, y_lim = np.min(ex.y_peaks))
     
         if zoom:
-            p_zoom = graphics.grid_zoom_2D(p, ex, x_start, x_stop, y_start, y_stop)  
-            p_zoom = np.flip(p_zoom, axis=0)
+            p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)  
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=20)#, y_lim = min(ex.y_peaks))
     
     #  Velocity plot: 
