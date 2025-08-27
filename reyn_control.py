@@ -39,7 +39,7 @@ class Reynolds_Solver:
         # colorbar min max
         self.vel_max = 5
         self.p_min=0
-        self.p_max = 120
+        self.p_max = 40
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
@@ -174,6 +174,18 @@ class Reynolds_Solver:
             p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
+        graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
+        
+        p_hs=np.zeros(height.Nx)
+        for i in range(height.Nx):
+            h = height.hs[i]
+            for j in range(height.Ny):
+                y = height.ys[j]
+                if y + height.dy >= h and y <= h:
+                    p_hs[i]=pressure.ps_2D[j-1,i]
+                    #continue
+        graphics.plot_2D(p_hs, height.xs, 'p(x,h)', ['x','p(x)'])
+                
         if zoom:
             if scaled:
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)

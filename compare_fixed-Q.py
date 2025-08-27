@@ -27,7 +27,6 @@ def linf_(ax, ay, bx, by):
 
 def l1(ax,ay,bx,by):
     return np.sum(np.abs(ax-bx)) + np.sum(np.abs(ay-by))
-
 def l2(ax,ay,bx,by):
     return np.sum((ax-bx)**2 + (ay-by)**2) **(1/2)
 
