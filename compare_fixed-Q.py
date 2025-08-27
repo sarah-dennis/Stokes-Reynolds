@@ -181,13 +181,13 @@ for args in test_args:
     
 # tests = [1-lam for lam in tests]
 # graphics.plot_log_multi(l1_V_errs, tests, f'$L_1$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ rel. %-error'],loc='left')
-graphics.plot_log_multi(l2_V_errs[:-1], tests, f'$L_2$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_2$ rel. %-error'],loc='left')
+graphics.plot_2D_multi(l2_V_errs[:-1], tests, f'Velocity $L_2$ rel. %-error, {exstr}', fun_labels, [label, 'Velocity $L_2$ rel. %-error'],loc='left')
 # graphics.plot_log_multi(linf_V_errs, tests, f'$L_\infty$ rel. %-error Velocity, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ rel. %-error'],loc='left')
 
 
 # graphics.plot_log_multi(l1_P_errs, tests, f'$L_1$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ rel. %-error'],loc='left')
-graphics.plot_log_multi(l2_P_errs, tests, f'$L_2$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels, [label, '$L_2$ rel. %-error'],loc='left')
+graphics.plot_log_multi(l2_P_errs, tests, f'Pressure $L_2$ rel. %-error, {exstr}',  fun_labels, [label, 'Presure $L_2$ rel. %-error '],loc='left')
 # graphics.plot_log_multi(linf_P_errs, tests, f'$L_\infty$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ rel. %-error'],loc='left')
-graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ rel. %-error, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$\Delta P$ rel. %-error'],loc='left')
+graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ rel. %-error, {exstr}',  fun_labels,  [label, '$\Delta P$ rel. %-error'],loc='left')
 
 
