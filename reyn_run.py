@@ -47,7 +47,7 @@ Example = examples.TriSlider
 
 
 h_in=1
-h=2
+h=2/4
 h_out = h_in
 l_in = 1
 l_out = 1
@@ -124,15 +124,15 @@ BC = bc.Mixed(U, Q)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 800
+N = 1000
 
 
 solver = control.Reynolds_Solver(Example, BC, args)
 # solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

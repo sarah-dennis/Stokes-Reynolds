@@ -15,7 +15,7 @@ Q=1
 Re=0
 
 H=2
-h=1
+h=1/100
 L=4
 l=1
 
@@ -28,8 +28,8 @@ delta = 32 #slope: -delta*(H-h)/4
 # args = [H, L, delta]-
 # example = examples.BFS_pwl
 
-args = [H, h, L, delta]
-example = examples.Logistic
+# args = [H, h, L, delta]
+# example = examples.Logistic
 
 # args = [H,h, L, delta]
 # example = examples.Sinusoid
@@ -38,7 +38,8 @@ example = examples.Logistic
 # example = examples.TriCavity
 
 # args =  [h, h*2, h, l, 1.25*l, 0.75*l, l]
-# example = examples.TriSlider
+args =  [h, h*2, h, l, 1.25*l, 0.75*l, l]
+example = examples.TriSlider
 
 
 

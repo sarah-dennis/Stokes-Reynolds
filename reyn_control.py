@@ -39,7 +39,7 @@ class Reynolds_Solver:
         # colorbar min max
         self.vel_max = 5
         self.p_min=0
-        self.p_max = 40
+        self.p_max = 120
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):

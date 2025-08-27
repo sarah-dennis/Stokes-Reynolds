@@ -210,7 +210,7 @@ class Stokes_Solver:
         dp_str = ', $\Delta P =%.2f$'%(-dp)
 
     
-        ax_labels_p = ['$p(x,y)$', '$x$', '$y$']
+        ax_labels_p = ['$p$', '$x$', '$y$']
         title_p = 'Stokes\n' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)

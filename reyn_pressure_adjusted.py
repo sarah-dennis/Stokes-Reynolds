@@ -35,7 +35,7 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
     else:
         
         sigmas, sigma_xs, sigma_2xs = make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
-        # graphics.plot_2D_multi([sigmas, sigma_xs, sigma_2xs], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
+        # graphics.plot_2D_multi([sigmas], height.xs, '$\sigma(x)$ gradients', ['$\sigma$','$\sigma_x$','$\sigma_{xx}$'], ['$x$','$\sigma_{*}$'])
 
     #---------------------------------------------------------------------------
 
@@ -134,16 +134,19 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
             s2x_C = BC.U/2*(4/(h**3)*(hx**3)-5/(h**2)*hx*h2x+1/h*h3x)
             sxx[i] = s2x_A + s2x_B +s2x_C
             
-            for i in height.i_peaks[1:-1]:
-                # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
-                sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
-                sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
-                        
+        for i in height.i_peaks[1:-1]:
+            # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
+            sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
+            sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
+        
+        for i in range(height.Nx):
+            
             if i > 1:
                 s[i] = (4*s[i-1] -s[i-2] + 2*height.dx*sx[i])/3
             elif i > 0:
                 s[i] = s[i-1] + sx[i]*height.dx
-    
+        # for i in height.i_peaks[1:-1]:
+            # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
 
     s -= s[-1]            
     return s, sx, sxx   

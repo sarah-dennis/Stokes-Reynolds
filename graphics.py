@@ -38,8 +38,8 @@ colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
 #---------LEGEND---------------------------------------------------------------
 
-colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-# colour_bar_scale=0.02 # for long figures like H=2, L=4
+# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
+colour_bar_scale=0.02 # for long figures like H=2, L=4
 # colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
 
 colour_bar_pad = 0.05
@@ -186,7 +186,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.5*np.min(fs),10*np.max(fs))
+    ax.set_ylim(0.5*np.min(fs),100*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])

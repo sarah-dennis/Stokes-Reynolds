@@ -68,34 +68,34 @@ N = 160 # grid size |1|= N
 #------------------------------------------------------------------------------
 #TODO: select example
 #------------------------------------------------------------------------------
-Reyn_Example = reyn_examples.Logistic
-Stokes_Example= stokes_examples.Logistic
-h_out = 2   # outlet height
-h_in = 1   # inlet height
-l = 4   #  length
+# Reyn_Example = reyn_examples.Logistic
+# Stokes_Example= stokes_examples.Logistic
+# h_out = 2   # outlet height
+# h_in = 1   # inlet height
+# l = 4   #  length
 
-tests = [2, 3, 4, 6, 8, 16, 32]
-test_args = [[h_out , h_in, l, lam] for lam in tests]
-exstr = 'Logistic Step'
-label = '$\lambda$'
+# tests = [2, 3, 4, 6, 8, 16, 32]
+# test_args = [[h_out , h_in, l, lam] for lam in tests]
+# exstr = 'Logistic Step'
+# label = '$\lambda$'
 #------------------------------------------------------------------------------
-# Reyn_Example = reyn_examples.TriSlider
-# Stokes_Example = stokes_examples.TriSlider
+Reyn_Example = reyn_examples.TriSlider
+Stokes_Example = stokes_examples.TriSlider
 
-# h_in=1  # inlet height
-# h0=1/4   # apex height 
-# h_out = 1  #oulet height
-# l_in = 1  # inlet length
-# l_out = 1  #outlet length
-# l_a = 1.25  # base length A  
-# l_b = 0.75  # base length B 
+h_in=1  # inlet height
+h0=1/4   # apex height 
+h_out = 1  #oulet height
+l_in = 1  # inlet length
+l_out = 1  #outlet length
+l_a = 1.25  # base length A  
+l_b = 0.75  # base length B 
 
-# #test h0
-# tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
-# test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
+#test h0
+tests = [1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
+test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
 
-# exstr = 'Triangular Slider'
-# label = '$h_{min} = 1-\lambda$'
+exstr = 'Triangular Slider'
+label = '$H$'
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 k = 0
