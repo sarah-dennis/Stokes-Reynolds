@@ -26,7 +26,7 @@ class PerturbedReynSol:
         self.y_scale = height.yf - height.y0
         
 
-    
+        
         self.Q_scale = reyn_velocity.Q
 
         self.P_scale = self.Q_scale * self.x_scale * (self.y_scale**-3) #*visc

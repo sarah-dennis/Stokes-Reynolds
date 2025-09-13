@@ -11,8 +11,8 @@ import reyn_examples as examples
 
 #----------------
 plots_on = True
-uv_on =  True
-inc_on=   True
+uv_on =  not True
+inc_on=  not True
 zoom_on = False 
 write_on = False
 scaled_on=False#True
@@ -20,13 +20,13 @@ scaled_on=False#True
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
-Example = examples.BFS
-H=1.25
+# Example = examples.BFS
+# H=2
 
-h=1
-l=2
-L=4
-args =  [h, H, l, L]
+# h=1
+# l=2
+# L=4
+# args =  [h, H, l, L]
 
  
 
@@ -37,22 +37,22 @@ args =  [h, H, l, L]
 
 
 Example = examples.TriSlider
+# h_in=1
+# h=4
+# h_out = h_in
+# l_in = 1
+# l_out = 1
+# l_a = 1
+# l_b = 1
+
+
 h_in=1
-h=7/4
+h=1/2
 h_out = h_in
 l_in = 1
 l_out = 1
 l_a = 1.25
 l_b = 0.75
-
-
-# h_in=1
-# h=2/4
-# h_out = h_in
-# l_in = 1
-# l_out = 1
-# l_a = 1.25
-# l_b = 0.75
 
 args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
@@ -117,22 +117,22 @@ U = 0
 # BC = bc.Fixed(U,dP)
 
 ## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-Q =1
+Q = 1
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 100
+N = 300
 
 
 solver = control.Reynolds_Solver(Example, BC, args)
 # solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # 
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)

@@ -64,7 +64,6 @@ class Velocity:
         sigmas, sxs, s2xs = adj_p.make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
         
         for i in range(height.Nx):
-            
 
             h = height.hs[i]
             hx = height.hxs[i]

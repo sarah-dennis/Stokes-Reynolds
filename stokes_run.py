@@ -14,12 +14,12 @@ U=0
 Q=1
 Re=0
 
-H=2
-h=1/100
-L=4
+# H=2
+h=1
+# L=4
 l=1
 
-delta = 32 #slope: -delta*(H-h)/4
+# delta = 32 #slope: -delta*(H-h)/4
 
 
 # args = [h, H, l, L]
@@ -38,7 +38,7 @@ delta = 32 #slope: -delta*(H-h)/4
 # example = examples.TriCavity
 
 # args =  [h, h*2, h, l, 1.25*l, 0.75*l, l]
-args =  [h, h*2, h, l, 1.25*l, 0.75*l, l]
+args =  [h, h*4, h, l, l*1.25, l*0.75, l]
 example = examples.TriSlider
 
 

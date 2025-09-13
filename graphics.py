@@ -186,7 +186,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.5*np.min(fs),20*np.max(fs))
+    ax.set_ylim(0.5*np.min(fs),5*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -243,8 +243,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
     
     X, Y = np.meshgrid(xs, ys)
     
-    stream_density=[1,1]
-    # stream_density=[xs.shape[0]/ys.shape[0],1]
+    # stream_density=[1,1]
+    stream_density=[xs.shape[0]/ys.shape[0],1]
     
     if vscale is not None:
         vx/= vscale

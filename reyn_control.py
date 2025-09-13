@@ -39,7 +39,7 @@ class Reynolds_Solver:
         # colorbar min max
         self.vel_max = 5
         self.p_min=0
-        self.p_max = 40
+        self.p_max = 30
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
@@ -86,7 +86,7 @@ class Reynolds_Solver:
 
         adj_velocity = rv.VelAdj_ReynVelocity(height,self.BC, adj_pressure)
                 
-        solver_title = "Velocity Adjusted ELT"
+        solver_title = "VA-ELT"
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
             self.v_plot(self.BC, height, adj_velocity, adj_pressure, solver_title, scaled, zoom, inc, uv)
@@ -107,7 +107,7 @@ class Reynolds_Solver:
                
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
         
-        solver_title = "Takeuchi & Gu ELT"
+        solver_title = "T.G.-ELT"
         
         if plot:
             self.p_plot(height, adj_pressure , adj_velocity.Q, solver_title, scaled, zoom)
@@ -174,17 +174,17 @@ class Reynolds_Solver:
             p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
-        graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
+        # graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
         
-        p_hs=np.zeros(height.Nx)
-        for i in range(height.Nx):
-            h = height.hs[i]
-            for j in range(height.Ny):
-                y = height.ys[j]
-                if y + height.dy >= h and y <= h:
-                    p_hs[i]=pressure.ps_2D[j-1,i]
-                    #continue
-        graphics.plot_2D(p_hs, height.xs, 'p(x,h)', ['x','p(x)'])
+        # p_hs=np.zeros(height.Nx)
+        # for i in range(height.Nx):
+        #     h = height.hs[i]
+        #     for j in range(height.Ny):
+        #         y = height.ys[j]
+        #         if y + height.dy >= h and y <= h:
+        #             p_hs[i]=pressure.ps_2D[j-1,i]
+        #             #continue
+        # graphics.plot_2D(p_hs, height.xs, 'p(x,h)', ['x','p(x)'])
                 
         if zoom:
             if scaled:
