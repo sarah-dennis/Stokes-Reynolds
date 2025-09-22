@@ -19,10 +19,10 @@ from stokes_solver import run_spLU
 # graphics args
 
 #-> zoom plot
-lenx = 0.55
-leny = 0.55
-x_start = 2
-y_start = 1.5
+lenx = 4
+leny = 2
+x_start = -2
+y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
@@ -49,8 +49,8 @@ class Stokes_Solver:
         # plotting thresholds
 
         self.vel_max = 5
-        self.p_min=-0
-        self.p_max=40
+        self.p_min=80
+        self.p_max=110
 
         
 #------------------------------------------------------------------------------

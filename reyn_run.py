@@ -13,7 +13,7 @@ import reyn_examples as examples
 plots_on = True
 uv_on =  not True
 inc_on=  not True
-zoom_on = False 
+zoom_on = True 
 write_on = False
 scaled_on=False#True
 #------------------------------------------------------------------------------
@@ -37,22 +37,22 @@ scaled_on=False#True
 
 
 Example = examples.TriSlider
+h_in=1
+h=3/4
+h_out = h_in
+l_in = 7
+l_out = 7
+l_a = 1.25
+l_b = 0.75
+
+
 # h_in=1
-# h=4
+# h=2
 # h_out = h_in
 # l_in = 1
 # l_out = 1
-# l_a = 1
-# l_b = 1
-
-
-h_in=1
-h=1/2
-h_out = h_in
-l_in = 1
-l_out = 1
-l_a = 1.25
-l_b = 0.75
+# l_a = 1.25
+# l_b = 0.75
 
 args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
@@ -62,7 +62,8 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 # H=2 # apex height
 # l_a = 1.25
 # l_b = 0.75
-# args = [H,l_a, l_b]
+
+# args = [H, l_a, l_b]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -100,7 +101,7 @@ args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 # delta = 8 # max slope: -delta*(H-h)/4
 # H = 2       # outlet height
 # h = 1       # inlet height
-# L = 4       # total length
+# L = 16       # total length
 
 # args = [ H, h, L, delta]
 
@@ -124,16 +125,16 @@ BC = bc.Mixed(U, Q)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 300
+N = 80
 
 
 solver = control.Reynolds_Solver(Example, BC, args)
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-# 
+# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+
 #------------------------------------------------------------------------------
 # solver.load_plot(N, zoom=zoom_on)
 

@@ -186,7 +186,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.5*np.min(fs),5*np.max(fs))
+    ax.set_ylim(0.5*np.min(fs),25*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])

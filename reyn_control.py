@@ -12,12 +12,12 @@ import reyn_pressure as rp
 import reyn_perturbed as rpert
 import reyn_boundary as bc
 
-i_test_scale=2.249/4
+i_test_scale=2
 
-lenx = 1/2
-leny = 3/2
-x_start = 2
-y_start = 1/2
+lenx = 4
+leny = 2
+x_start = -2
+y_start =0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
@@ -38,8 +38,8 @@ class Reynolds_Solver:
         
         # colorbar min max
         self.vel_max = 5
-        self.p_min=0
-        self.p_max = 30
+        self.p_min=60
+        self.p_max = 110
         self.Re = 0   #for plotting only
 
     def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):

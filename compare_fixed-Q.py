@@ -67,36 +67,36 @@ N = 160 # grid size |1|= N
 #------------------------------------------------------------------------------
 #TODO: select example
 #------------------------------------------------------------------------------
-# Reyn_Example = reyn_examples.Logistic
-# Stokes_Example= stokes_examples.Logistic
-# h_out = 2   # outlet height
-# h_in = 1   # inlet height
-# l = 4   #  length
+Reyn_Example = reyn_examples.Logistic
+Stokes_Example= stokes_examples.Logistic
+h_out = 2   # outlet height
+h_in = 1   # inlet height
+l = 4   #  length
 
-# tests = [2, 3, 4, 6, 8, 16, 32]
-# test_args = [[h_out , h_in, l, lam] for lam in tests]
-# exstr = 'Logistic Step'
-# label = '$\lambda$'
+tests = [2, 3, 4, 6, 8, 16, 32]
+test_args = [[h_out , h_in, l, lam] for lam in tests]
+exstr = 'Logistic Step'
+label = '$\lambda$'
 #------------------------------------------------------------------------------
-Reyn_Example = reyn_examples.TriSlider
-Stokes_Example = stokes_examples.TriSlider
+# Reyn_Example = reyn_examples.TriSlider
+# Stokes_Example = stokes_examples.TriSlider
 
-h_in=1  # inlet height
-h0=1/4   # apex height 
-h_out = 1  #oulet height
-l_in = 1  # inlet length
-l_out = 1  #outlet length
-l_a = 1.25  # base length A  
-l_b = 0.75  # base length B 
+# h_in=1  # inlet height
+# h0=1/4   # apex height 
+# h_out = 1  #oulet height
+# l_in = 1  # inlet length
+# l_out = 1  #outlet length
+# l_a = 1.25  # base length A  
+# l_b = 0.75  # base length B 
 
-#test h0
+# #test h0
 
-tests = [1/16,1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2, 4]
-test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
+# tests = [1/16,1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
+# test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
 
-exstr = 'Triangular Slider'
-label = '$H$'
-#------------------------------------------------------------------------------
+# exstr = 'Triangular Slider'
+# label = '$H$'
+# #------------------------------------------------------------------------------
 # Reyn_Example = reyn_examples.BFS
 # Stokes_Example = stokes_examples.BFS
 
@@ -200,7 +200,7 @@ graphics.plot_log_multi(l2_V_errs[:-1], tests, f'Velocity $L_2$ rel. %-error, {e
 
 
 # graphics.plot_log_multi(l1_P_errs, tests, f'$L_1$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}', fun_labels, [label, '$L_1$ rel. %-error'],loc='left')
-graphics.plot_log_multi(l2_P_errs, tests, f'Pressure $L_2$ rel. %-error, {exstr}',  fun_labels, [label, 'Presure $L_2$ rel. %-error '],loc='left')
+graphics.plot_log_multi(l2_P_errs[:-1], tests, f'Pressure $L_2$ rel. %-error, {exstr}',  fun_labels, [label, 'Presure $L_2$ rel. %-error '],loc='left')
 # graphics.plot_log_multi(linf_P_errs, tests, f'$L_\infty$ rel. %-error Pressure, {exstr} $Q=${Q:.1f}',  fun_labels,  [label, '$L_\infty$ rel. %-error'],loc='left')
 # graphics.plot_log_multi(dP_errs, tests, f'$\Delta P$ rel. %-error, {exstr}',  fun_labels,  [label, '$\Delta P$ rel. %-error'],loc='left')
 

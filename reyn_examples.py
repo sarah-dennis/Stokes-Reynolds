@@ -83,11 +83,11 @@ class BFS_noEddy(PWL_Height):
 class TriSlider(PWL_Height):
     def __init__(self, args, N):
         h_in, h, h_out, l_in, l_a, l_b, l_out=args
-        x0 = 0
-        xf = l_in+l_a+l_b+l_out
+        x0 = -(l_in + l_a)
+        xf = l_b+l_out
         N_regions = 4
 
-        x_peaks = np.asarray([x0, l_in, l_in+l_a, l_in+l_a+l_b, xf], float)
+        x_peaks = np.asarray([x0, -l_a, 0, l_b, xf], float)
 
         h_peaks = np.asarray(([[0, h_in], [h_in, h_in], [h, h], [h_out, h_out], [h_out, 0]]), float)
         namestr = ''#f'TriSlider_h{int(h)}L{int(xf)}'
@@ -168,9 +168,13 @@ class LambdaBump(BumpHeight):
 class Logistic(LogisticHeight):
     def __init__(self, args, N):
         H, h, L, delta = args
-        x0 = 0
-        xf = L
-        center = L/2
+        #H = h_in
+        #h = h_out
+        #L = total length
+        #delta = dh/dx * 4
+        x0 = -L//2
+        xf = L//2
+        center = 0
         namestr = '' #f'Logistic{delta:.2f}H{H:.2f}'
         titlestr =''# f'Logistic Step'#' $\lambda={delta}$, $dh/dx={-delta/4}$'
         super().__init__(x0, xf, N, H, h, center, delta, namestr)

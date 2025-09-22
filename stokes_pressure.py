@@ -11,10 +11,9 @@ def resistance(ex, p):
     p_2D = p.reshape((ex.Ny,ex.Nx))
     
 
-    j_mid_in = ex.Ny-1 - (ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
-    j_mid_out = ex.Ny-1 - (ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
-    
-    
+    j_mid_in = (ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
+    j_mid_out = (ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
+
     dp= p_2D[int(j_mid_out),-1] - p_2D[int(j_mid_in),0]
     if ex.flux!=0:
         r= dp/ex.flux
