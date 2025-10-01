@@ -53,7 +53,9 @@ IV. Choose the solver method(s) (uncomment an existing method, see reyn_control.
 	solver.fd_pert_solve(N, order=4, plot=plots_on)      # finite difference solution to perturbed Reynolds equation, (choose order = 0, 2, or 4)
 
 OTHER IMPORTANT FILES FOR REYNOLDS SOLVER:
+
 -- reyn_control.py : solver calls and plotting functions, main functionality for reyn_run.py
+
 -- reyn_examples.py : all example geometries, see how args are defined for each example
 
 #---------------------------------------------------------------------------------------------------------------------
@@ -106,7 +108,7 @@ III. c) run a new solution
 
 OTHER IMPORTANT FILES FOR STOKES SOLVER:
 
-OTHER IMPORTANT FILES FOR REYNOLDS SOLVER:
 -- stokes_control.py : solver calls and plotting functions, main functionality for stokes_run.py
+
 -- stokes_examples.py : all example geometries, see how args are defined for each example
                 
