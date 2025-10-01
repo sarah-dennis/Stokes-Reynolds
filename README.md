@@ -6,7 +6,7 @@ In collaboration with Thomas G. Fai (tfai@brandeis.edu)
 
 COMPARISON OF EXTENDED LUBRICATION THEORIES FOR STOKES FLOW
 
-last updated Oct 2026
+last updated Oct 2025
 
 #---------------------------------------------------------------------------------------------------------------------
 
