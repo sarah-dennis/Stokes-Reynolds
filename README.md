@@ -16,7 +16,7 @@ Solves for the pressure p and velocity (u,v) for incompressible fluid at zero Re
 
 -- reyn_run.py: Run this file for the Reynolds solver.
 
-I. Sset Example and args (see reyn_examples.py for details)
+I. Set Example and args (see reyn_examples.py for details)
 
 	Example = reyn_examples.BFS
 	H = 2 #inlet height
@@ -35,9 +35,9 @@ II. Set the grid scale N and the Fixed(U,dP) or Mixed(U,Q) boundary condition
 	Q = 1    # flux {dp/dx (x0,y) ~ Q, p(xL,y)=0}
 	BC = bc.Mixed(U, Q)  
 
-	# fixed Neumann pressure BC 
-	dP = 10  # pressure drop {p(x0,y)=dP, p(xL,y)=0}
-	BC = bc.Fixed(U,dP)
+	## fixed Neumann pressure BC 
+	#dP = 10  # pressure drop {p(x0,y)=dP, p(xL,y)=0}
+	#BC = bc.Fixed(U,dP)
 	
                 
 III. Initialize the solver
