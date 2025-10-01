@@ -11,7 +11,7 @@ last updated Oct 2026
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
-Methods for Reynolds equation in lubrication theory and models in extended or perturbed lubrication theory
+Methods for Reynolds equation in lubrication theory and models in extended or perturbed lubrication theory.
 Solves for the pressure p(x) and velocity (u,v) for incompressible fluid at zero Reynolds number
 
 -- reyn_run.py: Run this file for the Reynolds solver.
@@ -43,7 +43,7 @@ II. Set the grid scale N and the Fixed(U,dP) or Mixed(U,Q) boundary condition
                 
 III. Initialize the solver
                    
-	solver = control.Reynolds_Solver(Example)
+	solver = control.Reynolds_Solver(Example, BC, args)
                    
 IV. Choose the solver method(s) (uncomment an existing method, see reyn_control.py for details)
                 
