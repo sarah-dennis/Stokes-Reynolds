@@ -16,7 +16,7 @@ Solves for the pressure p and velocity (u,v) for incompressible fluid at zero Re
 
 -- reyn_run.py: Run this file for the Reynolds solver.
 
-I. Choose domain geometry (set Example and args, see reyn_examples.py for details)
+I. Sset Example and args (see reyn_examples.py for details)
 
 	Example = reyn_examples.BFS
 	H = 2 #inlet height
@@ -67,7 +67,7 @@ Part 2:
 
 -- stokes_run.py: Run this file for the Stokes solver. 
 
-I. Choose domain geometry (set Example and args, see stokes_examples.py for details)
+I. Set Example and args (see stokes_examples.py for details)
                 
 	Example = stokes_examples.Logistic
 	H = 2        # inlet height
