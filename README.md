@@ -2,129 +2,104 @@ Sarah Dennis
 (sarahdennis@brandeis.edu, sarahdennis98@gmail.com)
 
 PhD research at Brandeis University, Dept of Mathematics.
-in c4ollaboration with Thomas G. Fai (tfai@brandeis.edu)
+in collaboration with Thomas G. Fai (tfai@brandeis.edu)
 
-Comparison of Comparison of lubrication theory and Stokes flow models in step bearings with flow separation
+COMPARISON OF EXTENDED LUBRICATION THEORIES FOR STOKES FLOW
 
-WORK IN PROGRESS (updated Feb 2025) 
+last updated Oct 2026
+
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
-Methods for Reynolds equation in lubrication theory 
-Solves for the pressure p(x) and velocity field (u,v) for incompressible fluid at zero Reynolds number
-    in a 2D domain of length L:=xf-x0 and height H:=h(x)-y0 > 0.
-    No-slip condition at fluid-surface interfaces. Relative surface velocity U:=u(x,y0)-u(x,h), u(x,h):=0, V:=0.
-    Prescribed pressure drop dP:= p(xf,y)-p(x0,y), p(xf,0):=0
+Methods for Reynolds equation in lubrication theory and models in extended or perturbed lubrication theory
+Solves for the pressure p(x) and velocity (u,v) for incompressible fluid at zero Reynolds number
 
 -- reyn_run.py: Run this file for the Reynolds solver.
 
-                I. Set values for U, dP, and the grid scale N
+
+                I. Choose domain geometry (set Example and args, see reyn_examples.py for details)
+
+                   Example = reyn_examples.BFS
+                   H = 2 #inlet height
+		   h = 1 #outlet height
+		   l = 2 #inlet length
+                   L = 4 #total length
+                   args = [h,H,l,L]
+
+                II. Set the grid scale N and the Fixed(U,dP) or Mixed(U,Q) boundary condition
                 
-                    N = 100
-                    U = 1
-                    dP = 0
-                
-                II. Choose domain geometry from reyn_examples. (Or uncomment an existing example)
-            
-                    # backward facing step with H/h=2 and L/l = 4
-                    Example = examples.BFS
-                    args = [H=2,l=4]     
+                   N = 100  # number of grid points in unit length
+
+                   U = 1    # u(x,0) = U, u(x,h)=v(x,0)=v(x,h)=0
+
+		   # mixed Neumann-Dirichlet pressure BC 
+		   Q = 1    # flux {dp/dx (x0,y) ~ Q, p(xL,y)=0}
+		   BC = bc.Mixed(U, Q)  
+
+		   # fixed Neumann pressure BC 
+		   dP = 10  # pressure drop {p(x0,y)=dP, p(xL,y)=0}
+		   BC = bc.Fixed(U,dP)
+	
                 
                 III. Initialize the solver
                    
-                    solver = control.Reynolds_Solver(Example)
+                   solver = control.Reynolds_Solver(Example)
                    
-                IV. Choose the solver method from reyn_control (Or uncomment an existing method)
+                IV. Choose the solver method(s) (uncomment an existing method, see reyn_control.py for details)
                 
-                    solver.fd_solve(N, plot=plots_on)           # finite difference solution
-                    solver.pwl_solve(N, plot=plots_on)          # analytic solution for piecewise-linear h(x)
-                    solver.fd_adj_solve(N, plot=plots_on)       # finite difference solution to *adjusted Reynolds equation*
-                    
--- reyn_examples.py: wrapper examples of reyn_heights, variations on 2D slider bearings.
+                   solver.fd_solve(N, plot=plots_on)           		# finite difference solution
+                   solver.pwl_solve(N, plot=plots_on)          		# analytic solution for piecewise-linear h(x)
+                   solver.fd_adj_TG_solve(N, plot=plots_on)    		# finite difference solution to Takeuchi-Gu (2018) adjusted Reynolds equation
+                   solver.fd_adj_solve(N, plot=plots_on)       		# finite difference solution to velocity-adjusted Reynolds equation
+                   solver.fd_pert_solve(N, order=4, plot=plots_on)      # finite difference solution to perturbed Reynolds equation, (choose order = 0, 2, or 4)
 
--- reyn_control: solution helpers linking to reyn_pressures_finDiff and reyn_pressures_pwlinear
-
--- reyn_heights: piecewise linear, sinusoidal, and random height constructors, wrapper for domain
-
--- reyn_pressure: Pressure super class for various solution methods. Adjusted Reynolds pressure computed.
-
--- reyn_pressures_finDiff: second order finite difference method to Reynolds equation for pressure
-
--- reyn_pressures_pwlinear: analytic solution to Reynolds equation with piecewise linear height
-
--- reyn_velocity: double integration for Reynolds pressure-velocity equation
-
--- reyn_convergence: grid convergence tests
 
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 2:
 Methods for bi-harmonic Navier-Stokes equation.
-Solves for the pressure p(x,y) and velocity field (u,v) for incompressible fluid at low Reynolsd number
-    in a 2D domain of length L:=xf-x0 and height H:=h(x)-y0 > 0.
-    No-slip condition at fluid-surface interfaces. Relative surface velocity U:=u(x,y0)-u(x,h), u(x,h):=0, V:=0.
-    Prescribed flux Q:= sum_y u(x,y) dx
-    Fully developed laminar flow profile (dP/dx ~ Q) at x0 and xf
+Solves for the pressure p(x,y) and velocity (u,v) for incompressible fluid at low Reynolds number
 
 
 -- stokes_run.py: Run this file for the Stokes solver. 
 
-                I. Choose domain geometry from stokes_examples. (Or uncomment an existing example)
+                I. Choose domain geometry (set Example and args, see stokes_examples.py for details)
                 
-                    # backward facing step with H/h=2 and L/l = 4,  Re=0, Q=2, U=0
-                    example = examples.BFS_H2L4_Re0_Q2_U0 
-                    
+                   Example = stokes_examples.Logistic
+		   H = 2        # inlet height
+		   h = 1        # outlet height
+		   L = 16       # total length
+		   delta = 32   # slope: -delta*(H-h)/4
+		   args = [H, h, L, delta]
+
+                II. set boundary conditions & Reynolds number  (only Mixed(U,Q) boundary condition for biharmonic solver)
+
+		   U = 0      # u(x,0) = U, u(x,h)=v(x,0)=v(x,h)=0
+		   Q = 1      # flux {dp/dx (x0,y) ~ Q, p(xL,y)=0}
+		   Re = 0     # Re ~ U*Ly
+
                 II. Initialize the solver from stokes_control
                 
-                    solver = control.Stokes_Solver(example)    
+                    solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)    
                     
                 III. a) load or run an existing solution saved in ./examples    
-                      
-                    # ./examples/BFS_H2L4_Re0_Q2_U0/BFS_H2L4_Re0_Q2_U0_N160.csv
-                    
+                                       
                     N=160
-                    solver.load_run(N) # runs iterative solution until convergence 
-                    solver.load_plot(N)
+                    solver.load_run(N)    # runs iterative solution until convergence or max_iters
+                    solver.load_plot(N)	  
                     
                 III. b) scale up an existing solution to a new grid size
-                
-                    # ./examples/BFS_H2L4_Re0_Q2_U0/BFS_H2L4_Re0_Q2_U0_N80.csv
-                   
-                    N_old = 80
-                    N_new = 100 #if this grid size already exists, load_scale will overwrite it
-                    
+                                   
+                    N_old = 80	  
+                    N_new = 100   # if this grid size already exists, load_scale will overwrite it
+  
                     solver.load_scale(N_old, N_new)
                     solver.load_run(N_new)
 
                     
-                III. c) run a new solution (may take a while)
+                III. c) run a new solution
                 
-                    N = 100 #if this grid size already exists, new_run will overwrite it
+                    N = 100       # if this grid size already exists, new_run will overwrite it
                     solver.new_run(N)
 
                 
-
--- stokes_examples.py: wrapper examples of stokes_heights, variations on 2D sliders bearings. 
-
--- stokes_control: helpers linking to stokes_solver: iteration, file saving, plotting
-
--- stokes_heights: boundary condition handling, wrapper for domain
-
--- stokes_solver: iterative finite difference method for stream-velocity biharmonic equation
-
--- stokes_pressure: 2D finite difference and contour integral for velocity-pressure equation
-
--- stokes_convergence: grid convergence tests
-
--- ./examples: saved stream function solutions to specific examples, load_run and load_plot methods in stokes_control 
-
-#---------------------------------------------------------------------------------------------------------------------
-
-Part 3: 
-Additional/Shared methods
-
--- domain.py: inhereted by both reyn_heights and stokes_heights
-
--- graphics.py: All basic graphing methods. Referenced by *_control and *_convergence
-
--- read_write.py: For stokes_control and stokes_solver iterative method, file names assigned in stokes_examples

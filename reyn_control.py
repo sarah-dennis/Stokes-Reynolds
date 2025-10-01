@@ -16,7 +16,7 @@ i_test_scale=2
 
 lenx = 4
 leny = 2
-x_start = -2
+x_start = 6
 y_start =0
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -190,12 +190,12 @@ class Reynolds_Solver:
             if scaled:
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
-                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False,n_contours=100)
             
             else:
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
-                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
+                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False,n_contours=50)
             
       
     

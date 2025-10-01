@@ -21,7 +21,7 @@ from stokes_solver import run_spLU
 #-> zoom plot
 lenx = 4
 leny = 2
-x_start = -2
+x_start = 6
 y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -49,8 +49,8 @@ class Stokes_Solver:
         # plotting thresholds
 
         self.vel_max = 5
-        self.p_min=80
-        self.p_max=110
+        self.p_min=60
+        self.p_max=130
 
         
 #------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ class Stokes_Solver:
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx*ex.Ny)
         u, v, psi = run_spLU(ex, u, v, psi, self.max_iters, past_iters, self.error_mod, self.write_mod, self.err_tol)
         rw.write_stokes(ex, u, v, psi, self.max_iters+past_iters)
-
+   
     def load_scale(self, N_load, N_scale):
         ex_load = self.Example(self.args, self.U, self.Q, self.Re, N_load)
         ex_scale = self.Example(self.args, self.U, self.Q, self.Re, N_scale)
@@ -215,11 +215,11 @@ class Stokes_Solver:
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
         p_ma = np.flip(p_ma, axis=0)
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=40)#, y_lim = np.min(ex.y_peaks))
+        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=200)#, y_lim = np.min(ex.y_peaks))
     
         if zoom:
             p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)  
-            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=20)#, y_lim = min(ex.y_peaks))
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=100)#, y_lim = min(ex.y_peaks))
     
     #  Velocity plot: 
     

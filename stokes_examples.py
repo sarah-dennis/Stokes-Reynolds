@@ -10,14 +10,15 @@ from stokes_heights import PWLinear
 
 class BFS(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
-        h, H, l, L = args
+        h_in, h_out, l_in, l_out = args
         x0 = 0
-        xf = L
+        xf = l_in+l_out
+  
+        x_peaks = [0, l_in, l_in+l_out]
         y0 = 0
-        yf = H
-        x_peaks = [0, l, L]
-        y_peaks=[[yf,yf-h],[yf-h,0],[0,yf]]
-        namestr= f'BFS_H{H}L{L}_U{U}_Q{Q}_Re{Re}'
+        yf = max(h_in,h_out) 
+        y_peaks=[[yf,yf-h_in],[yf-h_in,h_out],[h_out,yf]]
+        namestr= f'BFS_hin{h_in}hout{h_out}lin{l_in}lout{l_out}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
         
 class BFS_pwl(PWLinear):
@@ -41,10 +42,12 @@ class Logistic(PWLinear):
         self.h = h
         self.H = H
         self.L = L
-        self.center=0
-        self.x0 = -L//2
-        self.xf = L//2
-        
+        # self.center=0
+        # self.x0 = -L//2
+        # self.xf = L//2
+        self.x0 = 0
+        self.xf = L
+        self.center = L//2
         self.h_in = self.h + (self.H-self.h) / ( 1 + np.exp(-self.delta*(self.center-self.x0)))
         
         self.h_out = self.h + (self.H-self.h) / ( 1 + np.exp(-self.delta*(self.center-self.xf)))
@@ -111,15 +114,17 @@ class TriSlider(PWLinear):
 
         Hin, H,  Hout, Lin, La, Lb, Lout = args
 
-        x0 = -(Lin + La)
-        xf = Lb+Lout
+        # x0 = -(Lin + La)
+        # xf = Lb+Lout
+        # x_peaks = [x0, -La, 0, Lb, xf]
+        x0=0
+        xf = Lin+La+Lb+Lout
+        x_peaks = [x0,Lin,Lin+La,Lin+La+Lb,xf]
+        
         y0 = 0
         yf = max(Hin, Hout, H)
+    
         
-        # x_peaks = [x0, l-delta, l, l+delta, xf]
-        # y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-h-(H-h)/2,yf-h-(H-h)/2],[0,0],[0,yf]]
-        
-        x_peaks = [x0, -La, 0, Lb, xf]
         y_peaks=[[yf,yf-Hin],[yf-Hin,yf-Hin],[yf-H,yf-H],[yf-Hout,yf-Hout], [yf-Hout, yf]]
         namestr = f"TriCavity_Hin{Hin}H{H}Hout{Hout}La{La}Lb{Lb}Lin{Lin}Lout{Lout}_Re{Re}_Q{Q}_U{U}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)

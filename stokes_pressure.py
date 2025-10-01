@@ -11,8 +11,8 @@ def resistance(ex, p):
     p_2D = p.reshape((ex.Ny,ex.Nx))
     
 
-    j_mid_in = (ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
-    j_mid_out = (ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
+    j_mid_in = ex.y_peaks[0][0] -(ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
+    j_mid_out = ex.y_peaks[-1][0]-(ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
 
     dp= p_2D[int(j_mid_out),-1] - p_2D[int(j_mid_in),0]
     if ex.flux!=0:
@@ -55,42 +55,43 @@ def pressure(ex, u, v):
     # contour each xi from flat boundary to y=h
     for i in range(n):
         j=m-3
-        while j >= 0:
+        while j >=0:
             k = j*n + i
-            if ex.space[j,i]==1:
+            if ex.space[j,i]==1 or ex.space[j,i]==0:
                 k_N = (j+1)*n + i
                 p[k] = p[k_N] - py[k_N]*dy
+          
             j-=1    
     
-    # contour the boundary
-    for i in range(n):
-        j=m-3
-        while j >= 0:
-            k = j*n + i
-            if ex.space[j,i]==0:
-                if ex.space[j+1,i]==1:
-                    k_N = (j+1)*n + i
-                    p[k] = p[k_N] - py[k_N]*dy
+    # # contour the boundary
+    # for i in range(n):
+    #     j=m-3
+    #     while j >= 0:
+    #         k = j*n + i
+    #         if ex.space[j,i]==0:
+    #             if ex.space[j+1,i]==1:
+                   
+    #                 k_N = (j+1)*n + i
+    #                 p[k] = p[k_N] - py[k_N]*dy
                     
-                elif i < n-1 and ex.space[j,i+1] == 1:
-                    k_E = j*n +i+1
-                    p[k] = p[k_E] - px[k_E]*dx
+    #             if i < n-1 and ex.space[j,i+1] == 1:
+    #                 k_E = j*n +i+1
+    #                 p[k] = p[k_E] - px[k_E]*dx
                     
-                elif i > 0 and ex.space[j,i-1]==1:
-                    k_W = j*n+i-1
-                    p[k] = p[k_W] + px[k_W]*dx
+    #             elif i > 0 and ex.space[j,i-1]==1:
+    #                 k_W = j*n+i-1
+    #                 p[k] = p[k_W] + px[k_W]*dx
                     
-                elif i < n-1 and ex.space[j+1,i+1]==1:
-                    k_NE = (j+1)*n+i+1
-                    p[k] = p[k_NE] - px[k_NE]*dx -py[k_NE]*dy
+    #             elif i < n-1 and ex.space[j+1,i+1]==1:
+    #                 k_NE = (j+1)*n+i+1
+    #                 p[k] = p[k_NE] - px[k_NE]*dx -py[k_NE]*dy
                     
-                elif i > 0 and ex.space[j+1,i-1]==1:
-                    k_NW = (j+1)*n+i-1
-                    p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
-                # else:        
-                    # assert False, "Grid misalignment - check x_peaks for dx=1/N"
-                
-            j-=1
+    #             elif i > 0 and ex.space[j+1,i-1]==1:
+    #                 k_NW = (j+1)*n+i-1
+    #                 p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
+    #             # else:        
+    #                 # assert False, "Grid misalignment - check x_peaks for dx=1/N"
+    #         j-=1
     
     return p
             

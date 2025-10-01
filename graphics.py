@@ -48,7 +48,7 @@ colour_bar_pad = 0.05
 #------------------------------------------------------------------------------
 dpi=200
 
-n_contours = 50
+n_contours = 100
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5
@@ -186,12 +186,13 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     # ax.set_xscale('log')
     ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(0.5*np.min(fs),25*np.max(fs))
+    ax.set_ylim(min(1,0.5*np.min(fs)),2*np.max(fs))
+    # ax.set_ylim(1,2*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
     # ax.minorticks_on()
-    # ax.yaxis.set_minor_locator(MultipleLocator(10))
+    # ax.yaxis.set_minor_locator(MultipleLocator(2.5))
     
     pp.title(title)
     
@@ -200,7 +201,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     elif loc=='left': #upper-left
         fig.legend(bbox_to_anchor=(0.3, 0.89))
     elif loc=='lower': #lower-right
-        fig.legend(bbox_to_anchor=(0.35, 0.35))
+        fig.legend(bbox_to_anchor=(0.3, 0.5))
     else: #lower left
         fig.legend(bbox_to_anchor=(0.9, 0.275))  
         
@@ -243,8 +244,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
     
     X, Y = np.meshgrid(xs, ys)
     
-    # stream_density=[1,1]
-    stream_density=[xs.shape[0]/ys.shape[0],1]
+    stream_density=[2,1]
+    # stream_density=[xs.shape[0]/(2*ys.shape[0]),1]
     
     if vscale is not None:
         vx/= vscale

@@ -27,7 +27,8 @@ class PWLinear(Space):
         self.H_in = yf - self.hf_in
         self.H_out = yf-y_peaks[-1][0]
         
-        self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  # for plot title
+        # self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  # for plot title
+        self.spacestr = "$Q=%.2f$, $U=%.1f$"%(Q,U)  # for plot title
         if self.H_in == 0: # closed cavity --> Q=0, dp=0
             self.dp_in = 0
         else: # gap entry --> dp ~ Q
