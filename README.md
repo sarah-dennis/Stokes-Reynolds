@@ -11,11 +11,10 @@ last updated Oct 2026
 #---------------------------------------------------------------------------------------------------------------------
 
 Part 1:
-Methods for Reynolds equation in lubrication theory and models in extended or perturbed lubrication theory.
-Solves for the pressure p(x) and velocity (u,v) for incompressible fluid at zero Reynolds number
+Methods for Reynolds equation in lubrication theory, and models in extended or perturbed lubrication theory.
+Solves for the pressure p and velocity (u,v) for incompressible fluid at zero Reynolds number
 
 -- reyn_run.py: Run this file for the Reynolds solver.
-
 
 I. Choose domain geometry (set Example and args, see reyn_examples.py for details)
 
@@ -53,6 +52,9 @@ IV. Choose the solver method(s) (uncomment an existing method, see reyn_control.
 	solver.fd_adj_solve(N, plot=plots_on)       		# finite difference solution to velocity-adjusted Reynolds equation
 	solver.fd_pert_solve(N, order=4, plot=plots_on)      # finite difference solution to perturbed Reynolds equation, (choose order = 0, 2, or 4)
 
+OTHER IMPORTANT FILES FOR REYNOLDS SOLVER:
+-- reyn_control.py : solver calls and plotting functions, main functionality for reyn_run.py
+-- reyn_examples.py : all example geometries, see how args are defined for each example
 
 #---------------------------------------------------------------------------------------------------------------------
 
@@ -102,4 +104,9 @@ III. c) run a new solution
 	N = 100       # if this grid size already exists, new_run will overwrite it
 	solver.new_run(N)
 
+OTHER IMPORTANT FILES FOR STOKES SOLVER:
+
+OTHER IMPORTANT FILES FOR REYNOLDS SOLVER:
+-- stokes_control.py : solver calls and plotting functions, main functionality for stokes_run.py
+-- stokes_examples.py : all example geometries, see how args are defined for each example
                 
