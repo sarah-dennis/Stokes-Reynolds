@@ -1,8 +1,8 @@
 Sarah Dennis 
 (sarahdennis@brandeis.edu, sarahdennis98@gmail.com)
-
 PhD research at Brandeis University, Dept of Mathematics.
-in collaboration with Thomas G. Fai (tfai@brandeis.edu)
+
+In collaboration with Thomas G. Fai (tfai@brandeis.edu)
 
 COMPARISON OF EXTENDED LUBRICATION THEORIES FOR STOKES FLOW
 
