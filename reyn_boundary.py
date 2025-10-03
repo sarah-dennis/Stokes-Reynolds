@@ -17,6 +17,6 @@ class Mixed(BoundaryCondition):
         
 class Fixed(BoundaryCondition):
     def __init__(self, U, dP):
-        self.p0 = -dP
+        self.p0 = dP
         self.dP = dP
         super().__init__(U)

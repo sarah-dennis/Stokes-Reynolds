@@ -13,7 +13,7 @@ import reyn_examples as examples
 plots_on = True
 uv_on =  not True # plot u(x,y) & v(x,y)
 inc_on=  not True # plot ux + vy =? 0
-zoom_on = True    # plot a zoomed-in window, set location in reyn_control.py
+zoom_on = not True    # plot a zoomed-in window, set location in reyn_control.py
 scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 
 #------------------------------------------------------------------------------
@@ -21,12 +21,12 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-# Example = examples.BFS
-# H=2
-# h=1
-# l=2
-# L=4
-# args =  [h, H, l, L]
+Example = examples.BFS
+H=2
+h=1
+l=2
+L=4
+args =  [h, H, l, L]
 
  
 
@@ -80,12 +80,12 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 # args= [ r, h0,l, drdx]
 
 
-Example = examples.Logistic
-delta = 8 # max slope: -delta*(H-h)/4
-H = 2       # outlet height
-h = 1       # inlet height
-L = 16       # total length
-args = [ H, h, L, delta]
+# Example = examples.Logistic
+# delta = 8 # max slope: -delta*(H-h)/4
+# H = 2       # outlet height
+# h = 1       # inlet height
+# L = 16       # total length
+# args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ args = [ H, h, L, delta]
 U = 0
 
 ## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
-# dP = -30.51
+# dP = 30.51
 # BC = bc.Fixed(U,dP)
 
 ## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
@@ -107,14 +107,13 @@ BC = bc.Mixed(U, Q)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160 #grid resolution N = |1|
-
+N = 160
 solver = control.Reynolds_Solver(Example, BC, args)
 
 
 solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 # solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
