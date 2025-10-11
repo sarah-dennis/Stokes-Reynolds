@@ -11,8 +11,9 @@ import numpy as np
 import reyn_pressure_finDiff as fd
 from numpy.linalg import solve as np_solve
 
-from reyn_heights import PWL_Height
+from reyn_heights import PWL_Height, PWC_Height
 import reyn_pressure_pwlGMRes as pwlGMRes
+import reyn_pressure_schurLU as pwcSchurLU
 from scipy.sparse.linalg import gmres
 
 import reyn_boundary as bc
@@ -70,7 +71,7 @@ class PwlGMRes_ReynPressure(Pressure):
             raise TypeError('Example is not piecewise linear')
         
         rhs = pwlGMRes.make_rhs(height, BC)
-        linOp = pwlGMRes.pwlLinOp(height)
+        linOp = pwlGMRes.pwlLinOp(height,BC)
         sol_coefs, exit_code = gmres(linOp, rhs, tol=1e-10)
          
         if exit_code != 0:
@@ -79,6 +80,15 @@ class PwlGMRes_ReynPressure(Pressure):
         ps_1D, Q = pwlGMRes.make_ps(height, BC, sol_coefs)
         super().__init__(height, BC, ps_1D)
     
+class SchurLU_ReynPressure(Pressure):
+    def __init__(self, height, BC):   
+        
+        if not isinstance(height, PWC_Height):
+            raise TypeError('Example is not piecewise constant')
+        
+        ps_1D = pwcSchurLU.schurLU_solve(height, BC)
+        super().__init__(height, BC, ps_1D)
+
 class VelAdj_ReynPressure(Pressure):
     def __init__(self, height, BC):
         
@@ -86,8 +96,6 @@ class VelAdj_ReynPressure(Pressure):
         ps_1D = reyn_pressure.ps_1D
         ps_2D, reyn_derivs, sigma_derivs = reyn_pressure_adjusted.make_adj_ps(height, BC, ps_1D, TG=False)
     
-        
-            
         self.reyn_pxs, self.reyn_p2xs, self.reyn_p3xs, self.reyn_p4xs = reyn_derivs
         self.sigmas,self.sigma_xs,self.sigma_2xs = sigma_derivs
 

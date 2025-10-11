@@ -22,10 +22,10 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 #------------------------------------------------------------------------------
 
 Example = examples.BFS
-H=2
-h=1
-l=2
-L=4
+H=1
+h=2
+l=1
+L=3
 args =  [h, H, l, L]
 
  
@@ -95,25 +95,25 @@ args =  [h, H, l, L]
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
 U = 0
 
-## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
-# dP = 30.51
+# ## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+# dP = 7.5
 # BC = bc.Fixed(U,dP)
 
-## mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-Q = 1
+# mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
+Q = 1/2
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160
+N = 20
 solver = control.Reynolds_Solver(Example, BC, args)
 
 
-solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-
-# solver.pwl_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.pwc_schur_LU_solve(N)
+solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)

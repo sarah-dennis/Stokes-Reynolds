@@ -46,11 +46,34 @@ class PWL_Height(Height):
             i_peaks[r+1] = i    
             widths[r] = xi - x_peaks[r]
             hs[i] = h_peaks[r,1] + slopes[r] * (xi - x_peaks[r])
-            
+
         return  hs, slopes, widths, i_peaks
     
+#------------------------------------------------------------------------------
+# PWC Height
+#------------------------------------------------------------------------------
+class PWC_Height(PWL_Height):
+    def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, filestr):
+        
+        #solver requires minimum 3 regions
+        while N_regions <3 :
+            x_peak_mid = x_peaks[-1] - x_peaks[-2]/2
+            x_peak_end = x_peaks[-1]
+            x_peaks[-1] = x_peak_mid
+            x_peaks = np.append(x_peaks, x_peak_end)
+            h_peaks = np.append(h_peaks, h_peaks[-1])
+            h_peaks = np.reshape(h_peaks, (N_regions+2,2))
+            N_regions +=1
+            
+            
+        self.h_steps = np.zeros(N_regions)
+        for i in range(N_regions):
+            self.h_steps[i] = h_peaks[i,1]
 
-    
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, filestr)
+        
+
+
 #------------------------------------------------------------------------------
 # Other Height Functions
 #------------------------------------------------------------------------------

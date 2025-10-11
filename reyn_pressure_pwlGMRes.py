@@ -8,7 +8,7 @@ Created on Tue Jul 30 15:17:44 2024
 import numpy as np
         
 from scipy.sparse.linalg import LinearOperator 
-    
+import reyn_boundary as bc
 
 def make_ps(height, BC, cs):
     slopes = height.slopes
@@ -46,13 +46,26 @@ def make_rhs(height, BC):
     
     rhs = np.zeros(N+1)
     c = 6*BC.U #*visc
+    if isinstance(BC, bc.Fixed):
+        if slopes[0] != 0:
+            rhs[0] = c / (hs[0,1] * slopes[0]) + BC.p0
+        else: 
+            rhs[0] = BC.p0 
+        
+                    
+        if slopes[N-1] != 0:
+            rhs[N] = c / (hs[N,0]*slopes[N-1]) + BC.pN
+        else:
+            rhs[N] = -c * hs[N,0]**-2 * widths[N-1] + BC.pN
+            
+    elif isinstance(BC, bc.Mixed):
+        rhs[0] = -12 * BC.Q
+        if slopes[N-1] != 0:
+            rhs[N] = c / (hs[N,0]*slopes[N-1]) + BC.pN
+        else:
+            rhs[N] = -c * hs[N,0]**-2 * widths[N-1] + BC.pN
     
-    if slopes[0] != 0:
-        rhs[0] = c / (hs[0,1] * slopes[0]) + BC.p0
-    else: 
-        rhs[0] = BC.p0 
-    
-    for i in range(1, N):
+    for i in range(1, N-1):
         
         if slopes[i] != 0 and slopes[i-1] != 0:
             rhs[i] = c *(1/(hs[i,1] * slopes[i]) - 1/(hs[i,0] * slopes[i-1]))
@@ -65,22 +78,17 @@ def make_rhs(height, BC):
 
         else: 
             rhs[i] = c * hs[i,0]**-2 * widths[i-1]
-            
-    if slopes[N-1] != 0:
-        rhs[N] = c / (hs[N,0]*slopes[N-1]) + BC.pN
-    else:
-        rhs[N] = -c * hs[N,0]**-2 * widths[N-1] + BC.pN
-        
+  
     return rhs
 
 class pwlLinOp(LinearOperator):
-    def __init__(self, height):
+    def __init__(self, height,BC):
 
         self.N = height.N_regions
         self.h_peaks = height.h_peaks
         self.widths = height.widths
         self.slopes = height.slopes
-        
+        self.BC = BC
         self.shape = (self.N+1,self.N+1)
         self.dtype = np.dtype('f8')
         self.mv = np.zeros(self.N+1)
@@ -93,10 +101,23 @@ class pwlLinOp(LinearOperator):
         mv = np.zeros(N+1)
         cq = v[N]
         
-        if slopes[0] != 0:
-            mv[0] = v[0] - cq/(2 * hs[0,1]**2 * slopes[0])
-        else:
-            mv[0] = v[0]
+        if isinstance(self.BC, bc.Fixed):
+            if slopes[0] != 0:
+                mv[0] = v[0] - cq/(2 * hs[0,1]**2 * slopes[0])
+            else:
+                mv[0] = v[0]
+                  
+            if slopes[N-1] != 0:
+                mv[N] = v[N-1] - cq/(2 * hs[N,0]**2 * slopes[N-1])
+            else:
+                mv[N] = v[N-1] + cq * hs[N,0]**-3 * widths[N-1]
+        
+        elif isinstance(self.BC, bc.Mixed):
+            mv[0] = cq
+            if slopes[N-1] != 0:
+                mv[N] = v[N-1] - cq/(2 * hs[N,0]**2 * slopes[N-1])
+            else:
+                mv[N] = v[N-1] + cq * hs[N,0]**-3 * widths[N-1]
  
         for i in range(1, N):
             if slopes[i] != 0 and slopes[i-1] != 0:
@@ -110,11 +131,6 @@ class pwlLinOp(LinearOperator):
                 
             else:
                 mv[i] = -v[i-1] + v[i] - cq * hs[i,0]**-3 * widths[i-1]
-                
-        if slopes[N-1] != 0:
-            mv[N] = v[N-1] - cq/(2 * hs[N,0]**2 * slopes[N-1])
-        else:
-            mv[N] = v[N-1] + cq * hs[N,0]**-3 * widths[N-1]
-
+           
         return mv
 

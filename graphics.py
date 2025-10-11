@@ -397,16 +397,25 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cma
 
 #------------------------------------------------------------------------------------
 def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
-    i_0 = int((x_start - ex.x0)/ex.dx)
-    i_f = int((x_stop - ex.x0)/ex.dx)
-    j_0 = int((y_start - ex.y0)/ex.dy)
-    j_f = int((y_stop - ex.y0)/ex.dy)
-    return grid[j_0:j_f,i_0:i_f]
+    i_start = int((x_start - ex.x0)/ex.dx)
+    i_stop = int((x_stop - ex.x0)/ex.dx)
+    j_start = int((y_start - ex.y0)/ex.dy)
+    j_stop = int((y_stop - ex.y0)/ex.dy)
+    i_max = int((ex.xf - ex.x0)/ex.dx)
+    j_max = int((ex.yf - ex.y0)/ex.dy)
+    if i_start < 0 or j_start < 0 or i_stop > i_max or j_stop > j_max or i_start > i_stop or j_start > j_stop:
+        raise Exception('graphics zoom window out of bounds')
+    return grid[j_start:j_stop,i_start:i_stop]
 
 def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
-    i_0 = int((x_start - ex.x0)/ex.dx)
-    i_f = int((x_stop - ex.x0)/ex.dx)
-    j_0 = int((y_start - ex.y0)/ex.dy)
-    j_f = int((y_stop - ex.y0)/ex.dy)
-    return grid_x[i_0:i_f], grid_y[j_0:j_f]
+    
+    i_start = int((x_start - ex.x0)/ex.dx)
+    i_stop = int((x_stop - ex.x0)/ex.dx)
+    j_start = int((y_start - ex.y0)/ex.dy)
+    j_stop = int((y_stop - ex.y0)/ex.dy)
+    i_max = int((ex.xf - ex.x0)/ex.dx)
+    j_max = int((ex.yf - ex.y0)/ex.dy)
+    if i_start < 0 or j_start < 0 or i_stop > i_max or j_stop > j_max or i_start > i_stop or j_start > j_stop:
+        raise Exception('graphics zoom window out of bounds')
+    return grid_x[i_start:i_stop], grid_y[j_start:j_stop]
         

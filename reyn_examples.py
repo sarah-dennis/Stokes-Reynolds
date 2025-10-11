@@ -7,7 +7,7 @@ Created on Wed Feb 22 10:01:42 2023
 
 import numpy as np
 
-from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight, LogisticHeight
+from reyn_heights import PWC_Height,  PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight, LogisticHeight
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
 #  |_____       |
@@ -15,14 +15,28 @@ from reyn_heights import PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight,
 #
 
 
-class BFS(PWL_Height):
+class BFS(PWC_Height):
     def __init__(self, args, N):
         h, H, l, L = args
         x0 = 0
         xf = L
         N_regions = 2
         x_peaks = np.asarray([0, l, L], float)
-        h_peaks = np.asarray([[0, h], [h, H], [H, 0]], float)
+        h_peaks = np.asarray([[h, h], [h, H], [H, H]], float)
+        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
+        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
+
+
+
+class BFS_2(PWC_Height):
+    def __init__(self, args, N):
+        h, H, l, L = args
+        x0 = 0
+        xf = L
+        N_regions = 3
+        x_peaks = np.asarray([0, l/2, (3/2)*l, L], float)
+        h_peaks = np.asarray([[0, h], [h, H], [H, h/2], [h/2,0]], float)
         namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)

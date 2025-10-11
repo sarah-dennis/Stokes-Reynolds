@@ -38,30 +38,10 @@ class Reynolds_Solver:
         
         # colorbar min max
         self.vel_max = 5
-        self.p_min=60
-        self.p_max = 110
+        self.p_min=0
+        self.p_max = 40
         self.Re = 0   #for plotting only
 
-    def pwl_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        height = self.Example(self.args,N)
-        solver_title = "Reynolds" #" Piecewise Linear"
-        
-        if isinstance(self.BC, bc.Mixed):
-            raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
-        else:
-        
-            pressure = rp.PwlGMRes_ReynPressure(height, self.BC)
-        
-        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
-    
-        
-        if plot:
-            self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
-
-        
-        return pressure, velocity
-    
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args, N)
         solver_title = "Reynolds"#"Finite Difference"
@@ -79,6 +59,45 @@ class Reynolds_Solver:
 
         return reyn_pressure, reyn_velocity
     
+    def pwl_gmres_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
+        height = self.Example(self.args,N)
+        solver_title = "Reynolds" #" Piecewise Linear"
+        
+        # if isinstance(self.BC, bc.Mixed):
+        #     raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
+        # else:
+        
+        pressure = rp.PwlGMRes_ReynPressure(height, self.BC)
+        
+        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
+    
+        
+        if plot:
+            self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
+            self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
+
+        
+        return pressure, velocity
+    
+    
+    def pwc_schur_LU_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+        height = self.Example(self.args, N)
+        solver_title = "Reynolds Schur-LU"
+        if isinstance(self.BC, bc.Mixed):
+            raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
+        else:
+        
+            pressure = rp.SchurLU_ReynPressure(height, self.BC)
+            
+        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
+     
+         
+        if plot:
+             self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
+             self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
+
+        return pressure, velocity
+        
     def fd_adj_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
         
@@ -174,7 +193,7 @@ class Reynolds_Solver:
             p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
     
-        # graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
+        graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
         
         # p_hs=np.zeros(height.Nx)
         # for i in range(height.Nx):
