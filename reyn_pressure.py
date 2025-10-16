@@ -13,7 +13,8 @@ from numpy.linalg import solve as np_solve
 
 from reyn_heights import PWL_Height, PWC_Height
 import reyn_pressure_pwlGMRes as pwlGMRes
-import reyn_pressure_schurLU as pwcSchurLU
+# import reyn_pressure_schurLU as pwcSchurLU
+import schur as pwcSchurLU
 from scipy.sparse.linalg import gmres
 
 import reyn_boundary as bc
@@ -86,7 +87,8 @@ class SchurLU_ReynPressure(Pressure):
         if not isinstance(height, PWC_Height):
             raise TypeError('Example is not piecewise constant')
         
-        ps_1D = pwcSchurLU.schurLU_solve(height, BC)
+        # ps_1D = pwcSchurLU.schurLU_solve(height, BC)
+        ps_1D = pwcSchurLU.LU_solve(height, BC)
         super().__init__(height, BC, ps_1D)
 
 class VelAdj_ReynPressure(Pressure):
