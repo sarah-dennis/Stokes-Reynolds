@@ -100,17 +100,6 @@ def get_Ds(n, center_diag, off_diag, Cs):
 
     return Ds
 
-# Elementwise accessing  K^-1 = S_ij
-# def S_ij(n, Cs_diagProd, Ds, i, j):
-#     if i == j:
-#         return Ds[i]
-#     # non-diagonals
-#     elif i < j:
-#         return (-1)**(i+j) * Ds[i] * Cs_diagProd[i, j-1]
-#     else:
-#         return (-1)**(i+j) * Ds[j] * Cs_diagProd[j, i-1]
-    
-
 # (P_extrema, P_slopes) -> [p(x)] over domain Nx
 def make_ps(height, BC, slopes, extrema):
     ps = np.zeros(height.Nx)
