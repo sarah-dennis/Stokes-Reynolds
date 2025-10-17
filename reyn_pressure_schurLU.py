@@ -30,7 +30,6 @@ def schurLU_solve(height, BC):
     Cs, Cs_diagProd = get_Cs(n, center_diag, off_diag)
     Ds = get_Ds(n, center_diag, off_diag, Cs)
 
-    # L block -  fwd sub
     p_peaks = np.zeros(n)
     for i in range(n):
         p_peak_ij = 0
@@ -52,7 +51,7 @@ def schurLU_solve(height, BC):
                 
         p_peaks[i] = p_peak_ij
         
-    # U block  - back sub
+
     p_slopes = np.zeros(n+1)
     p_slopes[0] = (p_peaks[0] - BC.p0)/height.widths[0]
     for i in range(1, n):

@@ -23,7 +23,7 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 
 Example = examples.BFS
 H=1
-h=2
+h=3
 l=1
 L=3
 args =  [h, H, l, L]
@@ -113,7 +113,7 @@ solver = control.Reynolds_Solver(Example, BC, args)
 
 # solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 solver.pwc_schur_LU_solve(N)
-# solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)

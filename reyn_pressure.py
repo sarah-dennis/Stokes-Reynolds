@@ -88,7 +88,7 @@ class SchurLU_ReynPressure(Pressure):
             raise TypeError('Example is not piecewise constant')
         
         # ps_1D = pwcSchurLU.schurLU_solve(height, BC)
-        ps_1D = pwcSchurLU.LU_solve(height, BC)
+        ps_1D = pwcSchurLU.schur_inv_solve(height, BC)
         super().__init__(height, BC, ps_1D)
 
 class VelAdj_ReynPressure(Pressure):

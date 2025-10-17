@@ -80,12 +80,10 @@ class PWC_Height(PWL_Height):
 
 class RandomHeight(Height):
     def __init__(self, x0, xf, N, h_min, h_max, filestr):
-        # h_str = "./examples/" +f"Rand_H{h_max}_U{U}_dP{dP}_N{N}"
 
         Nx = (xf-x0)*N + 1
         hs = np.zeros(Nx)
         for i in range (Nx):
-            # hs[i] = h_min + (h_max - h_min) * random.random()
             hs[i] = h_min + (h_max - h_min) * random.random()/(i+1)
         y0 = 0
         yf = max(hs)
@@ -196,71 +194,5 @@ class CircleHeight(Height):
         else:
             return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
         
-    # def h_fun(self, x):
-
-    #     x_r = np.sqrt(self.r**2-(1-self.r-self.h0)**2)
-    #     if x <-x_r or x >x_r:
-    #         return 1
-    #     else:
-    #         return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
-
-    # def h_fun(self, x):
-
-    #     x_r = np.sqrt(self.r**2-(1-self.r-self.h0)**2)
-    #     if x <-x_r: #1.73 = h'(x_r) when r=1, h0=1/2
-    #         return -1.73*(x+x_r)+1
-    #     elif x >x_r:
-    #         return 1.73*(x-x_r)+1
-            
-    #     else:
-    #         return self.h0 + self.r - np.sqrt(self.r**2 - x**2)
-    
-#------------------------------------------------------------------------------
-# class ConstantHeight(Height):
-#     def __init__(self, x0, xf, N, h0, filestr):
-#         # h_str = "./examples/" +f"Cnsnt_H{h0}_L{xf-x0}_N{N}"
-#         Nx = (xf-x0)*N + 1
-#         hs = np.ones(Nx)*h0
-        
-#         y0 = 0
-#         yf = h0
-#         i_peaks = []
-       
-#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
-
-#------------------------------------------------------------------------------
-# class StepHeight(Height):
-#     def __init__(self, x0, xf, N, h0, hf, x_step, U,dP, filestr):
-#         self.x_step = x_step
-#         self.N_steps = 1
-#         self.h_steps= [h0, hf]
-#         self.step_width = (xf - x0)/2
-#         # h_str = "./examples/" +f"BFS_H{hf}_L{xf-x0}_U{U}_dP{dP}_N{N}"
-#         y0 = 0
-#         yf = max(self.h_steps)
-#         Nx = (xf-x0)*N + 1
-#         hs= self.make_hs(x0, xf, N, Nx, self.N_steps, self.h_steps, self.step_width)  
-#         i_peaks = [self.step_width*N]
-        
-#         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
-
-#     def make_hs(self, x0, xf, N, Nx, n_steps, h_steps, step_width):
-#         hs = np.zeros(Nx)
-#         index_width = step_width*N
-
-#         for i in range(Nx):
-
-#             if i >= index_width :
-#                hs[i] = h_steps[1]
-#             else:
-#                hs[i] = h_steps[0]
-#         return hs
-# #-----------------------------------------------------------------------------
-
-    
-    
-    
-    
-    
     
     
