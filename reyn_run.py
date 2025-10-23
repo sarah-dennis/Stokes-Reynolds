@@ -21,7 +21,7 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-Example = examples.BFS
+Example = examples.BFS_2
 H=1
 h=3
 l=1
@@ -93,9 +93,9 @@ args =  [h, H, l, L]
 #------------------------------------------------------------------------------
 
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 0
+U = 1
 
-## fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+# fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
 dP = 7.5
 BC = bc.Fixed(U,dP)
 

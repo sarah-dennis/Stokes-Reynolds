@@ -75,10 +75,12 @@ def get_schurCompDiags(height):
     return center_diag, off_diag
 
 
+# recursive sequence {Si} 
 def get_Cs(n, center_diag, off_diag):
     Cs = np.zeros(n-1)
     
     Cs[n-2] = off_diag[n-2] / center_diag[n-1]
+    
     for k in reversed(range(n-2)):
         Cs[k] = off_diag[k] / (center_diag[k+1] - Cs[k+1]*off_diag[k+1])
     

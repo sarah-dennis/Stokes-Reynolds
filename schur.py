@@ -44,6 +44,39 @@ import reyn_boundary as bc
 # schur complement 
 # K = - C B : N-1 rows x N-1 cols
 
+
+    
+def schur_inv_solve(height, BC):
+    rhs = make_rhs(height, BC)
+    phis = make_phis(height, BC)
+    thetas = make_thetas(height, BC)
+    offdiag_prod = make_schur_offdiag_prod(height, BC)
+   
+    N = height.N_regions
+    K = np.zeros((N-1,N-1))
+    for i in range (N-1):
+        for j in range(N-1):
+            K[i,j] = K_ij(height, BC, i, j)
+            
+    # print(K)
+    # print(offdiag_prod)
+    print(thetas)
+    print(phis)
+    N = height.N_regions
+    xs = np.zeros(2*N - 1)
+    
+    for i in range(2*N-1):
+        xi = 0
+        for j in range(2*N-1):
+            m_inv_ij = M_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j)
+            xi += m_inv_ij
+        xs[i] = xi * rhs[i]
+    
+    slopes = xs[0:N]
+    extrema = xs[N:]
+    ps = make_ps(height, BC, slopes, extrema)
+    return ps
+
 def make_rhs(height, BC): 
     N = height.N_regions 
     rhs = np.zeros(2*N-1)
@@ -67,47 +100,28 @@ def make_rhs(height, BC):
 
 def M_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j):
     N = height.N_regions
-    
-    K_inv = K_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j)
-    
+
     if i < N and j < N: # I + B K^-1 C
         B = B_ij(height, BC, i, j)
         C = C_ij(height, i, j)
+        K_inv = K_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j)
         I = 1 if i == j else 0
         return I + B * K_inv * C
     
     elif i > N and j < N: # -B K^-1
-        B = B_ij(height, BC, i, j)
+        B = B_ij(height, BC, i-N, j)
+        K_inv = K_inv_ij(height, BC, phis, thetas, offdiag_prod, i-N, j)
         return - B * K_inv
     
     elif i < N and j > N: # -K^-1 C
-        C = C_ij(height, i, j)
+        C = C_ij(height, i, j-N)
+        K_inv = K_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j-N)
         return - K_inv * C
     
     else: # K^-1
+        K_inv = K_inv_ij(height, BC, phis, thetas, offdiag_prod, i-N, j-N)
         return K_inv
     
-    
-def schur_inv_solve(height, BC):
-    rhs = make_rhs(height, BC)
-    phis = make_phis(height, BC)
-    thetas = make_thetas(height, BC)
-    offdiag_prod = make_schur_offdiag_prod(height, BC)
-    
-    N = height.N_regions
-    xs = np.zeros(2*N - 1)
-    
-    for i in range(2*N-1):
-        xi = 0
-        for j in range(2*N-1):
-            m_inv_ij = M_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j)
-            xi += m_inv_ij
-        xs[i] = xi * rhs[i]
-    
-    slopes = xs[0:N]
-    extrema = xs[N:]
-    ps = make_ps(height, BC, slopes, extrema)
-    return ps
 #------------------------------------------------------------------------------
 
 # schur complement K is size N-1 x N-1 symmetric tridiagonal
@@ -145,7 +159,10 @@ def K_inv_ij(height, BC, phis, thetas, offdiag_prod, i, j):
         return thetas[j-1] * phis[i+1] / thetas[-1]
     
     elif i > j:
-        offdiag_prod_ij = offdiag_prod[j+1] / offdiag_prod[i-1] # = aj+1 * aj * ... * ai
+        prod_j =  offdiag_prod[j+1]
+        prod_i = offdiag_prod[i-1]
+        offdiag_prod_ij = prod_j/prod_i  # = aj+1 * aj * ... * ai
+        
         return (-1)**(i+j) * offdiag_prod_ij * thetas[j-1] * phis[i+1] / thetas[-1]
     
     elif i < j: # K is symmetric => K^-1 is symmetric
@@ -194,13 +211,13 @@ def make_phis(height, BC):
 def make_schur_offdiag_prod(height, BC):
     N = height.N_regions
         
-    # offdiag_prod[i] = prod a1 * a2 * ... * ai 
+    # offdiag_prod[i] = prod a1 * a2 * ... * ai+1 
     offdiag_prod = np.zeros(N-2)
 
-    offdiag_prod[0] = 1
+    offdiag_prod[0] = K_ij(height, BC, 1, 0)
     
     for i in range(1, N-2):
-        offdiag_prod[i] = K_ij(height, BC, i, i-1) * offdiag_prod[i-1]
+        offdiag_prod[i] = K_ij(height, BC, i+1, i) * offdiag_prod[i-1]
     
     return offdiag_prod
 

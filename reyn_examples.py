@@ -34,9 +34,9 @@ class BFS_2(PWC_Height):
         h, H, l, L = args
         x0 = 0
         xf = L
-        N_regions = 4
-        x_peaks = np.asarray([0, L/4, L/2, 3*L/4, L], float)
-        h_peaks = np.asarray([[0, h], [h, H], [H,h], [h,H/2], [H/2,0]], float)
+        N_regions = 5
+        x_peaks = np.asarray([0, L/5, 2*L/5, 3*L/5, 4*L/5, L], float)
+        h_peaks = np.asarray([[0, h], [h, H], [H, H/3], [H/3,h], [h,H/2], [H/2,0]], float)
         namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
