@@ -80,14 +80,14 @@ class Reynolds_Solver:
         return pressure, velocity
     
     
-    def pwc_schur_LU_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+    def pwc_schur_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
-        solver_title = "Reynolds Schur-LU"
-        if isinstance(self.BC, bc.Mixed):
-            raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
-        else:
+        solver_title = "Reynolds Schur"
+        # if isinstance(self.BC, bc.Mixed):
+        #     raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
+        # else:
         
-            pressure = rp.SchurLU_ReynPressure(height, self.BC)
+        pressure = rp.Schur_ReynPressure(height, self.BC)
             
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
      
