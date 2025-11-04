@@ -6,11 +6,31 @@ Created on Tue Jul 30 15:17:44 2024
 """
 
 import numpy as np
+import time
         
 from scipy.sparse.linalg import LinearOperator 
+from scipy.sparse.linalg import gmres
 import reyn_boundary as bc
 
+
+def gmres_solve(height, BC):
+    t0 = time.time()
+    rhs = make_rhs(height, BC)
+    linOp = pwlLinOp(height,BC)
+    sol_coefs, exit_code = gmres(linOp, rhs, tol=1e-10)
+        
+    if exit_code != 0:
+        raise Exception('gmres did not converge')
+   
+    tf = time.time()
+    print('gmres time: ', tf-t0)
+    ps_1D = make_ps(height, BC, sol_coefs)
+    tF =time.time()
+    # print('gmres total time: ', tF-t0)
+    return ps_1D
+
 def make_ps(height, BC, cs):
+    t0=time.time()
     slopes = height.slopes
     hs = height.hs
     x_peaks = height.x_peaks
@@ -19,9 +39,9 @@ def make_ps(height, BC, cs):
     ps = np.zeros(height.Nx)
     k = 0
     cq = cs[-1]
-    flux = -cq/12 #/visc
+    #flux = -cq/12 #/visc
     cu = 6 * BC.U #*visc
-    
+   
     for i in range(height.Nx):
         
         if xs[i] > x_peaks[k+1]:
@@ -35,7 +55,9 @@ def make_ps(height, BC, cs):
             dx = xs[i] - x_peaks[k]
             h = hs[i]
             ps[i] = dx* (cq * h**-3 + cu * h**-2) + cs[k]
-    return ps, flux
+    tf=time.time()
+    # print('make ps time:', tf-t0)
+    return ps
 
 
 def make_rhs(height, BC):

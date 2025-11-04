@@ -8,17 +8,19 @@ Created on Thu Dec  5 13:28:42 2024
 import numpy as np
 
 
-import reyn_pressure_finDiff as fd
+
 from numpy.linalg import solve as np_solve
 
-from reyn_heights import PWL_Height, PWC_Height
+from reyn_heights import PWL_Height, PWC_Height, make_PWC
+
+import reyn_pressure_finDiff as fd
 import reyn_pressure_pwlGMRes as pwlGMRes
 import reyn_pressure_schur as pwcSchur
-from scipy.sparse.linalg import gmres
+import reyn_pressure_adjusted
 
 import reyn_boundary as bc
 
-import reyn_pressure_adjusted
+
 
 class Pressure:
     def __init__(self, height, BC, ps_1D=None, ps_2D=None):
@@ -58,9 +60,8 @@ class Pressure:
                     
 class FinDiff_ReynPressure(Pressure):
     def __init__(self, height, BC):
-        rhs = fd.make_rhs(height, BC)
-        mat = fd.make_mat(height, BC)
-        ps_1D = np_solve(mat, rhs)
+        ps_1D, time = fd.fd_solve(height, BC)
+        self.time = time
         super().__init__(height, BC, ps_1D=ps_1D)
 
 
@@ -69,23 +70,15 @@ class PwlGMRes_ReynPressure(Pressure):
             
         if not isinstance(height, PWL_Height):
             raise TypeError('Example is not piecewise linear')
-        
-        rhs = pwlGMRes.make_rhs(height, BC)
-        linOp = pwlGMRes.pwlLinOp(height,BC)
-        sol_coefs, exit_code = gmres(linOp, rhs, tol=1e-10)
-         
-        if exit_code != 0:
-            raise Exception('gmres did not converge')
             
-        ps_1D, Q = pwlGMRes.make_ps(height, BC, sol_coefs)
+        ps_1D = pwlGMRes.gmres_solve(height, BC)
         super().__init__(height, BC, ps_1D)
     
 class Schur_ReynPressure(Pressure):
     def __init__(self, height, BC): 
-        if not isinstance(height, PWC_Height):
-            raise TypeError('Example is not piecewise constant')
         
-        ps_1D = pwcSchur.schur_solve(height, BC)
+        ps_1D, time = pwcSchur.schur_solve(height, BC)
+        self.time=time
         super().__init__(height, BC, ps_1D)
 
 class VelAdj_ReynPressure(Pressure):

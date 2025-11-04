@@ -46,14 +46,14 @@ colour_bar_pad = 0.05
 #------------------------------------------------------------------------------
 # RESOLUTION
 #------------------------------------------------------------------------------
-dpi=200
+dpi=800
 
 n_contours = 100
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5
 
-linthresh = 1e-4
+linthresh = 1e-8
 
 # FONTS
 SMALL_SIZE = 10
@@ -165,7 +165,7 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
 
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left'):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left', log_x=False, log_y=True):
     pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
@@ -180,13 +180,20 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     
     
     # reference lines
-    # ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
-    # ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
+    if bigO_on:
+        O1 = 1
+        O2 = 1
+        ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
+        ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
     
-    # ax.set_xscale('log')
-    ax.set_yscale('symlog', linthresh=linthresh)
+    if log_x:
+        ax.set_xscale('log')
+        
+    if log_y:
+        ax.set_yscale('log')
+        # ax.set_yscale('symlog', linthresh=linthresh)
 
-    ax.set_ylim(min(1,0.5*np.min(fs)),2*np.max(fs))
+    # ax.set_ylim(min(1,0.5*np.min(fs)),2*np.max(fs))
     # ax.set_ylim(1,2*np.max(fs))
 
     ax.set_xlabel(ax_labels[0])

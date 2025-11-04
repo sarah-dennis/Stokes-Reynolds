@@ -7,12 +7,17 @@ Created on Tue May 21 16:05:05 2024
 import numpy as np
 import graphics
 
+import time
+
 import reyn_velocity as rv
 import reyn_pressure as rp 
 import reyn_perturbed as rpert
 import reyn_boundary as bc
 
+from reyn_heights import PWC_Height, PWL_Height, make_PWC
+
 i_test_scale=2
+
 
 lenx = 4
 leny = 2
@@ -31,26 +36,21 @@ class Reynolds_Solver:
         self.Example = Example #initialize height = Example(args) in the solver
         self.args = args
         
-        self.BC = BC
-
-        # self.U = U # velocity at flat boundary
-        
+        self.BC = BC        
         
         # colorbar min max
         self.vel_max = 5
         self.p_min=0
-        self.p_max = 40
+        self.p_max = 90
         self.Re = 0   #for plotting only
 
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args, N)
-        solver_title = "Reynolds"#"Finite Difference"
 
+        solver_title = "Reynolds Finite Difference"#"Finite Difference"
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
         
-        
         reyn_velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
-        
         
         
         if plot:
@@ -61,12 +61,12 @@ class Reynolds_Solver:
     
     def pwl_gmres_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         height = self.Example(self.args,N)
-        solver_title = "Reynolds" #" Piecewise Linear"
+        solver_title = "Reynolds GMRes" #" Piecewise Linear"
         
         # if isinstance(self.BC, bc.Mixed):
         #     raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
         # else:
-        
+       
         pressure = rp.PwlGMRes_ReynPressure(height, self.BC)
         
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
@@ -82,13 +82,16 @@ class Reynolds_Solver:
     
     def pwc_schur_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         height = self.Example(self.args, N)
-        solver_title = "Reynolds Schur"
+        solver_title = "Reynolds Schur Complement"
         # if isinstance(self.BC, bc.Mixed):
         #     raise Exception("TODO: implement prescribed flux for PWL reynolds solve")
         # else:
-        
-        pressure = rp.Schur_ReynPressure(height, self.BC)
             
+        if not isinstance(height, PWC_Height):
+            height = make_PWC(height)
+            
+        pressure = rp.Schur_ReynPressure(height, self.BC)
+
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
      
          
@@ -182,13 +185,13 @@ class Reynolds_Solver:
             x_scale = height.xs[-1]-height.xs[0]
             y_scale = min(height.hs)
             p_scale = flux*x_scale/y_scale #*visc
-            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta   P=%.2f$"%(flux, self.BC.U, -pressure.dP/p_scale)
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta   P=%.4f$"%(flux, self.BC.U, -pressure.dP/p_scale)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$  p$", "$  x$","$  y$"]
             graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=self.p_min/p_scale, vmax=self.p_max/p_scale, log_cmap=False)
         
         else:
-            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, -pressure.dP)
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.4f$"%(flux, self.BC.U, -pressure.dP)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)

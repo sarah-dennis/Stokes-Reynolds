@@ -7,6 +7,17 @@ Created on Tue Jun 21 09:43:24 2022
 """
 import numpy as np
 import reyn_boundary as bc
+import time
+
+
+def fd_solve(height, BC):
+    t0 = time.time()
+    rhs = make_rhs(height, BC)
+    mat = make_mat(height, BC)
+    ps_1D = np.linalg.solve(mat, rhs)
+    tf = time.time()
+    print('fd time: ', tf-t0)
+    return ps_1D, tf-t0
 
 # Reynolds rhs
 def make_rhs(height, BC):

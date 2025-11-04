@@ -6,6 +6,7 @@ Created on Mon May 19 17:32:18 2025
 """
 import numpy as np
 import reyn_boundary as bc
+import time
 
 def make_rhs(height, BC): 
     N = height.N_regions 
@@ -21,13 +22,14 @@ def make_rhs(height, BC):
 
     rhs[N-1] = BC.pN/height.widths[-1] # = dp{N-1} + p{N-1}/dx{N-1}
     
-    
+    sixU = 6*BC.U
     for k in range (N-1):
-        rhs[N + k] = (height.h_steps[k+1] - height.h_steps[k]) * 6*BC.U
+        rhs[N + k] = (height.h_steps[k+1] - height.h_steps[k]) * sixU
  
     return rhs
 
 def schur_solve(height, BC):
+    t0 = time.time()
     N = height.N_regions
 
     rhs = make_rhs(height, BC)
@@ -39,6 +41,7 @@ def schur_solve(height, BC):
     for i in range(N-1):
         p_peak_ij = 0
         
+
         for j in range(N-1):
             k_inv_ij = K_inv_ij(height, BC, D, S_prod, i, j)
             
@@ -68,9 +71,12 @@ def schur_solve(height, BC):
         p_slopes[i] = (p_peaks[i] - p_peaks[i-1])/height.widths[i]
         
     p_slopes[N-1] = (BC.pN - p_peaks[N-2])/height.widths[N-1]
-    
+    tf = time.time()
+    print('schur time: ', tf-t0)
     ps = make_ps(height, BC, p_slopes, p_peaks)
-    return ps
+    # tF = time.time()
+    # print('schur total time:', tF-t0)
+    return ps, tf-t0
 
 def K_inv_ij(height, BC, D, S_prod, i, j):
     if i == j:
@@ -83,7 +89,9 @@ def K_inv_ij(height, BC, D, S_prod, i, j):
         k_inv_ij = D[j] * (S_prod[i-1]/S_prod[j-1])
     return k_inv_ij
 
-def K_ij(height, BC, i, j): # schur complement K = - C B
+
+# schur complement K = - C B
+def K_ij(height, BC, i, j): 
     hs = height.h_steps
     ws = height.widths
     
@@ -107,47 +115,46 @@ def K_ij(height, BC, i, j): # schur complement K = - C B
 # recursive sequence {Si} 
 def get_S(height, BC):
     N = height.N_regions
-    n = N-1 # schur complement is size N-1 x N-1
     
-    S = np.zeros(n-1)
+    S = np.zeros(N-2)
 
 
-    k=n-2
-    off_diag = K_ij(height, BC, k, k+1)
-    center_diag = K_ij(height, BC, k+1, k+1)
-    # S[k] = off_diag / center_diag
-    S[k] = -off_diag / center_diag
     
-    for k in range(n-3, -1, -1):
+    off_diag = K_ij(height, BC, N-3, N-2)
+    center_diag = K_ij(height, BC, N-2, N-2)
+    S[N-3] = -off_diag / center_diag
+    
+    for k in range(N-4, -1, -1):
         off_diag_succ = off_diag #=K_ij(height, BC, k+1, k+2)
+        
         off_diag = K_ij(height, BC, k, k+1)
         center_diag = K_ij(height, BC, k+1, k+1)
         
         S[k] = -off_diag / (center_diag + S[k+1] * off_diag_succ)
         
         
-    S_prod = np.zeros(n)
+    S_prod = np.zeros(N-1)
     S_prod[0] = S[0]
-    for k in range(1, n-1):
+    for k in range(1, N-2):
         S_prod[k] = S_prod[k-1]*S[k]
-    S_prod[n-1]=1
+        
+    S_prod[N-2]=1
 
     return S, S_prod
 
 # recursive sequence {Di} = diags of schur inverse
 def get_D(height, BC, S):
     N = height.N_regions
-    n = N-1 # schur complement is size N-1 x N-1
     
-    D = np.zeros(n)
+    D = np.zeros(N-1)
     
-    k=0
-    off_diag = K_ij(height, BC, k, k+1)
-    center_diag = K_ij(height, BC, k, k)
-    D[k] = 1/(center_diag + off_diag * S[k])
+
+    off_diag = K_ij(height, BC, 0, 1)
+    center_diag = K_ij(height, BC, 0, 0)
+    D[0] = 1/(center_diag + off_diag * S[0])
     
     
-    for k in range(1, n-1):
+    for k in range(1, N-2):
         off_diag_pred = off_diag
         off_diag = K_ij(height, BC, k, k+1)
         center_diag = K_ij(height, BC, k, k)
@@ -156,13 +163,14 @@ def get_D(height, BC, S):
         
 
     off_diag_pred = off_diag
-    center_diag = K_ij(height, BC, n-1, n-1)
-    D[n-1] = (1 - off_diag_pred*D[n-2]*S[n-2]) / center_diag 
+    center_diag = K_ij(height, BC, N-2, N-2)
+    D[N-2] = (1 - off_diag_pred*D[N-3]*S[N-3]) / center_diag 
     
     return D
 
 # (P_extrema, P_slopes) -> [p(x)] over domain Nx
 def make_ps(height, BC, slopes, extrema):
+
     ps = np.zeros(height.Nx)
     x0 = height.x0
     k = 0
@@ -175,13 +183,13 @@ def make_ps(height, BC, slopes, extrema):
         p_k = extrema[0]  - slope_k * height.widths[0]
     
     for i in range(height.Nx):
-        x = height.xs[i]
-        ps[i] = slope_k*(x-x_k) + p_k
+        ps[i] = slope_k*(height.xs[i]-x_k) + p_k
         
         if i >= height.i_peaks[k+1] and k < height.N_regions-1:
             k+= 1
             x_k = height.x_peaks[k]
             p_k = extrema[k-1]
             slope_k = slopes[k]
+
     return ps
 

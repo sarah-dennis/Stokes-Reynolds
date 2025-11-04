@@ -23,19 +23,6 @@ def make_adj_velocity(height, BC, adj_pressure):
 
     us = make_us(height, BC.U, pxs, p2xs, p3xs, sigma_xs)
     vs = make_vs(height,  BC.U, pxs, p2xs, p3xs, p4xs, sigma_xs, sigma_2xs)
-      
-    
-    
-    # for i in height.i_peaks[1:-1]:
-    #     for j in range(height.Ny):
-    #         y = height.ys[j]
-    #         h = height.hs[i]
-    #         h_2W = height.hs[i-2]
-    #         h_2E = height.hs[i+2]
-    #         if y < h_2E and y < h and y< h_2W:
-    #             us[j,i-1:i+2] = dm.avg_2x(us[j,i-2:i+3])
-    #             vs[j,i-1:i+2] = dm.avg_2x(vs[j,i-2:i+3])
-   
     
     return us, vs
 
