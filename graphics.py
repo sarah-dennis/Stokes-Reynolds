@@ -208,7 +208,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     elif loc=='left': #upper-left
         fig.legend(bbox_to_anchor=(0.3, 0.89))
     elif loc=='lower': #lower-right
-        fig.legend(bbox_to_anchor=(0.3, 0.5))
+        fig.legend(bbox_to_anchor=(0.3, 0.275))
     else: #lower left
         fig.legend(bbox_to_anchor=(0.9, 0.275))  
         

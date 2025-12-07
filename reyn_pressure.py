@@ -11,15 +11,11 @@ import numpy as np
 
 from numpy.linalg import solve as np_solve
 
-from reyn_heights import PWL_Height, PWC_Height, make_PWC
 
 import reyn_pressure_finDiff as fd
 import reyn_pressure_pwlGMRes as pwlGMRes
 import reyn_pressure_schur as pwcSchur
 import reyn_pressure_adjusted
-
-import reyn_boundary as bc
-
 
 
 class Pressure:
@@ -38,11 +34,11 @@ class Pressure:
         if ps_2D is not None:
             self.ps_2D = ps_2D
         else:
-            
             self.ps_2D = self.make_2D_ps(height, ps_1D)
         
         
-        self.dP = self.ps_2D[0,-1]- self.ps_2D[0,0]
+        # self.dP = self.ps_2D[0,-1]- self.ps_2D[0,0]
+        self.dP = self.ps_1D[-1]-self.ps_1D[0]
         
         
     def make_2D_ps(self,height,ps): # p(x,y) = p(x) 
@@ -60,16 +56,15 @@ class Pressure:
                     
 class FinDiff_ReynPressure(Pressure):
     def __init__(self, height, BC):
-        ps_1D, time = fd.fd_solve(height, BC)
-        self.time = time
+        ps_1D = fd.fd_solve(height, BC)
+        
         super().__init__(height, BC, ps_1D=ps_1D)
 
 
 class PwlGMRes_ReynPressure(Pressure):
     def __init__(self, height, BC):
             
-        if not isinstance(height, PWL_Height):
-            raise TypeError('Example is not piecewise linear')
+
             
         ps_1D = pwlGMRes.gmres_solve(height, BC)
         super().__init__(height, BC, ps_1D)
@@ -77,8 +72,19 @@ class PwlGMRes_ReynPressure(Pressure):
 class Schur_ReynPressure(Pressure):
     def __init__(self, height, BC): 
         
-        ps_1D, time = pwcSchur.schur_solve(height, BC)
-        self.time=time
+        # ps_1D = pwcSchur.schur_solve_parallel(height, BC)
+
+        ps_1D = pwcSchur.schur_solve(height, BC)
+
+        super().__init__(height, BC, ps_1D)
+        
+class Schur_parallel_ReynPressure(Pressure):
+    def __init__(self, height, BC): 
+        
+        ps_1D = pwcSchur.schur_solve_parallel(height, BC)
+
+        # ps_1D = pwcSchur.schur_solve(height, BC)
+
         super().__init__(height, BC, ps_1D)
 
 class VelAdj_ReynPressure(Pressure):

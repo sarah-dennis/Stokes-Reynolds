@@ -21,11 +21,9 @@ def gmres_solve(height, BC):
         
     if exit_code != 0:
         raise Exception('gmres did not converge')
-   
-    tf = time.time()
-    print('gmres time: ', tf-t0)
+
     ps_1D = make_ps(height, BC, sol_coefs)
-    tF =time.time()
+
     # print('gmres total time: ', tF-t0)
     return ps_1D
 

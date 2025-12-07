@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Mon May 19 17:32:18 2025
@@ -6,7 +7,10 @@ Created on Mon May 19 17:32:18 2025
 """
 import numpy as np
 import reyn_boundary as bc
+# import multiprocessing
 import time
+from multiprocessing import shared_memory, Pool
+# from multiprocessing import Pool
 
 def make_rhs(height, BC): 
     N = height.N_regions 
@@ -23,36 +27,48 @@ def make_rhs(height, BC):
     rhs[N-1] = BC.pN/height.widths[-1] # = dp{N-1} + p{N-1}/dx{N-1}
     
     sixU = 6*BC.U
+    h_steps = height.h_steps
+   
     for k in range (N-1):
-        rhs[N + k] = (height.h_steps[k+1] - height.h_steps[k]) * sixU
- 
+        rhs[N + k] = (h_steps[k+1] - h_steps[k]) * sixU
+       
     return rhs
 
 def schur_solve(height, BC):
-    t0 = time.time()
+
     N = height.N_regions
 
     rhs = make_rhs(height, BC)
-    
+
     S, S_prod = get_S(height, BC)
     D = get_D(height, BC, S)
     
+    h_steps = height.h_steps
+    widths = height.widths
+    
     p_peaks = np.zeros(N-1) # interior peaks only
+    
     for i in range(N-1):
         p_peak_ij = 0
-        
 
-        for j in range(N-1):
-            k_inv_ij = K_inv_ij(height, BC, D, S_prod, i, j)
+        j=0
+        k_inv_ij = K_inv_ij(D, S_prod, i, j)
+        p_peak_i_j = k_inv_ij * (rhs[N+j] + rhs[j] *  h_steps[j]**3)
+        p_peak_ij += p_peak_i_j
+        
+        j=N-2
+        k_inv_ij = K_inv_ij(D, S_prod, i, j)
+        p_peak_i_j = k_inv_ij * (rhs[N+j] - rhs[j+1] * h_steps[j+1]**3)
+        p_peak_ij += p_peak_i_j
+        
+        for j in range(1,N-2):
             
-            if j == 0:
-                p_peak_ij += k_inv_ij * (rhs[N] + rhs[0] *  height.h_steps[0]**3)
-              
-            elif j == N-2:
-                p_peak_ij += k_inv_ij * (rhs[2*N-2] - rhs[N-1] * height.h_steps[N-1]**3)
-                
-            else: 
-                p_peak_ij += k_inv_ij * rhs[N+j]
+            if rhs[N+j]!=0:
+                k_inv_ij = K_inv_ij(D, S_prod, i, j)
+     
+                p_peak_i_j = k_inv_ij * rhs[N+j]
+  
+                p_peak_ij += p_peak_i_j
                 
         p_peaks[i] = p_peak_ij
         
@@ -61,24 +77,108 @@ def schur_solve(height, BC):
 
     if isinstance(BC, bc.Fixed):
         p0 = BC.p0
-        p_slopes[0] = (p_peaks[0] - p0)/height.widths[0]
+        p_slopes[0] = (p_peaks[0] - p0)/widths[0]
         
     elif isinstance(BC, bc.Mixed):
-        p0 = p_peaks[0]  - rhs[0] * height.widths[0]
+        p0 = p_peaks[0]  - rhs[0] * widths[0]
         p_slopes[0] = rhs[0]
     
     for i in range(1, N-1):
-        p_slopes[i] = (p_peaks[i] - p_peaks[i-1])/height.widths[i]
+        p_slopes[i] = (p_peaks[i] - p_peaks[i-1])/widths[i]
         
-    p_slopes[N-1] = (BC.pN - p_peaks[N-2])/height.widths[N-1]
-    tf = time.time()
-    print('schur time: ', tf-t0)
+    p_slopes[N-1] = (BC.pN - p_peaks[N-2])/widths[N-1]
+
+    # print('schur time: ', tf-t0)
     ps = make_ps(height, BC, p_slopes, p_peaks)
     # tF = time.time()
     # print('schur total time:', tF-t0)
-    return ps, tf-t0
+    return ps# , tf-t0
 
-def K_inv_ij(height, BC, D, S_prod, i, j):
+
+def schur_solve_parallel(height, BC):
+
+    N = height.N_regions
+
+    rhs = make_rhs(height, BC)
+   
+    S, S_prod = get_S(height, BC)
+    D = get_D(height, BC, S)
+    
+    h_steps = height.h_steps
+    widths = height.widths
+    
+    p_peaks = np.zeros(N-1) # interior peaks only
+    
+    smem_h_steps, smem_rhs, smem_D, smem_S_prod = create_shared_memory(h_steps, rhs, D, S_prod)
+    
+    with Pool(processes=min(12,int(height.N**(1/2)))) as pool:
+        p_peaks = pool.starmap(outer_process, ((i, N, smem_h_steps, smem_rhs, smem_D, smem_S_prod) for i in range(N-1))) 
+        
+        # for i in range(N-1):    
+        #     p_peak_i_js = pool.starmap(inner_process, ((i, j, N, smem_h_steps, smem_rhs, smem_D, smem_S_prod) for j in range(N-1)))
+        #     p_peaks[i] = sum(p_peak_i_js)
+            
+            
+    smem_h_steps.shm.close()
+    smem_h_steps.shm.unlink()
+    smem_rhs.shm.close() 
+    smem_rhs.shm.unlink()
+    smem_D.shm.close()
+    smem_D.shm.unlink()
+    smem_S_prod.shm.close()
+    smem_S_prod.shm.unlink()
+    
+    p_slopes = np.zeros(N)
+
+    if isinstance(BC, bc.Fixed):
+        p0 = BC.p0
+        p_slopes[0] = (p_peaks[0] - p0)/widths[0]
+        
+    elif isinstance(BC, bc.Mixed):
+        p0 = p_peaks[0]  - rhs[0] * widths[0]
+        p_slopes[0] = rhs[0]
+    
+    for i in range(1, N-1):
+        p_slopes[i] = (p_peaks[i] - p_peaks[i-1])/widths[i]
+        
+    p_slopes[N-1] = (BC.pN - p_peaks[N-2])/widths[N-1]
+
+    # print('schur time: ', tf-t0)
+    ps = make_ps(height, BC, p_slopes, p_peaks)
+    # tF = time.time()
+    # print('schur total time:', tF-t0)
+    return ps# , tf-t0
+
+def create_shared_memory(h_steps, rhs, D, S_prod):
+    smem_h_steps = shared_memory.ShareableList(h_steps.tolist(),name='smem_h_steps')
+    smem_rhs = shared_memory.ShareableList(rhs.tolist(),name='smem_rhs')
+    smem_D = shared_memory.ShareableList(D.tolist(),name='smem_D')
+    smem_S_prod = shared_memory.ShareableList(S_prod.tolist(),name='smem_S_prod')
+
+    return smem_h_steps, smem_rhs, smem_D, smem_S_prod
+
+def inner_process(i, j, N, h_steps, rhs, D, S_prod):
+    k_inv_ij = K_inv_ij(D, S_prod, i, j)
+    
+    if j == 0:
+        p_peak_ij = k_inv_ij * (rhs[N] + rhs[0] *  h_steps[0]**3)
+      
+    elif j == N-2:
+        p_peak_ij = k_inv_ij * (rhs[2*N-2] - rhs[N-1] * h_steps[N-1]**3)
+        
+    else: 
+        p_peak_ij = k_inv_ij * rhs[N+j]
+    return p_peak_ij
+
+def outer_process(i, N, h_steps, rhs, D, S_prod):
+    p_peak_i_j =0
+    for j in range(N-1):
+        p_peak_i_j += inner_process(i, j, N, h_steps, rhs, D, S_prod)
+    return p_peak_i_j
+
+
+
+def K_inv_ij(D, S_prod, i, j):
     if i == j:
         k_inv_ij = D[i]
         
@@ -89,7 +189,6 @@ def K_inv_ij(height, BC, D, S_prod, i, j):
         k_inv_ij = D[j] * (S_prod[i-1]/S_prod[j-1])
     return k_inv_ij
 
-
 # schur complement K = - C B
 def K_ij(height, BC, i, j): 
     hs = height.h_steps
@@ -97,8 +196,9 @@ def K_ij(height, BC, i, j):
     
     if i == j: #bi : center diag 
         if i == 0 and isinstance(BC, bc.Mixed):
+
             return -(hs[i+1]**3)/ws[i+1]
-    
+
         else:
             return -(hs[i]**3)/ws[i] -(hs[i+1]**3)/ws[i+1]
     
@@ -135,6 +235,7 @@ def get_S(height, BC):
         
     S_prod = np.zeros(N-1)
     S_prod[0] = S[0]
+    
     for k in range(1, N-2):
         S_prod[k] = S_prod[k-1]*S[k]
         
@@ -170,7 +271,6 @@ def get_D(height, BC, S):
 
 # (P_extrema, P_slopes) -> [p(x)] over domain Nx
 def make_ps(height, BC, slopes, extrema):
-
     ps = np.zeros(height.Nx)
     x0 = height.x0
     k = 0

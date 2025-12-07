@@ -52,9 +52,9 @@ class PWL_Height(Height):
 #------------------------------------------------------------------------------
 # PWC Height
 #------------------------------------------------------------------------------
-class PWC_Height(PWL_Height):
+class PWC_Height(Height):#(PWL_Height):
     def __init__(self, x0, xf, N, N_regions, x_peaks, h_peaks, filestr):
-        
+
         #solver requires minimum 3 regions
         while N_regions <3 :
             x_peak_mid = x_peaks[-1] - x_peaks[-2]/2
@@ -64,50 +64,78 @@ class PWC_Height(PWL_Height):
             h_peaks = np.append(h_peaks, h_peaks[-1])
             h_peaks = np.reshape(h_peaks, (N_regions+2,2))
             N_regions +=1
-            
-            
-        self.h_steps = np.zeros(N_regions)
-        for i in range(N_regions):
-            self.h_steps[i] = h_peaks[i,0]
+        
+        self.N_regions = N_regions
+        self.x_peaks=x_peaks
+        self.h_peaks=h_peaks
+        self.h_steps = h_peaks[:,1][:-1] 
+        self.slopes =np.zeros(self.N_regions)
+        
+        hs, self.widths, i_peaks = self.make_hs(x0, xf, N, x_peaks, h_peaks)
+        y0 = 0
+        yf = max(hs)  
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
+        
+    def make_hs(self, x0, xf, N, x_peaks, h_peaks):
+        widths = np.zeros(self.N_regions)
+        i_peaks = np.zeros(self.N_regions+1, dtype=int)
+       
+        Nx = int((xf-x0)*N + 1)
+        hs = np.zeros(Nx)
+        dx = 1/N
+        
+        r = 0
+        for i in range(Nx):
+            xi = x0 + i*dx
+            if xi > x_peaks[r+1] and r+1 < self.N_regions:
+                r +=1
+            i_peaks[r+1] = i    
+            widths[r] = xi - x_peaks[r]
+            hs[i] = h_peaks[r,1]
+        return  hs, widths, i_peaks
 
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, filestr)        
+    
+# def make_PWC(height):
+   
+#     N = int((height.Nx-1)/(height.xf-height.x0))
+
+#     x_peaks = np.linspace(height.x0, height.xf,height.Nx+1)
+#     h_peaks = np.zeros((height.Nx+1, 2))
+
+#     h_peaks[0,0] = height.hs[0]
+#     for i in range(height.Nx):
+#         h_step =height.hs[i]
+#         h_peaks[i, 1] = h_step
+#         h_peaks[i+1, 0] = h_step
+#     h_peaks[height.Nx,1] = height.hs[-1]
+    
+#     new_height = PWC_Height(height.x0, height.xf, N, height.Nx, x_peaks, h_peaks, '')
+#     new_height.widths = np.ones(height.Nx)/N
+
+#     return new_height
 
 def make_PWC(height):
 
+    N = height.N
+    N_regions = height.Nx-1
+    x_peaks = height.xs
+    h_peaks = np.zeros((height.Nx, 2))
+
+    h_peaks[0,0] = 0
     
-    # x_peaks = height.xs
-
-    # h_peaks = np.zeros((height.Nx, 2))
-
-    # h_peaks[0,0] = height.hs[0]
-    # for i in range(height.Nx-1):
-    #     h_step = height.hs[i] #height.hs[i]+height.hs[i+1])/2
-    #     h_peaks[i, 1] = h_step
-    #     h_peaks[i+1, 0] = h_step
-    # h_peaks[height.Nx-1,1] = height.hs[-1]
-
-    # new_height = PWC_Height(height.x0, height.xf, height.N, height.Nx-1, x_peaks, h_peaks, '')
-
-    # return new_height
-
-   
-    N = int((height.Nx-1)/(height.xf-height.x0))
-
-    x_peaks = np.linspace(height.x0, height.xf,height.Nx+1)
-    h_peaks = np.zeros((height.Nx+1, 2))
-
-    h_peaks[0,0] = height.hs[0]
-    for i in range(height.Nx):
-        h_step =height.hs[i]
-        h_peaks[i, 1] = h_step
-        h_peaks[i+1, 0] = h_step
-    h_peaks[height.Nx,1] = height.hs[-1]
-
-    new_height = PWC_Height(height.x0, height.xf, N, height.Nx, x_peaks, h_peaks, '')
-    new_height.widths = np.ones(height.Nx)/N
+    
+    for i in range(height.Nx-1):
+        h_step = (height.hs[i+1] + height.hs[i])/2
+        
+        h_peaks[i,1] = h_step
+        h_peaks[i+1,0] = h_step
+        
+    
+    h_peaks[height.Nx-1,1] = 0
+    
+    new_height = PWC_Height(height.x0, height.xf, N, N_regions, x_peaks, h_peaks, '')
+    # print(new_height.h_steps, height.hs)
     return new_height
-
-
  
 #------------------------------------------------------------------------------
 # Other Height Functions

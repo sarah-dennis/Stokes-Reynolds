@@ -43,13 +43,14 @@ class Height(Domain):
         self.H_in=hs[0]
         self.H_out=hs[-1]
         self.i_peaks = i_peaks
-        self.hxs = center_diff(self.hs, self.Nx, self.dx)
-        self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)
-        self.h3xs = center_third_diff(self.hs, self.Nx, self.dx)
-
-
+        
+        ## moved to reyn_control since not all solvers need all derivs
+        # self.hxs = center_diff(self.hs, self.Nx, self.dx)
+        # self.h2xs = center_second_diff(self.hs, self.Nx, self.dx)
+        # self.h3xs = center_third_diff(self.hs, self.Nx, self.dx)
+        
         # for i in i_peaks[1:-1]:
-        #     # self.hxs[i-1:i+2] = avg_x(self.hxs[i-2:i+3])
+        #     self.hxs[i-1:i+2] = avg_x(self.hxs[i-2:i+3])
         #     self.h2xs[i-1:i+2] = avg_2x(self.h2xs[i-2:i+3])
         #     self.h3xs[i-2:i+3] = avg_3x(self.h3xs[i-3:i+4])  
                 

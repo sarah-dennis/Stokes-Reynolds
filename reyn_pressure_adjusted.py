@@ -15,7 +15,8 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
 
     hs = height.hs
     hxs = height.hxs
-     
+
+    
     #--------------------------------------------------------------------------
     pxs = dm.center_diff(reyn_ps, height.Nx, height.dx)
     p2xs = dm.center_second_diff(reyn_ps, height.Nx, height.dx)
