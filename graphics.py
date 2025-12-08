@@ -94,7 +94,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors== 'pri':
-        cs = ['r','forestgreen','b', 'darkmagenta', 'darkorange']
+        cs = ['r','b', 'forestgreen','darkmagenta', 'darkorange']
     else: 
         cs=['forestgreen', 'darkmagenta', 'darkorgange']
     markers = ['D', 'o', 's', '*', 'H', 'X']

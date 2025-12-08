@@ -23,15 +23,12 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-
-
 # Example = examples.BFS
 # H=1
 # h=2
 # l=1
 # L=4
 # args =  [h, H, l, L]
-
 
 # Example = examples.BFS_2
 # H=1.5

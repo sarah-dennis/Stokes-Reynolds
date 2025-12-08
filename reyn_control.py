@@ -29,7 +29,7 @@ y_stop = y_start + leny
         # colorbar min max
 vel_max = 5
 p_min= 0
-p_max = 170
+p_max = 30
         
 log_linthresh=1e-8  
 

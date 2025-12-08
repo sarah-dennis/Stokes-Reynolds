@@ -30,7 +30,7 @@ class Pressure:
 
             self.ps_1D = np_solve(mat, rhs)
         
-        # initializing for any 1D Reynolds solution, ps_2D will be missing
+        
         # if ps_2D is not None:
         #     self.ps_2D = ps_2D
         # else:
