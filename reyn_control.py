@@ -26,7 +26,11 @@ y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
-
+        # colorbar min max
+vel_max = 5
+p_min= 0
+p_max = 170
+        
 log_linthresh=1e-8  
 
 warnings_on=False
@@ -38,11 +42,8 @@ class Reynolds_Solver:
         
         self.BC = BC        
         
-        # colorbar min max
-        self.vel_max = 5
-        self.p_min=0
-        self.p_max = 90
-        self.Re = 0   #for plotting only
+
+        
 
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         solver_title = "Reynolds Finite Difference"
@@ -96,7 +97,7 @@ class Reynolds_Solver:
 
         if not isinstance(height, PWC_Height):
             height = make_PWC(height)
-        # graphics.plot_2D(height.hs, height.xs, 'schur height', ['x','h'])   
+        
         t0 = time.time()
                 
         height.hxs = np.zeros(height.Nx)
@@ -235,15 +236,17 @@ class Reynolds_Solver:
             paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta   P=%.4f$"%(flux, self.BC.U, -pressure.dP/p_scale)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$  p$", "$  x$","$  y$"]
-            graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=self.p_min/p_scale, vmax=self.p_max/p_scale, log_cmap=False)
+            graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=p_min/p_scale, vmax=p_max/p_scale, log_cmap=False)
         
         else:
             paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.4f$"%(flux, self.BC.U, -pressure.dP)
             p_title = solver_title +'\n' + paramstr
             p_labels = ["$p$", "$x$","$y$"]
-            graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False)
-    
-        graphics.plot_2D(pressure.ps_1D, height.xs, 'p(x,0)', ['x','p(x)'])
+            graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False)
+        
+        paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.4f$"%(flux, self.BC.U, -pressure.dP)
+        p_title = solver_title +'\n' + paramstr
+        graphics.plot_2D(pressure.ps_1D, height.xs, p_title, ['x','p(x)'])
         
         # p_hs=np.zeros(height.Nx)
         # for i in range(height.Nx):
@@ -259,12 +262,12 @@ class Reynolds_Solver:
             if scaled:
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
-                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False,n_contours=100)
+                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False,n_contours=100)
             
             else:
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
-                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=self.p_min, vmax=self.p_max, log_cmap=False,n_contours=50)
+                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False,n_contours=50)
             
       
     
@@ -280,7 +283,7 @@ class Reynolds_Solver:
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
             uv_mag = np.sqrt((velocity.u/u_scale)**2 + (velocity.v/v_scale)**2)
-            graphics.plot_stream_heat(velocity.u/u_scale, velocity.v/y_scale, height.xs/x_scale, height.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max/velocity.Q, log_cmap=False)
+            graphics.plot_stream_heat(velocity.u/u_scale, velocity.v/y_scale, height.xs/x_scale, height.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max/velocity.Q, log_cmap=False)
 
         else:
            
@@ -288,7 +291,7 @@ class Reynolds_Solver:
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(u,v)|_2$','$x$', '$y$'] 
             uv_mag = np.sqrt((velocity.u)**2 + (velocity.v)**2)
-            graphics.plot_stream_heat(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+            graphics.plot_stream_heat(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
 
         if uv:
             
@@ -296,7 +299,7 @@ class Reynolds_Solver:
             graphics.plot_2D(height.ys,velocity.u[:,i_test],  f'$u({height.xs[i_test]:.2f}),y)$',[f'$u({height.xs[i_test]:.2f},y)$','$y$'])
             graphics.plot_2D(height.ys,velocity.v[:,i_test],  f'$v({height.xs[i_test]:.2f}),y)$',[f'$v({height.xs[i_test]:.2f},y)$','$y$'])
            
-            # graphics.plot_quiver(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=self.vel_max)
+            # graphics.plot_quiver(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max)
 
             graphics.plot_contour_mesh(velocity.u, height.xs, height.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
             graphics.plot_contour_mesh(velocity.v, height.xs, height.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
@@ -306,14 +309,14 @@ class Reynolds_Solver:
             u_2D_zoom = graphics.grid_zoom_2D(velocity.u, height, x_start, x_stop, y_start, y_stop)
             v_2D_zoom = graphics.grid_zoom_2D(velocity.v, height, x_start, x_stop, y_start, y_stop)
             uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, height, x_start, x_stop, y_start, y_stop)
-            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
 
         if inc:
             # inc = velocity.make_inc(height)
             
             # graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             
-            # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+            # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
             
             qs = velocity.get_flux(height)
             # qs = velocity.get_adj_flux(BC,height, pressure) #adj

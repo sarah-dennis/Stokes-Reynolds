@@ -41,13 +41,27 @@ class BFS_2(PWC_Height):
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
+        
+        
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
 #  |_____       |
 #        \______|
 #
 
-
+class pwl_discont_wave(PWL_Height):
+    def __init__(self, args, N):
+        H, L = args
+        x0 = 0
+        xf = L
+        N_regions = 10
+        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
+        h_peaks = np.asarray([[0, H],[H, H/2],[2*H/3, H/3],[H/4,3*H/7],[4*H/7,H/5],[H/3,2*H/3],[2*H/3,H],[H/4,H/5],[3*H/5,3*H/5],[2*H/5,3*H/4],[H/2,0]], float)
+        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
+        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
+        
+        
 class BFS_deltaSmooth(PWL_Height):
     def __init__(self, args, N):
         H, delta = args
@@ -63,11 +77,6 @@ class BFS_deltaSmooth(PWL_Height):
         namestr = ''#f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}'
         titlestr = ''#f'$\delta$-BFS $\delta={delta :.3f}$, $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
-# -----------------------------------------------------------------------------------------------------------------------------------
-#   ____________
-#  |_____       |
-#        |      |
-#        \______|
 
 
 class BFS_noEddy(PWL_Height):
@@ -92,6 +101,20 @@ class BFS_noEddy(PWL_Height):
 #  |____  ____|
 #       \/
 #
+
+
+
+class pwl_cont_wave(PWL_Height):
+    def __init__(self, args, N):
+        H, L = args
+        x0 = 0
+        xf = L
+        N_regions = 10
+        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
+        h_peaks = np.asarray([[0, H],[H, H/2],[H/2, H/3],[H/3,3*H/7],[3*H/7,H/5],[H/5,2*H/3],[2*H/3,H],[H,H/5],[H/5,3*H/5],[3*H/5,3*H/4],[3*H/4,0]], float)
+        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
+        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 
 class TriSlider(PWL_Height):
