@@ -43,10 +43,10 @@ scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 # args = [H,L]
 
 
-Example = examples.BFS_deltaSmooth
-H = 2
-delta = 1
-args = [H,delta]
+# Example = examples.BFS_deltaSmooth
+# H = 2
+# delta = 1
+# args = [H,delta]
 
 
 # Example = examples.linear 
@@ -77,11 +77,11 @@ args = [H,delta]
 ## Smooth examples  
 ##      (finite difference solution only)
 #------------------------------------------------------------------------------
-# Example = examples.Sinusoid
-# H=1
-# delta = 1/4
-# L=4 #k=2pi/L
-# args = [H, delta, L]
+Example = examples.Sinusoid
+H=1
+delta = 1/4
+L=4 #k=2pi/L
+args = [H, delta, L]
 
 # Example = examples.LambdaBump 
 # lam=-1/2
@@ -132,6 +132,7 @@ solver = control.Reynolds_Solver(Example, BC, args)
 
 N = 100
 solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# print(ps.ps_1D[0], ps.ps_1D[50], ps.ps_1D[100], ps.ps_1D[150],ps.ps_1D[200],ps.ps_1D[250],ps.ps_1D[300])
 # solver.pwc_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 solver.pwl_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
@@ -140,8 +141,8 @@ solver.pwl_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_o
 # if __name__ == '__main__':
 #     solver.pwc_schur_parallel_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
-# solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-
+solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# print(ps.ps_1D[0], ps.ps_1D[50], ps.ps_1D[100], ps.ps_1D[150],ps.ps_1D[200],ps.ps_1D[250],ps.ps_1D[300])
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
