@@ -36,6 +36,8 @@ class PerturbedReynSol:
 
         self.u0s = reyn_velocity.u /self.U_scale
         self.v0s = reyn_velocity.v /self.V_scale
+        
+        reyn_pressure.make_2D_ps(height)
         self.p0s = reyn_pressure.ps_2D /self.P_scale
         
         self.dP_reyn = reyn_pressure.dP

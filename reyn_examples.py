@@ -69,11 +69,10 @@ class BFS_deltaSmooth(PWL_Height):
         h = 1
         x0 = 0
         xf = 4
-        L = xf
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf], float)
         h_peaks = np.asarray(
-            [[0, h], [h, h], [h+(H-h)/2, h+(H-h)/2], [H, H], [H, 0]], float)
+            [[0, H], [H, H], [H+(h-H)/2, H+(h-H)/2], [h,h], [h, 0]], float)
         namestr = ''#f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}'
         titlestr = ''#f'$\delta$-BFS $\delta={delta :.3f}$, $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
@@ -186,10 +185,12 @@ class Sinusoid(SinusoidalHeight):
         xf = args[2]
 
         H = args[0]
-        h = args[1]
+        delta = args[1]
+        k = 2*np.pi/xf
+        
         namestr = ''
         # namestr = f'Sinusoid_H{H}h{h}'
-        super().__init__(x0, xf, N, H, h, namestr)
+        super().__init__(x0, xf, N, H, delta, k, namestr)
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 class LambdaBump(BumpHeight):

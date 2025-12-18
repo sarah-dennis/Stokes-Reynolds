@@ -32,6 +32,9 @@ class BFS_pwl(PWLinear):
         l = L/2
         x_peaks = [x0, l-delta, l, l+delta, xf]
         y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-h-(H-h)/2,yf-h-(H-h)/2],[0,0],[0,yf]]
+        
+        y_peaks=[[yf,0],[0,0],[yf-h-(H-h)/2,yf-h-(H-h)/2],[yf-h,yf-h],[yf-h,yf]]
+        
         namestr= f'BFS_pwl_H{H}L{L}d{delta}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
      

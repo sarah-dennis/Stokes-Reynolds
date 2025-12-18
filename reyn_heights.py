@@ -9,6 +9,7 @@ import numpy as np
 import random
 
 from domain import Height
+# import graphics
 #------------------------------------------------------------------------------
 # PWL Height
 #------------------------------------------------------------------------------
@@ -48,6 +49,29 @@ class PWL_Height(Height):
         # print(hs)
         
         return  hs, slopes, widths, i_peaks
+    
+def make_PWL(height):  
+    
+    N = height.N
+    N_regions = height.Nx-1
+    x_peaks = height.xs
+    h_peaks = np.zeros((height.Nx, 2))
+
+    h_peaks[0,0] = 0
+    
+    
+    for i in range(height.Nx-1):
+        
+        h_peaks[i,1] =  height.hs[i]
+        h_peaks[i+1,0] =  height.hs[i+1]
+        
+    
+    h_peaks[height.Nx-1,1] = 0
+
+    new_height = PWL_Height(height.x0, height.xf, N, N_regions, x_peaks, h_peaks, '')
+    
+    return new_height
+    
     
 #------------------------------------------------------------------------------
 # PWC Height
@@ -94,26 +118,6 @@ class PWC_Height(Height):#(PWL_Height):
             hs[i] = h_peaks[r,1]
         return  hs, widths, i_peaks
 
-    
-# def make_PWC(height):
-   
-#     N = int((height.Nx-1)/(height.xf-height.x0))
-
-#     x_peaks = np.linspace(height.x0, height.xf,height.Nx+1)
-#     h_peaks = np.zeros((height.Nx+1, 2))
-
-#     h_peaks[0,0] = height.hs[0]
-#     for i in range(height.Nx):
-#         h_step =height.hs[i]
-#         h_peaks[i, 1] = h_step
-#         h_peaks[i+1, 0] = h_step
-#     h_peaks[height.Nx,1] = height.hs[-1]
-    
-#     new_height = PWC_Height(height.x0, height.xf, N, height.Nx, x_peaks, h_peaks, '')
-#     new_height.widths = np.ones(height.Nx)/N
-
-#     return new_height
-
 def make_PWC(height):
 
     N = height.N
@@ -157,16 +161,17 @@ class RandomHeight(Height):
 #------------------------------------------------------------------------------   
 class SinusoidalHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
-    def __init__(self, x0, xf, N, H, h, filestr):
-        Nx = (xf-x0)*N + 1
+    def __init__(self, x0, xf, N, H, delta, k, filestr):
+        
         self.H = H
-        self.h = h
-        self.L = (xf-x0)
+        self.k = k
+        self.delta=delta
         
-        # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
+       
         y0 = 0
-        yf =max(h, H+h)
+        yf = H *(1+delta)
         
+        Nx = (xf-x0)*N + 1
         dx = 1/N
         xs = np.asarray([x0 + i*dx for i in range(Nx)])
         hs = np.asarray([self.h_fun(x) for x in xs])
@@ -175,8 +180,11 @@ class SinusoidalHeight(Height):
 
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
-    def h_fun(self, x):
-        return self.H/2 * (1 + np.cos(2*np.pi/self.L*(self.L/2 - x))) + self.h
+    # def h_fun(self, x):
+    #     return self.H/2 * (1 + np.cos(2*np.pi/self.L*(self.L/2 - x))) + self.h
+    
+    def h_fun(self,x):
+        return self.H *(1+self.delta*np.cos(self.k*x))
     
 class BumpHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))

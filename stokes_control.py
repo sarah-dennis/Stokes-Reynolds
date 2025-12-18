@@ -49,8 +49,8 @@ class Stokes_Solver:
         # plotting thresholds
 
         self.vel_max = 5
-        self.p_min=60
-        self.p_max=130
+        self.p_min=35
+        self.p_max=0
 
         
 #------------------------------------------------------------------------------

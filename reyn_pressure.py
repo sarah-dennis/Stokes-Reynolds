@@ -13,8 +13,8 @@ from numpy.linalg import solve as np_solve
 
 
 import reyn_pressure_finDiff as fd
-import reyn_pressure_pwlGMRes as pwlGMRes
-import reyn_pressure_schur as pwcSchur
+import reyn_pressure_pwl as pwl
+import reyn_pressure_pwc as pwc
 import reyn_pressure_adjusted
 
 
@@ -31,28 +31,23 @@ class Pressure:
             self.ps_1D = np_solve(mat, rhs)
         
         
-        # if ps_2D is not None:
-        #     self.ps_2D = ps_2D
-        # else:
-        #     self.ps_2D = self.make_2D_ps(height, ps_1D)
+        self.ps_2D = ps_2D # = None if ps_1D = ps_2D
         
-        
-        # self.dP = self.ps_2D[0,-1]- self.ps_2D[0,0]
         self.dP = self.ps_1D[-1]-self.ps_1D[0]
         
-        
-    def make_2D_ps(self,height,ps): # p(x,y) = p(x) 
-        ps_2D = np.zeros((height.Ny, height.Nx))
-        
-        for i in range(height.Nx):
-            for j in range(height.Ny):
+    def make_2D_ps(self, height): # p(x,y) = p(x) 
+         ps_2D = np.zeros((height.Ny, height.Nx))
+         
+         for i in range(height.Nx):
+             for j in range(height.Ny):
+                 
+                 y = height.ys[j]
+                 if y <= height.hs[i]:
+                     ps_2D[j,i] = self.ps_1D[i]
+                 else:
+                     ps_2D[j,i] = None
                 
-                y = height.ys[j]
-                if y <= height.hs[i]:
-                    ps_2D[j,i] = ps[i]
-                else:
-                    ps_2D[j,i] = None
-        return ps_2D
+         self.ps_2D = ps_2D
                     
 class FinDiff_ReynPressure(Pressure):
     def __init__(self, height, BC):
@@ -66,24 +61,29 @@ class PwlGMRes_ReynPressure(Pressure):
             
 
             
-        ps_1D = pwlGMRes.gmres_solve(height, BC)
+        ps_1D = pwl.gmres_solve(height, BC)
+        super().__init__(height, BC, ps_1D)
+        
+class PwlSchur_ReynPressure(Pressure):
+    def __init__(self, height, BC):
+            
+        ps_1D = pwl.schur_solve(height, BC)
         super().__init__(height, BC, ps_1D)
     
-class Schur_ReynPressure(Pressure):
+class PwcSchur_ReynPressure(Pressure):
     def __init__(self, height, BC): 
         
         # ps_1D = pwcSchur.schur_solve_parallel(height, BC)
 
-        ps_1D = pwcSchur.schur_solve(height, BC)
+        ps_1D = pwc.schur_solve(height, BC)
 
         super().__init__(height, BC, ps_1D)
         
-class Schur_parallel_ReynPressure(Pressure):
+class PwcSchur_parallel_ReynPressure(Pressure):
     def __init__(self, height, BC): 
         
-        ps_1D = pwcSchur.schur_solve_parallel(height, BC)
+        ps_1D = pwc.schur_solve_parallel(height, BC)
 
-        # ps_1D = pwcSchur.schur_solve(height, BC)
 
         super().__init__(height, BC, ps_1D)
 
