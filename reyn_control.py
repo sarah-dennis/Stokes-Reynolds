@@ -265,6 +265,8 @@ class Reynolds_Solver:
         p_title = solver_title +'\n' + paramstr
         p_labels = ["$p$", "$x$","$y$"]
            
+        graphics.plot_2D(pressure.ps_1D, height.xs, p_title, p_labels)
+        
         if scaled:
             x_scale = height.xs[-1]-height.xs[0]
             y_scale = min(height.hs)

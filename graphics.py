@@ -85,7 +85,7 @@ def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     pp.xlabel(axis_labels[0])
     
     pp.ylabel(axis_labels[1])
-    pp.ylim(0, 1.25*max(fs))
+    # pp.ylim(0, 1.25*max(fs))
     pp.minorticks_on()
     return fig
 

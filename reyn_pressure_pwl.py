@@ -26,10 +26,12 @@ def make_ps(height, BC, cs):
     k = 0
     cq = cs[0] #flux = -cq/12 #/visc
     cu = 6 * BC.U #*visc
-   
+    print(cs)
+
     for i in range(height.Nx):
         
         if xs[i] > x_peaks[k+1]:
+            print(xs[i])
             k += 1
         
         if slopes[k] != 0:
@@ -65,9 +67,9 @@ def make_rhs(height, BC):
 
     
     if slopes[N-1] != 0:
-        rhs[N] = -c / (hs[N,0]*slopes[N-1]) - BC.pN
+        rhs[N] = c / (hs[N,0]*slopes[N-1]) - BC.pN
     else:
-        rhs[N] = c * hs[N,0]**-2 * widths[N-1] - BC.pN
+        rhs[N] = -c * widths[N-1]/(hs[N,0]**2) - BC.pN
     
     for i in range(1, N-1):
         
@@ -134,7 +136,7 @@ class pwlLinOp(LinearOperator):
         if slopes[N-1] != 0:
             mv[N] = -v[N] + cq/(2 * hs[N,0]**2 * slopes[N-1])
         else:
-            mv[N] = -v[N] - cq * hs[N,0]**-3 * widths[N-1]
+            mv[N] = -v[N] - cq  * widths[N-1]/(hs[N,0]**3)
  
  
         for i in range(1, N):
@@ -193,7 +195,7 @@ def make_dinv_c_rhs(height, rhs): # [-D_inv @ C] and [D_inv @ rhs]
     if slopes[N-1] != 0:
         psum_c = 1/(2 * hs[N,0]**2 * slopes[N-1])
     else:
-        psum_c = -1 * hs[N,0]**-3 * widths[N-1]
+        psum_c = -1  * widths[N-1]/(hs[N,0]**3)
     dinv_c[N-1] = psum_c   
     
     psum_rhs =-rhs[N] #rhs[-1], length N+1, rhs[(i+1)]

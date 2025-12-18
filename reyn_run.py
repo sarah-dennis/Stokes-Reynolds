@@ -49,6 +49,12 @@ delta = 1
 args = [H,delta]
 
 
+# Example = examples.linear 
+# h0 = 1
+# m = 0
+# L = 4
+# args = [h0,m,L]
+
 # Example = examples.TriSlider
 # h_in=1
 # h=2
@@ -125,8 +131,8 @@ solver = control.Reynolds_Solver(Example, BC, args)
 
 
 N = 100
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-solver.pwc_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.pwc_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 solver.pwl_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
@@ -134,7 +140,7 @@ solver.pwl_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_o
 # if __name__ == '__main__':
 #     solver.pwc_schur_parallel_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
-solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+# solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 # solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)

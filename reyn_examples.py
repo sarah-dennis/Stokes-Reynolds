@@ -41,7 +41,19 @@ class BFS_2(PWC_Height):
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+class linear(PWL_Height):
+    def __init__(self, args, N):
+        h0,m,L = args
+        x0 = 0
+        xf = L
+        N_regions = 1
+        x_peaks= np.asarray([x0,xf])
+        h_peaks = np.asarray([[0,h0], [m*L + h0,0]])
+        namestr = ''
         
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
         
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
