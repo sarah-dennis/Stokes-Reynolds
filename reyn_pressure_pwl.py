@@ -181,15 +181,15 @@ def schur_solve(height, BC):
     
         
 
-def make_dinv_c_rhs(height, rhs): # [-D_inv @ C] and [D_inv @ rhs]
+def make_dinv_c_rhs(height, rhs): # make [-D_inv @ C] and [D_inv @ rhs]
     # d_inv_ij = {-1 : i<=j, 0 : i > j}
     slopes = height.slopes  
     widths = height.widths
     hs = height.h_peaks
     N = height.N_regions
-                          # C = rhs = [a,b,c,d,e]
-    dinv_c = np.zeros(N)  # = [e+d+c+b+a, e+d+c+b, e+d+c, e+d, e]
-    dinv_rhs = np.zeros(N) # = -[e+d+c+b+a, e+d+c+b, e+d+c, e+d, e]
+                         
+    dinv_c = np.zeros(N)  
+    dinv_rhs = np.zeros(N) 
     # e: dP bc
     psum_c=0
     psum_rhs=0
