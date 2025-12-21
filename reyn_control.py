@@ -26,14 +26,12 @@ y_start = 0
 x_stop= x_start + lenx
 y_stop = y_start + leny
 
-        # colorbar min max
+# colorbar min max
 vel_max = 5
-p_min= 0
-p_max = 35
+p_min= 60
+p_max = 110
         
 log_linthresh=1e-8  
-
-warnings_on=False
         
 class Reynolds_Solver: 
     def __init__(self, Example, BC, args=None):
@@ -41,8 +39,6 @@ class Reynolds_Solver:
         self.args = args
         
         self.BC = BC        
-        
-
         
 
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
@@ -55,6 +51,7 @@ class Reynolds_Solver:
 
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
         tf = time.time()
+        
         reyn_velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
         print('fd time: ', tf-t0)
         
@@ -196,8 +193,7 @@ class Reynolds_Solver:
             if isinstance(self.BC, bc.Mixed):
                 raise Exception(f"adj.-TG solver prescribed Q={self.BC.Q:.1f} for P_Reyn; Q for P_adj + P_reyn will differ")
         except Exception as e:
-            if warnings_on:
-                print(e)
+            print(e)
         tf = time.time()        
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
 
@@ -261,7 +257,7 @@ class Reynolds_Solver:
             pressure.make_2D_ps(height)
             
         # dps = [pressure.ps_1D[i] - pressure.ps_1D[i+1] for i in range(height.Nx-1)]
-        paramstr = "$Q=%.6f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, -pressure.dP)
+        paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, -pressure.dP)
         p_title = solver_title +'\n' + paramstr
         p_labels = ["$p$", "$x$","$y$"]
            
@@ -293,7 +289,7 @@ class Reynolds_Solver:
     
     def v_plot(self, BC, height, velocity, pressure, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
         dP = pressure.dP 
-        paramstr = "$Q=%.6f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.BC.U, -dP)
+        paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.BC.U, -dP)
         v_title = solver_title + '\n' + paramstr
         v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
         if scaled:

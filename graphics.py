@@ -10,7 +10,7 @@ import numpy as np
 from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
-from matplotlib.ticker import MultipleLocator
+
 #------------------------------------------------------------------------------
 # COLOURINGS
 #------------------------------------------------------------------------------
@@ -46,9 +46,9 @@ colour_bar_pad = 0.05
 #------------------------------------------------------------------------------
 # RESOLUTION
 #------------------------------------------------------------------------------
-dpi=800
+dpi=1200
 
-n_contours = 100
+n_contours = 200
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5

@@ -179,17 +179,20 @@ class SinusoidalHeight(Height):
 
         super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
 
-    # def h_fun(self, x):
-    #     return self.H/2 * (1 + np.cos(2*np.pi/self.L*(self.L/2 - x))) + self.h
     
     def h_fun(self,x):
         return self.H *(1+self.delta*np.cos(self.k*x))
+    
+    def h_recip_deriv_fun(self,x):
+        num = self.delta * self.k  * np.sin(self.k * x)
+        dnm = self.H * (1 + self.delta * np.cos(self.k*x))**2
+        return  num/dnm
     
 class BumpHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, x0, xf, N, lam, H, h0, filestr):
         Nx = (xf-x0)*N + 1
-        # h_str = "./examples/" + f"sin_h{h_avg}_r{r}_k{k}_U{U}_dP{dP}_N{N}"
+
         y0 = 0
         
         self.H=H         

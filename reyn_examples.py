@@ -76,11 +76,11 @@ class pwl_discont_wave(PWL_Height):
         
 class BFS_deltaSmooth(PWL_Height):
     def __init__(self, args, N):
-        H, delta = args
-        l = 2
+        H, delta, L = args
+        l = L/2
         h = 1
         x0 = 0
-        xf = 4
+        xf = L
         N_regions = 4
         x_peaks = np.asarray([x0, l-delta, l, l+delta, xf], float)
         h_peaks = np.asarray(

@@ -189,14 +189,14 @@ def make_px_pxx(height, ps):
             pxxs[j,i] = pxx
                
     
-    for i in height.i_peaks[1:-1]:
-        for j in range(height.Ny):
-            h = height.ys[j]
-            pxxs[j,i-4: i+5] = dm.avg_5x(pxxs[j,i-5 : i+6])
-            pxs[j,i-3 : i+4] = dm.avg_4x(pxs[j,i-4 : i+5])
-            # pxxs[j,i-1:i+2] = dm.avg_2x(pxxs[j,i-2 : i+3]) 
-            # p3xs[i-2:i+3] =dm.avg_3x(p3xs[i-3 : i+4]) 
-            # p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
+    # for i in height.i_peaks[1:-1]:
+    #     for j in range(height.Ny):
+    #         h = height.ys[j]
+    #         pxxs[j,i-4: i+5] = dm.avg_5x(pxxs[j,i-5 : i+6])
+    #         pxs[j,i-3 : i+4] = dm.avg_4x(pxs[j,i-4 : i+5])
+    #         # pxxs[j,i-1:i+2] = dm.avg_2x(pxxs[j,i-2 : i+3]) 
+    #         # p3xs[i-2:i+3] =dm.avg_3x(p3xs[i-3 : i+4]) 
+    #         # p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
     # graphics.plot_2D_multi([pxs[5], pxxs[5]], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
 
     return pxs, pxxs     
