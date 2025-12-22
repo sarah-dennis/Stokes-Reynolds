@@ -200,9 +200,15 @@ class Sinusoid(SinusoidalHeight):
         delta = args[1]
         k = 2*np.pi/xf
         
+        self.H = H
+        self.delta = delta
+        self.k= k
+        self.Nx = N * xf
         namestr = ''
         # namestr = f'Sinusoid_H{H}h{h}'
         super().__init__(x0, xf, N, H, delta, k, namestr)
+        
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------
 class LambdaBump(BumpHeight):

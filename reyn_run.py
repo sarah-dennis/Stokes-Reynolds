@@ -121,6 +121,10 @@ U = 0
 
 # mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
 Q = 1
+
+#sinuosoid Q for DP=0
+# Q = (U*H/2) * (1-(delta**2))/(1+(delta**2)/2)
+
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
@@ -151,7 +155,7 @@ solver = control.Reynolds_Solver(Example, BC, args)
 # solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 # #------------------------------------------------------------------------------
-tests = 12
+tests = 12                                                                                                                                                                                                                                                                         
 
 dPs_err = np.zeros(tests)
 l1Ps_err = np.zeros(tests)
@@ -161,6 +165,10 @@ linfPs_err = np.zeros(tests)
 pwc_schur_times= np.zeros(tests)
 pwl_schur_times=np.zeros(tests)
 fd_times= np.zeros(tests)
+
+dPs_err_fd= np.zeros(tests)
+dPs_err_pwc= np.zeros(tests)
+dPs_err_pwl= np.zeros(tests)
 
 Ns = np.zeros(tests)
 k_0=0 # start with N = 2**(k0 + 1)
@@ -173,11 +181,18 @@ for k in range(tests):
     pwc_schur_p, pwc_schur_v, pwc_schur_t = solver.pwc_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     pwl_schur_p, pwl_schur_v, pwl_schur_t = solver.pwl_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
+    # sinus_ps = solver.sinusoid_exact_sol(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
     
 
-    fd_times[k] = fd_t
-    pwl_schur_times[k] = pwl_schur_t
+    fd_times[k] = fd_t    
     pwc_schur_times[k] = pwc_schur_t
+    pwl_schur_times[k] = pwl_schur_t
+
+    
+    # dPs_err_pwl[k] = abs(pwl_schur_p.dP) 
+    # dPs_err_pwc[k] = abs(pwc_schur_p.dP)
+    # dPs_err_fd[k] = abs(fd_p.dP)
+
     
     # dPs_err[k] = abs(fd_p.dP - pwc_schur_p.dP) 
     # l1Ps_err[k] = sum(abs(fd_p.ps_1D-pwc_schur_p.ps_1D))/N 
@@ -185,10 +200,10 @@ for k in range(tests):
     # linfPs_err[k] = max(abs(fd_p.ps_1D-pwc_schur_p.ps_1D))
 
     
-    # dPs_err[k] = abs(pwl_schur_p.dP - pwc_schur_p.dP) 
-    # l1Ps_err[k] =sum(abs(pwl_schur_p.ps_1D-pwc_schur_p.ps_1D))/N 
-    # l2Ps_err[k] = (sum((pwl_schur_p.ps_1D-pwc_schur_p.ps_1D)**2)/N)**(1/2)  
-    # linfPs_err[k] = max(abs(pwl_schur_p.ps_1D-pwc_schur_p.ps_1D)) 
+    # dPs_err[k] = abs(pwl_schur_p.dP) 
+    # l1Ps_err[k] =sum(abs(pwl_schur_p.ps_1D-sinus_ps))/N 
+    # l2Ps_err[k] = (sum((pwl_schur_p.ps_1D-sinus_ps)**2)/N)**(1/2)  
+    # linfPs_err[k] = max(abs(pwl_schur_p.ps_1D-sinus_ps)) 
 
 
     # dPs_err[k] = abs(pwl_schur_p.dP - fd_p.dP) 
@@ -204,4 +219,9 @@ for k in range(tests):
 
 # graphics.plot_log_multi([dPs_err, l1Ps_err, l2Ps_err, linfPs_err], Ns, 'Convergence Pressure Error', ['dP err', '$l_1$ $p$ error', '$l_2$ $p$ err', '$l_\infty$ $p$ err'], ['N', 'error'], log_x=True, loc='upper', bigO_on=True)
 
-graphics.plot_2D_multi([fd_times, pwc_schur_times, pwl_schur_times], Ns, 'Run Time', ['FD', 'pwc schur', 'pwl schur'], ['N', 'run time'], loc='left')
+graphics.plot_2D_multi([fd_times, pwc_schur_times, pwl_schur_times], Ns, 'Run Time', ['FD', 'PWC Schur', 'PWL Schur'], ['$1/\Delta x$', 'run time (s)'], loc='left')
+# graphics.plot_2D_multi([pwc_schur_times, pwl_schur_times], Ns, 'Run Time', ['pwc schur', 'pwl schur'], ['$1/\Delta x$', 'run time (s)'], loc='left')
+
+# graphics.plot_2D(pwl_schur_times, Ns, 'Run Time PWL Schur Complement', ['$1/\Delta x$', 'run time (s)'], color='forestgreen')
+
+# graphics.plot_log_multi([dPs_err_fd, dPs_err_pwc, dPs_err_pwl], Ns, 'Convergence Pressure Error', ['fd', 'pwc_schur', 'pwl_schur'], ['N', 'error'], log_x=True, loc='upper', bigO_on=True)

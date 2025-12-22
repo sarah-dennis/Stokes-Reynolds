@@ -185,7 +185,7 @@ class SinusoidalHeight(Height):
     
     def h_recip_deriv_fun(self,x):
         num = self.delta * self.k  * np.sin(self.k * x)
-        dnm = self.H * (1 + self.delta * np.cos(self.k*x))**2
+        dnm = -self.H * (1 + self.delta * np.cos(self.k*x))**2
         return  num/dnm
     
 class BumpHeight(Height): 

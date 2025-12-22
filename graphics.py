@@ -87,6 +87,7 @@ def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
     pp.ylabel(axis_labels[1])
     # pp.ylim(0, 1.25*max(fs))
     pp.minorticks_on()
+   
     return fig
 
 def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri'):

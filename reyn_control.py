@@ -40,6 +40,8 @@ class Reynolds_Solver:
         
         self.BC = BC        
         
+        
+
 
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
         solver_title = "Reynolds Finite Difference"
@@ -51,15 +53,16 @@ class Reynolds_Solver:
 
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
         tf = time.time()
-        
-        reyn_velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
+    
+       
         print('fd time: ', tf-t0)
-        
-        if plot:
-            self.p_plot(height, reyn_pressure, reyn_velocity.Q, solver_title, scaled, zoom)
-            self.v_plot(self.BC, height, reyn_velocity, reyn_pressure, solver_title, scaled, zoom, inc, uv)
+        velocity = None
+        if plot: 
+            velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
+            self.p_plot(height, reyn_pressure, velocity.Q, solver_title, scaled, zoom)
+            self.v_plot(self.BC, height, velocity, reyn_pressure, solver_title, scaled, zoom, inc, uv)
 
-        return reyn_pressure, reyn_velocity, tf-t0
+        return reyn_pressure, velocity, tf-t0
 
     def pwc_schur_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         solver_title = "Reynolds PWC Schur Complement"
@@ -70,17 +73,19 @@ class Reynolds_Solver:
             height = make_PWC(height)
     
                 
-        height.hxs = np.zeros(height.Nx)
+        
         
         t0 = time.time()
         pressure = rp.PwcSchur_ReynPressure(height, self.BC)
         tf = time.time()
         print('pwc schur time: ', tf-t0)
         
-        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
+       
+        velocity = None
+        if plot: 
+             height.hxs = np.zeros(height.Nx)
+             velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
      
-         
-        if plot:
              self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
              self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
@@ -102,16 +107,19 @@ class Reynolds_Solver:
         tf = time.time()
         print('pwl schur time: ', tf-t0)
         
-        height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
-        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
-    
         
+        
+    
+        velocity = None
         if plot:
+            height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
+            velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
             self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
             self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
         
         return pressure, velocity, tf-t0
+    
     def pwc_schur_parallel_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
         solver_title = "Reynolds Schur Complement"
         
@@ -127,10 +135,11 @@ class Reynolds_Solver:
         pressure = rp.PwcSchur_parallel_ReynPressure(height, self.BC)
         tf = time.time()
         print('schur parallel time: ', tf-t0)
-        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
+        
      
-         
-        if plot:
+        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
+        if plot:        
+             
              self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
              self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
@@ -218,8 +227,7 @@ class Reynolds_Solver:
             if isinstance(self.BC, bc.Fixed):
                 raise Exception(f"pert. solver prescribed dP={self.BC.dP:.1f} for P_0; dP for P_k>0 will differ")
         except Exception as e:
-            if warnings_on:
-                print(e)
+            print(e)
 
         
     
@@ -335,3 +343,14 @@ class Reynolds_Solver:
             # qs = velocity.get_adj_flux(BC,height, pressure) #adj
             # qs = velocity.get_reyn_flux(BC, height, pressure) #reyn
             graphics.plot_2D(qs, height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])
+
+    def sinusoid_exact_sol(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
+        height = self.Example(self.args, N)
+       
+        ps = np.zeros(height.Nx)
+        
+        h_recip_dx = [height.h_recip_deriv_fun(x) for x in height.xs]
+        for i in range(height.Nx):
+            h = height.hs[i] 
+            ps[i] = -6*self.BC.U * (h + height.H)/((height.k * height.H)**2 * (2+height.delta**2)) * h_recip_dx[i]
+        return ps
