@@ -40,7 +40,7 @@ class PerturbedReynSol:
         reyn_pressure.make_2D_ps(height)
         self.p0s = reyn_pressure.ps_2D /self.P_scale
         
-        self.dP_reyn = reyn_pressure.dP
+        #self.dP_reyn = reyn_pressure.dP
         
         delta = self.y_scale/self.x_scale
 
@@ -56,7 +56,7 @@ class PerturbedReynSol:
             pert2_vs_2D = (self.v0s + (delta**2) * self.v2s) *self.V_scale
             self.pert2_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
             self.pert2_velocity = Velocity(reyn_velocity.Q, pert2_us_2D, pert2_vs_2D)
-            self.dP_pert2 = (self.p2s[0,-1]-self.p2s[0,0])
+            #self.dP_pert2 = (self.p2s[0,-1]-self.p2s[0,0])
 
         if order > 2: 
 
@@ -69,7 +69,7 @@ class PerturbedReynSol:
         
             self.pert4_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
             self.pert4_velocity = Velocity(reyn_velocity.Q, pert4_us_2D, pert4_vs_2D)
-            self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
+            #self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
     
     
         

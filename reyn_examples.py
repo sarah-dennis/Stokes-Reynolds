@@ -7,7 +7,7 @@ Created on Wed Feb 22 10:01:42 2023
 
 import numpy as np
 
-from reyn_heights import PWC_Height,  PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight, LogisticHeight
+from reyn_heights import PWC_Height,  PWL_Height, SinusoidalHeight, CircleHeight, BumpHeight, LogisticHeight, SinusoidalHeight_2
 # -----------------------------------------------------------------------------------------------------------------------------------
 #   ____________
 #  |_____       |
@@ -194,11 +194,17 @@ class Cylinder(CircleHeight):
 class Sinusoid(SinusoidalHeight):
     def __init__(self, args, N):
         x0 = 0
-        xf = args[2]
+        
+        
+        # xf = args[2]
+        
+        # k = 2*np.pi/xf
+        k = args[2] * 2*np.pi
+        xf = args[3]
 
         H = args[0]
         delta = args[1]
-        k = 2*np.pi/xf
+
         
         self.H = H
         self.delta = delta
@@ -207,7 +213,31 @@ class Sinusoid(SinusoidalHeight):
         namestr = ''
         # namestr = f'Sinusoid_H{H}h{h}'
         super().__init__(x0, xf, N, H, delta, k, namestr)
+
+class Sinusoid_2(SinusoidalHeight_2):
+    def __init__(self, args, N):
+
         
+        # k = 2*np.pi/xf
+
+
+        H = args[0]
+        delta = args[1]
+        k = args[2]
+        l = args[3]
+        L = args[4]
+        
+        x0 = -L
+        xf = L
+    
+        
+        self.H = H
+        self.delta = delta
+        self.k= k
+        self.Nx = N * xf
+        namestr = ''
+        # namestr = f'Sinusoid_H{H}h{h}'
+        super().__init__(x0, xf, N, H, delta, k, l, L, namestr)        
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------

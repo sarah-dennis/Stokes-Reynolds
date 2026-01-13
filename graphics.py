@@ -39,7 +39,7 @@ colour_map_mesh = colors.ListedColormap(mesh_cmap)
 #---------LEGEND---------------------------------------------------------------
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-colour_bar_scale=0.02 # for long figures like H=2, L=4
+colour_bar_scale=0.022 # for long figures like H=2, L=4
 # colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
 
 colour_bar_pad = 0.05
@@ -48,7 +48,7 @@ colour_bar_pad = 0.05
 #------------------------------------------------------------------------------
 dpi=1200
 
-n_contours = 200
+n_contours = 20
 contour_width = 0.25
 stream_width = 1
 line_width = 1.5
@@ -73,11 +73,10 @@ pp.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 #------------------------------------------------------------------------------
 # LINE PLOTS
 #------------------------------------------------------------------------------
-def plot_2D(fs, xs, title, axis_labels, color='darkmagenta'):
+def plot_2D(fs, xs, title, axis_labels, color='darkmagenta', marker='o'):
     fig = pp.figure()
     pp.rcParams['figure.dpi'] = dpi
-    # marker = None
-    marker = 'o'
+
     pp.plot(xs, fs, color=color, linewidth=.8, marker=marker)
 
     pp.title(title, fontweight="bold")
@@ -113,7 +112,7 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.35, 0.875))
+        fig.legend(bbox_to_anchor=(0.3, 0.875))
     elif loc=='lower':
         
         fig.legend(bbox_to_anchor=(0.35, 0.35))
@@ -166,26 +165,29 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
 
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left', log_x=False, log_y=True):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left', log_x=False, log_y=True, colors='pri'):
     pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
     
-    ax = fig.add_subplot()
-    colors = [ 'forestgreen', 'darkorchid',  'firebrick','royalblue','darkorange']    
+    ax = fig.add_subplot() 
+    if colors== 'pri':
+         cs = ['r','b', 'forestgreen','darkmagenta', 'darkorange']
+    else: 
+         cs=['forestgreen', 'darkmagenta', 'darkorgange']
     markers = ['D', 'o', 's', '*', 'H', 'X']
 
     pp.rcParams["lines.linewidth"] =line_width
     for i in range(len(fs)):
-        ax.plot(xs, fs[i], label=f_labels[i], color=colors[i], marker=markers[i], markevery=1)
+        ax.plot(xs, fs[i], label=f_labels[i], color=cs[i], marker=markers[i], markevery=1)
     
     
     # reference lines
     if bigO_on:
         O1 = 1
         O2 = 1
-        ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(%s^{-1})$"%ax_labels[0], color='darkgrey')    
-        ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(%s^{-2})$"%ax_labels[0], color='k')
+        ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(\Delta x)$", color='darkgrey')    
+        ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(\Delta x^2)$", color='k')
     
     if log_x:
         ax.set_xscale('log')
@@ -225,7 +227,8 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     
     X, Y = np.meshgrid(xs, ys)
 
-    stream_density=[ys.shape[0]/xs.shape[0],1]
+    # stream_density=[ys.shape[0]/xs.shape[0],1]
+    stream_density=[1/2,1]
     pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows

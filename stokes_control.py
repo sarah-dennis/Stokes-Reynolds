@@ -27,7 +27,7 @@ x_stop= x_start + lenx
 y_stop = y_start + leny
 
 #-> log plots
-log_linthresh=1e-5  
+log_linthresh=1e-5
 log_cmap_on = False
 
 #---------------------------------------------------------------------------
@@ -50,8 +50,7 @@ class Stokes_Solver:
 
         self.vel_max = 5
         self.p_min=60
-        self.p_max=110
-
+        self.p_max=120
         
 #------------------------------------------------------------------------------
     def new_run(self, N):
@@ -207,7 +206,7 @@ class Stokes_Solver:
         dp, res = pressure.resistance(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta P =%.2f$'%(-dp)
+        dp_str = ', $\Delta P =%.2f$'%(dp)
 
     
         ax_labels_p = ['$p$', '$x$', '$y$']

@@ -11,10 +11,18 @@ def resistance(ex, p):
     p_2D = p.reshape((ex.Ny,ex.Nx))
     
 
-    j_mid_in = ex.y_peaks[0][0] -(ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
-    j_mid_out = ex.y_peaks[-1][0]-(ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
+    # j_mid_in = ex.y_peaks[0][0] -(ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
+    # j_mid_out = ex.y_peaks[-1][0]-(ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
 
-    dp= p_2D[int(j_mid_out),-1] - p_2D[int(j_mid_in),0]
+    # dp= p_2D[int(j_mid_out),-1] - p_2D[int(j_mid_in),0]
+    
+
+    # dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
+    # h_in = ex.yf - ex.y_peaks[0][0]
+    # h_out = ex.yf - ex.y_peaks[-1][0]
+    dp = (sum(p_2D[:,0])/ex.H_in - sum(p_2D[:,-1])/ex.H_out)*ex.dy
+    
+    
     if ex.flux!=0:
         r= dp/ex.flux
         return dp, r

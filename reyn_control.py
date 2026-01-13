@@ -20,7 +20,7 @@ i_test_scale=2
 
 
 lenx = 4
-leny = 2
+leny = 1
 x_start = 6
 y_start = 0
 x_stop= x_start + lenx
@@ -28,9 +28,9 @@ y_stop = y_start + leny
 
 # colorbar min max
 vel_max = 5
-p_min= 60
-p_max = 110
-        
+p_min= 200
+p_max = 60
+
 log_linthresh=1e-8  
         
 class Reynolds_Solver: 
@@ -44,7 +44,7 @@ class Reynolds_Solver:
 
 
     def fd_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        solver_title = "Reynolds Finite Difference"
+        solver_title = "Reynolds"
         
         height = self.Example(self.args, N)
 
@@ -55,17 +55,17 @@ class Reynolds_Solver:
         tf = time.time()
     
        
-        print('fd time: ', tf-t0)
-        velocity = None
+        # print('fd time: ', tf-t0)
+        # velocity = None
+        velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
         if plot: 
-            velocity = rv.ReynVelocity(height, self.BC, ps=reyn_pressure.ps_1D)
             self.p_plot(height, reyn_pressure, velocity.Q, solver_title, scaled, zoom)
             self.v_plot(self.BC, height, velocity, reyn_pressure, solver_title, scaled, zoom, inc, uv)
 
         return reyn_pressure, velocity, tf-t0
 
     def pwc_schur_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
-        solver_title = "Reynolds PWC Schur Complement"
+        solver_title = "Reynolds"
         
         height = self.Example(self.args, N)
 
@@ -78,21 +78,21 @@ class Reynolds_Solver:
         t0 = time.time()
         pressure = rp.PwcSchur_ReynPressure(height, self.BC)
         tf = time.time()
-        print('pwc schur time: ', tf-t0)
+        # print('pwc schur time: ', tf-t0)
         
        
-        velocity = None
+        # velocity = None
+        
+        height.hxs = np.zeros(height.Nx)
+        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
         if plot: 
-             height.hxs = np.zeros(height.Nx)
-             velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
-     
              self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
              self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
         return pressure, velocity, tf-t0
     
     def pwl_schur_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        solver_title = "Reynolds PWL Schur Complement" #" Piecewise Linear"
+        solver_title = "Reynolds" #" Piecewise Linear"
         
         height = self.Example(self.args,N)
         
@@ -105,15 +105,15 @@ class Reynolds_Solver:
         t0 = time.time()
         pressure = rp.PwlSchur_ReynPressure(height, self.BC)
         tf = time.time()
-        print('pwl schur time: ', tf-t0)
+        # print('pwl schur time: ', tf-t0)
         
         
         
     
-        velocity = None
+        # velocity = None
+        height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
+        velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
         if plot:
-            height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
-            velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
             self.p_plot(height, pressure, velocity.Q, solver_title, scaled, zoom)
             self.v_plot(self.BC, height, velocity, pressure, solver_title, scaled, zoom, inc, uv)
 
@@ -121,7 +121,7 @@ class Reynolds_Solver:
         return pressure, velocity, tf-t0
     
     def pwc_schur_parallel_solve(self, N, plot=True, scaled=False, zoom=False, inc=False, uv=False):
-        solver_title = "Reynolds Schur Complement"
+        solver_title = "Reynolds"
         
         height = self.Example(self.args, N)
 
@@ -134,7 +134,7 @@ class Reynolds_Solver:
 
         pressure = rp.PwcSchur_parallel_ReynPressure(height, self.BC)
         tf = time.time()
-        print('schur parallel time: ', tf-t0)
+        # print('schur parallel time: ', tf-t0)
         
      
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
@@ -146,7 +146,7 @@ class Reynolds_Solver:
         return pressure, velocity, tf-t0
        
     def pwl_gmres_solve(self, N, plot=True, scaled=False, zoom=False,inc=False, uv=False):
-        solver_title = "Reynolds GMRes" #" Piecewise Linear"
+        solver_title = "Reynolds" #" Piecewise Linear"
         
         height = self.Example(self.args,N)
         
@@ -159,7 +159,7 @@ class Reynolds_Solver:
         pressure = rp.PwlGMRes_ReynPressure(height, self.BC)
         tf = time.time()
         
-        print('pwl gmres time: ', tf-t0)
+        # print('pwl gmres time: ', tf-t0)
         height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
         velocity = rv.ReynVelocity(height, self.BC, ps=pressure.ps_1D)
     
@@ -197,12 +197,8 @@ class Reynolds_Solver:
         height.h2xs = dm.center_second_diff(height.hs, height.Nx, height.dx)
         height.h3xs = dm.center_third_diff(height.hs, height.Nx, height.dx)
         
-        try:
-            adj_pressure = rp.TGAdj_ReynPressure(height, self.BC)
-            if isinstance(self.BC, bc.Mixed):
-                raise Exception(f"adj.-TG solver prescribed Q={self.BC.Q:.1f} for P_Reyn; Q for P_adj + P_reyn will differ")
-        except Exception as e:
-            print(e)
+        adj_pressure = rp.TGAdj_ReynPressure(height, self.BC)
+
         tf = time.time()        
         adj_velocity = rv.TGAdj_ReynVelocity(height, self.BC, adj_pressure)
 
@@ -221,15 +217,8 @@ class Reynolds_Solver:
         height.h2xs = dm.center_second_diff(height.hs, height.Nx, height.dx)
         height.h3xs = dm.center_third_diff(height.hs, height.Nx, height.dx)
         
-        try:
-            reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
+        reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
 
-            if isinstance(self.BC, bc.Fixed):
-                raise Exception(f"pert. solver prescribed dP={self.BC.dP:.1f} for P_0; dP for P_k>0 will differ")
-        except Exception as e:
-            print(e)
-
-        
     
         reyn_velocity = rv.ReynVelocity(height, self.BC, reyn_pressure.ps_1D)                   
         
@@ -261,25 +250,38 @@ class Reynolds_Solver:
 
     
     def p_plot(self, height, pressure, flux, solver_title, scaled=False, zoom=False):
-        if pressure.ps_2D is None:
-            pressure.make_2D_ps(height)
-            
-        # dps = [pressure.ps_1D[i] - pressure.ps_1D[i+1] for i in range(height.Nx-1)]
-        paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, -pressure.dP)
-        p_title = solver_title +'\n' + paramstr
-        p_labels = ["$p$", "$x$","$y$"]
+
            
-        graphics.plot_2D(pressure.ps_1D, height.xs, p_title, p_labels)
+        # graphics.plot_2D(pressure.ps_1D, height.xs, p_title, p_labels)
+        x_scale = height.xs[-1]-height.xs[0]
+        y_scale = max(height.hs)
+        u_scale = flux/y_scale
+        p_scale = flux*x_scale/y_scale #*visc
+        
+        
+        ps_2D = np.nan_to_num(pressure.ps_2D)
+
+        dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
+        
+        dp_dim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy
+        
         
         if scaled:
             x_scale = height.xs[-1]-height.xs[0]
-            y_scale = min(height.hs)
+            y_scale = max(height.hs)
+            u_scale = flux/y_scale
             p_scale = flux*x_scale/y_scale #*visc
+            
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(1,self.BC.U/u_scale, dp_nondim)
+            p_title = solver_title + '\n' + paramstr
+            p_labels =  ['$P$','$X$', '$Y$']
         
             graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=p_min/p_scale, vmax=p_max/p_scale, log_cmap=False)
         
         else:
-         
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, dp_dim)
+            p_title = solver_title +'\n' + paramstr
+            p_labels = ["$p$", "$x$","$y$"]
             graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False)
         
         if zoom:
@@ -296,20 +298,38 @@ class Reynolds_Solver:
       
     
     def v_plot(self, BC, height, velocity, pressure, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
-        dP = pressure.dP 
-        paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta   P=%.2f$"%(velocity.Q, self.BC.U, -dP)
-        v_title = solver_title + '\n' + paramstr
-        v_ax_labels =  ['$|(  u,  v)|_2$','$  x$', '$  y$'] 
+                
+        x_scale = height.xs[-1]-height.xs[0]
+        y_scale = max(height.hs)
+        u_scale = velocity.Q/y_scale
+        v_scale = velocity.Q/x_scale
+        p_scale = velocity.Q*x_scale/y_scale #*visc
+        
+
+        
+        ps_2D = np.nan_to_num(pressure.ps_2D)
+        
+        dp = ps_2D[0,0]-ps_2D[0,-1]
+        
+        dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
+        
+        dp_dim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy
+        
+        
         if scaled:
-            x_scale = height.xs[-1]-height.xs[0]
-            y_scale = min(height.hs)
-            u_scale = velocity.Q/y_scale
-            v_scale = velocity.Q/x_scale
+            
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(1, self.BC.U/u_scale, dp_nondim)
+            v_title = solver_title + '\n' + paramstr
+            v_ax_labels =  ['$|(U, V)|_2$','$X$', '$Y$']
            
             uv_mag = np.sqrt((velocity.u/u_scale)**2 + (velocity.v/v_scale)**2)
             graphics.plot_stream_heat(velocity.u/u_scale, velocity.v/y_scale, height.xs/x_scale, height.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max/velocity.Q, log_cmap=False)
 
         else:
+           
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.Q, self.BC.U, dp_dim)
+            v_title = solver_title + '\n' + paramstr
+            v_ax_labels =  ['$|(  u,  v)|_2$','$x$', '$y$']  
            
             uv_mag = np.sqrt((velocity.u)**2 + (velocity.v)**2)
             graphics.plot_stream_heat(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)

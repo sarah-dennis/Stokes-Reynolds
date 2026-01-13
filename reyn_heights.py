@@ -188,6 +188,40 @@ class SinusoidalHeight(Height):
         dnm = -self.H * (1 + self.delta * np.cos(self.k*x))**2
         return  num/dnm
     
+class SinusoidalHeight_2(Height):
+    def __init__(self, x0, xf, N, H, delta, k, l, L, filestr):
+        
+        self.H = H
+        self.k = k
+        self.delta = delta
+        self.l = l
+        self.L = L
+        self.period = k*np.pi/l
+        
+        y0 = 0
+        yf = H *(1+delta)
+        
+        
+        Nx = 2*L*N + 1
+        dx = 1/N
+        xs = np.asarray([x0 + i*dx for i in range(Nx)])
+        hs = np.asarray([self.h_fun(x) for x in xs])
+        
+        i_peaks = [0, Nx-1]
+  
+        super().__init__(x0, xf, y0, yf, N, hs, i_peaks, filestr)
+  
+    
+    def h_fun(self,x):
+        if abs(x) > self.l:
+            if self.k%2 == 0:
+                return self.H *(1+self.delta)
+            else:
+                return self.H *(1-self.delta)
+        else:
+            return self.H *(1+self.delta*np.cos(self.period * x))
+        
+
 class BumpHeight(Height): 
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, x0, xf, N, lam, H, h0, filestr):

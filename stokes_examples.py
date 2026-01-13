@@ -31,7 +31,6 @@ class BFS_pwl(PWLinear):
         yf = H
         l = L/2
         x_peaks = [x0, l-delta, l, l+delta, xf]
-        y_peaks=[[yf,yf-h],[yf-h,yf-h],[yf-h-(H-h)/2,yf-h-(H-h)/2],[0,0],[0,yf]]
         
         y_peaks=[[yf,0],[0,0],[yf-h-(H-h)/2,yf-h-(H-h)/2],[yf-h,yf-h],[yf-h,yf]]
         
@@ -74,29 +73,54 @@ class Logistic(PWLinear):
      
 class Sinusoid(PWLinear):
     def __init__(self, args, U, Q, Re, N):
-        H, h,  L, delta = args
-        self.h=h
+        H, delta, k,  l, L = args
+        # self.h=h
         self.H=H
-        self.k = delta
-
+        self.k = k
+        self.delta = delta
+        self.l = l
         self.L = L
+        self.period = np.pi * k / l
+        
         self.x0 = -self.L
         self.xf = self.L
+        
+        y0 = 0
+        yf = self.H*(1+self.delta)
+        self.yf = yf
+        
+        
         x_peaks = [self.x0 + i/N for i in range (int(1 + 2*self.L*N))]
         h_peaks = [self.h_fun(x) for x in x_peaks]
-        y_peaks_L = [max(h_peaks)+ self.h] + h_peaks[:-1]
-        y_peaks_R =  h_peaks[1:] + [max(h_peaks)+ self.h]
+        
+        
+        y_peaks_L = [0] + h_peaks[:-1]
+        # y_peaks_L = [max(h_peaks)+ self.h] + h_peaks[:-1]
+        # y_peaks_R =  h_peaks[1:] + [max(h_peaks)+ self.h]
+        y_peaks_R = h_peaks[1:] + [0]
 
         y_peaks = [[y_L, y_R] for y_L,y_R in np.stack((y_peaks_L,y_peaks_R), axis=1)] 
-        y0 =  np.min(y_peaks)
-        yf =  np.max(y_peaks)
+       
+        
 
-        namestr= f'sinusoid_H{H}h{h}L{L}d{delta}_U{U}_Q{Q}_Re{Re}'
+        namestr= f'sinusoid_H{H}L{L}d{delta}k{k}_U{U}_Q{Q}_Re{Re}'
         super().__init__(self.x0, self.xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
 
 
-    def h_fun(self, x):
-        return self.H* (1 + self.h * np.cos(np.pi*self.k*x/self.L))
+    # def h_fun(self, x):
+    #     return self.H* (1 + self.h * np.cos(np.pi*self.k*x/self.L))
+    
+        
+    def h_fun(self,x):
+        if x < -self.l or x > self.l:
+            if self.k%2 == 0:
+                return 0 #yf - hin
+            else:
+                return self.yf - self.H*(1-self.delta)
+            
+        else:
+            return self.yf -self.H*(1+self.delta * np.cos(self.period * x))
+            # return self.H* (1+self.delta * np.cos(self.k*x*np.pi)) - self.H*self.delta
         
 class TriCavity(PWLinear):
     def __init__ (self, args, U, Q, Re, N):

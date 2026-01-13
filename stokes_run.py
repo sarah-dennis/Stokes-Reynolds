@@ -32,21 +32,26 @@ Re=0
 H=2
 h=1
 L=16
-delta = 32 #slope: -delta*(H-h)/4
+delta = 8 #slope: -delta*(H-h)/4
 args = [H, h, L, delta]
 Example = examples.Logistic
 
-# args = [H,h, L, delta]
+# H = 1
+# delta = 1/4
+# k = 2 #int 
+# l = 1
+# L = 8
+# args = [H, delta, k,  l, L]
 # Example = examples.Sinusoid
 
 # args = [H, L]
 # Example = examples.TriCavity
 
-# l=7
-# h=1
-# H = 2
-# args =  [h, H, h, l, 1.25, 0.75, l]
-# Example = examples.TriSlider
+l=7
+h=1
+H = 2
+args =  [h, H, h, l, 1.25, 0.75, l]
+Example = examples.TriSlider
 
 
 
@@ -54,7 +59,7 @@ Example = examples.Logistic
 
 solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)                
 
-N=20
+N=80
 
        
 
@@ -69,8 +74,8 @@ N=20
 # solver.new_run_many(N, 2, 3)  
 # solver.load_run_new_many(N, 2, 3)
 
-solver.load_plot(80, zoom=zoom_on)
-# 
+solver.load_plot(160, zoom=zoom_on)
+
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
 
