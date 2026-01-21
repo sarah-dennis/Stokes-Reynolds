@@ -23,11 +23,10 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
     p3xs = dm.center_third_diff(reyn_ps, height.Nx, height.dx)
     p4xs = dm.center_fourth_diff(reyn_ps, height.Nx, height.dx)
     
-    # for i in height.i_peaks[1:-1]:
-    #     p2xs[i-1:i+2] =dm.avg_2x(p2xs[i-2 : i+3]) 
-    #     p3xs[i-2:i+3] =dm.avg_3x(p3xs[i-3 : i+4]) 
-    #     p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
-    
+    for i in height.i_peaks[1:-1]:
+        p2xs[i-1:i+2] =dm.avg_2x(p2xs[i-2 : i+3]) 
+        p3xs[i-2:i+3] =dm.avg_3x(p3xs[i-3 : i+4]) 
+        p4xs[i-2:i+3] = dm.avg_3x(p4xs[i-3 : i+4])
     # graphics.plot_2D_multi([pxs, p2xs, p3xs, p4xs], height.xs, 'Reynolds Pressure gradients', ['$p_x$','$p_{xx}$','$p_{xxx}$','$p_{xxxx}$'], ['x','p_*'])
    #---------------------------------------------------------------------------
    
@@ -108,10 +107,10 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
         sx = dm.center_diff(s, height.Nx, height.dx)
         sxx = dm.center_second_diff(s, height.Nx, height.dx)
         
-        # for i in height.i_peaks[1:-1]:
-        #     # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
-        #     sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
-        #     sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
+        for i in height.i_peaks[1:-1]:
+            # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
+            sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
+            sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
                     
     elif isinstance(BC, bc.Mixed): #match reyn Flux
       
@@ -134,20 +133,21 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
             s2x_B = -1/4*(h*p3x+2*p2x*hx+px*h2x)*hx  #/visc 
             s2x_C = BC.U/2*(4/(h**3)*(hx**3)-5/(h**2)*hx*h2x+1/h*h3x)
             sxx[i] = s2x_A + s2x_B +s2x_C
-            
-        # for i in height.i_peaks[1:-1]:
-        #     # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
-        #     sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
-        #     sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
         
+        for i in height.i_peaks[1:-1]:
+            # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
+            sx[i-2:i+3] = dm.avg_3x(sx[i-3 : i+4])
+            sxx[i-2:i+3] = dm.avg_3x(sxx[i-3 : i+4])
+        
+
         for i in range(height.Nx):
             
             if i > 1:
                 s[i] = (4*s[i-1] -s[i-2] + 2*height.dx*sx[i])/3
             elif i > 0:
                 s[i] = s[i-1] + sx[i]*height.dx
-        # for i in height.i_peaks[1:-1]:
-            # s[i-2:i+3] = dm.avg_3x(s[i-3 : i+4])
+                
+
 
     s -= s[-1]            
     return s, sx, sxx   

@@ -50,7 +50,7 @@ class Stokes_Solver:
 
         self.vel_max = 5
         self.p_min=60
-        self.p_max=120
+        self.p_max=110
         
 #------------------------------------------------------------------------------
     def new_run(self, N):
@@ -206,7 +206,7 @@ class Stokes_Solver:
         dp, res = pressure.resistance(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta P =%.2f$'%(dp)
+        dp_str = ', $\Delta p =%.2f$'%(dp)
 
     
         ax_labels_p = ['$p$', '$x$', '$y$']
@@ -214,11 +214,12 @@ class Stokes_Solver:
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
         p_ma = np.flip(p_ma, axis=0)
-        graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=200)#, y_lim = np.min(ex.y_peaks))
-    
+       
         if zoom:
             p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)  
             graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, title_p, ax_labels_p, vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=100)#, y_lim = min(ex.y_peaks))
+        else:
+            graphics.plot_contour_mesh(p_ma, xs, ys, title_p, ax_labels_p,  vmin=self.p_min, vmax=self.p_max, log_cmap=log_cmap_on, n_contours=200)#, y_lim = np.min(ex.y_peaks))
     
     #  Velocity plot: 
     
@@ -238,13 +239,14 @@ class Stokes_Solver:
         u_2D = np.flip(u_2D, axis=0)
         v_2D = -np.flip(v_2D, axis=0)
         
-        graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
-        
         if zoom:
             u_2D_zoom = graphics.grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
             v_2D_zoom = graphics.grid_zoom_2D(v_2D, ex, x_start, x_stop, y_start, y_stop)
             uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, ex, x_start, x_stop, y_start, y_stop)
             graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, title, ax_labels, vmin=0, vmax=self.vel_max, log_cmap=False)
+        else:
+            
+            graphics.plot_stream_heat(u_2D, v_2D, xs, ys, uv_mag, title, ax_labels,  vmin=0, vmax=self.vel_max, log_cmap=False) 
         
     # Stream plot:
     

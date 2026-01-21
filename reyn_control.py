@@ -20,7 +20,7 @@ i_test_scale=2
 
 
 lenx = 4
-leny = 1
+leny = 2
 x_start = 6
 y_start = 0
 x_stop= x_start + lenx
@@ -28,7 +28,7 @@ y_stop = y_start + leny
 
 # colorbar min max
 vel_max = 5
-p_min= 200
+p_min= 110
 p_max = 60
 
 log_linthresh=1e-8  
@@ -275,27 +275,26 @@ class Reynolds_Solver:
             paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(1,self.BC.U/u_scale, dp_nondim)
             p_title = solver_title + '\n' + paramstr
             p_labels =  ['$P$','$X$', '$Y$']
-        
-            graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=p_min/p_scale, vmax=p_max/p_scale, log_cmap=False)
-        
-        else:
-            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta P=%.2f$"%(flux, self.BC.U, dp_dim)
-            p_title = solver_title +'\n' + paramstr
-            p_labels = ["$p$", "$x$","$y$"]
-            graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False)
-        
-        if zoom:
-            if scaled:
+            
+            if zoom: 
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
                 graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False,n_contours=100)
-            
             else:
+                graphics.plot_contour_mesh(pressure.ps_2D/p_scale, height.xs/x_scale, height.ys/y_scale, p_title, p_labels, vmin=p_min/p_scale, vmax=p_max/p_scale, log_cmap=False)
+        
+        else:
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta p=%.2f$"%(flux, self.BC.U, dp_dim)
+            p_title = solver_title +'\n' + paramstr
+            p_labels = ["$p$", "$x$","$y$"]
+           
+            if zoom: 
                 xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
                 p_zoom = graphics.grid_zoom_2D(pressure.ps_2D, height, x_start, x_stop, y_start, y_stop)
                 graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False,n_contours=50)
-            
-      
+            else:
+                graphics.plot_contour_mesh(pressure.ps_2D, height.xs, height.ys, p_title, p_labels, vmin=p_min, vmax=p_max, log_cmap=False)
+        
     
     def v_plot(self, BC, height, velocity, pressure, solver_title, scaled=False, zoom=False,  inc=False, uv=False):
                 
@@ -304,35 +303,45 @@ class Reynolds_Solver:
         u_scale = velocity.Q/y_scale
         v_scale = velocity.Q/x_scale
         p_scale = velocity.Q*x_scale/y_scale #*visc
-        
 
         
         ps_2D = np.nan_to_num(pressure.ps_2D)
-        
-        dp = ps_2D[0,0]-ps_2D[0,-1]
-        
-        dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
-        
-        dp_dim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy
-        
-        
+    
         if scaled:
-            
-            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(1, self.BC.U/u_scale, dp_nondim)
+            dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
+            paramstr = "$Q=%.2f$, $U_b=%.2f$, $\Delta P=%.2f$"%(1, self.BC.U/u_scale, dp_nondim)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(U, V)|_2$','$X$', '$Y$']
-           
             uv_mag = np.sqrt((velocity.u/u_scale)**2 + (velocity.v/v_scale)**2)
-            graphics.plot_stream_heat(velocity.u/u_scale, velocity.v/y_scale, height.xs/x_scale, height.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max/velocity.Q, log_cmap=False)
+                
+            if zoom:
+                xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
+                u_2D_zoom = graphics.grid_zoom_2D(velocity.u, height, x_start, x_stop, y_start, y_stop)
+                v_2D_zoom = graphics.grid_zoom_2D(velocity.v, height, x_start, x_stop, y_start, y_stop)
+                uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, height, x_start, x_stop, y_start, y_stop)
+         
+                graphics.plot_stream_heat(u_2D_zoom/u_scale, v_2D_zoom/v_scale, xs_zoom/x_scale, ys_zoom/y_scale, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False) 
+            else:
+                graphics.plot_stream_heat(velocity.u/u_scale, velocity.v/y_scale, height.xs/x_scale, height.ys/y_scale, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max/velocity.Q, log_cmap=False)
 
         else:
-           
-            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(velocity.Q, self.BC.U, dp_dim)
+            dp_dim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy
+            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta p=%.2f$"%(velocity.Q, self.BC.U, dp_dim)
             v_title = solver_title + '\n' + paramstr
             v_ax_labels =  ['$|(  u,  v)|_2$','$x$', '$y$']  
-           
             uv_mag = np.sqrt((velocity.u)**2 + (velocity.v)**2)
-            graphics.plot_stream_heat(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
+            
+
+            if zoom:
+                xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
+                u_2D_zoom = graphics.grid_zoom_2D(velocity.u, height, x_start, x_stop, y_start, y_stop)
+                v_2D_zoom = graphics.grid_zoom_2D(velocity.v, height, x_start, x_stop, y_start, y_stop)
+                uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, height, x_start, x_stop, y_start, y_stop)
+         
+                graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False) 
+            else:
+            
+               graphics.plot_stream_heat(velocity.u, velocity.v, height.xs, height.ys, uv_mag, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
 
         if uv:
             
@@ -345,19 +354,13 @@ class Reynolds_Solver:
             graphics.plot_contour_mesh(velocity.u, height.xs, height.ys, 'u', ['$u$', '$x$', '$y$'], -3, 3)
             graphics.plot_contour_mesh(velocity.v, height.xs, height.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
            
-        if zoom:
-            xs_zoom, ys_zoom = graphics.grid_zoom_1D(height.xs, height.ys, height, x_start, x_stop, y_start, y_stop)
-            u_2D_zoom = graphics.grid_zoom_2D(velocity.u, height, x_start, x_stop, y_start, y_stop)
-            v_2D_zoom = graphics.grid_zoom_2D(velocity.v, height, x_start, x_stop, y_start, y_stop)
-            uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, height, x_start, x_stop, y_start, y_stop)
-            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
+      
 
         if inc:
-            # inc = velocity.make_inc(height)
+            inc = velocity.make_inc(height)
+            graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             
-            # graphics.plot_contour_mesh(inc, height.xs, height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
-            
-            # graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
+            graphics.plot_contour_mesh(uv_mag, height.xs, height.ys, v_title, v_ax_labels, vmin=0, vmax=vel_max, log_cmap=False)
             
             qs = velocity.get_flux(height)
             # qs = velocity.get_adj_flux(BC,height, pressure) #adj

@@ -17,19 +17,19 @@ plots_on = False + True
 uv_on =  not True # plot u(x,y) & v(x,y)
 inc_on=  not True # plot ux + vy =? 0
 zoom_on =   True    # plot a zoomed-in window, set location in reyn_control.py
-scaled_on=  False  # plot in scaled variables x/X, y/Y etc.
+scaled_on= False  # plot in scaled variables x/X, y/Y etc.
 
 #------------------------------------------------------------------------------
 ## Piecewise-linear examples 
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-# Example = examples.BFS
-# H=1
-# h=2
-# l=8
-# L=16
-# args =  [h, H, l, L]
+Example = examples.BFS
+H=1
+h=2
+l=8
+L=16
+args =  [h, H, l, L]
 
 # Example = examples.BFS_2
 # H=1.5
@@ -57,15 +57,15 @@ scaled_on=  False  # plot in scaled variables x/X, y/Y etc.
 # L = 4
 # args = [h0,m,L]
 
-Example = examples.TriSlider
-h_in=1
-h=1/2
-h_out = h_in
-l_in = 7
-l_out = 7
-l_a = 1.25
-l_b = 0.75
-args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
+# Example = examples.TriSlider
+# h_in=1
+# h=2
+# h_out = h_in
+# l_in = 7
+# l_out = 7
+# l_a = 1.25
+# l_b = 0.75
+# args =  [h_in, h, h_out, l_in, l_a, l_b, l_out]
 
 
 
@@ -147,8 +147,8 @@ solver = control.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 100
-# solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+N = 80
+solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 # solver.pwc_schur_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 # 
@@ -160,9 +160,9 @@ N = 100
 # solver.pwl_gmres_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 
-# solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
-# solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 
 solver.fd_pert_solve(N, order=4,  plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
 

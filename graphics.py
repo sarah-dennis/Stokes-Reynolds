@@ -42,7 +42,7 @@ colour_map_mesh = colors.ListedColormap(mesh_cmap)
 colour_bar_scale=0.022 # for long figures like H=2, L=4
 # colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
 
-colour_bar_pad = 0.05
+colour_bar_pad = 0.02
 #------------------------------------------------------------------------------
 # RESOLUTION
 #------------------------------------------------------------------------------
@@ -102,8 +102,10 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
-    # ax.set_xlim([0, 1])
-    # ax.set_ylim([-100,100])
+    ax.set_xlim([None, 18])
+    ax.set_ylim([0.25*np.min(fs),min(1.1*np.max(fs),25)])
+
+    # ax.set_ylim([2,min(1.1*np.max(fs),5)])
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
@@ -112,12 +114,14 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.3, 0.875))
+        fig.legend(bbox_to_anchor=(0.325, 0.875))
     elif loc=='lower':
         
-        fig.legend(bbox_to_anchor=(0.35, 0.35))
-    else:
-        fig.legend(bbox_to_anchor=(0.9, 0.275))
+        fig.legend(bbox_to_anchor=(0.325, 0.45))
+    elif loc=='center':
+        fig.legend(bbox_to_anchor=(0.5, 0.875))
+    else: 
+        fig.legend(bbox_to_anchor=(0.9, 0.375))
     
     return fig
 
@@ -179,7 +183,7 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
 
     pp.rcParams["lines.linewidth"] =line_width
     for i in range(len(fs)):
-        ax.plot(xs, fs[i], label=f_labels[i], color=cs[i], marker=markers[i], markevery=1)
+        ax.plot(xs, fs[i], label=f_labels[i], color=cs[i], linewidth=0.8, marker=markers[i], markevery=1)
     
     
     # reference lines
@@ -212,6 +216,8 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
         fig.legend(bbox_to_anchor=(0.3, 0.89))
     elif loc=='lower': #lower-right
         fig.legend(bbox_to_anchor=(0.3, 0.275))
+    elif loc=='center': #lower-right
+        fig.legend(bbox_to_anchor=(0.5, 0.875))
     else: #lower left
         fig.legend(bbox_to_anchor=(0.9, 0.275))  
         
@@ -228,7 +234,7 @@ def plot_stream(vx, vy, xs, ys, title, ax_labels):
     X, Y = np.meshgrid(xs, ys)
 
     # stream_density=[ys.shape[0]/xs.shape[0],1]
-    stream_density=[1/2,1]
+    stream_density=[1,4]
     pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
     
     #remove arrows

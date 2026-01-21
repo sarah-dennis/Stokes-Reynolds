@@ -16,12 +16,12 @@ U=0
 Q=1
 Re=0
 
-# h_in = 2
-# h_out = 1
-# l_in = 8
-# l_out=8
-# args = [h_in, h_out, l_in, l_out]
-# Example = examples.BFS
+h_in = 2
+h_out = 1
+l_in = 8
+l_out=8
+args = [h_in, h_out, l_in, l_out]
+Example = examples.BFS
 
 # H=2
 # L=16
@@ -29,12 +29,12 @@ Re=0
 # args = [H, L, delta]
 # Example = examples.BFS_pwl
 
-H=2
-h=1
-L=16
-delta = 8 #slope: -delta*(H-h)/4
-args = [H, h, L, delta]
-Example = examples.Logistic
+# H=2
+# h=1
+# L=16
+# delta = 32 #slope: -delta*(H-h)/4
+# args = [H, h, L, delta]
+# Example = examples.Logistic
 
 # H = 1
 # delta = 1/4
@@ -47,11 +47,11 @@ Example = examples.Logistic
 # args = [H, L]
 # Example = examples.TriCavity
 
-l=7
-h=1
-H = 2
-args =  [h, H, h, l, 1.25, 0.75, l]
-Example = examples.TriSlider
+# l=7
+# h=1
+# H = 2
+# args =  [h, H, h, l, 1.25, 0.75, l]
+# Example = examples.TriSlider
 
 
 
