@@ -5,7 +5,7 @@ Created on Wed Aug 28 11:58:25 2024
 @author: sarah
 """
 import numpy as np
-import graphics
+
 def dp_res(ex, p):
     
     p_2D = p.reshape((ex.Ny,ex.Nx))
@@ -29,17 +29,7 @@ def pressure(ex, u, v):
     shape = n*m
     p = np.zeros(shape)
 
-    # set the ambient pressure at outlet 
-    # p[(m-2)*n + n-1] = ex.p_ambient   
     p[2*n-1] = ex.p_ambient  # i=n-1, j=1
-    
-    # contour the first interior row (backwards) using px
-    # i=n-2
-    # while i >= 0:
-    #     k =   (m-2)*n + i
-    #     k_E = (m-2)*n + i+1
-    #     p[k] = p[k_E]-px[k]*dx
-    #     i-=1
     
     i=n-2 #j=1
     while i >= 0:
@@ -48,40 +38,12 @@ def pressure(ex, u, v):
         p[k] = p[k_E] - px[k]*dx
         i-=1
      
-    # # contour the flat boundary using dy from interior row
-    # # p[(m-1)*n-1] = ex.p_ambient
-    # # i = n-1
-    # # while i >=0:
-    # #     k   = (m-1)*n + i
-    # #     k_S = (m-2)*n + i
-    # #     p[k] = p[k_S] + py[k_S]*dy
-    # #     i-=1
-    
     i=n-2 #j=0
     while i >= 0:
         k = i
         k_N = n + i
         p[k] = p[k_N] - py[k_N]*dy
         i-=1
-    
-    # i = n-1 
-    # while i >=0:
-    #     k = i
-    #     k_N = n + i
-    #     p[k] = p[k_N] + py[k_N]*dy
-    #     i-=1
-
-    
-    # contour each xi from flat boundary to y=h
-    # for i in range(n):
-    #     j=m-3
-    #     while j >=0:
-    #         k = j*n + i
-    #         if ex.space[j,i]==1 or ex.space[j,i]==0:
-    #             k_N = (j+1)*n + i
-    #             p[k] = p[k_N] - py[k_N]*dy
-          
-    #         j-=1  
             
     for i in range(n):
         j = 2
@@ -146,17 +108,6 @@ def px_py(ex, u, v):
             k_N=(j+1)*n + i
             k_S=(j-1)*n + i
             
-            # u_N = u[k_N]                    
-            # v_N = v[k_N]
-            
-            # if space[j-1,i] == -1:
-            #     scale_S = ex.scale_S(i,j)
-            #     u_S = ex.interp(scale_S, u[k_N])
-            #     v_S = ex.interp(scale_S, v[k_N])
-            # else: 
-            #     u_S = u[k_S]
-            #     v_S = v[k_S]
-            
             u_S = u[k_S]
             v_S = v[k_S]
             
@@ -164,12 +115,11 @@ def px_py(ex, u, v):
                 scale_N = ex.scale_N(i,j)
                 u_N = ex.interp(scale_N, u[k_S])
                 v_N = ex.interp(scale_N, v[k_S])
+                
             else: 
                 u_N = u[k_N]
                 v_N = v[k_N]
             
-            
-
             uyy_k = (u_N -2*u_k + u_S)/ex.dx**2
             vyy_k = (v_N -2*v_k + v_S)/ex.dx**2
             

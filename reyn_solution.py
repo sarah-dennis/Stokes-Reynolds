@@ -9,7 +9,7 @@ import graphics
 
 import time
 
-import boundary as bc
+import reyn_boundary as bc
 
 
 lenx = 4
@@ -26,7 +26,7 @@ p_max = 60
 
 log_linthresh=1e-8  
         
-class Solution:
+class Reyn_Solution:
     def __init__(self, height, BC, pressure, velocity, solver_str, t=None):
         self.height = height
         self.BC = BC
@@ -128,10 +128,11 @@ class Solution:
             graphics.plot_contour_mesh(self.velocity.v, self.height.xs, self.height.ys, 'v', ['$v$', '$x$', '$y$'], -3, 3)
             
         if inc:
+            
             inc = self.velocity.make_inc(self.height)
             graphics.plot_contour_mesh(inc, self.height.xs, self.height.ys, 'incompressibility', ['$u_x+v_y$', '$x$', '$y$'], -1, 1)
             
             
-            qs = self.velocity.get_flux(self.height)
+            qs = self.velocity.get_flux_all(self.height)
            
             graphics.plot_2D(qs, self.height.xs, 'flux $\mathcal{Q} = q(x) =\int_0^{h(x)} u(x,y) dy$', ['$x$', '$q(x)=\mathcal{Q}$'])

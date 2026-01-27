@@ -6,7 +6,7 @@ Created on Thu Oct 24 13:23:27 2024
 """
 
 
-import boundary as bc
+import reyn_boundary as bc
 import reyn_examples as examples
 import reyn_solvers as solvers
 
@@ -112,12 +112,12 @@ args =  [h, H, l, L]
 # args= [ r, h0,l, drdx]
 
 
-# Example = examples.Logistic
-# delta = 8 # max slope: delta*(H-h)/4
-# H = 2     # outlet height
-# h = 1       # inlet height
-# L = 16     # total length
-# args = [ H, h, L, delta]
+Example = examples.Logistic
+delta = 8 # max slope: delta*(H-h)/4
+H = 2     # outlet height
+h = 1       # inlet height
+L = 8     # total length
+args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
@@ -125,15 +125,14 @@ args =  [h, H, l, L]
 #------------------------------------------------------------------------------
 
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 2
+U = 1
 
-# fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
-# dP = 0
+#fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
+# dP = 8
 # BC = bc.Fixed(U,dP)
 
 # mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
 Q = 1
-
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
@@ -145,7 +144,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 
 
 N = 80
-solution = solver.fd_solve(N)
+# solution = solver.fd_solve(N)
 
 # solution = solver.pwc_schur_solve(N)
 
@@ -157,11 +156,11 @@ solution = solver.fd_solve(N)
 # solution = solver.pwl_gmres_solve(N)
 
 # solution = solver.fd_TG_ELT_solve(N)
-
-# solution = solver.fd_VA_ELT_solve(N)
+# 
+solution = solver.fd_VA_ELT_solve(N)
 
 # solution = solver.fd_pert_solve(N, order=2)
-solution = solver.fd_pert_solve(N, order=4, get_both=False)
+# solution = solver.fd_pert_solve(N, order=4, get_both=False)
 
 if plots_on:
     solution.p_plot(scaled=scaled_on, zoom=zoom_on)

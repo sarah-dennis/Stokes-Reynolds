@@ -22,18 +22,14 @@ class PWLinear(Space):
         self.N_regions = len(self.x_peaks)-1
         self.make_space()
 
-                               
-        # self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
-        # self.H_in = yf - self.hf_in
-        # self.H_out = yf-y_peaks[-1][0]
-        self.H_in = y_peaks[0][1]
-        self.H_out = y_peaks[-1][0]
+        self.H_in = y_peaks[0][1] - y0
+        self.H_out = y_peaks[-1][0] - y0
         
-
         self.spacestr = "$Q=%.2f$, $U=%.1f$"%(Q,U)  # for plot title
+        
         if self.H_in == 0: # closed cavity --> Q=0, dp=0
             self.dp_in = 0
-        else: # gap entry --> dp ~ Q
+        else:              # gap entry --> dp ~ Q
             self.dp_in = (self.flux - 0.5*self.U*self.H_in) * (-12 / self.H_in**3)
     
     # 0 : boundary, -1: exterior, 1: interior
@@ -64,22 +60,17 @@ class PWLinear(Space):
             for j in range(self.Ny):
                 y = self.ys[j]
                 
-                # if j == self.Ny-1: #upper boundary
-                #     grid[j,i] = 0
-                
                 if j == 0: #lower boundary
                     grid[j,i] = 0
 
-                    
-                elif i == 0: #inlet boundary
-                    # if y >= self.y_peaks[0][1]: 
+                   
+                elif i == 0: #inlet boundary 
                     if y <= self.y_peaks[0][1]: 
                         grid[j,i] = 0
                     else:
                         grid[j,i] = -1
                     
                 elif i == self.Nx-1:# outlet boundary
-                    # if y >= self.y_peaks[-1][0]: 
                     if y <= self.y_peaks[-1][0]: 
                         grid[j,i] = 0
                     else:
@@ -93,8 +84,7 @@ class PWLinear(Space):
                         
                         if h_left < y and y < h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
-                            
-                        # elif y > h_right: # above vert boundary (interior)
+
                         elif y < h_left: # below vert boundary (interior)
                             grid[j,i] = 1
                             
@@ -105,7 +95,6 @@ class PWLinear(Space):
                         if h_left > y and y > h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
                             
-                        # elif y > h_left: # above vert boundary (interior)
                         elif y < h_right: # below vert boundary (interior)
                             grid[j,i] = 1
                             
@@ -115,8 +104,7 @@ class PWLinear(Space):
                 else:
                     if math.isclose(y,h): # true boundary point not at region change (from dx | slope)
                         grid[j,i] = 0
-                        
-                    # elif y > h:            # above boundary (interior)
+
                     elif y < h:            # below boundary (interior)
                         grid[j,i] = 1
                     
@@ -124,7 +112,6 @@ class PWLinear(Space):
                         grid[j,i] = -1
         
         self.space = grid
-        # self.slopes = slopes
         self.hs = hs
 
 #------------------------------------------------------------------------------
@@ -132,15 +119,9 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
    
     def streamInlet(self, j):
-        #y = self.y0 + j*self.dy
-        
-        y = j * self.dy
-        h = self.H_in
-        
-        # if y >= self.y_peaks[0][1]:
-        #     u_term = self.U*(0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
-        #     dp_term = -0.5*self.dp_in*((-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
-        #     psi = u_term + dp_term + self.flux 
+
+        y = self.y0 + j * self.dy
+        h = self.y0 + self.H_in
         
         if y <= h:
             u_term = self.U * y * (h-y)**2 / h**2
@@ -151,12 +132,9 @@ class PWLinear(Space):
             return 0
     
     def velInlet(self, j):
-        #y = self.y0 + j*self.dy
-        y = j * self.dy
-        h = self.H_in
-        # if y >= self.y_peaks[0][1]:
-        #     u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
-        #     return  u
+        y = self.y0 + j * self.dy
+        h = self.y0 + self.H_in
+        
         if y <= h:
             u = self.dp_in * (y**2 - h*y)/2 + self.U * (h-y)/h
             return u
@@ -166,32 +144,13 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
 # Boundary interpolation
 #------------------------------------------------------------------------------
-    def interp(self, scale, v_opp, v_bdry=0, p=False):
+    def interp(self, scale, v_opp, v_bdry=0):
         v_nbr = v_bdry + (v_bdry - v_opp)*scale
 
-        if p:
-            print(v_nbr, v_opp)
+        # print(v_nbr, v_opp)
 
         return v_nbr
 
-    # def scale_S(self, i,j):
-    #     y_N = self.ys[j+1]
-    #     y_nbr = self.ys[j-1]
-    #     y_bdry = self.hs[i][0] # arbitrary 
-    
-    #     l1 = np.abs(y_nbr-y_bdry)
-    #     l2 = np.abs(y_N-y_bdry) 
-        
-    #     if np.isclose(l2,0):
-    #         scale = 0
-    #     else:
-    #         scale = l1/l2        
-    
-    #     # print(scale)
-    #     # print('s', scale<1)
-    #     return scale
-    
-    
     def scale_N(self, i,j):
         y_S = self.ys[j-1]
         y_nbr = self.ys[j+1]
@@ -205,8 +164,7 @@ class PWLinear(Space):
         else:
             scale = l1/l2        
     
-        # print(scale)
-        # print('s', scale<1)
+        # print('n', scale)
         return scale
     
 
@@ -227,7 +185,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2        
-        # print('e', scale<1)
+        # print('e', scale)
         return scale
     
     def scale_W(self, i,j):
@@ -246,8 +204,8 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2 
-        # print('w', i,j,scale)
-        # print('w', scale<1)
+
+        # print('w', scale)
         return scale
 
 
@@ -273,7 +231,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2 
-        # print('ne', scale<1)
+        # print('ne', scale)
         return scale
         
     def scale_SW(self, i,j): 
@@ -297,7 +255,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2  
-        # print('sw', scale<1)
+        # print('sw', scale)
         return scale
     
     def scale_NW(self, i,j): 
@@ -322,7 +280,7 @@ class PWLinear(Space):
         else:
             scale = l1/l2   
         
-        # print('nw', scale<1)
+        # print('nw', scale)
         return scale
     
     def scale_SE(self, i,j): 
@@ -346,7 +304,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l2/l1  
-        # print('se', scale<1)
+        # print('se', scale)
         return scale
 #------------------------------------------------------------------------------
 

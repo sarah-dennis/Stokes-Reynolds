@@ -11,6 +11,8 @@ import reyn_examples as examples
 import graphics
 import numpy as np
 
+#TURN OFF REYN PRESSURE MAKE 2D PS
+
 #------------------------------------------------------------------------------
 Example = examples.Sinusoid
 H=1

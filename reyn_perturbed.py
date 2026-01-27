@@ -8,11 +8,11 @@ Created on Wed Feb 26 14:30:05 2025
 import numpy as np
 import domain as dm
 
-from pressure import Pressure
-from velocity import Velocity
-from reyn_solution import Solution
+from reyn_pressure import Pressure
+from reyn_velocity import Velocity
+from reyn_solution import Reyn_Solution
  
-class Perturbed_Solution(Solution):
+class Perturbed_Solution(Reyn_Solution):
     def __init__(self, height, BC, order, reyn_sol):
         self.order = order
 

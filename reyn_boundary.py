@@ -10,6 +10,7 @@ class BoundaryCondition:
     def __init__(self, U):
         self.pN = 0
         self.U = U
+        
          
 class Mixed(BoundaryCondition):
     def __init__(self, U, Q):
@@ -21,3 +22,10 @@ class Fixed(BoundaryCondition):
         self.p0 = dP
         self.dP = dP
         super().__init__(U)
+
+
+
+#------------------------------------------------------------------------------
+# Boundary conditions on stream and velocity
+#------------------------------------------------------------------------------
+   

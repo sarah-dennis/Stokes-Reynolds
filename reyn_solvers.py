@@ -8,12 +8,13 @@ import numpy as np
 from time import time
 
 import domain as dm
-import boundary as bc
-import velocity as v
-import pressure as p
+import reyn_boundary as bc
+import reyn_velocity as rv
+import reyn_velocity_ELT as eltv
 import reyn_pressure as rp
+import reyn_pressure_ELT as eltp
 import reyn_perturbed as rpert
-from reyn_solution import Solution
+from reyn_solution import Reyn_Solution
 from reyn_heights import PWC_Height, PWL_Height, make_PWC, make_PWL
 
 
@@ -35,10 +36,10 @@ class Reynolds_Solver:
         pressure = rp.FinDiff_ReynPressure(height, self.BC)
         tf = time()
             
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
         t = tf-t0
         
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
 #----------------------------------------------------------------------------------
@@ -58,10 +59,10 @@ class Reynolds_Solver:
         tf = time()
             
         height.hxs = np.zeros(height.Nx)
-        velocity = v.Reyn_Velocity(height, self.BC,pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC,pressure)
         
         t=tf-t0
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
 #----------------------------------------------------------------------------------   
@@ -78,14 +79,14 @@ class Reynolds_Solver:
         pressure = rp.PwcSchur_parallel_ReynPressure(height, self.BC)
         tf = time()
         
-        velocity = v.Reyn_Velocity(height, self.BC,pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC,pressure)
         
 
         height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
         
         t = tf-t0
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
 
@@ -106,10 +107,10 @@ class Reynolds_Solver:
         tf = time()
         t = tf-t0
         height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
         
         
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
         return pressure, velocity, tf-t0
@@ -134,10 +135,10 @@ class Reynolds_Solver:
         
         # print('pwl gmres time: ', tf-t0)
         height.hxs = dm.center_diff(height.hs, height.Nx, height.dx)
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
             
         t = tf-t0
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
     
@@ -155,13 +156,13 @@ class Reynolds_Solver:
         height.h3xs = dm.center_third_diff(height.hs, height.Nx, height.dx)
         
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
-        pressure = p.TG_ELT_Pressure(height, self.BC, reyn_pressure)
+        pressure = eltp.TG_ELT_Pressure(height, self.BC, reyn_pressure)
 
         tf = time()        
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
         
         t = tf-t0
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
     
@@ -174,12 +175,12 @@ class Reynolds_Solver:
         height.h3xs = dm.center_third_diff(height.hs, height.Nx, height.dx)
         
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
-        pressure = p.VA_ELT_Pressure(height, self.BC, reyn_pressure)
+        pressure = eltp.VA_ELT_Pressure(height, self.BC, reyn_pressure)
         tf = time()
-        velocity = v.ELT_Velocity(height,self.BC, pressure)
+        velocity = eltv.ELT_Velocity(height,self.BC, pressure)
         
         t = tf-t0
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
 
         return solution
     
@@ -194,9 +195,9 @@ class Reynolds_Solver:
         height.h3xs = dm.center_third_diff(height.hs, height.Nx, height.dx)
         
         reyn_pressure = rp.FinDiff_ReynPressure(height, self.BC)
-        reyn_velocity = v.Reyn_Velocity(height, self.BC, reyn_pressure)                   
+        reyn_velocity = rv.Reyn_Velocity(height, self.BC, reyn_pressure)                   
         t_r = time() -t0
-        reyn_sol = Solution(height, self.BC, reyn_pressure, reyn_velocity, 'Reynolds', t_r)
+        reyn_sol = Reyn_Solution(height, self.BC, reyn_pressure, reyn_velocity, 'Reynolds', t_r)
 
         pert = rpert.Perturbed_Solution(height, self.BC, order, reyn_sol)
         
@@ -206,11 +207,11 @@ class Reynolds_Solver:
         
         if order >= 2:
             solver_title = "$\epsilon^2$ PLT"
-            solution_2 = Solution(height, self.BC, pert.pert2_pressure, pert.pert2_velocity, solver_title, t)
+            solution_2 = Reyn_Solution(height, self.BC, pert.pert2_pressure, pert.pert2_velocity, solver_title, t)
             
         if order >= 4:
             solver_title = "$\epsilon^4$ PLT"
-            solution_4 = Solution(height, self.BC, pert.pert4_pressure, pert.pert4_velocity, solver_title, t)
+            solution_4 = Reyn_Solution(height, self.BC, pert.pert4_pressure, pert.pert4_velocity, solver_title, t)
         
         if order == 2:
             return solution_2
@@ -234,10 +235,10 @@ class Reynolds_Solver:
             h = height.hs[i] 
             ps[i] = -6*self.BC.U * (h + height.H)/((height.k * height.H)**2 * (2+height.delta**2)) * h_recip_dx[i]
         
-        pressure = p.Reyn_Pressure(height, ps)
-        velocity = v.Reyn_Velocity(height, self.BC, pressure)
+        pressure = rp.Reyn_Pressure(height, ps)
+        velocity = rv.Reyn_Velocity(height, self.BC, pressure)
         tf = time()
         t = tf-t0
         solver_title = "exact solution"
-        solution = Solution(height, self.BC, pressure, velocity, solver_title, t)
+        solution = Reyn_Solution(height, self.BC, pressure, velocity, solver_title, t)
         return solution

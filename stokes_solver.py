@@ -114,9 +114,6 @@ def update_rhs(ex, u, v, psi): #
         i = k % n
         j = k // n
             
-        # if j == m-1:
-        #     rhs[k] = ex.flux
-            
         if i == 0 and space[j,i] == 0: # inlet: psi(y,x0) ~ Q
             rhs[k] = ex.streamInlet(j)
         
@@ -148,13 +145,14 @@ def update_rhs(ex, u, v, psi): #
             k_SW = (j-1)*n + i-1
             k_SE = (j-1)*n + i+1
             
+            # South (i, j-1)
+            u_S = u[k_S]
+            v_S = v[k_S]
+
             # North (i, j+1) 
-            # u_N = u[k_N]
-            # v_N = v[k_N]
-            
             if ex.space[j+1,i] == -1: #N:
                 scale_N = ex.scale_N(i,j)
-                dpsi_bc += -8 * ex.interp(scale_N, psi[k_S])
+                dpsi_bc += -8 * ex.interp(scale_N, psi[k_S], v_bdry= ex.flux)
                 u_N = ex.interp(scale_N, u[k_S])
                 v_N = ex.interp(scale_N, v[k_S])
 
@@ -165,7 +163,7 @@ def update_rhs(ex, u, v, psi): #
             # East (i+1, j)                
             if ex.space[j,i+1] == -1: #E:
                 scale_E = ex.scale_E(i,j)
-                dpsi_bc += -8 * ex.interp(scale_E, psi[k_W])
+                dpsi_bc += -8 * ex.interp(scale_E, psi[k_W], v_bdry= ex.flux)
                 u_E = ex.interp(scale_E, u[k_W])
                 v_E = ex.interp(scale_E, v[k_W])
                 
@@ -176,42 +174,28 @@ def update_rhs(ex, u, v, psi): #
             # West (i-1, j)          
             if ex.space[j,i-1] == -1: #W:
                 scale_W = ex.scale_W(i,j)
-                dpsi_bc += -8 * ex.interp(scale_W, psi[k_E])
+                dpsi_bc += -8 * ex.interp(scale_W, psi[k_E], v_bdry= ex.flux)
                 u_W = ex.interp(scale_W, u[k_E])
                 v_W = ex.interp(scale_W, v[k_E])
             else:
                 u_W = u[k_W]
                 v_W = v[k_W]
 
-                
-            # South (i, j-1)
-            # if ex.space[j-1,i] == -1: #S:
-            #     scale_S = ex.scale_S(i,j)
-            #     dpsi_bc += -8 * ex.interp(scale_S, psi[k_N])
-            #     u_S = ex.interp(scale_S, u[k_N])
-            #     v_S = ex.interp(scale_S, v[k_N])
-
-            # else:
-            #     u_S = u[k_S]
-            #     v_S = v[k_S]
-            u_S = u[k_S]
-            v_S = v[k_S]
-
             if ex.space[j+1,i+1] == -1 : #NE:
                 scale_NE = ex.scale_NE(i,j)
-                dpsi_bc += ex.interp(scale_NE, psi[k_SW])
+                dpsi_bc += ex.interp(scale_NE, psi[k_SW], v_bdry= ex.flux)
 
             if ex.space[j+1,i-1] == -1: #NW:
                 scale_NW = ex.scale_NW(i,j)
-                dpsi_bc += ex.interp(scale_NW, psi[k_SE])
+                dpsi_bc += ex.interp(scale_NW, psi[k_SE], v_bdry= ex.flux)
                                                      
             if ex.space[j-1,i+1] == -1: #SE:
                 scale_SE = ex.scale_SE(i,j)
-                dpsi_bc += ex.interp(scale_SE, psi[k_NW])
+                dpsi_bc += ex.interp(scale_SE, psi[k_NW], v_bdry= ex.flux)
 
             if ex.space[j-1,i-1] == -1: #SW:
                 scale_SW = ex.scale_SW(i,j)
-                dpsi_bc += ex.interp(scale_SW, psi[k_NE])
+                dpsi_bc += ex.interp(scale_SW, psi[k_NE], v_bdry= ex.flux)
 
             A = u_S - u_N + v_E - v_W
             
@@ -244,10 +228,7 @@ def uv_approx(ex, u, v, psi):
         i = k % n
         j = k // n
 
-        # y=yL moving boundary
-        # if j == m-1: 
-        #     u[k] = U
-        #     v[k] = 0 
+        # y=0 moving boundary
         if j == 0:
             u[k] = U
             v[k] = 0  
@@ -271,13 +252,16 @@ def uv_approx(ex, u, v, psi):
             k_W = j*n + i-1
             k_S = (j-1)*n + i
             k_N = (j+1)*n + i
+            
+            
+            # South (i, j-1)
+            if j-1 == 0:  # y=0 boundary
+                u_S = ex.U
+                psi_S = 0
                 
-            # if j+1 == m-1: #
-            #     u_N = U
-            #     psi_N = ex.flux
-            # else:
-            #     u_N = u[k_N]
-            #     psi_N = psi[k_N]
+            else:  # exterior 
+                u_S = u[k_S]
+                psi_S = psi[k_S]
             
             # North (i, j+1)
             if ex.space[j+1,i] == 0: # h(x) boundary
@@ -287,7 +271,7 @@ def uv_approx(ex, u, v, psi):
             elif ex.space[j+1,i] == -1: # exterior 
                 scale_N = ex.scale_N(i,j)
                 u_N = ex.interp(scale_N, u[k_S]) 
-                psi_N = ex.interp(scale_N, psi[k_S])
+                psi_N = ex.interp(scale_N, psi[k_S], v_bdry= ex.flux)
                 
             else:
                 u_N = u[k_N]
@@ -305,7 +289,7 @@ def uv_approx(ex, u, v, psi):
             elif ex.space[j,i+1] == -1:  # exterior 
                 scale_E = ex.scale_E(i,j)
                 v_E = ex.interp(scale_E, v[k_W])
-                psi_E = ex.interp(scale_E, psi[k_W])
+                psi_E = ex.interp(scale_E, psi[k_W], v_bdry= ex.flux)
             else:
                 v_E = v[k_E]
                 psi_E = psi[k_E] 
@@ -322,31 +306,12 @@ def uv_approx(ex, u, v, psi):
             elif ex.space[j,i-1] == -1:  # exterior 
                 scale_W = ex.scale_W(i,j)
                 v_W = ex.interp(scale_W, v[k_E])
-                psi_W = ex.interp(scale_W, psi[k_E])
+                psi_W = ex.interp(scale_W, psi[k_E], v_bdry= ex.flux)
             else:
                 v_W = v[k_W]
                 psi_W = psi[k_W]
    
-            # South (i, j-1)
-            # if ex.space[j-1,i] == 0:
-            #     u_S = 0
-            #     psi_S = 0
-            # elif ex.space[j-1,i] == -1:
-            #     scale_S = ex.scale_S(i,j)
-            #     u_S = ex.interp(scale_S, u[k_N]) 
-            #     psi_S = ex.interp(scale_S, psi[k_N])
-            # else:
-            #     u_S = u[k_S]
-            #     psi_S = psi[k_S]
-            
-            if j-1 == 0:  # y=0 boundary
-                u_S = ex.U
-                psi_S = 0
-                
-            else:  # exterior 
-                u_S = u[k_S]
-                psi_S = psi[k_S]
-            
+
             
             u[k] = c2 * (psi_N - psi_S) - c3 * (u_N + u_S)
             v[k] = -c2 * (psi_E - psi_W) - c3 * (v_E + v_W)

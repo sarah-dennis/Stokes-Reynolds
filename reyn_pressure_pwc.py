@@ -8,7 +8,7 @@ Created on Mon May 19 17:32:18 2025
 import numpy as np
 import time
 from multiprocessing import shared_memory, Pool
-import boundary as bc
+import reyn_boundary as bc
 def make_rhs(height, BC): 
     N = height.N_regions 
     rhs = np.zeros(2*N-1)
