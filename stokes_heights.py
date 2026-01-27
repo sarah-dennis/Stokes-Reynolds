@@ -23,11 +23,13 @@ class PWLinear(Space):
         self.make_space()
 
                                
-        self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
-        self.H_in = yf - self.hf_in
-        self.H_out = yf-y_peaks[-1][0]
+        # self.hf_in = y_peaks[0][1] # hf < h0 measured from y0
+        # self.H_in = yf - self.hf_in
+        # self.H_out = yf-y_peaks[-1][0]
+        self.H_in = y_peaks[0][1]
+        self.H_out = y_peaks[-1][0]
         
-        # self.spacestr = "$Re=%.2f$, $Q=%.2f$, $U=%.1f$"%(Re,Q,U)  # for plot title
+
         self.spacestr = "$Q=%.2f$, $U=%.1f$"%(Q,U)  # for plot title
         if self.H_in == 0: # closed cavity --> Q=0, dp=0
             self.dp_in = 0
@@ -61,17 +63,24 @@ class PWLinear(Space):
                 
             for j in range(self.Ny):
                 y = self.ys[j]
-                if j == self.Ny-1: #upper boundary
+                
+                # if j == self.Ny-1: #upper boundary
+                #     grid[j,i] = 0
+                
+                if j == 0: #lower boundary
                     grid[j,i] = 0
+
                     
                 elif i == 0: #inlet boundary
-                    if y >= self.y_peaks[0][1]: 
+                    # if y >= self.y_peaks[0][1]: 
+                    if y <= self.y_peaks[0][1]: 
                         grid[j,i] = 0
                     else:
                         grid[j,i] = -1
                     
                 elif i == self.Nx-1:# outlet boundary
-                    if y >= self.y_peaks[-1][0]: 
+                    # if y >= self.y_peaks[-1][0]: 
+                    if y <= self.y_peaks[-1][0]: 
                         grid[j,i] = 0
                     else:
                         grid[j,i] = -1
@@ -80,28 +89,37 @@ class PWLinear(Space):
                     if math.isclose(y, h_left) or math.isclose(y, h_right): # true boundary point at region change
                         grid[j,i] = 0
                         
-                    elif h_left < h_right:
+                    elif h_left < h_right: 
+                        
                         if h_left < y and y < h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
-                        elif y > h_right: # above vert boundary (interior)
+                            
+                        # elif y > h_right: # above vert boundary (interior)
+                        elif y < h_left: # below vert boundary (interior)
                             grid[j,i] = 1
+                            
                         else:             # below vert boundary(exterior)
                             grid[j,i] = -1
                 
                     else:
                         if h_left > y and y > h_right: # x=h(y) vertical boundary
                             grid[j,i] = 0
-                        elif y > h_left: # above vert boundary (interior)
+                            
+                        # elif y > h_left: # above vert boundary (interior)
+                        elif y < h_right: # below vert boundary (interior)
                             grid[j,i] = 1
+                            
                         else:              # below vert boundary (exterior)
                             grid[j,i] = -1
 
                 else:
                     if math.isclose(y,h): # true boundary point not at region change (from dx | slope)
                         grid[j,i] = 0
-                    elif y > h:            # above boundary (interior)
-
+                        
+                    # elif y > h:            # above boundary (interior)
+                    elif y < h:            # below boundary (interior)
                         grid[j,i] = 1
+                    
                     else:                   # below boundary (exterior)
                         grid[j,i] = -1
         
@@ -114,20 +132,34 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
    
     def streamInlet(self, j):
-        y = self.y0 + j*self.dy
-        if y >= self.y_peaks[0][1]:
-            u_term = self.U*(0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
-            dp_term = -0.5*self.dp_in*((-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
-            psi = u_term + dp_term + self.flux 
+        #y = self.y0 + j*self.dy
+        
+        y = j * self.dy
+        h = self.H_in
+        
+        # if y >= self.y_peaks[0][1]:
+        #     u_term = self.U*(0.5*(y**2 - self.yf**2) - self.hf_in*(y-self.yf))/self.H_in
+        #     dp_term = -0.5*self.dp_in*((-1/3)*(y**3 -self.yf**3) + 0.5*(self.yf+self.hf_in)*(y**2-self.yf**2) - self.yf*self.hf_in*(y-self.yf))
+        #     psi = u_term + dp_term + self.flux 
+        
+        if y <= h:
+            u_term = self.U * y * (h-y)**2 / h**2
+            dp_term = self.flux * y**2 * (3*h - 2*y) / h**3
+            psi = u_term + dp_term 
             return psi
         else:
             return 0
     
     def velInlet(self, j):
-        y = self.y0 + j*self.dy
-        if y >= self.y_peaks[0][1]:
-            u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
-            return  u
+        #y = self.y0 + j*self.dy
+        y = j * self.dy
+        h = self.H_in
+        # if y >= self.y_peaks[0][1]:
+        #     u = (self.U/self.H_in - 0.5*self.dp_in*(self.yf-y)) * (y-self.hf_in) 
+        #     return  u
+        if y <= h:
+            u = self.dp_in * (y**2 - h*y)/2 + self.U * (h-y)/h
+            return u
         else: 
             return 0
         
@@ -142,13 +174,31 @@ class PWLinear(Space):
 
         return v_nbr
 
-    def scale_S(self, i,j):
-        y_N = self.ys[j+1]
-        y_nbr = self.ys[j-1]
+    # def scale_S(self, i,j):
+    #     y_N = self.ys[j+1]
+    #     y_nbr = self.ys[j-1]
+    #     y_bdry = self.hs[i][0] # arbitrary 
+    
+    #     l1 = np.abs(y_nbr-y_bdry)
+    #     l2 = np.abs(y_N-y_bdry) 
+        
+    #     if np.isclose(l2,0):
+    #         scale = 0
+    #     else:
+    #         scale = l1/l2        
+    
+    #     # print(scale)
+    #     # print('s', scale<1)
+    #     return scale
+    
+    
+    def scale_N(self, i,j):
+        y_S = self.ys[j-1]
+        y_nbr = self.ys[j+1]
         y_bdry = self.hs[i][0] # arbitrary 
     
         l1 = np.abs(y_nbr-y_bdry)
-        l2 = np.abs(y_N-y_bdry) 
+        l2 = np.abs(y_S-y_bdry) 
         
         if np.isclose(l2,0):
             scale = 0

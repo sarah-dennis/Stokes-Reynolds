@@ -10,7 +10,7 @@ import time
         
 from scipy.sparse.linalg import LinearOperator 
 from scipy.sparse.linalg import gmres
-import reyn_boundary as bc
+import boundary as bc
 
 
 

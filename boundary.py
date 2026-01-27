@@ -4,8 +4,9 @@ Created on Fri Aug  8 09:52:29 2025
 
 @author: sarah
 """
+#reynolds
 
-class BoundaryCondition: #reynolds
+class BoundaryCondition: 
     def __init__(self, U):
         self.pN = 0
         self.U = U

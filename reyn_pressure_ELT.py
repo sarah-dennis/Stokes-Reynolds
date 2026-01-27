@@ -6,11 +6,11 @@ Created on Tue Feb 25 15:16:58 2025
 """
 import numpy as np
 import domain as dm
-import reyn_boundary as bc
+import boundary as bc
 import graphics
 import reyn_pressure_finDiff as fd
 
-def make_adj_ps(height, BC, reyn_ps, TG=False):
+def make_ELT_ps(height, BC, reyn_ps, TG=False):
     ps_adj = np.zeros((height.Ny, height.Nx))
 
     hs = height.hs
@@ -31,7 +31,7 @@ def make_adj_ps(height, BC, reyn_ps, TG=False):
    #---------------------------------------------------------------------------
    
     if TG:
-        sigmas, sigma_xs, sigma_2xs = 0, 0, 0 
+        sigmas, sigma_xs, sigma_2xs = 0, 0, 0
     else:
         
         sigmas, sigma_xs, sigma_2xs = make_sigmas(height,BC, pxs,p2xs,p3xs,p4xs)
@@ -151,3 +151,4 @@ def make_sigmas(height, BC, pxs, p2xs, p3xs, p4xs):
 
     s -= s[-1]            
     return s, sx, sxx   
+

@@ -28,21 +28,24 @@ class BFS(PWC_Height):
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 
-
-class BFS_2(PWC_Height):
+class multi_step(PWL_Height):
     def __init__(self, args, N):
-        h, H, l, L = args
+        H, L = args
         x0 = 0
         xf = L
-        N_regions = 5
-        x_peaks = np.asarray([0, L/5, 2*L/5, 3*L/5, 4*L/5, L], float)
-        h_peaks = np.asarray([[0, h], [h, H], [H, H/3], [H/3,h], [h,H/2], [H/2,0]], float)
+        N_regions = 10
+        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
+        h_peaks = np.asarray([[0, H],[H, H/2],[2*H/3, H/3],[H/4,3*H/7],[4*H/7,H/5],[H/3,2*H/3],[2*H/3,H],[H/4,H/5],[3*H/5,3*H/5],[2*H/5,3*H/4],[H/2,0]], float)
         namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
-
+        
 # -----------------------------------------------------------------------------------------------------------------------------------
-
+#   _____
+#  |     |
+#    \   |
+#      \ |
+#
 class linear(PWL_Height):
     def __init__(self, args, N):
         h0,m,L = args
@@ -61,18 +64,6 @@ class linear(PWL_Height):
 #        \______|
 #
 
-class pwl_discont_wave(PWL_Height):
-    def __init__(self, args, N):
-        H, L = args
-        x0 = 0
-        xf = L
-        N_regions = 10
-        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
-        h_peaks = np.asarray([[0, H],[H, H/2],[2*H/3, H/3],[H/4,3*H/7],[4*H/7,H/5],[H/3,2*H/3],[2*H/3,H],[H/4,H/5],[3*H/5,3*H/5],[2*H/5,3*H/4],[H/2,0]], float)
-        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
-        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
-        
         
 class BFS_deltaSmooth(PWL_Height):
     def __init__(self, args, N):
@@ -92,17 +83,14 @@ class BFS_deltaSmooth(PWL_Height):
 
 class BFS_noEddy(PWL_Height):
     def __init__(self, args, N):
-        H = args[0]
-        L = 4
-        xr = args[1]
-        yr = args[2]
+        h, H, l, L, xr, yr = args
         x0 = 0
         xf = L
-        x_reattatch = 1 + xr
+        x_reattatch = l + xr
         y_reattatch = H - yr
         N_regions = 3
-        x_peaks = np.asarray([x0, 1, x_reattatch, xf], float)
-        h_peaks = np.asarray( [[0, 1], [1, y_reattatch], [H, H], [H, 0]], float)
+        x_peaks = np.asarray([x0, l, x_reattatch, xf], float)
+        h_peaks = np.asarray( [[0, h], [h, y_reattatch], [H, H], [H, 0]], float)
         namestr = ''#f'cBFS_H{int(H)}L{int(xf)}_xr{int(xr)}yr{int(yr)}'
         titlestr = ''#f'Corner removed BFS $H/h={H/h : .3f}$, $x_r = {x_reattatch:.2f}$, $y_r = {y_reattatch:.2f}$, $L={L : .1f}$ '
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
@@ -112,21 +100,6 @@ class BFS_noEddy(PWL_Height):
 #  |____  ____|
 #       \/
 #
-
-
-
-class pwl_cont_wave(PWL_Height):
-    def __init__(self, args, N):
-        H, L = args
-        x0 = 0
-        xf = L
-        N_regions = 10
-        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
-        h_peaks = np.asarray([[0, H],[H, H/2],[H/2, H/3],[H/3,3*H/7],[3*H/7,H/5],[H/5,2*H/3],[2*H/3,H],[H,H/5],[H/5,3*H/5],[3*H/5,3*H/4],[3*H/4,0]], float)
-        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
-        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
-        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
-
 
 class TriSlider(PWL_Height):
     def __init__(self, args, N):
@@ -143,6 +116,18 @@ class TriSlider(PWL_Height):
         h_peaks = np.asarray(([[0, h_in], [h_in, h_in], [h, h], [h_out, h_out], [h_out, 0]]), float)
         namestr = ''#f'TriSlider_h{int(h)}L{int(xf)}'
         titlestr =''# f'Triangular Textured Slider $h_{in}={h_in:.2f}$, $h_{out}={h_out:.2f}$, $h={h:.2f}$, $l_{a}={l_a:.2f}$, $l_b={l_b:.2f}$'
+        super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
+
+class multi_tri(PWL_Height):
+    def __init__(self, args, N):
+        H, L = args
+        x0 = 0
+        xf = L
+        N_regions = 10
+        x_peaks = np.asarray([0, L/10, 2*L/10, 3*L/10, 4*L/10, 5*L/10, 6*L/10, 7*L/10, 8*L/10, 9*L/10, L], float)
+        h_peaks = np.asarray([[0, H],[H, H/2],[H/2, H/3],[H/3,3*H/7],[3*H/7,H/5],[H/5,2*H/3],[2*H/3,H],[H,H/5],[H/5,3*H/5],[3*H/5,3*H/4],[3*H/4,0]], float)
+        namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
+        titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 

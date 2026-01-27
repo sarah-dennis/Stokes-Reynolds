@@ -80,11 +80,11 @@ def plot_2D(fs, xs, title, axis_labels, color='darkmagenta', marker='o'):
     pp.plot(xs, fs, color=color, linewidth=.8, marker=marker)
 
     pp.title(title, fontweight="bold")
-    
     pp.xlabel(axis_labels[0])
-    
     pp.ylabel(axis_labels[1])
+    
     # pp.ylim(0, 1.25*max(fs))
+    
     pp.minorticks_on()
    
     return fig
@@ -102,15 +102,19 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
         
         ax.plot(xs, fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
     
-    ax.set_xlim([None, 18])
-    ax.set_ylim([0.25*np.min(fs),min(1.1*np.max(fs),25)])
 
-    # ax.set_ylim([2,min(1.1*np.max(fs),5)])
-
+    pp.title(title,  fontweight ="bold")
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
-    pp.title(title,  fontweight ="bold")
+    
+    # ax.set_xlim([None, 18])
+    
+    # ax.set_ylim([0.25*np.min(fs),min(1.1*np.max(fs),25)])
+    # ax.set_ylim([2,min(1.1*np.max(fs),5)])
+    
+    
     pp.minorticks_on()
+    
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
@@ -123,33 +127,6 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     else: 
         fig.legend(bbox_to_anchor=(0.9, 0.375))
     
-    return fig
-
-def plot_2D_multi_multi(fs, xs, title, fun_labels, ax_labels, loc, colors):
-    fig = pp.figure()
-    pp.rcParams['figure.dpi'] = dpi
-    ax = fig.add_subplot()
-    if colors=='sec':
-        cs = ['forestgreen', 'darkmagenta', 'orange', 'firebrick', 'royalblue', 'crimson']
-    else:
-        cs = ['firebrick', 'mediumblue','crimson','royalblue','indianred',  'dodgerblue']
-    markers = ['D', 'o', 's', '^', 'd', 'h']
-    for i in range(len(fs)):
-        
-        ax.plot(xs[i], fs[i], label=fun_labels[i], color=cs[i], linewidth=0.8, marker=markers[i])
-    
-    #ax.set_xlim([0, 1])
-    #ax.set_ylim([0, 1])
-
-    ax.set_xlabel(ax_labels[0])
-    ax.set_ylabel(ax_labels[1])
-    pp.title(title,  fontweight ="bold")
-    if loc== 'upper':
-        
-        fig.legend(bbox_to_anchor=(0.9, 0.875))
-    else:
-        fig.legend(bbox_to_anchor=(0.9, 0.275))
-    pp.minorticks_on()
     return fig
 
 #------------------------------------------------------------------------------   
@@ -169,16 +146,17 @@ def plot_log(fs, xs, title, ax_labels):
     return fig
 
 
-def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left', log_x=False, log_y=True, colors='pri'):
+def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO_on=False, loc='left', colors='pri'):
     pp.rcParams['figure.dpi'] = dpi
     fig = pp.figure()
     
-    
     ax = fig.add_subplot() 
+    
     if colors== 'pri':
          cs = ['r','b', 'forestgreen','darkmagenta', 'darkorange']
     else: 
          cs=['forestgreen', 'darkmagenta', 'darkorgange']
+         
     markers = ['D', 'o', 's', '*', 'H', 'X']
 
     pp.rcParams["lines.linewidth"] =line_width
@@ -192,12 +170,10 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
         O2 = 1
         ax.plot(xs, [O1*x**-1 for x in xs], label="$\mathcal{O}(\Delta x)$", color='darkgrey')    
         ax.plot(xs, [O2*x**-2 for x in xs], label="$\mathcal{O}(\Delta x^2)$", color='k')
+
+    ax.set_xscale('log')
     
-    if log_x:
-        ax.set_xscale('log')
-        
-    if log_y:
-        ax.set_yscale('log')
+    ax.set_yscale('log')
         # ax.set_yscale('symlog', linthresh=linthresh)
 
     # ax.set_ylim(min(1,0.5*np.min(fs)),2*np.max(fs))
@@ -205,7 +181,8 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
 
     ax.set_xlabel(ax_labels[0])
     ax.set_ylabel(ax_labels[1])
-    # ax.minorticks_on()
+    
+    ax.minorticks_on()
     # ax.yaxis.set_minor_locator(MultipleLocator(2.5))
     
     pp.title(title)
@@ -224,35 +201,8 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
     return fig
 
 #------------------------------------------------------------------------------
-# STREAMLINE & QUIVER PLOTS 
+# STREAMLINE PLOT <U(X,Y), V(X,Y)>
 #------------------------------------------------------------------------------
-def plot_stream(vx, vy, xs, ys, title, ax_labels):
-    
-    pp.rcParams['figure.dpi'] = dpi
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-
-    # stream_density=[ys.shape[0]/xs.shape[0],1]
-    stream_density=[1,4]
-    pp.streamplot(xs, ys, vx, vy, stream_density, linewidth=0.5, color='k', broken_streamlines=False)
-    
-    #remove arrows
-    ax = pp.gca()
-    # for art in ax.get_children():
-    #     if not isinstance(art, patches.FancyArrowPatch):
-    #         continue
-    #     art.remove()        
-    
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[0])
-    pp.ylabel(ax_labels[1])
-
-    ax.set_aspect('equal')
-    ax.set_ylim(0,1.01*max(ys))
-    pp.show()
-    
-        
 def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vscale=None, log_cmap=False, linthresh=linthresh):
 
     pp.rcParams['figure.dpi'] = dpi
@@ -296,87 +246,9 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
     pp.minorticks_on()
     pp.show()
        
-def plot_quiver(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, linthresh=linthresh):
-    pp.rcParams['figure.dpi'] = dpi
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-
-    N_x = 50
-    N_y = max(int(len(ys)/len(xs)*N_x), 1)
-    vscale=1/N_x * (len(xs)/len(ys))
-    
-    pp.quiver(xs[:: N_x], ys[:: N_y], vx[::N_y, ::N_x], vy[::N_y, ::N_x], scale=vscale)#, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
-   
-    # ax = pp.gca()
-    # for art in ax.get_children():
-    #     if not isinstance(art, patches.FancyArrowPatch):
-    #         continue
-    #     art.remove()        
-
-
-    pp.title(title, fontweight="bold")
-    pp.xlabel(ax_labels[1])
-    pp.ylabel(ax_labels[2])
-    # ax.set_aspect('equal')
-    pp.minorticks_on()
-    pp.show()
-
 #------------------------------------------------------------------------------       
 # VALUE PLOTS F(X,Y)
 #------------------------------------------------------------------------------
-def plot_contour(zs, xs, ys, title, labels, log_cmap=False, linthresh=linthresh):
-    pp.rcParams["lines.linewidth"] = .5
-    pp.rcParams['figure.dpi'] = dpi
-
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    n_contours = max(zs.shape)
-
-    if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh)#, vmin=-1, vmax=1, clip=True)
-        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma', norm=norm_symLog)
-    else:
-        contour_plot = pp.contour(X, Y, zs,  n_contours, cmap='plasma')
-        
-        
-    pp.title(title, fontweight="bold")
-    pp.xlabel(labels[1])
-    pp.ylabel(labels[2])
-    pp.colorbar(contour_plot, label=labels[0])
-    
-    ax = pp.gca()
-    ax.set_aspect('equal')
-    pp.show()
-    
-def plot_contour_multi(funs, xs, ys, title, fun_labels, labels, y_lim=None):
-    pp.rcParams["lines.linewidth"] = .5
-    pp.rcParams['figure.dpi'] = dpi
-
-    pp.figure()
-    
-    X, Y = np.meshgrid(xs, ys)
-    n_contours = len(xs)//2
-    colors = [ 'forestgreen', 'darkorchid', 'darkorange', 'royalblue', 'firebrick']  
-    plots = []
-    
-    for i in range(len(funs)):          
-        pp.contour(X, Y, funs[i], n_contours, colors=colors[i])
-        plots.append(pp.plot(0,0,color=colors[i], label=fun_labels[i]))
-        
-        
-    pp.title(title, fontweight="bold")
-    pp.xlabel(labels[0])
-    pp.ylabel(labels[1])    
-    ax = pp.gca()
-    pp.legend()
-    # ax.set_aspect('equal')
-    if y_lim is not None:
-        ax.set_ylim(0, y_lim)
-    pp.show()    
-
-
 def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cmap=False, linthresh=linthresh, n_contours=n_contours):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()

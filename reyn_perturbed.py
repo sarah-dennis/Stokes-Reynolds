@@ -7,58 +7,47 @@ Created on Wed Feb 26 14:30:05 2025
 """
 import numpy as np
 import domain as dm
-import graphics
-import reyn_boundary as bc
 
-from reyn_pressure import Pressure
-from reyn_velocity import Velocity
-from reyn_heights import PWL_Height
-# H=1
-# slope_k = 1/10
+from pressure import Pressure
+from velocity import Velocity
+from reyn_solution import Solution
  
-class PerturbedReynSol:
-    def __init__(self, height, BC, order, reyn_pressure, reyn_velocity):
+class Perturbed_Solution(Solution):
+    def __init__(self, height, BC, order, reyn_sol):
         self.order = order
-        if order < 0 or order > 4:
-            return Exception(f"order {order} not in range [0,4]")
-        
+
         self.x_scale = (height.xf - height.x0)/2 
         self.y_scale = height.yf - height.y0
         
 
         
-        self.Q_scale = reyn_velocity.Q
+        self.Q_scale = reyn_sol.Q
 
         self.P_scale = self.Q_scale * self.x_scale * (self.y_scale**-3) #*visc
         
-        self.U_scale = self.Q_scale/self.y_scale
-        self.V_scale = self.Q_scale/self.x_scale                      
+        self.U_scale = self.Q_scale /self.y_scale
+        self.V_scale = self.Q_scale /self.x_scale                      
 
-        self.u0s = reyn_velocity.u /self.U_scale
-        self.v0s = reyn_velocity.v /self.V_scale
+        self.u0s = reyn_sol.velocity.u /self.U_scale
+        self.v0s = reyn_sol.velocity.v /self.V_scale
         
-        reyn_pressure.make_2D_ps(height)
-        self.p0s = reyn_pressure.ps_2D /self.P_scale
-        
-        #self.dP_reyn = reyn_pressure.dP
-        
+        self.p0s = reyn_sol.pressure.ps_2D /self.P_scale
+
         delta = self.y_scale/self.x_scale
 
-        self.is_pwl_height = isinstance(height, PWL_Height)
-
-        if order > 1:
-
+        if order >= 2:
+            
             # make self.u2s, self.v2s, self.p2s, etc... 
 
             self.perturb_second(height)
             pert2_ps_2D = (self.p0s + (delta**2) * self.p2s) *self.P_scale
             pert2_us_2D = (self.u0s + (delta**2) * self.u2s) *self.U_scale
             pert2_vs_2D = (self.v0s + (delta**2) * self.v2s) *self.V_scale
-            self.pert2_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert2_ps_2D)
-            self.pert2_velocity = Velocity(reyn_velocity.Q, pert2_us_2D, pert2_vs_2D)
-            #self.dP_pert2 = (self.p2s[0,-1]-self.p2s[0,0])
+            self.pert2_pressure = Pressure(reyn_sol.pressure.ps_1D, pert2_ps_2D)
+            self.pert2_velocity = Velocity(pert2_us_2D, pert2_vs_2D)
 
-        if order > 2: 
+
+        if order >= 4: 
 
             # make self.u4s, self.v4s, self.p4s, etc... 
             self.perturb_fourth(height)
@@ -67,11 +56,9 @@ class PerturbedReynSol:
             pert4_us_2D = pert2_us_2D + (delta**4) * self.u4s *self.U_scale
             pert4_vs_2D = pert2_vs_2D + (delta**4) * self.v4s *self.V_scale
         
-            self.pert4_pressure = Pressure(height, BC, ps_1D = reyn_pressure.ps_1D, ps_2D=pert4_ps_2D)
-            self.pert4_velocity = Velocity(reyn_velocity.Q, pert4_us_2D, pert4_vs_2D)
-            #self.dP_pert4 = (self.p4s[0,-1]-self.p4s[0,0])
-    
-    
+            self.pert4_pressure = Pressure(reyn_sol.pressure.ps_1D, pert4_ps_2D)
+            self.pert4_velocity = Velocity(pert4_us_2D, pert4_vs_2D)
+
         
     def perturb_second(self, height):
 
@@ -149,10 +136,7 @@ class PerturbedReynSol:
             c3_xs[i]  = 6 * h2_2x * h - 18/5 * h3_2x * (h**2)
             c3_2xs[i] = 6 * (h2_2x * h_x +  h2_3x * h) - 18/5* (2*h*h_x * h3_2x + (h**2) * h3_3x)
         
-
-
-    
-        # correct finite differences at discontinuities
+        
         for i in height.i_peaks[1:-1]:
             h_xs[i-1 : i+2] = dm.avg_x(h_xs[i-2 : i+3])
             h2_2xs[i-1 : i+2] = dm.avg_2x(h2_2xs[i-2 : i+3])
@@ -340,39 +324,39 @@ class PerturbedReynSol:
             c3_3x_A = 6*(2*h2_3x*h_x + h2_2x*h_2x + h2_4x*h)
             c3_3x_B = (-18/5)*(2*(h_x**2)*h3_2x + 2*h*h_2x*h3_2x + 4*h*h_x*h3_3x + (h**2)*h3_4x)
             c3_3x = c3_3x_A + c3_3x_B
-            c3_3xs[i] = c3_3x #4x correction
+            c3_3xs[i] = c3_3x 
             
             c3_4x_A = 6*(3*h2_4x*h_x + 3*h2_3x*h_2x + h2_2x*h_3x + h2_5x*h)
             c3_4x_B = (-18/5)*(6*(h_x*h_2x*h3_2x+ (h_x**2)*h3_3x + h*h_2x*h3_3x + h*h_x*h3_4x) + 2*h*h_3x*h3_2x + (h**2)*h3_5x)
             c3_4x = c3_4x_A + c3_4x_B
-            c3_4xs[i] = c3_4x #5x correction
+            c3_4xs[i] = c3_4x 
             
             f1_2x = (6*h*(h_x**2) + 3*(h**2)*h_2x)*h3_2x + 6*(h**2)*h_x*h3_3x + (h**3)*h3_4x
-            f1_2xs[i] = f1_2x #4x correction
+            f1_2xs[i] = f1_2x 
             
             f1_3x_A = (6*(h_x**3) + 18*h*h_x*h_2x + 3*(h**2)*h_3x) *h3_2x
             f1_3x_B = (9*(h**2)*h_2x + 18*h*(h_x**2)) *h3_3x + 9*(h**2)*h_x*h3_4x + (h**3)*h3_5x
             f1_3x = f1_3x_A + f1_3x_B
-            f1_3xs[i] = f1_3x #5x correction
+            f1_3xs[i] = f1_3x
             
             f2_2x = 2*(h_x**2 + h*h_2x)*h2_2x + 4*h*h_x*h2_3x + (h**2)*h2_4x
-            f2_2xs[i] = f2_2x #4x correction
+            f2_2xs[i] = f2_2x 
 
             f2_3x_A = (6*h_x*h_2x + 2*h*h_3x)*h2_2x
             f2_3x_B = 6*(h*h_2x + h_x**2)*h2_3x + 6*h*h_x*h2_4x + (h**2)*h2_5x
             f2_3x = f2_3x_A + f2_3x_B 
-            f2_3xs[i] = f2_3x #5x correction
+            f2_3xs[i] = f2_3x 
     
             f3_2x = h_2x*c3_x + 2*h_x*c3_2x + h*c3_3x
-            f3_2xs[i] = f3_2x #4x correction
+            f3_2xs[i] = f3_2x 
             
             f3_3x = h_3x*c3_x + 3*h_2x*c3_2x + 3*h_x*c3_3x + h*c3_4x
-            f3_3xs[i] = f3_3x #5x correction
+            f3_3xs[i] = f3_3x 
     
             c5_x_A = (3/14)*h3_4x*(h**4) - (3/5)*h2_4x*(h**3)+ (3/10)*c3_3x*(h**2)
             c5_x_B = -(f1_2x - 2*f2_2x)*h  -(1/2)*f3_2x*h
             c5_x =  c5_x_A + c5_x_B
-            c5_xs[i] = c5_x #4x correction
+            c5_xs[i] = c5_x 
             
             c5_2x_A = (3/14)*(h3_5x*(h**4) + 4*h3_4x*h_x*(h**3)) 
             c5_2x_B = -(3/5)*(h2_5x*(h**3) + 3*h2_4x*h_x*(h**2))
@@ -380,11 +364,10 @@ class PerturbedReynSol:
             c5_2x_D = (3/10)*(c3_4x*(h**2) + 2*c3_3x*h_x*h) 
             c5_2x_E = -(1/2)*(f3_3x*h + f3_2x*h_x) 
             c5_2x = c5_2x_A + c5_2x_B + c5_2x_C + c5_2x_D + c5_2x_E 
-            c5_2xs[i] = c5_2x #5x correction
+            c5_2xs[i] = c5_2x 
             
 
             
-        # correct finite differences at discontinuities
         for i in height.i_peaks[1:-1]:
             h_2xs[i-1 : i+2] = dm.avg_2x(h_2xs[i-2 : i+3])
             h_3xs[i-2 : i+3] = dm.avg_3x(h_3xs[i-3 : i+4])
@@ -468,26 +451,10 @@ class PerturbedReynSol:
                     v4_F = (1/2)*(c5_2x)*((1/3)*(y**3) - (1/2)*h*(y**2)) - (1/4)*c5_x*h_x*(y**2)
                     v4s[j,i] = -(v4_A + v4_B + v4_C + v4_D + v4_E + v4_F)
 
-        # graphics.plot_2D(h2_4xs, height.xs,  'h2_xxxx', ['x', 'h2_4xs']) 
-        # graphics.plot_2D(h2_5xs, height.xs,  'h2_xxxxx', ['x', 'h2_5xs']) 
-        # graphics.plot_2D(h3_4xs, height.xs,  'h3_xxxx', ['x', 'h3_4xs']) 
-        # graphics.plot_2D(h3_5xs, height.xs,  'h3_xxxxx', ['x', 'h3_5xs']) 
-        
-        # graphics.plot_2D(c3_3xs, height.xs,  'c3_xxx', ['x', 'c3_3xs'])    
-        # graphics.plot_2D(c3_4xs, height.xs,  'c3_xxxx', ['x', 'c3_4xs'])  
-        # graphics.plot_2D(c5_xs, height.xs,  'c5_xs', ['x', 'c5_x'])    
-        # graphics.plot_2D(c5_2xs, height.xs,  'c5_2xs', ['x', 'c5_2x'])  
 
-        # graphics.plot_2D(f1_2xs, height.xs,  'f1_xx', ['x', 'f1_2x'])    
-        # graphics.plot_2D(f1_3xs, height.xs,  'f1_xxx', ['x', 'f1_3x'])  
-        # graphics.plot_2D(f2_2xs, height.xs,  'f2_xx', ['x', 'f2_2x'])    
-        # graphics.plot_2D(f2_3xs, height.xs,  'f2_xxx', ['x', 'f2_3x'])
-        # graphics.plot_2D(f3_2xs, height.xs,  'f3_xx', ['x', 'f3_2x'])    
-        # graphics.plot_2D(f3_3xs, height.xs,  'f3_xxx', ['x', 'f3_3x'])
-        
         # p4s = -u2_xs + dxx int_0^y [v0] dy + c5s
          
-        for j in range(height.Ny): #TODO height dependent averaging?
+        for j in range(height.Ny):
             v0_Sy_2xs[j] = dm.center_second_diff(v0_Sys[j], height.Nx, dx)
             for i in height.i_peaks[1:-1]:
                 

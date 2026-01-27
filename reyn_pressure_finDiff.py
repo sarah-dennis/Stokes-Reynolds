@@ -6,8 +6,7 @@ Created on Tue Jun 21 09:43:24 2022
 @author: sarahdennis
 """
 import numpy as np
-import reyn_boundary as bc
-import time
+import boundary as bc
 
 
 def fd_solve(height, BC):

@@ -126,9 +126,9 @@ class Stokes_Solver:
         u = u.reshape((ex.Ny,ex.Nx))
         v = v.reshape((ex.Ny,ex.Nx))
         
-        p = np.flip(p, axis=0)        
-        u = np.flip(u, axis=0)
-        v = -np.flip(v, axis=0) 
+        # p = np.flip(p, axis=0)        
+        # u = np.flip(u, axis=0)
+        # v = -np.flip(v, axis=0) 
         
         return p, u, v
         
@@ -137,35 +137,35 @@ class Stokes_Solver:
         ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         p = pressure.pressure(ex, u, v)
-        dp, res = pressure.resistance(ex, p) 
+        dp, res = pressure.dp_res(ex, p) 
         return dp
     
-    def get_attachments(self,N):
-        ex=self.Example(self.args, self.U, self.Q, self.Re, N)
-        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
+    # def get_attachments(self,N):
+    #     ex=self.Example(self.args, self.U, self.Q, self.Re, N)
+    #     u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         
-        y_xr = 0 
-        x_yr = 1 #=l
+    #     y_xr = 0 
+    #     x_yr = 1 #=l
         
-        i_yr =int( x_yr/ex.dx +1)
+    #     i_yr =int( x_yr/ex.dx +1)
         
-        j_xr = int(y_xr+1)
+    #     j_xr = int(y_xr+1)
 
-        xr = 0
-        yr = 0
+    #     xr = 0
+    #     yr = 0
         
-        for i in range(ex.Nx-1):
-            k = j_xr*ex.Nx + i
-            k2 = j_xr*ex.Nx + i+1    
-            if np.sign(psi[k])!= np.sign(psi[k2]):
-                xr = ex.xs[i]-1
+    #     for i in range(ex.Nx-1):
+    #         k = j_xr*ex.Nx + i
+    #         k2 = j_xr*ex.Nx + i+1    
+    #         if np.sign(psi[k])!= np.sign(psi[k2]):
+    #             xr = ex.xs[i]-1
                 
-        for j in range(ex.Ny-1):
-            k = int(j*ex.Nx + i_yr)
-            k2 = int((j+1)*ex.Nx + i_yr)
-            if np.sign(psi[k])!= np.sign(psi[k2]):
-                yr = ex.ys[j]
-        return xr,yr
+    #     for j in range(ex.Ny-1):
+    #         k = int(j*ex.Nx + i_yr)
+    #         k2 = int((j+1)*ex.Nx + i_yr)
+    #         if np.sign(psi[k])!= np.sign(psi[k2]):
+    #             yr = ex.ys[j]
+    #     return xr,yr
     
 #------------------------------------------------------------------------------
 # Error
@@ -203,7 +203,7 @@ class Stokes_Solver:
 
     # Pressure plot: 
         p = pressure.pressure(ex, u, v)
-        dp, res = pressure.resistance(ex, p) 
+        dp, res = pressure.dp_res(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
         dp_str = ', $\Delta p =%.2f$'%(dp)
@@ -213,7 +213,7 @@ class Stokes_Solver:
         title_p = 'Stokes\n' + ex.spacestr + dp_str
     
         p_ma = np.ma.masked_where(ex.space==-1, p_2D)
-        p_ma = np.flip(p_ma, axis=0)
+        # p_ma = np.flip(p_ma, axis=0)
        
         if zoom:
             p_zoom = graphics.grid_zoom_2D(p_ma, ex, x_start, x_stop, y_start, y_stop)  
@@ -235,9 +235,9 @@ class Stokes_Solver:
         uv_mag = np.sqrt(u_2D**2 + v_2D**2)
         
         
-        uv_mag = np.flip(uv_mag, axis=0)
-        u_2D = np.flip(u_2D, axis=0)
-        v_2D = -np.flip(v_2D, axis=0)
+        # uv_mag = np.flip(uv_mag, axis=0)
+        # u_2D = np.flip(u_2D, axis=0)
+        # v_2D = -np.flip(v_2D, axis=0)
         
         if zoom:
             u_2D_zoom = graphics.grid_zoom_2D(u_2D, ex, x_start, x_stop, y_start, y_stop)
@@ -250,13 +250,13 @@ class Stokes_Solver:
         
     # Stream plot:
     
-        # ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
-        # title = 'Stream $\psi(x,y)$ \n' + ex.spacestr + dp_str
-        # stream_2D = psi.reshape((ex.Ny,ex.Nx))
-        # stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
-        # graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=True, n_contours=20, vmin=None, vmax=ex.flux)
-        # if zoom:
-            # stream_2D_zoom = grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-            # graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, True, n_contours=20, vmin=None, vmax=ex.flux)
+        ax_labels = ['$\psi(x,y)$ : $u = \psi_y$, $v = -\psi_x$', '$x$', '$y$']
+        title = 'Stream $\psi(x,y)$ \n' + ex.spacestr + dp_str
+        stream_2D = psi.reshape((ex.Ny,ex.Nx))
+        stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
+        graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20, vmin=0, vmax=ex.flux)
+        if zoom:
+            stream_2D_zoom = graphics.grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
+            graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=False, n_contours=20, vmin=0, vmax=ex.flux)
     
         return dp

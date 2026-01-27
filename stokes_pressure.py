@@ -6,25 +6,15 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 import graphics
-def resistance(ex, p):
+def dp_res(ex, p):
     
     p_2D = p.reshape((ex.Ny,ex.Nx))
-    
 
-    # j_mid_in = ex.y_peaks[0][0] -(ex.y_peaks[0][0] - ex.y_peaks[0][1])/ex.dy/2
-    # j_mid_out = ex.y_peaks[-1][0]-(ex.y_peaks[-1][1] - ex.y_peaks[-1][0])/ex.dy/2
-
-    # dp= p_2D[int(j_mid_out),-1] - p_2D[int(j_mid_in),0]
-    
-
-    # dp_nondim = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy/p_scale/y_scale
-    # h_in = ex.yf - ex.y_peaks[0][0]
-    # h_out = ex.yf - ex.y_peaks[-1][0]
     dp = (sum(p_2D[:,0])/ex.H_in - sum(p_2D[:,-1])/ex.H_out)*ex.dy
     
     
     if ex.flux!=0:
-        r= dp/ex.flux
+        r = dp/ex.flux
         return dp, r
     else:
         return dp, np.inf
@@ -40,66 +30,68 @@ def pressure(ex, u, v):
     p = np.zeros(shape)
 
     # set the ambient pressure at outlet 
-    p[(m-2)*n + n-1] = ex.p_ambient   
+    # p[(m-2)*n + n-1] = ex.p_ambient   
+    p[2*n-1] = ex.p_ambient  # i=n-1, j=1
     
     # contour the first interior row (backwards) using px
-    i=n-2
+    # i=n-2
+    # while i >= 0:
+    #     k =   (m-2)*n + i
+    #     k_E = (m-2)*n + i+1
+    #     p[k] = p[k_E]-px[k]*dx
+    #     i-=1
+    
+    i=n-2 #j=1
     while i >= 0:
-        k =   (m-2)*n + i
-        k_E = (m-2)*n + i+1
-        p[k] = p[k_E]-px[k]*dx
+        k = n + i
+        k_E = n + i+1
+        p[k] = p[k_E] - px[k]*dx
         i-=1
      
-    # contour the flat boundary using dy from interior row
-    p[(m-1)*n-1] = ex.p_ambient
-    i = n-1
-    while i >=0:
-        k   = (m-1)*n + i
-        k_S = (m-2)*n + i
-        p[k] = p[k_S] + py[k_S]*dy
+    # # contour the flat boundary using dy from interior row
+    # # p[(m-1)*n-1] = ex.p_ambient
+    # # i = n-1
+    # # while i >=0:
+    # #     k   = (m-1)*n + i
+    # #     k_S = (m-2)*n + i
+    # #     p[k] = p[k_S] + py[k_S]*dy
+    # #     i-=1
+    
+    i=n-2 #j=0
+    while i >= 0:
+        k = i
+        k_N = n + i
+        p[k] = p[k_N] - py[k_N]*dy
         i-=1
+    
+    # i = n-1 
+    # while i >=0:
+    #     k = i
+    #     k_N = n + i
+    #     p[k] = p[k_N] + py[k_N]*dy
+    #     i-=1
 
     
     # contour each xi from flat boundary to y=h
-    for i in range(n):
-        j=m-3
-        while j >=0:
-            k = j*n + i
-            if ex.space[j,i]==1 or ex.space[j,i]==0:
-                k_N = (j+1)*n + i
-                p[k] = p[k_N] - py[k_N]*dy
-          
-            j-=1    
-    
-    # # contour the boundary
     # for i in range(n):
     #     j=m-3
-    #     while j >= 0:
+    #     while j >=0:
     #         k = j*n + i
-    #         if ex.space[j,i]==0:
-    #             if ex.space[j+1,i]==1:
-                   
-    #                 k_N = (j+1)*n + i
-    #                 p[k] = p[k_N] - py[k_N]*dy
-                    
-    #             if i < n-1 and ex.space[j,i+1] == 1:
-    #                 k_E = j*n +i+1
-    #                 p[k] = p[k_E] - px[k_E]*dx
-                    
-    #             elif i > 0 and ex.space[j,i-1]==1:
-    #                 k_W = j*n+i-1
-    #                 p[k] = p[k_W] + px[k_W]*dx
-                    
-    #             elif i < n-1 and ex.space[j+1,i+1]==1:
-    #                 k_NE = (j+1)*n+i+1
-    #                 p[k] = p[k_NE] - px[k_NE]*dx -py[k_NE]*dy
-                    
-    #             elif i > 0 and ex.space[j+1,i-1]==1:
-    #                 k_NW = (j+1)*n+i-1
-    #                 p[k] = p[k_NW] + px[k_NW]*dx -py[k_NW]*dy
-    #             # else:        
-    #                 # assert False, "Grid misalignment - check x_peaks for dx=1/N"
-    #         j-=1
+    #         if ex.space[j,i]==1 or ex.space[j,i]==0:
+    #             k_N = (j+1)*n + i
+    #             p[k] = p[k_N] - py[k_N]*dy
+          
+    #         j-=1  
+            
+    for i in range(n):
+        j = 2
+        while j <=m-1 and ex.space[j,i] != -1:
+            k = j*n + i
+            
+            k_S = (j-1)*n + i
+            p[k] = p[k_S] + py[k_S]*dy
+          
+            j+=1  
     
     return p
             
@@ -154,16 +146,29 @@ def px_py(ex, u, v):
             k_N=(j+1)*n + i
             k_S=(j-1)*n + i
             
-            u_N = u[k_N]                    
-            v_N = v[k_N]
+            # u_N = u[k_N]                    
+            # v_N = v[k_N]
             
-            if space[j-1,i] == -1:
-                scale_S = ex.scale_S(i,j)
-                u_S = ex.interp(scale_S, u[k_N])
-                v_S = ex.interp(scale_S, v[k_N])
+            # if space[j-1,i] == -1:
+            #     scale_S = ex.scale_S(i,j)
+            #     u_S = ex.interp(scale_S, u[k_N])
+            #     v_S = ex.interp(scale_S, v[k_N])
+            # else: 
+            #     u_S = u[k_S]
+            #     v_S = v[k_S]
+            
+            u_S = u[k_S]
+            v_S = v[k_S]
+            
+            if space[j+1,i] == -1:
+                scale_N = ex.scale_N(i,j)
+                u_N = ex.interp(scale_N, u[k_S])
+                v_N = ex.interp(scale_N, v[k_S])
             else: 
-                u_S = u[k_S]
-                v_S = v[k_S]
+                u_N = u[k_N]
+                v_N = v[k_N]
+            
+            
 
             uyy_k = (u_N -2*u_k + u_S)/ex.dx**2
             vyy_k = (v_N -2*v_k + v_S)/ex.dx**2

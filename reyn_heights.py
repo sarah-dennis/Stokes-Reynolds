@@ -6,8 +6,6 @@ Created on Sun Jan 29 08:18:07 2023
 @author: sarahdennis
 """
 import numpy as np
-import random
-
 from domain import Height
 # import graphics
 #------------------------------------------------------------------------------
@@ -143,22 +141,7 @@ def make_PWC(height):
 #------------------------------------------------------------------------------
 # Other Height Functions
 #------------------------------------------------------------------------------
-
-class RandomHeight(Height):
-    def __init__(self, x0, xf, N, h_min, h_max, filestr):
-
-        Nx = (xf-x0)*N + 1
-        hs = np.zeros(Nx)
-        for i in range (Nx):
-            hs[i] = h_min + (h_max - h_min) * random.random()/(i+1)
-        y0 = 0
-        yf = max(hs)
-        i_peaks = np.asarray(range(Nx))
-        super().__init__(x0, xf, y0, yf, Nx-1, hs, i_peaks,filestr)
-  
-
-#------------------------------------------------------------------------------   
-class SinusoidalHeight(Height): 
+class SinusoidalHeight(Height):  #exact solution
     #h(x) = h_min + r(1 + cos(kx))
     def __init__(self, x0, xf, N, H, delta, k, filestr):
         
@@ -188,7 +171,7 @@ class SinusoidalHeight(Height):
         dnm = -self.H * (1 + self.delta * np.cos(self.k*x))**2
         return  num/dnm
     
-class SinusoidalHeight_2(Height):
+class SinusoidalHeight_2(Height): # inlet and outlet dh/dx=0
     def __init__(self, x0, xf, N, H, delta, k, l, L, filestr):
         
         self.H = H

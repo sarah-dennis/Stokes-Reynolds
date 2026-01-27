@@ -6,12 +6,9 @@ Created on Mon May 19 17:32:18 2025
 @author: sarah
 """
 import numpy as np
-import reyn_boundary as bc
-# import multiprocessing
 import time
 from multiprocessing import shared_memory, Pool
-# from multiprocessing import Pool
-
+import boundary as bc
 def make_rhs(height, BC): 
     N = height.N_regions 
     rhs = np.zeros(2*N-1)
