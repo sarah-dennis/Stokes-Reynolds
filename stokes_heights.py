@@ -134,11 +134,10 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
 # Boundary interpolation
 #------------------------------------------------------------------------------
-    def interp(self, scale, v_opp, v_bdry=0, p=False):
+    def interp(self, scale, v_opp, v_bdry=0):
         v_nbr = v_bdry + (v_bdry - v_opp)*scale
 
-        if p:
-            print(v_nbr, v_opp)
+        # print(v_nbr, v_opp)
 
         return v_nbr
 
@@ -154,9 +153,8 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2        
-    
-        # print(scale)
-        # print('s', scale<1)
+
+        # print('s', scale)
         return scale
     
 
@@ -177,7 +175,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2        
-        # print('e', scale<1)
+        # print('e', scale)
         return scale
     
     def scale_W(self, i,j):
@@ -196,8 +194,8 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2 
-        # print('w', i,j,scale)
-        # print('w', scale<1)
+
+        # print('w', scale)
         return scale
 
 
@@ -223,7 +221,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2 
-        # print('ne', scale<1)
+        # print('ne', scale)
         return scale
         
     def scale_SW(self, i,j): 
@@ -247,7 +245,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l1/l2  
-        # print('sw', scale<1)
+        # print('sw', scale)
         return scale
     
     def scale_NW(self, i,j): 
@@ -272,7 +270,7 @@ class PWLinear(Space):
         else:
             scale = l1/l2   
         
-        # print('nw', scale<1)
+        # print('nw', scale)
         return scale
     
     def scale_SE(self, i,j): 
@@ -296,7 +294,7 @@ class PWLinear(Space):
             scale = 0
         else:
             scale = l2/l1  
-        # print('se', scale<1)
+        # print('se', scale)
         return scale
 #------------------------------------------------------------------------------
 
