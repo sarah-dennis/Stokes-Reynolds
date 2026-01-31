@@ -20,6 +20,20 @@ class BFS(PWLinear):
         namestr= f'BFS_hin{h_in}hout{h_out}lin{l_in}lout{l_out}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
         
+
+class BFS_wedge(PWLinear):
+    def __init__ (self, args, U, Q, Re, N):
+        h_in, h_out, l_in, l_out, xr, yr = args
+        x0 = 0
+        xf = l_in+l_out
+  
+        x_peaks = [0, l_in-xr, l_in, l_in+l_out]
+        y0 = 0
+        yf = max(h_in,h_out) 
+        y_peaks=[[0,h_in],[h_in, h_in],[h_in-yr,h_out],[h_out,0]]
+        namestr= f'wedgeBFS_hin{h_in}hout{h_out}lin{l_in}lout{l_out}xr{xr}yr{yr}_U{U}_Q{Q}_Re{Re}'
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
+        
         
 class BFS_pwl(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
@@ -42,12 +56,12 @@ class TriCavity(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
         H, L = args
         x0 = 0
-        xf = 2
-        l=xf//2
+        xf = L
+        l=xf/2
         y0 = 0
         yf = H
         x_peaks = [x0, x0+l, xf]
-        y_peaks=[[0,0],[H,H],[0,0]]
+        y_peaks=[[0,2/N],[H,H],[2/N,0]]
         namestr = f"TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
         

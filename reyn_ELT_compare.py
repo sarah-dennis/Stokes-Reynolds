@@ -6,6 +6,7 @@ Created on Mon Aug  4 15:41:51 2025
 @author: sarahdennis
 """
 import reyn_control
+import reyn_solvers
 import reyn_examples
 import reyn_boundary as rbc
 import stokes_control
@@ -53,55 +54,41 @@ BC = rbc.Mixed(U, Q)
 Re=0
 
 
-N = 80 # grid size |1|= N
+N = 20 # grid size |1|= N
 
 #------------------------------------------------------------------------------
 #TODO: select example
 #------------------------------------------------------------------------------
-Reyn_Example = reyn_examples.Logistic
-Stokes_Example= stokes_examples.Logistic
-h_in = 2   # inlet height
-h_out= 1   # outlet height
-l = 16   #  length
+# Reyn_Example = reyn_examples.Logistic
+# Stokes_Example= stokes_examples.Logistic
+# h_in = 2   # inlet height
+# h_out= 1   # outlet height
+# l = 16   #  length
 
-tests = [2, 3, 4, 6, 8, 16, 32]
-test_args = [[h_in , h_out, l, lam] for lam in tests]
-exstr = 'Logistic Step'
-label = '$\lambda$'
+# tests = [2, 3, 4, 6, 8, 16, 32]
+# test_args = [[h_in , h_out, l, lam] for lam in tests]
+# exstr = 'Logistic Step'
+# label = '$\lambda$'
 #------------------------------------------------------------------------------
-# Reyn_Example = reyn_examples.TriSlider
-# Stokes_Example = stokes_examples.TriSlider
+Reyn_Example = reyn_examples.TriSlider
+Stokes_Example = stokes_examples.TriSlider
 
-# h_in=1  # inlet height
-# h0=1/4   # apex height 
-# h_out = 1  #oulet height
-# l_in = 7  # inlet length
-# l_out = 7  #outlet length
-# l_a = 1.25  # base length A  
-# l_b = 0.75  # base length B 
+h_in=1  # inlet height
+h0=1/4   # apex height 
+h_out = 1  #oulet height
+l_in = 7  # inlet length
+l_out = 7  #outlet length
+l_a = 1.25  # base length A  
+l_b = 0.75  # base length B 
 
-# #test h0
+#test h0
 
-# tests = [1/16, 1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
-# test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
+tests = [1/16, 1/8, 1/4, 1/2, 3/4, 5/4, 3/2, 7/4, 2]
+test_args = [[h_in, h0, h_out, l_in, l_a, l_b, l_out] for h0 in tests]
 
-# exstr = 'Triangular Slider'
-# label = '$H_v$'
-# #------------------------------------------------------------------------------
-# Reyn_Example = reyn_examples.BFS
-# Stokes_Example = stokes_examples.BFS
+exstr = 'Triangular Slider'
+label = '$H_v$'
 
-# h_in=1  # inlet height
-# # h_out=2   # outlet height 
-# l_in = 2  # inlet length
-# l_out = 2  #outlet length
-
-# #test h_out
-# tests = [2]
-# test_args = [[h_in, h_out, l_in, l_in+l_out] for h_out in tests]
-
-# exstr = 'BFS'
-# label = '$H$'
  #------------------------------------------------------------------------------
 k = 0
 num_tests=len(test_args)
@@ -122,27 +109,28 @@ for args in test_args:
 #------------------------------------------------------------------------------
 # Reynolds 
 #------------------------------------------------------------------------------
-    reyn_solver = reyn_control.Reynolds_Solver(Reyn_Example, BC, args)
-    reyn_P, reyn_V, _ = reyn_solver.fd_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    reyn_ps,reyn_us, reyn_vs = np.nan_to_num(reyn_P.ps_2D),reyn_V.u,reyn_V.v
+    reyn_solver = reyn_solvers.Reynolds_Solver(Reyn_Example, BC, args)
+    reyn_solution = reyn_solver.fd_solve(N)
     
-    adj_P, adj_V, _ = reyn_solver.fd_adj_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    adj_ps,adj_us, adj_vs = np.nan_to_num(adj_P.ps_2D),adj_V.u,adj_V.v
+    reyn_ps,reyn_us, reyn_vs = np.nan_to_num(reyn_solution.pressure.ps_2D),reyn_solution.velocity.u,reyn_solution.velocity.v
     
-    adj_TG_P, adj_TG_V, _ = reyn_solver.fd_adj_TG_solve(N, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
-    adj_TG_ps,adj_TG_us,adj_TG_vs = np.nan_to_num(adj_TG_P.ps_2D),adj_TG_V.u,adj_TG_V.v
+    VA_ELT_solution = reyn_solver.fd_VA_ELT_solve(N)
+    VA_ELT_ps,VA_ELT_us, VA_ELT_vs = np.nan_to_num(VA_ELT_solution.pressure.ps_2D),VA_ELT_solution.velocity.u,VA_ELT_solution.velocity.v
+    
+    TG_ELT_solution = reyn_solver.fd_TG_ELT_solve(N)
+    TG_ELT_ps,TG_ELT_us,TG_ELT_vs = np.nan_to_num(TG_ELT_solution.pressure.ps_2D),TG_ELT_solution.velocity.u,TG_ELT_solution.velocity.v
 
-    pert = reyn_solver.fd_pert_solve(N, order=4, plot=plots_on, scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on, get_all=True)
-    e2_ps, e2_us, e2_vs =  np.nan_to_num(pert.pert2_pressure.ps_2D), pert.pert2_velocity.u, pert.pert2_velocity.v
+    pert2_solution, pert4_solution = reyn_solver.fd_pert_solve(N, order=4, get_both=True)
+    e2_ps, e2_us, e2_vs =  np.nan_to_num(pert2_solution.pressure.ps_2D), pert2_solution.velocity.u, pert2_solution.velocity.v
 
-    e4_ps, e4_us, e4_vs =  np.nan_to_num(pert.pert4_pressure.ps_2D), pert.pert4_velocity.u, pert.pert4_velocity.v
+    e4_ps, e4_us, e4_vs =  np.nan_to_num(pert4_solution.pressure.ps_2D), pert4_solution.velocity.u, pert4_solution.velocity.v
 
 #------------------------------------------------------------------------------
 # Stokes 
 #------------------------------------------------------------------------------
     
     stokes_solver = stokes_control.Stokes_Solver(Stokes_Example, args, U, Q, Re)
-    stokes_ps, stokes_us, stokes_vs = stokes_solver.load(N)
+    stokes_ps, stokes_us, stokes_vs, stokes_dp = stokes_solver.load(N)
     stokes_ps = np.nan_to_num(stokes_ps)
 
     if plots_on:
@@ -157,8 +145,8 @@ for args in test_args:
     l2_stokes_P = l2(stokes_ps, 0, 0, 0)
     #------------------------------------------------------------------------------
     # fun_labels= ['Reyn',  '$\epsilon^2$-PLT', '$\epsilon^4$-PLT','VA-ELT', 'TG-ELT']
-    test_us = [[reyn_us, reyn_vs], [e2_us,e2_vs], [e4_us,e4_vs], [adj_us, adj_vs],  [adj_TG_us, adj_TG_vs]]
-    test_ps = [reyn_ps, e2_ps, e4_ps, adj_ps, adj_TG_ps]
+    test_us = [[reyn_us, reyn_vs], [e2_us,e2_vs], [e4_us,e4_vs], [VA_ELT_us, VA_ELT_vs],  [TG_ELT_us, TG_ELT_vs]]
+    test_ps = [reyn_ps, e2_ps, e4_ps, VA_ELT_ps, TG_ELT_ps]
     
     for i in range(len(test_us)):
         # l1_V_errs[i,k] = l1(stokes_us, stokes_vs, test_us[i][0], test_us[i][1])/l1_stokes_V *100

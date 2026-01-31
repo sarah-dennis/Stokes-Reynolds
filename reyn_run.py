@@ -15,7 +15,7 @@ import reyn_solvers as solvers
 plots_on = True
 uv_on = False          # plot u(x,y) & v(x,y) & |(u,v)|
 inc_on = False         # plot ux + vy =? 0
-zoom_on = False        # plot a zoomed-in window, set location in reyn_solution.py
+zoom_on = True #False        # plot a zoomed-in window, set location in reyn_solution.py
 scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 
 #------------------------------------------------------------------------------
@@ -25,10 +25,10 @@ scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 
 Example = examples.BFS
 H=1 
-h=2 
-l=1
-L=2
-args =  [h, H, l, L]
+h=2.75
+l=8
+l_out=8
+args =  [h, H, l, l_out]
 
 # Example = examples.multi_step
 # H = 2
@@ -112,12 +112,12 @@ args =  [h, H, l, L]
 # args= [ r, h0,l, drdx]
 
 
-Example = examples.Logistic
-delta = 8 # max slope: delta*(H-h)/4
-H = 2     # outlet height
-h = 1       # inlet height
-L = 8     # total length
-args = [ H, h, L, delta]
+# Example = examples.Logistic
+# delta = 8 # max slope: delta*(H-h)/4
+# H = 2     # outlet height
+# h = 1       # inlet height
+# L = 8     # total length
+# args = [ H, h, L, delta]
 
 
 #------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ args = [ H, h, L, delta]
 #------------------------------------------------------------------------------
 
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 1
+U = 0
 
 #fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
 # dP = 8
@@ -143,21 +143,21 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 80
+N = 160
 # solution = solver.fd_solve(N)
-
+# 
 # solution = solver.pwc_schur_solve(N)
 
 # if __name__ == '__main__':
 #     solution = solver.pwc_schur_parallel_solve(N)
 
-# solution = solver.pwl_schur_solve(N)
+solution = solver.pwl_schur_solve(N)
 
 # solution = solver.pwl_gmres_solve(N)
 
 # solution = solver.fd_TG_ELT_solve(N)
 # 
-solution = solver.fd_VA_ELT_solve(N)
+# solution = solver.fd_VA_ELT_solve(N)
 
 # solution = solver.fd_pert_solve(N, order=2)
 # solution = solver.fd_pert_solve(N, order=4, get_both=False)

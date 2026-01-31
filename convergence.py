@@ -113,43 +113,6 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
     return err_l1, err_l2, err_inf, cnvg_rates, ex_min
 
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-
-def reyn_cnvg_pwl_fd(solver, Ns):
-    many=len(Ns)
-    inf_errs = np.zeros(many)
-    l1_errs = np.zeros(many)
-    l2_errs = np.zeros(many)
-    q_errs = np.zeros(many)
-
-
-    for k in range (many):
-        N=Ns[k]
-        pwl_p, pwl_vel = solver.pwl_solve(N, plot=False)
-        fd_p, fd_vel = solver.fd_solve(N, plot=False)
-        size_k = len(pwl_p.ps_1D)
-        
-        p_err = np.abs(pwl_p.ps_1D - fd_p.ps_1D)
-        inf_errs[k] = np.max(p_err)
-        l1_errs[k] = np.sum(p_err)/size_k
-        l2_errs[k] = np.sqrt(np.sum(p_err**2)/size_k)
-        q_errs[k] = np.abs(pwl_vel.flux-fd_vel.flux)
-        
-    p_l1_rate = convg_rate(l1_errs)
-    p_l2_rate = convg_rate(l2_errs)
-    p_inf_rate = convg_rate(inf_errs)
-    q_err_rate = convg_rate(q_errs)
-    cnvg_rates = np.stack([p_l1_rate, p_l2_rate, p_inf_rate, q_err_rate], axis=0)
-    
-    
-        
-    print("cnvg rates")
-    print("p-l1: " + np.array2string(p_l1_rate))
-    print("p-l2: " + np.array2string(p_l2_rate))
-    print("p-linf" + np.array2string(p_inf_rate))
-    print("q-linf" + np.array2string(q_err_rate))
-    
-    return l1_errs, l2_errs, inf_errs, cnvg_rates
     
 def convg_rate(errs):
     n = len(errs)

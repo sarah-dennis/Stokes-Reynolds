@@ -17,12 +17,12 @@ from reyn_heights import PWC_Height,  PWL_Height, SinusoidalHeight, CircleHeight
 
 class BFS(PWC_Height):
     def __init__(self, args, N):
-        h, H, l, L = args
+        h_in, h_out, l_in, l_out = args
         x0 = 0
-        xf = L
+        xf = l_in+l_out
         N_regions = 2
-        x_peaks = np.asarray([0, l, L], float)
-        h_peaks = np.asarray([[h, h], [h, H], [H, H]], float)
+        x_peaks = np.asarray([0, l_in, xf], float)
+        h_peaks = np.asarray([[h_in, h_in], [h_in, h_out], [h_out, h_out]], float)
         namestr = ''#f'BFS_H{int(H)}L{int(xf)}'
         titlestr = ''#f'BFS $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)

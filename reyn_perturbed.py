@@ -10,7 +10,7 @@ import domain as dm
 
 from reyn_pressure import Pressure
 from reyn_velocity import Velocity
-from reyn_solution import Reyn_Solution
+from reyn_control import Reyn_Solution
  
 class Perturbed_Solution(Reyn_Solution):
     def __init__(self, height, BC, order, reyn_sol):

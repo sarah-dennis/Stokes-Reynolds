@@ -11,7 +11,7 @@ import stokes_control as control
 import stokes_examples as examples
 
 
-zoom_on= not True    
+zoom_on= True    
 
 U=0
 Q=1
@@ -24,8 +24,22 @@ l_out=8
 args = [h_in, h_out, l_in, l_out]
 Example = examples.BFS
 
+h_in = 2
+h_out = 1
+l_in = 8
+l_out=8
+xr = 0.35
+yr = 0.4
+new_args = [h_in, h_out, l_in, l_out, xr, yr]
+new_Example = examples.BFS_wedge
+# args = [h_in, h_out, l_in, l_out, xr, yr]
+# Example = examples.BFS_wedge
+
+
+
+
 # H=2
-# L=4
+# L=16
 # delta=1 
 # args = [H, L, delta]
 # Example = examples.BFS_pwl
@@ -45,7 +59,9 @@ Example = examples.BFS
 # args = [H, delta, k,  l, L]
 # Example = examples.Sinusoid
 
-# args = [H, L]
+# H = 2
+# L = 2 
+# args = [H, L]# tri slope = 2H/L
 # Example = examples.TriCavity
 
 # l=7
@@ -59,22 +75,23 @@ Example = examples.BFS
 # ------------------------------------------------------------------------------
 solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)                
 
-N=20
+N=160
 
        
 
-# solver.new_run(20) 
+# solver.new_run(N) 
+# solver.load_run(N)
 
+# solver.load_scale(N,2*N) 
 
-# solver.load_scale(80,160) 
-# solver.load_run(20)
-
-# solver.load_run_many(20, 2, 4)
+solver.load_copy(N, new_Example, new_args)
+# 
+# solver.load_run_many(N, 2, 4)
 
 # solver.new_run_many(N, 2, 3)  
-solver.load_run_new_many(N, 2, 3)
+# solver.load_run_new_many(N, 2, 2)
 
-solver.load_plot(20, zoom=zoom_on)
+# solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)

@@ -11,11 +11,57 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-#------------------------------------------------------------------------------
-# COLOURINGS
+H = 2
+#---------ZOOM PLOT---------------------------------------------------------------
+# zoom for BFS corner ((change y_start to max h - leny))
+# lenx = 0.25
+# leny = 0.25
+# x_start = 8-lenx
+# y_start = H-leny
+
+# zoom for BFS step tip (8,1)
+# lenx = 0.5
+# leny = 0.5
+# x_start = 8-lenx/2
+# y_start = 1-leny/2
+
+# zoom to trim length ((change leny to max h))
+lenx = 4
+leny = H
+x_start = 6
+y_start = 0
+
+
+x_stop= x_start + lenx
+y_stop = y_start + leny
+
+#---------LEGEND---------------------------------------------------------------
+
+vel_max = 5
+p_min= 120
+p_max = 60
+
+ 
+# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
+# colour_bar_scale=0.024 # for long figures like H=2, L=4
+colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+
+colour_bar_pad = 0.02
+
 #------------------------------------------------------------------------------
 
-# -------- 2D field u(x,y),v(x,y) ----------------velocity---------------------
+dpi=1200
+
+n_contours = 25 #100
+contour_width = 0.25
+
+stream_width = 1
+stream_density=[3,1]
+line_width = 1.5
+
+linthresh = 1e-8
+
+# -------- COLOURING 2D field u(x,y),v(x,y) ----------------velocity-----------
 
 # stream_cmap = pp.cm.viridis(np.arange(pp.cm.viridis.N))
 # stream_cmap = pp.cm.plasma(np.arange(pp.cm.plasma.N))
@@ -26,7 +72,7 @@ stream_cmap = pp.cm.Spectral_r(np.arange(pp.cm.Spectral_r.N))
 
 colour_map_stream = colors.ListedColormap(stream_cmap)
 
-# -------- Value p(x,y):= ------------pressure/incompressiblity/error----------
+# -------- COLOURING value p(x,y):= -------------------------pressure----------
 # colour_map_mesh='PiYG'
 # colour_map_mesh = 'Spectral_r'
 
@@ -36,24 +82,7 @@ mesh_cmap = pp.cm.RdYlBu_r(np.arange(pp.cm.RdYlBu_r.N))
 colour_map_mesh = colors.ListedColormap(mesh_cmap)
 
 
-#---------LEGEND---------------------------------------------------------------
 
-# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-colour_bar_scale=0.022 # for long figures like H=2, L=4
-# colour_bar_scale=0.5 # for almost square figures like H=2.75, L=4
-
-colour_bar_pad = 0.02
-#------------------------------------------------------------------------------
-# RESOLUTION
-#------------------------------------------------------------------------------
-dpi=1200
-
-n_contours = 20
-contour_width = 0.25
-stream_width = 1
-line_width = 1.5
-
-linthresh = 1e-8
 
 # FONTS
 SMALL_SIZE = 10
@@ -118,10 +147,10 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.325, 0.875))
+        fig.legend(bbox_to_anchor=(0.25, 0.875))
     elif loc=='lower':
         
-        fig.legend(bbox_to_anchor=(0.325, 0.45))
+        fig.legend(bbox_to_anchor=(0.25, 0.45))
     elif loc=='center':
         fig.legend(bbox_to_anchor=(0.5, 0.875))
     else: 
@@ -203,23 +232,14 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
 #------------------------------------------------------------------------------
 # STREAMLINE PLOT <U(X,Y), V(X,Y)>
 #------------------------------------------------------------------------------
-def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vscale=None, log_cmap=False, linthresh=linthresh):
+def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=vel_max, log_cmap=False, linthresh=linthresh):
 
     pp.rcParams['figure.dpi'] = dpi
     
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    
-    stream_density=[2,1]
-    # stream_density=[xs.shape[0]/(2*ys.shape[0]),1]
-    
-    if vscale is not None:
-        vx/= vscale
-        vy/=vscale
-        vmin/= vscale
-        vmax/= vscale
-    
+
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
@@ -243,21 +263,20 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin, vmax, vs
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
     ax.set_aspect('equal')
+
+    # ax.tick_params(which='minor', top=True, right=True)
+    # ax.tick_params(which='major', top=True, right=True)
     pp.minorticks_on()
     pp.show()
        
 #------------------------------------------------------------------------------       
 # VALUE PLOTS F(X,Y)
 #------------------------------------------------------------------------------
-def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cmap=False, linthresh=linthresh, n_contours=n_contours):
+def plot_contour_mesh(zs, xs, ys, title, labels, vmin=p_min, vmax=p_max, log_cmap=False, linthresh=linthresh, n_contours=n_contours):
     pp.rcParams['figure.dpi'] = dpi
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-    if vscale is not None:
-        zs/= vscale
-        vmin/= vscale
-        vmax/= vscale
        
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=0)#vmax, clip=False)
@@ -285,7 +304,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin, vmax, vscale=None,log_cma
     pp.show()    
 
 #------------------------------------------------------------------------------------
-def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
+def grid_zoom_2D(grid, ex):
     i_start = int((x_start - ex.x0)/ex.dx)
     i_stop = int((x_stop - ex.x0)/ex.dx)
     j_start = int((y_start - ex.y0)/ex.dy)
@@ -296,7 +315,7 @@ def grid_zoom_2D(grid, ex, x_start, x_stop, y_start, y_stop):
         raise Exception('graphics zoom window out of bounds')
     return grid[j_start:j_stop,i_start:i_stop]
 
-def grid_zoom_1D(grid_x, grid_y, ex, x_start, x_stop, y_start, y_stop):
+def grid_zoom_1D(grid_x, grid_y, ex):
     
     i_start = int((x_start - ex.x0)/ex.dx)
     i_stop = int((x_stop - ex.x0)/ex.dx)

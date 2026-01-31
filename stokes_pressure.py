@@ -6,18 +6,13 @@ Created on Wed Aug 28 11:58:25 2024
 """
 import numpy as np
 
-def dp_res(ex, p):
+def get_dp(ex, p):
     
     p_2D = p.reshape((ex.Ny,ex.Nx))
 
     dp = (sum(p_2D[:,0])/ex.H_in - sum(p_2D[:,-1])/ex.H_out)*ex.dy
     
-    
-    if ex.flux!=0:
-        r = dp/ex.flux
-        return dp, r
-    else:
-        return dp, np.inf
+    return dp
 
 
 def pressure(ex, u, v):
@@ -28,8 +23,11 @@ def pressure(ex, u, v):
     dx = ex.dx
     shape = n*m
     p = np.zeros(shape)
-
+    
+    
     p[2*n-1] = ex.p_ambient  # i=n-1, j=1
+    #k = j*n + i
+    #k = n + (n-1)
     
     i=n-2 #j=1
     while i >= 0:

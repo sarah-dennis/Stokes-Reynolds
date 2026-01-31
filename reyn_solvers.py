@@ -14,7 +14,7 @@ import reyn_velocity_ELT as eltv
 import reyn_pressure as rp
 import reyn_pressure_ELT as eltp
 import reyn_perturbed as rpert
-from reyn_solution import Reyn_Solution
+from reyn_control import Reyn_Solution
 from reyn_heights import PWC_Height, PWL_Height, make_PWC, make_PWL
 
 
