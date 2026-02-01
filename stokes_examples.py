@@ -47,7 +47,7 @@ class BFS_pwl(PWLinear):
         
         y_peaks=[[0,H],[H,H],[h,h],[h,0]]
         
-        namestr= f'BFS_pwl_H{H}L{L}d{delta}_U{U}_Q{Q}_Re{Re}'
+        namestr= f'pwlBFS_H{H}L{L}d{delta}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
      
         
@@ -61,7 +61,7 @@ class TriCavity(PWLinear):
         yf = H
         x_peaks = [x0, x0+l, xf]
         y_peaks=[[0,2/N],[H,H],[2/N,0]]
-        namestr = f"TriCavity_H{H}L{L}_Re{Re}_Q{Q}_U{U}"
+        namestr = f"TriCavity_H{H}L{L}_U{U}_Q{Q}_Re{Re}"
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
         
         

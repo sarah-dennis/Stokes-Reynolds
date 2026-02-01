@@ -30,22 +30,23 @@ l_in = 8
 l_out=8
 xr = 0.35
 yr = 0.4
-xr_0p5 = 0.175   #xr/2
-yr_0p5 = 0.2     #yr/2
-xr_0p75 = 0.2625 #3xr/4
-yr_0p75 = 0.3    #3yr/4
+
+xr_0p75 = 0.2625
+yr_0p75 = 0.3
+
+xr_0p5 = 0.175
+yr_0p5 = 0.2
+
 
 # args = [h_in, h_out, l_in, l_out, xr, yr]
 # Example = examples.BFS_wedge
 
 
-
-args = [h_in, h_out, l_in, l_out, xr_0p5, yr_0p5]
-Example = examples.BFS_wedge
-
-
-# args = [h_in, h_out, l_in, l_out, xr_0p75, yr_0p75]
+# args = [h_in, h_out, l_in, l_out, xr_0p5, yr_0p5]
 # Example = examples.BFS_wedge
+
+args = [h_in, h_out, l_in, l_out, xr_0p75, yr_0p75]
+Example = examples.BFS_wedge
 
 # H=2
 #h=1
