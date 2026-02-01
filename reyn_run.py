@@ -23,12 +23,12 @@ scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-Example = examples.BFS
-H=1 
-h=2.75
-l=8
-l_out=8
-args =  [h, H, l, l_out]
+# Example = examples.BFS
+# H=1 
+# h=2.75
+# l=8
+# l_out=8
+# args =  [h, H, l, l_out]
 
 # Example = examples.multi_step
 # H = 2
@@ -41,11 +41,12 @@ args =  [h, H, l, l_out]
 # L = 4
 # args =  [h0, m, L]
 
-# Example = examples.BFS_deltaSmooth
-# H = 2
-# delta = 1
-# L=16
-# args = [H,delta,L]
+Example = examples.BFS_deltaSmooth
+H = 2
+h=1
+delta = 1/4
+L=16
+args = [H,h,delta,L]
 
 
 # Example = examples.BFS_noEddy
@@ -143,7 +144,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160
+N = 300
 # solution = solver.fd_solve(N)
 # 
 # solution = solver.pwc_schur_solve(N)

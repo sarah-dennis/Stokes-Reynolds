@@ -14,10 +14,10 @@ from matplotlib import patches
 H = 2
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
-# lenx = 0.25
-# leny = 0.25
-# x_start = 8-lenx
-# y_start = H-leny
+lenx = 0.5
+leny = 0.5
+x_start = 8-lenx
+y_start = H-leny
 
 # zoom for BFS step tip (8,1)
 # lenx = 0.5
@@ -26,10 +26,10 @@ H = 2
 # y_start = 1-leny/2
 
 # zoom to trim length ((change leny to max h))
-lenx = 4
-leny = H
-x_start = 6
-y_start = 0
+# lenx = 4
+# leny = H
+# x_start = 6
+# y_start = 0
 
 
 x_stop= x_start + lenx
@@ -43,8 +43,8 @@ p_max = 60
 
  
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-# colour_bar_scale=0.024 # for long figures like H=2, L=4
-colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+colour_bar_scale=0.024 # for long figures like H=2, L=4
+# colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
 
 colour_bar_pad = 0.02
 
@@ -52,11 +52,11 @@ colour_bar_pad = 0.02
 
 dpi=1200
 
-n_contours = 25 #100
+n_contours = 100#25
 contour_width = 0.25
 
 stream_width = 1
-stream_density=[3,1]
+stream_density=[2,1]
 line_width = 1.5
 
 linthresh = 1e-8

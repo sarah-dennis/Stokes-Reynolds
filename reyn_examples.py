@@ -67,15 +67,14 @@ class linear(PWL_Height):
         
 class BFS_deltaSmooth(PWL_Height):
     def __init__(self, args, N):
-        H, delta, L = args
-        l = L/2
-        h = 1
+        H, h, delta, L = args
+
         x0 = 0
         xf = L
-        N_regions = 4
-        x_peaks = np.asarray([x0, l-delta, l, l+delta, xf], float)
+        N_regions = 3
+        x_peaks = np.asarray([x0, (L-delta)/2, (L+delta)/2, xf], float)
         h_peaks = np.asarray(
-            [[0, H], [H, H], [H+(h-H)/2, H+(h-H)/2], [h,h], [h, 0]], float)
+            [[0, H], [H, H], [h,h], [h, 0]], float)
         namestr = ''#f'dBFS_H{int(H)}L{int(xf)}_d{int(delta)}'
         titlestr = ''#f'$\delta$-BFS $\delta={delta :.3f}$, $H/h={H/h : .3f}$, $L={L : .1f}$'
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)

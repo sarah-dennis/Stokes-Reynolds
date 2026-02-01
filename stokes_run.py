@@ -17,12 +17,12 @@ U=0
 Q=1
 Re=0
 
-h_in = 2
-h_out = 1
-l_in = 8
-l_out=8
-args = [h_in, h_out, l_in, l_out]
-Example = examples.BFS
+# h_in = 2.75
+# h_out = 1
+# l_in = 8
+# l_out=8
+# args = [h_in, h_out, l_in, l_out]
+# Example = examples.BFS
 
 h_in = 2
 h_out = 1
@@ -30,18 +30,26 @@ l_in = 8
 l_out=8
 xr = 0.35
 yr = 0.4
-new_args = [h_in, h_out, l_in, l_out, xr, yr]
-new_Example = examples.BFS_wedge
+
 # args = [h_in, h_out, l_in, l_out, xr, yr]
 # Example = examples.BFS_wedge
 
+xr_0p5 = 0.175
+yr_0p5 = 0.2
 
+# args = [h_in, h_out, l_in, l_out, xr_0p5, yr_0p5]
+# Example = examples.BFS_wedge
 
+xr_0p25 = 0.2625
+yr_0p25 = 0.3
+args = [h_in, h_out, l_in, l_out, xr_0p25, yr_0p25]
+Example = examples.BFS_wedge
 
 # H=2
+#h=1
 # L=16
 # delta=1 
-# args = [H, L, delta]
+# args = [H, h, L, delta]
 # Example = examples.BFS_pwl
 
 # H=2
@@ -75,17 +83,17 @@ new_Example = examples.BFS_wedge
 # ------------------------------------------------------------------------------
 solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)                
 
-N=160
+N=80
 
        
 
 # solver.new_run(N) 
-# solver.load_run(N)
+solver.load_run(N)
 
 # solver.load_scale(N,2*N) 
 
-solver.load_copy(N, new_Example, new_args)
-# 
+# solver.load_copy(N, new_Example, new_args)
+
 # solver.load_run_many(N, 2, 4)
 
 # solver.new_run_many(N, 2, 3)  

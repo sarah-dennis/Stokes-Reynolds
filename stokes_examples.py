@@ -37,16 +37,15 @@ class BFS_wedge(PWLinear):
         
 class BFS_pwl(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
-        H, L, delta = args
-        h=1
+        H, h, L, delta = args
+        
         x0 = 0
         xf = L
         y0 = 0
         yf = H
-        l = L/2
-        x_peaks = [x0, l-delta, l, l+delta, xf]
+        x_peaks = [x0, (L-delta)/2, (L+delta)/2, xf]
         
-        y_peaks=[[0,yf],[yf,yf],[h+(H-h)/2,h+(H-h)/2],[h,h],[h,0]]
+        y_peaks=[[0,H],[H,H],[h,h],[h,0]]
         
         namestr= f'BFS_pwl_H{H}L{L}d{delta}_U{U}_Q{Q}_Re{Re}'
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
