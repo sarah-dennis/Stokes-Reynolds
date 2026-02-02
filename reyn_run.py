@@ -144,7 +144,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 300
+N = 160
 # solution = solver.fd_solve(N)
 # 
 # solution = solver.pwc_schur_solve(N)

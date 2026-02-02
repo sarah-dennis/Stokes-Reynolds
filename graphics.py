@@ -11,13 +11,21 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-H = 2
+H = 1.25
+d=1
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
-lenx = 0.5
-leny = 0.5
-x_start = 8-lenx
+lenx = .5
+leny = .5
+x_start = 8-lenx 
 y_start = H-leny
+
+# zoom for slope BFS corner ((change y_start to max h - leny))
+lenx = .5
+leny = .5
+x_start = 8-d/2
+y_start = H-leny
+
 
 # zoom for BFS step tip (8,1)
 # lenx = 0.5
@@ -42,9 +50,9 @@ p_min= 120
 p_max = 60
 
  
-# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-colour_bar_scale=0.024 # for long figures like H=2, L=4
-# colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+# colour_bar_scale=0.015 # for very long figures (like H=1.25)
+colour_bar_scale=0.024 # for long figures  (like H=2)
+# colour_bar_scale=0.05 # for almost square figures (like H=2.75 or zooms)
 
 colour_bar_pad = 0.02
 
