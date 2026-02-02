@@ -153,10 +153,10 @@ class PWLinear(Space):
 
     def scale_N(self, i,j):
         y_S = self.ys[j-1]
-        y_nbr = self.ys[j+1]
+        y_N = self.ys[j+1]
         y_bdry = self.hs[i][0] # arbitrary 
     
-        l1 = np.abs(y_nbr-y_bdry)
+        l1 = np.abs(y_N-y_bdry)
         l2 = np.abs(y_S-y_bdry) 
         
         if np.isclose(l2,0):
@@ -172,13 +172,13 @@ class PWLinear(Space):
     def scale_E(self, i,j):
         x_W = self.xs[i-1]
         h_W = self.hs[i-1][1]
-        x_nbr = self.xs[i+1]
-        h_nbr = self.hs[i+1][0]
+        x_E = self.xs[i+1]
+        h_E = self.hs[i+1][0]
         
         y_bdry = self.ys[j]
-        x_bdry = x_W + (x_nbr-x_W) * (y_bdry-h_W)/(h_nbr-h_W)
+        x_bdry = x_W + (x_E-x_W) * (y_bdry-h_W)/(h_E-h_W)
 
-        l1 = np.abs(x_nbr-x_bdry)
+        l1 = np.abs(x_E-x_bdry)
         l2 = np.abs(x_W-x_bdry)
         
         if np.isclose(l2,0):
@@ -191,13 +191,13 @@ class PWLinear(Space):
     def scale_W(self, i,j):
         x_E = self.xs[i+1]
         h_E = self.hs[i+1][0]
-        x_nbr = self.xs[i-1]
-        h_nbr = self.hs[i-1][1]
+        x_W = self.xs[i-1]
+        h_W = self.hs[i-1][1]
         
         y_bdry = self.ys[j]
-        x_bdry = x_E + (x_nbr-x_E) * (y_bdry-h_E)/(h_nbr-h_E)
+        x_bdry = x_E + (x_W-x_E) * (y_bdry-h_E)/(h_W-h_E)
 
-        l1 = np.abs(x_nbr-x_bdry)
+        l1 = np.abs(x_W-x_bdry)
         l2 = np.abs(x_E-x_bdry)
         
         if np.isclose(l2,0):
@@ -216,15 +216,15 @@ class PWLinear(Space):
         y_SW = self.ys[j-1]
         h_SW = self.hs[i-1][1]
         
-        x_nbr = self.xs[i+1]
-        y_nbr = self.ys[j+1]
-        h_nbr = self.hs[i+1][0]
+        x_NE = self.xs[i+1]
+        y_NE = self.ys[j+1]
+        h_NE = self.hs[i+1][0]
 
-        slope = (h_nbr-h_SW)/(x_nbr-x_SW)
+        slope = (h_NE-h_SW)/(x_NE-x_SW)
         x_bdry = (y_SW-h_SW)/(slope-1) + x_SW
         y_bdry = (x_bdry-x_SW) + y_SW
         
-        l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
+        l1 = np.sqrt((x_NE-x_bdry)**2 + (y_NE-y_bdry)**2)
         l2 = np.sqrt((x_SW-x_bdry)**2 + (y_SW-y_bdry)**2)
         
         if np.isclose(l2,0):
@@ -240,15 +240,15 @@ class PWLinear(Space):
         y_NE = self.ys[j+1]
         h_NE = self.hs[i+1][0]
         
-        x_nbr = self.xs[i-1]
-        y_nbr = self.ys[j-1]
-        h_nbr = self.hs[i-1][1]
+        x_SW = self.xs[i-1]
+        y_SW = self.ys[j-1]
+        h_SW = self.hs[i-1][1]
 
-        slope = (h_nbr-h_NE)/(x_nbr-x_NE)
+        slope = (h_SW-h_NE)/(x_SW-x_NE)
         x_bdry = (y_NE-h_NE)/(slope-1) + x_NE
         y_bdry = (x_bdry-x_NE) + y_NE
         
-        l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
+        l1 = np.sqrt((x_SW-x_bdry)**2 + (y_SW-y_bdry)**2)
         l2 = np.sqrt((x_NE-x_bdry)**2 + (y_NE-y_bdry)**2)
         
         if np.isclose(l2,0):
@@ -264,15 +264,15 @@ class PWLinear(Space):
         y_SE = self.ys[j-1]
         h_SE = self.hs[i+1][0]
         
-        x_nbr = self.xs[i-1]
-        y_nbr = self.ys[j+1]
-        h_nbr = self.hs[i-1][1]
+        x_NW = self.xs[i-1]
+        y_NW = self.ys[j+1]
+        h_NW = self.hs[i-1][1]
 
-        slope = (h_nbr-h_SE)/(x_nbr-x_SE)
+        slope = (h_NW-h_SE)/(x_NW-x_SE)
         x_bdry = (y_SE-h_SE)/(slope+1) + x_SE
         y_bdry = -(x_bdry-x_SE) + y_SE
         
-        l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
+        l1 = np.sqrt((x_NW-x_bdry)**2 + (y_NW-y_bdry)**2)
         l2 = np.sqrt((x_SE-x_bdry)**2 + (y_SE-y_bdry)**2)
 
         if np.isclose(l2,0):
@@ -285,25 +285,25 @@ class PWLinear(Space):
     
     def scale_SE(self, i,j): 
 
-        x_NW = self.xs[i+1]
-        y_NW = self.ys[j-1]
-        h_NW = self.hs[i+1][0]
+        x_NW = self.xs[i-1]
+        y_NW = self.ys[j+1]
+        h_NW = self.hs[i-1][1]
         
-        x_nbr = self.xs[i-1]
-        y_nbr = self.ys[j+1]
-        h_nbr = self.hs[i-1][1]
+        x_SE = self.xs[i+1]
+        y_SE = self.ys[j-1]
+        h_SE = self.hs[i+1][0]
 
-        slope = (h_nbr-h_NW)/(x_nbr-x_NW)
+        slope = (h_SE-h_NW)/(x_SE-x_NW)
         x_bdry = (y_NW-h_NW)/(slope+1) + x_NW
         y_bdry = -(x_bdry-x_NW) + y_NW
         
-        l1 = np.sqrt((x_nbr-x_bdry)**2 + (y_nbr-y_bdry)**2)
+        l1 = np.sqrt((x_SE-x_bdry)**2 + (y_SE-y_bdry)**2)
         l2 = np.sqrt((x_NW-x_bdry)**2 + (y_NW-y_bdry)**2)
         
-        if np.isclose(l2,0):
+        if np.isclose(l1,0):
             scale = 0
         else:
-            scale = l2/l1  
+            scale = l2/l1  ##branch!! scale = l2/l1 not l1/l2 as others
         # print('se', scale)
         return scale
 #------------------------------------------------------------------------------

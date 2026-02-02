@@ -137,8 +137,8 @@ class Stokes_Solver:
         ex=self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         
-        y_xr = ex.yf   #(xr, y_xr=h(xr)) reattachment
-        x_yr = ex.xf/2 #(x_yr=L/2, yr) detachment
+        y_xr = ex.yf   # xr on y=h
+        x_yr = ex.xf/2 # yr on x=L/2
         
         i_yr =int(x_yr/ex.dx)-1 # 
         
@@ -151,6 +151,7 @@ class Stokes_Solver:
             k_a = int(j_xr*ex.Nx + i)
             k_b = int(j_xr*ex.Nx + i+1 )   
             if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
+                
                 xr = x_yr-(ex.xs[i+1])
                 if xr > 0:
                     xrs.append(xr)
@@ -162,8 +163,11 @@ class Stokes_Solver:
                 yr = y_xr-(ex.ys[j+1])
                 if yr > 0:
                     yrs.append(yr)
-        
-        return xrs,yrs
+        if xrs==[]:
+            xrs.append(0)
+        if yrs == []:
+            yrs.append(0)
+        return xrs, yrs
     
 #------------------------------------------------------------------------------
 # Error
@@ -243,9 +247,10 @@ class Stokes_Solver:
         # stream_2D = psi.reshape((ex.Ny,ex.Nx))
         # stream_2D_ma = np.ma.masked_where(ex.space==-1, stream_2D)
         # if zoom:
-        #     stream_2D_zoom = graphics.grid_zoom_2D(stream_2D_ma, ex, x_start, x_stop, y_start, y_stop)
-        #     graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=False, n_contours=20, vmin=0, vmax=ex.flux)
+        #     stream_2D_zoom = graphics.grid_zoom_2D(stream_2D_ma, ex)
+        #     vmin = np.min(stream_2D_zoom)
+        #     graphics.plot_contour_mesh(stream_2D_zoom, xs_zoom, ys_zoom, title, ax_labels, log_cmap=True,vmin=vmin, vmax=ex.flux)
         # else:
-        #     graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, log_cmap=False, n_contours=20, vmin=0, vmax=ex.flux)
+        #     graphics.plot_contour_mesh(stream_2D_ma, xs, ys, title, ax_labels, vmin=0, vmax=ex.flux)
         
 

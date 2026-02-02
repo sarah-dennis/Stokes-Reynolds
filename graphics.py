@@ -18,6 +18,7 @@ d=1
 lenx = .5
 leny = .5
 x_start = 8-lenx 
+
 y_start = H-leny
 
 # zoom for slope BFS corner ((change y_start to max h - leny))
@@ -49,10 +50,10 @@ vel_max = 5
 p_min= 120
 p_max = 60
 
- 
-# colour_bar_scale=0.015 # for very long figures (like H=1.25)
-colour_bar_scale=0.024 # for long figures  (like H=2)
-# colour_bar_scale=0.05 # for almost square figures (like H=2.75 or zooms)
+# colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
+# colour_bar_scale=0.024 # for long figures like H=2, L=4
+colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+
 
 colour_bar_pad = 0.02
 
@@ -67,7 +68,7 @@ stream_width = 1
 stream_density=[2,1]
 line_width = 1.5
 
-linthresh = 1e-8
+linthresh = 1e-12
 
 # -------- COLOURING 2D field u(x,y),v(x,y) ----------------velocity-----------
 
@@ -270,10 +271,14 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=v
     pp.title(title, fontweight="bold")
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
+    
+    # pp.ylim(y_start, y_stop)
+    # pp.xlim(x_start, x_stop)
+    
     ax.set_aspect('equal')
 
-    # ax.tick_params(which='minor', top=True, right=True)
-    # ax.tick_params(which='major', top=True, right=True)
+    ax.tick_params(which='minor', top=True, right=True)
+    ax.tick_params(which='major', top=True, right=True)
     pp.minorticks_on()
     pp.show()
        
@@ -287,7 +292,7 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin=p_min, vmax=p_max, log_cma
     X, Y = np.meshgrid(xs, ys)
        
     if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=0)#vmax, clip=False)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax)
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
