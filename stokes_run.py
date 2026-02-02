@@ -50,15 +50,8 @@ Re=0
 # args = [h_in, h_out, l_in, l_out, xr_0p75, yr_0p75]
 # Example = examples.BFS_wedge
 
-H=2
-h=1
-L=16
-delta=1/4
-args = [H, h, L, delta]
-Example = examples.BFS_pwl
-
 #------------------------------------------------------------------------------
-H=2
+H=1.25
 h=1
 L=16
 delta=1/4
@@ -115,9 +108,9 @@ N=40
 
 # solver.load_copy(N, new_Example, new_args)
 
-# solver.load_run_many(N, 2, 4)
+solver.load_run_many(N, 2, 2)
 
-solver.new_run_many(N, 2, 3)  
+# solver.new_run_many(N, 2, 3)  
 # solver.load_run_new_many(N, 2, 2)
 
 solver.load_plot(N, zoom=zoom_on)
