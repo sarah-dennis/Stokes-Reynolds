@@ -50,14 +50,12 @@ Re=0
 # args = [h_in, h_out, l_in, l_out, xr_0p75, yr_0p75]
 # Example = examples.BFS_wedge
 
-H=1.25
+H=2
 h=1
 L=16
 delta=1/4
 args = [H, h, L, delta]
 Example = examples.BFS_pwl
-
-
 
 #------------------------------------------------------------------------------
 H=2

@@ -288,7 +288,7 @@ class PWLinear(Space):
         x_NW = self.xs[i-1]
         y_NW = self.ys[j+1]
         h_NW = self.hs[i-1][1]
-        
+
         x_SE = self.xs[i+1]
         y_SE = self.ys[j-1]
         h_SE = self.hs[i+1][0]
