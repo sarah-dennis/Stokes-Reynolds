@@ -11,7 +11,7 @@ import stokes_control as control
 import stokes_examples as examples
 
 
-zoom_on= not True    
+zoom_on= not False    
 
 U=0
 Q=1
@@ -51,12 +51,13 @@ Re=0
 # Example = examples.BFS_wedge
 
 #------------------------------------------------------------------------------
-H=1.25
+H=2
 h=1
 L=16
-delta=1/4
+delta=0.25
 args = [H, h, L, delta]
 Example = examples.BFS_pwl
+
 
 
 #------------------------------------------------------------------------------
@@ -95,7 +96,7 @@ Example = examples.BFS_pwl
 
 
 #------------------------------------------------------------------------------
-solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)                
+solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=10000)                
 
 N=40
 
@@ -108,7 +109,7 @@ N=40
 
 # solver.load_copy(N, new_Example, new_args)
 
-solver.load_run_many(N, 2, 2)
+# solver.load_run_many(N, 2, 2)
 
 # solver.new_run_many(N, 2, 3)  
 # solver.load_run_new_many(N, 2, 2)

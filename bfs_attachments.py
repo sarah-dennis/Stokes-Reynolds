@@ -57,6 +57,7 @@ for k in range(num_tests):
     #primary
     xrs[k] = xr[0]
     yrs[k] = yr[0]
+    print(yrs[k]/xrs[k])
 print(xrs,yrs)
 
 

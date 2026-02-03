@@ -192,12 +192,19 @@ class Stokes_Solver:
     # Grid domain
         xs = ex.xs
         ys = ex.ys
-
+        ax_labels = ['space', '$x$', '$y$']
+        
     # Zoom domain
         if zoom:
-            
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(xs, ys, ex)
 
+    # Space plot: (debugging)
+        if zoom:
+            space_zoom = graphics.grid_zoom_2D(ex.space, ex)
+            graphics.plot_contour_mesh(space_zoom, xs_zoom, ys_zoom,'space', ax_labels, vmin=-1, vmax=1)
+        else:
+            graphics.plot_contour_mesh(ex.space, xs, ys, 'space', ax_labels, vmin=-1, vmax=1)
+            
     # Pressure plot: 
         p = pressure.pressure(ex, u, v)
         dp = pressure.get_dp(ex, p) 

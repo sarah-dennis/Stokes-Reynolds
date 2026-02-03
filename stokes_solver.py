@@ -162,6 +162,7 @@ def update_rhs(ex, u, v, psi): #
             
             # East (i+1, j)                
             if ex.space[j,i+1] == -1: #E:
+
                 scale_E = ex.scale_E(i,j)
                 dpsi_bc += -8 * ex.interp(scale_E, psi[k_W], v_bdry= ex.flux)
                 u_E = ex.interp(scale_E, u[k_W])
@@ -287,6 +288,7 @@ def uv_approx(ex, u, v, psi):
                 psi_E = ex.flux 
                 
             elif ex.space[j,i+1] == -1:  # exterior 
+
                 scale_E = ex.scale_E(i,j)
                 v_E = ex.interp(scale_E, v[k_W])
                 psi_E = ex.interp(scale_E, psi[k_W], v_bdry= ex.flux)

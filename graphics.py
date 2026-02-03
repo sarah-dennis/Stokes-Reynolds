@@ -11,7 +11,7 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-H = 1.25
+H =2
 d=1
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
@@ -21,11 +21,11 @@ x_start = 8-lenx
 
 y_start = H-leny
 
-# zoom for slope BFS corner ((change y_start to max h - leny))
-lenx = .5
-leny = .5
-x_start = 8-d/2
-y_start = H-leny
+# # zoom for slope BFS corner ((change y_start to max h - leny))
+# lenx = .5
+# leny = .5
+# x_start = 8-d/2
+# y_start = H-leny
 
 
 # zoom for BFS step tip (8,1)
