@@ -51,10 +51,12 @@ Re=0
 # Example = examples.BFS_wedge
 
 #------------------------------------------------------------------------------
-H=2
+H=2.75
 h=1
 L=16
-delta=0.25
+
+delta=1/2
+
 args = [H, h, L, delta]
 Example = examples.BFS_pwl
 
@@ -96,9 +98,9 @@ Example = examples.BFS_pwl
 
 
 #------------------------------------------------------------------------------
-solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=10000)                
+solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=50000)                
 
-N=40
+N=20
 
        
 
@@ -111,10 +113,10 @@ N=40
 
 # solver.load_run_many(N, 2, 2)
 
-# solver.new_run_many(N, 2, 3)  
-# solver.load_run_new_many(N, 2, 2)
+solver.new_run_many(N, 2, 3)  
+# solver.load_run_new_many(N, 2, 1)
 
-solver.load_plot(N, zoom=zoom_on)
+# solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
