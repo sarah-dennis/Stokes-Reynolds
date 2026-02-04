@@ -11,15 +11,15 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-H =2
+H =1.25
 d=1
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
-lenx = .5
-leny = .5
-x_start = 8-lenx 
+# lenx = .5
+# leny = .5
+# x_start = 8-lenx 
 
-y_start = H-leny
+# y_start = H-leny
 
 # # zoom for slope BFS corner ((change y_start to max h - leny))
 # lenx = .5
@@ -35,10 +35,10 @@ y_start = H-leny
 # y_start = 1-leny/2
 
 # zoom to trim length ((change leny to max h))
-# lenx = 4
-# leny = H
-# x_start = 6
-# y_start = 0
+lenx = 4
+leny = H
+x_start = 6
+y_start = 0
 
 
 x_stop= x_start + lenx
@@ -51,8 +51,8 @@ p_min= 120
 p_max = 60
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-# colour_bar_scale=0.024 # for long figures like H=2, L=4
-colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+colour_bar_scale=0.024 # for long figures like H=2, L=4
+# colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
 
 
 colour_bar_pad = 0.02
@@ -277,8 +277,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=v
     
     ax.set_aspect('equal')
 
-    ax.tick_params(which='minor', top=True, right=True)
-    ax.tick_params(which='major', top=True, right=True)
+    # ax.tick_params(which='minor', top=True, right=True)
+    # ax.tick_params(which='major', top=True, right=True)
     pp.minorticks_on()
     pp.show()
        
@@ -309,6 +309,8 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin=p_min, vmax=p_max, log_cma
     pp.xlabel(labels[1])
     pp.ylabel(labels[2])
 
+    # pp.ylim(y_start, y_stop)
+    # pp.xlim(x_start, x_stop)
     pp.minorticks_on()
     ax = pp.gca()
     ax.set_aspect('equal')    

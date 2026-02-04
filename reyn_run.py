@@ -25,7 +25,7 @@ scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 
 # Example = examples.BFS
 # H=1 
-# h=2.75
+# h=2
 # l=8
 # l_out=8
 # args =  [h, H, l, l_out]
@@ -44,7 +44,7 @@ scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 Example = examples.BFS_deltaSmooth
 H = 2
 h=1
-delta = 1/4
+delta = 1/2
 L=16
 args = [H,h,delta,L]
 
@@ -144,7 +144,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 160
+N = 200
 # solution = solver.fd_solve(N)
 # 
 # solution = solver.pwc_schur_solve(N)

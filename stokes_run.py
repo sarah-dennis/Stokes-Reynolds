@@ -51,16 +51,15 @@ Re=0
 # Example = examples.BFS_wedge
 
 #------------------------------------------------------------------------------
-H=2.75
+
+H=2
 h=1
 L=16
 
-delta=1/2
+delta=1/4
 
 args = [H, h, L, delta]
 Example = examples.BFS_pwl
-
-
 
 #------------------------------------------------------------------------------
 # H=2
@@ -102,7 +101,6 @@ solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=50000)
 
 N=20
 
-       
 
 # solver.new_run(N) 
 # solver.load_run(N)

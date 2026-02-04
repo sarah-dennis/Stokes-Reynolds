@@ -152,7 +152,7 @@ class Stokes_Solver:
             k_b = int(j_xr*ex.Nx + i+1 )   
             if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
                 
-                xr = x_yr-(ex.xs[i+1])
+                xr = x_yr-(ex.xs[i]+ex.xs[i+1])/2
                 if xr > 0:
                     xrs.append(xr)
                 
@@ -160,13 +160,14 @@ class Stokes_Solver:
             k_a = int(j*ex.Nx + i_yr)
             k_b = int((j+1)*ex.Nx + i_yr)
             if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
-                yr = y_xr-(ex.ys[j+1])
+                yr = y_xr-(ex.ys[j] + ex.ys[j+1])/2
                 if yr > 0:
                     yrs.append(yr)
         if xrs==[]:
             xrs.append(0)
         if yrs == []:
             yrs.append(0)
+            
         return xrs, yrs
     
 #------------------------------------------------------------------------------
@@ -192,18 +193,19 @@ class Stokes_Solver:
     # Grid domain
         xs = ex.xs
         ys = ex.ys
-        ax_labels = ['space', '$x$', '$y$']
+        
         
     # Zoom domain
         if zoom:
             xs_zoom, ys_zoom = graphics.grid_zoom_1D(xs, ys, ex)
 
     # Space plot: (debugging)
-        if zoom:
-            space_zoom = graphics.grid_zoom_2D(ex.space, ex)
-            graphics.plot_contour_mesh(space_zoom, xs_zoom, ys_zoom,'space', ax_labels, vmin=-1, vmax=1)
-        else:
-            graphics.plot_contour_mesh(ex.space, xs, ys, 'space', ax_labels, vmin=-1, vmax=1)
+        # ax_labels = ['space', '$x$', '$y$']
+        # if zoom:
+        #     space_zoom = graphics.grid_zoom_2D(ex.space, ex)
+        #     graphics.plot_contour_mesh(space_zoom, xs_zoom, ys_zoom,'space', ax_labels, vmin=-1, vmax=1)
+        # else:
+        #     graphics.plot_contour_mesh(ex.space, xs, ys, 'space', ax_labels, vmin=-1, vmax=1)
             
     # Pressure plot: 
         p = pressure.pressure(ex, u, v)
