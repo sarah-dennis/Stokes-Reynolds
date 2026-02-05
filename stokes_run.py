@@ -11,10 +11,10 @@ import stokes_control as control
 import stokes_examples as examples
 
 
-zoom_on= not False    
+zoom_on=  True    
 
-U=0
-Q=1
+U=1
+Q=0
 Re=0
 
 
@@ -52,14 +52,18 @@ Re=0
 
 #------------------------------------------------------------------------------
 
-H=2
-h=1
-L=16
+# H=2
+# h=1
+# L=16
+
 
 delta=1
 
-args = [H, h, L, delta]
-Example = examples.BFS_pwl
+# delta=1/4
+
+
+# args = [H, h, L, delta]
+# Example = examples.BFS_pwl
 
 
 #------------------------------------------------------------------------------
@@ -82,10 +86,10 @@ Example = examples.BFS_pwl
 
 
 #------------------------------------------------------------------------------
-# H = 2
-# L = 2 
-# args = [H, L]# tri slope = 2H/L
-# Example = examples.TriCavity
+H = 2
+L = 2 
+args = [H, L]# tri slope = 2H/L
+Example = examples.TriCavity
 
 
 #------------------------------------------------------------------------------
@@ -104,7 +108,7 @@ N=160
 
 
 # solver.new_run(N) 
-solver.load_run(N)
+# solver.load_run(N)
 
 # solver.load_scale(N,2*N) 
 
@@ -113,9 +117,9 @@ solver.load_run(N)
 # solver.load_run_many(N, 2, 2)
 
 # solver.new_run_many(N, 2, 3)  
-# solver.load_run_new_many(N, 2, 1)
+# solver.load_run_new_many(N, 2,2)
 
-# solver.load_plot(N, zoom=zoom_on)
+solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(20,[40,80,160],320)
