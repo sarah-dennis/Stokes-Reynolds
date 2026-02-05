@@ -65,9 +65,9 @@ class linear(PWL_Height):
 #
 
         
-class BFS_deltaSmooth(PWL_Height):
+class BFS_pwl(PWL_Height):
     def __init__(self, args, N):
-        H, h, delta, L = args
+        H, h, L, delta = args
 
         x0 = 0
         xf = L

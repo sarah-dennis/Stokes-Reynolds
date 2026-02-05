@@ -46,7 +46,7 @@ H = 2
 h=1
 delta = 1/2
 L=16
-args = [H,h,delta,L]
+args = [H,h,L,delta]
 
 
 # Example = examples.BFS_noEddy
