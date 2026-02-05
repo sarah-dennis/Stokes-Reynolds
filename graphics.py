@@ -11,8 +11,8 @@ from matplotlib import pyplot as pp
 from matplotlib import colors
 from matplotlib import patches
 
-H =1.25
-d=1
+H =2
+d=1/2
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
 # lenx = .5
@@ -24,7 +24,7 @@ d=1
 # # zoom for slope BFS corner ((change y_start to max h - leny))
 # lenx = .5
 # leny = .5
-# x_start = 8-d/2
+# x_start = 8-3*d/4
 # y_start = H-leny
 
 
@@ -47,7 +47,7 @@ y_stop = y_start + leny
 #---------LEGEND---------------------------------------------------------------
 
 vel_max = 5
-p_min= 120
+p_min= 110 #120
 p_max = 60
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
@@ -65,7 +65,7 @@ n_contours = 100#25
 contour_width = 0.25
 
 stream_width = 1
-stream_density=[2,1]
+stream_density=[1,1]
 line_width = 1.5
 
 linthresh = 1e-12
@@ -272,8 +272,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=v
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
     
-    # pp.ylim(y_start, y_stop)
-    # pp.xlim(x_start, x_stop)
+    pp.ylim(y_start, y_stop)
+    pp.xlim(x_start, x_stop)
     
     ax.set_aspect('equal')
 
