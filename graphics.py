@@ -47,7 +47,7 @@ y_stop = y_start + leny
 #---------LEGEND---------------------------------------------------------------
 
 vel_max = 5
-p_min= 110 #120
+p_min= 120
 p_max = 60
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
@@ -65,7 +65,7 @@ n_contours = 100#25
 contour_width = 0.25
 
 stream_width = 1
-stream_density=[1,1]
+stream_density=[2,1]
 line_width = 1.5
 
 linthresh = 1e-12
@@ -132,9 +132,12 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     pp.rcParams['figure.dpi'] = dpi
     ax = fig.add_subplot()
     if colors== 'pri':
-        cs = ['r','b', 'forestgreen','darkmagenta', 'darkorange']
+        cs = ['red','blue', 'forestgreen','darkmagenta', 'darkorange', 'hotpink', 'turquoise']
+        
+    elif colors== 'bi':
+        cs = ['red','lightcoral', 'blue', 'lightskyblue', 'forestgreen','limegreen']
     else: 
-        cs=['forestgreen', 'darkmagenta', 'darkorgange']
+        cs=['forestgreen', 'darkmagenta', 'darkorgange', 'red', 'blue','hotpink', 'turquoise']
     markers = ['D', 'o', 's', '*', 'H', 'X']
     for i in range(len(fs)):
         

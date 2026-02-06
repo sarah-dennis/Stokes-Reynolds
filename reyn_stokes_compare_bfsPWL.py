@@ -58,14 +58,14 @@ N = 80 # grid size |1|= N
 h_out=1   # outlet height 
 L = 16 # total length
 
-h_ins = [2, 1.25]#, 2.75]
+h_ins = [2.75, 2, 1.25]
 deltas = [1, 0.5, 0.25, 0.125, 0]
  
 num_h = len(h_ins)
 num_d = len(deltas)
 num_tests =num_d*num_h
 
-exstr = '$\delta$-BFS'
+exstr = 'Wedge slider'
 label = '$\delta$'
 #------------------------------------------------------------------------------
 
@@ -134,3 +134,4 @@ graphics.plot_2D_multi(l2_V_errs, deltas, f'Velocity $L_2$ rel. %-error, {exstr}
 graphics.plot_2D_multi(l2_P_errs, deltas, f'Pressure $L_2$ rel. %-error, {exstr}', fun_labels, [label, 'Pressure $L_2$ rel. %-error '])#,loc='lower')
 graphics.plot_2D_multi(dP_errs, deltas, f'Pressure $\Delta p$ rel. %-error, {exstr}',fun_labels, [label, 'Pressure $\Delta p$ rel. %-error '])#,loc='lower')
 graphics.plot_2D_multi(dPs, deltas, f'Pressure $\Delta p$, {exstr}',fun_labels_2, [label, 'Pressure $\Delta p$'])#,loc='lower')
+
