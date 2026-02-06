@@ -13,6 +13,7 @@ from matplotlib import patches
 
 H =2
 d=1/2
+
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
 # lenx = .5
@@ -34,12 +35,19 @@ d=1/2
 # x_start = 8-lenx/2
 # y_start = 1-leny/2
 
-# zoom to trim length ((change leny to max h))
+# zoom to trim pipe length ((change leny to max h))
 lenx = 4
 leny = H
 x_start = 6
 y_start = 0
 
+
+
+# zoom to triangle tip ((change leny to max h))
+lenx = 1/2
+leny = 1/2
+x_start = 1 - lenx/2
+y_start = H-leny
 
 x_stop= x_start + lenx
 y_stop = y_start + leny

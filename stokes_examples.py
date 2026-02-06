@@ -56,7 +56,7 @@ class TriCavity(PWLinear):
         H, L = args
         x0 = 0
         xf = L
-        l=xf/2
+        l=L/2
         y0 = 0
         yf = H
         x_peaks = [x0, x0+l, xf]
