@@ -326,8 +326,7 @@ class PWLinear(Space):
         
 
         scale = l1/l2
-        if scale > 1:
-            print('se', scale)
+
         return scale
 #------------------------------------------------------------------------------
 

@@ -15,7 +15,7 @@ import reyn_solvers as solvers
 plots_on = True
 uv_on = False          # plot u(x,y) & v(x,y) & |(u,v)|
 inc_on = False         # plot ux + vy =? 0
-zoom_on = True #False        # plot a zoomed-in window, set location in reyn_solution.py
+zoom_on =False        # plot a zoomed-in window, set location in reyn_solution.py
 scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 
 #------------------------------------------------------------------------------
@@ -23,12 +23,12 @@ scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 ##       (analytic or finite difference solution)
 #------------------------------------------------------------------------------
 
-Example = examples.BFS
-H=1 
-h=2
-l=8
-l_out=8
-args =  [h, H, l, l_out]
+# Example = examples.BFS
+# H=1 
+# h=2
+# l=8
+# l_out=8
+# args =  [h, H, l, l_out]
 
 # Example = examples.multi_step
 # H = 2
@@ -41,12 +41,12 @@ args =  [h, H, l, l_out]
 # L = 4
 # args =  [h0, m, L]
 
-Example = examples.BFS_deltaSmooth
-H = 2
-h=1
-delta = 1
-L=16
-args = [H,h,L,delta]
+# Example = examples.BFS_pwl
+# H = 2
+# h=1
+# delta = 1
+# L=16
+# args = [H,h,L,delta]
 
 
 # Example = examples.BFS_noEddy
@@ -71,11 +71,11 @@ args = [H,h,L,delta]
 
 
 
-# Example = examples.TriCavity
-# H=2 # apex height
-# l_a = 1.25
-# l_b = 0.75
-# args = [H, l_a, l_b]
+Example = examples.TriCavity
+H=4 # apex height
+l_a = 1
+l_b = 1
+args = [H, l_a, l_b]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -126,14 +126,14 @@ args = [H,h,L,delta]
 #------------------------------------------------------------------------------
 
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 0
+U = 1
 
 #fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
 # dP = 8
 # BC = bc.Fixed(U,dP)
 
 # mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-Q = 1
+Q = 0
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------

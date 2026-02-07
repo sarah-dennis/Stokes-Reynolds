@@ -59,8 +59,9 @@ p_min= 110 #120
 p_max = 60
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
-colour_bar_scale=0.024 # for long figures like H=2, L=4
+# colour_bar_scale=0.024 # for long figures like H=2, L=4
 # colour_bar_scale=0.05 # for almost square figures like H=2.75, L=4
+colour_bar_scale=0.1 # for tall figures like H=4, L=2
 
 
 colour_bar_pad = 0.02
@@ -280,8 +281,8 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=v
     pp.xlabel(ax_labels[1])
     pp.ylabel(ax_labels[2])
     
-    pp.ylim(y_start, y_stop)
-    pp.xlim(x_start, x_stop)
+    # pp.ylim(y_start, y_stop)
+    # pp.xlim(x_start, x_stop)
     
     ax.set_aspect('equal')
 

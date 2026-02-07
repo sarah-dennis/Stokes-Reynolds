@@ -11,7 +11,7 @@ import stokes_control as control
 import stokes_examples as examples
 
 
-zoom_on=  True    
+zoom_on=  not True    
 
 U=1
 Q=0
@@ -86,7 +86,7 @@ delta=1
 
 
 #------------------------------------------------------------------------------
-H = 2
+H = 4
 L = 2 
 args = [H, L]# tri slope = 2H/L
 Example = examples.TriCavity
@@ -104,7 +104,7 @@ Example = examples.TriCavity
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=50000)                
 
-N=160
+N=40
 
 
 # solver.new_run(N) 
@@ -116,7 +116,7 @@ N=160
 
 # solver.load_run_many(N, 2, 2)
 
-# solver.new_run_many(N, 2, 3)  
+# solver.new_run_many(N, 2, 4)  
 # solver.load_run_new_many(N, 2,2)
 
 solver.load_plot(N, zoom=zoom_on)
