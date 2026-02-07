@@ -57,7 +57,7 @@ Re=0
 # L=16
 
 
-delta=1
+delta=1/4
 
 # delta=1/4
 
