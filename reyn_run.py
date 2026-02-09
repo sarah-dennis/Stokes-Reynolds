@@ -16,7 +16,6 @@ plots_on = True
 uv_on = False          # plot u(x,y) & v(x,y) & |(u,v)|
 inc_on = False         # plot ux + vy =? 0
 zoom_on =False        # plot a zoomed-in window, set location in reyn_solution.py
-scaled_on = False      # plot in scaled variables x/X, y/Y etc.
 
 #------------------------------------------------------------------------------
 ## Piecewise-linear examples 
@@ -144,7 +143,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 500
+N = 200
 # solution = solver.fd_solve(N)
 # 
 # solution = solver.pwc_schur_solve(N)
@@ -164,6 +163,6 @@ solution = solver.pwl_schur_solve(N)
 # solution = solver.fd_pert_solve(N, order=4, get_both=False)
 
 if plots_on:
-    solution.p_plot(scaled=scaled_on, zoom=zoom_on)
-    solution.v_plot(scaled=scaled_on, zoom=zoom_on, uv=uv_on, inc=inc_on)
+    solution.p_plot(zoom=zoom_on)
+    solution.v_plot(zoom=zoom_on, uv=uv_on, inc=inc_on)
 #------------------------------------------------------------------------------

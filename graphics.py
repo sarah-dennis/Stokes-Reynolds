@@ -12,21 +12,20 @@ from matplotlib import colors
 from matplotlib import patches
 
 H =2
-d=1/2
+d=1
 
 #---------ZOOM PLOT---------------------------------------------------------------
 # zoom for BFS corner ((change y_start to max h - leny))
 # lenx = .5
 # leny = .5
 # x_start = 8-lenx 
-
 # y_start = H-leny
 
-# # zoom for slope BFS corner ((change y_start to max h - leny))
-# lenx = .5
-# leny = .5
-# x_start = 8-3*d/4
-# y_start = H-leny
+# zoom for slope BFS corner ((change y_start to max h - leny))
+lenx = .5
+leny = .5
+x_start = 8-3*d/4
+y_start = H-leny
 
 
 # zoom for BFS step tip (8,1)
@@ -35,19 +34,18 @@ d=1/2
 # x_start = 8-lenx/2
 # y_start = 1-leny/2
 
-# zoom to trim pipe length ((change leny to max h))
-lenx = 4
-leny = H
-x_start = 6
-y_start = 0
+# # zoom to trim pipe length ((change leny to max h))
+# lenx = 4
+# leny = H
+# x_start = 6
+# y_start = 0
 
-
-
-# zoom to triangle tip ((change leny to max h))
-lenx = 1/2
-leny = 1/2
+# # zoom to triangle tip ((change leny to max h))
+lenx = 1/4
+leny = 1/4
 x_start = 1 - lenx/2
 y_start = H-leny
+
 
 x_stop= x_start + lenx
 y_stop = y_start + leny
@@ -55,8 +53,8 @@ y_stop = y_start + leny
 #---------LEGEND---------------------------------------------------------------
 
 vel_max = 5
-p_min= 120
-p_max = 60
+p_min= 0
+p_max = 120
 
 # colour_bar_scale=0.015 # for very long figures, H=1.25, L=4
 # colour_bar_scale=0.024 # for long figures like H=2, L=4
@@ -77,7 +75,7 @@ stream_width = 1
 stream_density=[2,1]
 line_width = 1.5
 
-linthresh = 1e-12
+linthresh = 1e-8
 
 # -------- COLOURING 2D field u(x,y),v(x,y) ----------------velocity-----------
 
@@ -241,11 +239,11 @@ def plot_log_multi(fs, xs, title, f_labels, ax_labels, linthresh=linthresh, bigO
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left': #upper-left
         fig.legend(bbox_to_anchor=(0.3, 0.89))
-    elif loc=='lower': #lower-right
-        fig.legend(bbox_to_anchor=(0.3, 0.275))
-    elif loc=='center': #lower-right
+    elif loc=='lower': #lower-left
+        fig.legend(bbox_to_anchor=(0.3, 0.425))
+    elif loc=='center': 
         fig.legend(bbox_to_anchor=(0.5, 0.875))
-    else: #lower left
+    else: #lower-right
         fig.legend(bbox_to_anchor=(0.9, 0.275))  
         
     return fig
@@ -262,7 +260,7 @@ def plot_stream_heat(vx, vy, xs, ys, color_map, title, ax_labels, vmin=0, vmax=v
     X, Y = np.meshgrid(xs, ys)
 
     if log_cmap:
-        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax, clip=False)
+        norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax)
         stream_plot=pp.streamplot(xs, ys, vx, vy, stream_density, broken_streamlines=False, linewidth=stream_width, color=color_map, cmap=colour_map_stream, norm=norm_symLog)
     else:
         no_norm = colors.CenteredNorm(vcenter=vmin + vmax/2, halfrange=vmax/2, clip=True)
@@ -302,10 +300,11 @@ def plot_contour_mesh(zs, xs, ys, title, labels, vmin=p_min, vmax=p_max, log_cma
     pp.figure()
     
     X, Y = np.meshgrid(xs, ys)
-       
+
     if log_cmap:
         norm_symLog = colors.AsinhNorm(linthresh, vmin=vmin, vmax=vmax)
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, norm=norm_symLog)
+        
     else:
         color_plot = pp.pcolor(X, Y, zs, cmap=colour_map_mesh, vmin=vmin, vmax=vmax)
     

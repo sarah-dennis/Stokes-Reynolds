@@ -133,5 +133,3 @@ fun_labels_2 = [label + " Reyn" for label in fun_labels] + [label + " Stokes" fo
 graphics.plot_2D_multi(l2_V_errs, deltas, f'Velocity $L_2$ rel. %-error, {exstr}',fun_labels,  [label, 'Velocity $L_2$ rel. %-error'])#,loc='right')
 graphics.plot_2D_multi(l2_P_errs, deltas, f'Pressure $L_2$ rel. %-error, {exstr}', fun_labels, [label, 'Pressure $L_2$ rel. %-error '])#,loc='lower')
 graphics.plot_2D_multi(dP_errs, deltas, f'Pressure $\Delta p$ rel. %-error, {exstr}',fun_labels, [label, 'Pressure $\Delta p$ rel. %-error '])#,loc='lower')
-graphics.plot_2D_multi(dPs, deltas, f'Pressure $\Delta p$, {exstr}',fun_labels_2, [label, 'Pressure $\Delta p$'])#,loc='lower')
-

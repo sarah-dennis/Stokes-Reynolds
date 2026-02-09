@@ -11,7 +11,6 @@ def get_dp(ex, p):
     p_2D = p.reshape((ex.Ny,ex.Nx))
 
     dp = (sum(p_2D[:,0])/ex.H_in - sum(p_2D[:,-1])/ex.H_out)*ex.dy
-    
     return dp
 
 

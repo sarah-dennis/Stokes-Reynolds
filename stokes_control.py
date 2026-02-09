@@ -130,57 +130,22 @@ class Stokes_Solver:
         ex = self.Example(self.args, self.U, self.Q, self.Re, N)
         u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
         p = pressure.pressure(ex, u, v)
-        dp = pressure.getr_dp(ex, p) 
+        dp = pressure.get_dp(ex, p) 
         return dp
     
-    def get_bfs_attachments(self,N):
-        ex=self.Example(self.args, self.U, self.Q, self.Re, N)
-        u, v, psi, past_iters = rw.read_stokes(ex.filestr+".csv", ex.Nx * ex.Ny)
-        
-        y_xr = ex.yf   # xr on y=h
-        x_yr = ex.xf/2 # yr on x=L/2
-        
-        i_yr =int(x_yr/ex.dx)-1 # 
-        
-        j_xr =int(y_xr/ex.dy)-1
-
-        xrs = []
-        yrs = []
-
-        for i in range(ex.Nx-1):
-            k_a = int(j_xr*ex.Nx + i)
-            k_b = int(j_xr*ex.Nx + i+1 )   
-            if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
-                
-                xr = x_yr-(ex.xs[i]+ex.xs[i+1])/2
-                if xr > 0:
-                    xrs.append(xr)
-                
-        for j in range(ex.Ny-1):
-            k_a = int(j*ex.Nx + i_yr)
-            k_b = int((j+1)*ex.Nx + i_yr)
-            if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
-                yr = y_xr-(ex.ys[j] + ex.ys[j+1])/2
-                if yr > 0:
-                    yrs.append(yr)
-        if xrs==[]:
-            xrs.append(0)
-        if yrs == []:
-            yrs.append(0)
-            
-        return xrs, yrs
+    
     
 #------------------------------------------------------------------------------
 # Error
 #------------------------------------------------------------------------------
-    def compare(self,N_min, Ns, N_max,p_err=True):
+    def compare(self, args, U, Q, Re, N_min, Ns, N_max,p_err=False): # grid convergence (multiple grid sizes of same example)
         
-        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.stokes_cnvg_self(self.Example, N_min, Ns, N_max,p_err)
-        title = ''#"Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
+        l1_errs, l2_errs, inf_errs, cnvg_rates, ex_min = cnvg.stokes_cnvg_self(self.Example, args, U, Q, Re, N_min, Ns, N_max,p_err)
+        title = "Iterative Grid Error in Stream $\psi$ at $N_{max}=%d$ \n %s"%(N_max, ex_min.spacestr)
         ax_labels = ["$N$", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
         
-        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels)
+        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels,bigO_on=True,loc='lower' )
 
 #------------------------------------------------------------------------------
 # PLOTTING 
@@ -212,7 +177,11 @@ class Stokes_Solver:
         dp = pressure.get_dp(ex, p) 
         
         p_2D = p.reshape((ex.Ny,ex.Nx))
-        dp_str = ', $\Delta p =%.2f$'%(dp)
+        
+        if self.Q == 0:
+            dp_str = '' #cavity flow dp undefined
+        else:
+            dp_str = ', $\Delta p =%.2f$'%(dp)
 
     
         ax_labels_p = ['$p$', '$x$', '$y$']

@@ -8,9 +8,9 @@ import numpy as np
 import readwrite as rw
 import stokes_pressure as pressure
 #-------------------------------------------------------------------------------
-def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
-    ex_min = Ex(N_min)
-    ex_max = Ex(N_max)
+def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
+    ex_min = Ex(args, U, Q, Re, N_min)
+    ex_max = Ex(args, U, Q, Re, N_max)
     
     # Load max grid for 'true' values
     u_max, v_max, psi_max, past_iters = rw.read_stokes(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
@@ -18,7 +18,7 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
 
     if p_err:
         p_max = pressure.pressure(ex_max, u_max, v_max)
-        dp_max, res_max = pressure.resistance(ex_max, p_max) 
+        dp_max = pressure.get_dp(ex_max, p_max) 
         p_max = p_max.reshape((ex_max.Ny,ex_max.Nx))
         
     mult_max = int(N_max/N_min)
@@ -38,10 +38,10 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
     
     for n in range(len(Ns)+1):
         if n == 0:
-            ex_n = Ex(N_min)
+            ex_n = ex_min
             mult = 1
         else:
-            ex_n = Ex(Ns[n-1])
+            ex_n = Ex(args, U, Q, Re, Ns[n-1])
             mult = int(Ns[n-1]/N_min)
             
             
@@ -50,7 +50,7 @@ def stokes_cnvg_self(Ex, N_min, Ns, N_max, p_err=True):
 
         if p_err:
             p_n = pressure.pressure(ex_n, u_n, v_n)
-            dp_n, res_n = pressure.resistance(ex_n, p_n)
+            dp_n = pressure.get_dp(ex_n, p_n)
             p_n=p_n.reshape((ex_n.Ny,ex_n.Nx))
             
         for k_min in range(ex_min.Ny*ex_min.Nx):

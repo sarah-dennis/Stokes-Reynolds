@@ -35,80 +35,45 @@ class Reyn_Solution:
             
     def p_plot(self, scaled=False, zoom=False):
 
-        if scaled:
-            x_scale = self.height.xs[-1]-self.height.xs[0]
-            y_scale = max(self.height.hs)
-            u_scale = self.Q/y_scale
-            p_scale = self.Q*x_scale/y_scale #*visc
-            
-            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta P=%.2f$"%(1,self.BC.U/u_scale,self.dP/p_scale)
-            p_title = self.solver_str+ '\n' + paramstr
-            p_labels =  ['$P$','$X$', '$Y$']
-            
-            if zoom: 
-                xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height )
-                p_zoom = graphics.grid_zoom_2D(self.pressure.ps_2D, self.height )
-                graphics.plot_contour_mesh(p_zoom/p_scale, xs_zoom/x_scale, ys_zoom/y_scale, p_title, p_labels)
-            else:
-                graphics.plot_contour_mesh(self.pressure.ps_2D/p_scale, self.height.xs/x_scale, self.height.ys/y_scale, p_title, p_labels)
-        
+        if self.Q == 0: #cavity flow 
+            paramstr = "$Q=%.2f$, $U=%.1f$"%(self.Q, self.BC.U)
         else:
             paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta p=%.2f$"%(self.Q, self.BC.U, self.dP)
-            p_title = self.solver_str +'\n' + paramstr
-            p_labels = ["$p$", "$x$","$y$"]
-           
-            if zoom: 
-                xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height )
-                p_zoom = graphics.grid_zoom_2D(self.pressure.ps_2D, self.height )
-                graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels)
-            else:
-                graphics.plot_contour_mesh(self.pressure.ps_2D, self.height.xs, self.height.ys, p_title, p_labels)
+        
+        p_title = self.solver_str +'\n' + paramstr
+        p_labels = ["$p$", "$x$","$y$"]
+       
+        if zoom: 
+            xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height )
+            p_zoom = graphics.grid_zoom_2D(self.pressure.ps_2D, self.height )
+            graphics.plot_contour_mesh(p_zoom, xs_zoom, ys_zoom, p_title, p_labels)
+        else:
+            graphics.plot_contour_mesh(self.pressure.ps_2D, self.height.xs, self.height.ys, p_title, p_labels)
         
     
     def v_plot(self, scaled=False, zoom=False,  inc=False, uv=False):
                 
     
-        if scaled:
-        
-            x_scale = self.height.xs[-1]-self.height.xs[0]
-            y_scale = max(self.height.hs)
-            u_scale = self.Q/y_scale
-            v_scale = self.Q/x_scale
-            p_scale = self.Q*x_scale/y_scale #*visc
-            
-            paramstr = "$Q=%.2f$, $U_b=%.2f$, $\Delta P=%.2f$"%(1, self.BC.U/u_scale, self.dP/p_scale)
-            v_title = self.solver_str + '\n' + paramstr
-            v_ax_labels =  ['$|(U, V)|_2$','$X$', '$Y$']
-            uv_mag = np.sqrt((self.velocity.u/u_scale)**2 + (self.velocity.v/v_scale)**2)
-                
-            if zoom:
-                xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height )
-                u_2D_zoom = graphics.grid_zoom_2D(self.velocity.u, self.height )
-                v_2D_zoom = graphics.grid_zoom_2D(self.velocity.v, self.height )
-                uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, self.height )
-         
-                graphics.plot_stream_heat(u_2D_zoom/u_scale, v_2D_zoom/v_scale, xs_zoom/x_scale, ys_zoom/y_scale, uv_mag_zoom, v_title, v_ax_labels) 
-            else:
-                graphics.plot_stream_heat(self.velocity.u/u_scale, self.velocity.v/y_scale, self.height.xs/x_scale, self.height.ys/y_scale, uv_mag, v_title, v_ax_labels)
-
+        if self.Q == 0: #cavity flow 
+            paramstr = "$Q=%.2f$, $U=%.1f$"%(self.Q, self.BC.U)
         else:
-            
-            paramstr = "$Q=%.2f$, $U=%.2f$, $\Delta p=%.2f$"%(self.Q, self.BC.U, self.dP)
-            v_title = self.solver_str+ '\n' + paramstr
-            v_ax_labels =  ['$|(  u,  v)|_2$','$x$', '$y$']  
-            uv_mag = np.sqrt((self.velocity.u)**2 + (self.velocity.v)**2)
-            
+            paramstr = "$Q=%.2f$, $U=%.1f$, $\Delta p=%.2f$"%(self.Q, self.BC.U, self.dP)
+        
+        v_title = self.solver_str+ '\n' + paramstr
+        v_ax_labels =  ['$|(  u,  v)|_2$','$x$', '$y$']  
+        uv_mag = np.sqrt((self.velocity.u)**2 + (self.velocity.v)**2)
+        
 
-            if zoom:
-                xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height)
-                u_2D_zoom = graphics.grid_zoom_2D(self.velocity.u, self.height)
-                v_2D_zoom = graphics.grid_zoom_2D(self.velocity.v, self.height)
-                uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, self.height)
-         
-                graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels) 
-            else:
-            
-               graphics.plot_stream_heat(self.velocity.u, self.velocity.v, self.height.xs, self.height.ys, uv_mag, v_title, v_ax_labels)
+        if zoom:
+            xs_zoom, ys_zoom = graphics.grid_zoom_1D(self.height.xs, self.height.ys, self.height)
+            u_2D_zoom = graphics.grid_zoom_2D(self.velocity.u, self.height)
+            v_2D_zoom = graphics.grid_zoom_2D(self.velocity.v, self.height)
+            uv_mag_zoom = graphics.grid_zoom_2D(uv_mag, self.height)
+     
+            graphics.plot_stream_heat(u_2D_zoom, v_2D_zoom, xs_zoom, ys_zoom, uv_mag_zoom, v_title, v_ax_labels) 
+        else:
+        
+           graphics.plot_stream_heat(self.velocity.u, self.velocity.v, self.height.xs, self.height.ys, uv_mag, v_title, v_ax_labels)
 
         if uv:
             
