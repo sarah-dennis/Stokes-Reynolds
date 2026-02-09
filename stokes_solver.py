@@ -239,6 +239,9 @@ def uv_approx(ex, u, v, psi):
             v[k] = 0 
                 
         elif i == n-1: #outlet: dx{u(dx)} = 0
+            #TODO
+            # ux[j,n-1] = 3*u[j,n-1] -4*u[j,n-2] + u[j,n-3] = 0 
+            # u[k] = (4/3)*u[j*n + n-2] - (1/3)*u[j*n + n-3]
             u[k] = u[j*n+i-1]
             v[k] = 0 
                     
@@ -280,8 +283,12 @@ def uv_approx(ex, u, v, psi):
                 
             # East (i+1, j)
             if i+1 == n-1 and ex.space[j,i+1] == 0: # outlet
-                v_E = 0 
+                v_E = 0
+                #TODO
+                # psix[j,n-1] = 3*psi[j,n-1] -4*psi[j,n-2] + psi[j,n-3] = 0
+                # psi[k] = (4/3)*psi[j*n + n-2] - (1/3)*psi[j*n + n-3]
                 psi_E = psi[k] 
+                
                 
             elif ex.space[j,i+1] == 0: # y=h(x) boundary
                 v_E = 0

@@ -65,6 +65,21 @@ class TriCavity(PWLinear):
         super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
         
         
+class TrapCavity(PWLinear):
+    def __init__ (self, args, U, Q, Re, N):
+        H, xr, L = args
+        yr = H*xr*2/L
+        x0 = 0
+        xf = L
+
+        y0 = 0
+        yf = yr
+        x_peaks = [x0, x0+xr, xf-xr, xf]
+        y_peaks=[[0,2/N],[yr,yr],[yr,yr],[2/N,0]]
+        namestr = f"TrapCavity_yr{yr}xr{xr}L{L}_U{U}_Q{Q}_Re{Re}"
+        super().__init__(x0, xf, y0, yf, N, U, Q, Re,namestr, x_peaks, y_peaks)
+        
+        
 class TriSlider(PWLinear):
     def __init__ (self, args, U, Q, Re, N):
 

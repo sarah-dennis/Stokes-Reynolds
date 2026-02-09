@@ -11,22 +11,25 @@ import stokes_pressure as pressure
 def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
     ex_min = Ex(args, U, Q, Re, N_min)
     ex_max = Ex(args, U, Q, Re, N_max)
-    
+    size=ex_min.Ny*ex_min.Nx
     # Load max grid for 'true' values
     u_max, v_max, psi_max, past_iters = rw.read_stokes(ex_max.filestr+".csv", ex_max.Nx * ex_max.Ny)
     psi_max = psi_max.reshape((ex_max.Ny,ex_max.Nx))
+
 
     if p_err:
         p_max = pressure.pressure(ex_max, u_max, v_max)
         dp_max = pressure.get_dp(ex_max, p_max) 
         p_max = p_max.reshape((ex_max.Ny,ex_max.Nx))
+
+
         
     mult_max = int(N_max/N_min)
     
-    err = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
-    err_inf = np.zeros(len(Ns)+1)
-    err_l1 = np.zeros(len(Ns)+1)
-    err_l2 = np.zeros(len(Ns)+1)
+    err_psi = np.zeros((len(Ns)+1,ex_min.Ny,ex_min.Nx))
+    err_psi_inf = np.zeros(len(Ns)+1)
+    err_psi_l1 = np.zeros(len(Ns)+1)
+    err_psi_l2 = np.zeros(len(Ns)+1)
     
 
     if p_err:
@@ -53,7 +56,7 @@ def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
             dp_n = pressure.get_dp(ex_n, p_n)
             p_n=p_n.reshape((ex_n.Ny,ex_n.Nx))
             
-        for k_min in range(ex_min.Ny*ex_min.Nx):
+        for k_min in range(size):
         # all indices (i,j) on grid N_min
             i = k_min % ex_min.Nx
             j = (k_min // ex_min.Nx)
@@ -66,29 +69,29 @@ def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
             i_max = mult_max * i
             j_max = mult_max * j
             
-            err[n,j,i] = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
-            err_l1[n] += err[n,j,i]
-            err_l2[n] += err[n,j,i]**2
+            err_psi_n_ij = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
+            err_psi[n,j,i] = err_psi_n_ij
+            err_psi_l1[n] += err_psi_n_ij
+            err_psi_l2[n] += err_psi_n_ij**2
             
             if p_err:
                 err_p[n,j,i] = abs(p_max[j_max,i_max] - p_n[j_n,i_n])
                 err_p_l1[n]+= err_p[n,j,i] 
-                err_p_l2[n]+= (err_p[n,j,i]**2)
-                
-        size_n= ex_n.Nx*ex_n.Ny   
+                err_p_l2[n]+= (err_p[n,j,i]**2) 
         
-        err_inf[n] = np.max(err[n])
-        err_l1[n] /= size_n
-        err_l2[n] = np.sqrt(err_l2[n] / size_n)
+        err_psi_inf[n] = np.max(err_psi[n])
+        err_psi_l1[n] /= size
+        err_psi_l2[n] = np.sqrt(err_psi_l2[n]/size)
         
         if p_err:
             err_p_inf[n] = np.max(err_p[n])
-            err_p_l2[n] = np.sqrt(err_p_l2[n])
-            err_dp[n]=np.abs(dp_max-dp_n)
+            err_p_l1[n] /= size
+            err_p_l2[n] = np.sqrt(err_p_l2[n]/size)
+            err_dp[n]= abs(dp_max-dp_n)
             
-    l1_rate = convg_rate(err_l1)
-    l2_rate = convg_rate(err_l2)
-    inf_rate = convg_rate(err_inf)
+    l1_rate = convg_rate(err_psi_l1)
+    l2_rate = convg_rate(err_psi_l2)
+    inf_rate = convg_rate(err_psi_inf)
     cnvg_rates = np.stack([l1_rate, l2_rate, inf_rate], axis=0)
     
     if p_err:
@@ -110,7 +113,7 @@ def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
         print("linf" + np.array2string(p_cnvg_rates[2], precision=2))
         print("dp: " + np.array2string(p_cnvg_rates[3], precision=2))
 
-    return err_l1, err_l2, err_inf, cnvg_rates, ex_min
+    return err_psi_l1, err_psi_l2, err_psi_inf, cnvg_rates, ex_min
 
 #------------------------------------------------------------------------------
     
@@ -119,7 +122,7 @@ def convg_rate(errs):
     rates = np.zeros(n-1)
     
     for k in range(n-1):
-        rates[k]=errs[k+1]/errs[k]
+        rates[k]=errs[k]/errs[k+1]
     
     return rates
 

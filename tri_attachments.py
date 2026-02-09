@@ -20,14 +20,15 @@ def get_tri_attachments(ex, H, L):
         if i < ex.Nx/2 - 1:
             j_ha = H/(L/2) * i
             j_hb = H/(L/2) * (i+1)
-            k_a = int(j_ha*ex.Nx + i)
-            k_b = int(j_hb*ex.Nx + i+1)   
-            
-          
-            if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
+            if j_ha < ex.Ny and j_hb < ex.Ny:
+                k_a = int(j_ha*ex.Nx + i)
+                k_b = int(j_hb*ex.Nx + i+1)   
                 
-                xr = ex.xs[i]
-                xrs.append(xr)
+              
+                if np.sign(psi[k_a]-ex.flux)!= np.sign(psi[k_b]-ex.flux):
+                    
+                    xr = ex.xs[i]
+                    xrs.append(xr)
 
 
     if xrs==[]:
@@ -43,7 +44,8 @@ Re=0
 #------------------------------------------------------------------------------
 
 
-hs = [4, 2, 1]
+hs = [4]#, 2, 1]
+xr = 0.75
 L = 2
 N=160
 
@@ -56,7 +58,11 @@ for i in range(num_h):
     H= hs[i]
 
     Example = examples.TriCavity
-    args = [H, L]           
+    args = [H, L]
+    
+    # Example = examples.TrapCavity
+    # args = [H, xr,L]
+    
     ex = Example(args, U, Q, Re, N)
     
     xr = get_tri_attachments(ex, H, L)
