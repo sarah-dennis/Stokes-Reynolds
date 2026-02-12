@@ -58,6 +58,7 @@ Re=0
 Example = examples.BFS
 h_ins = [1.125, 1.25, 1.5, 2, 2.5, 2.75, 3] #N=80
 # h_ins = [1.25, 2, 2.75] #N=160
+# h_ins = [2] #N=160
 h_out = 1
 l_in = 8
 l_out = 8

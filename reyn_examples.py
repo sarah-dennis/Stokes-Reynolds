@@ -80,16 +80,16 @@ class BFS_pwl(PWL_Height):
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
 
 
-class BFS_noEddy(PWL_Height):
+class BFS_wedge(PWL_Height):
     def __init__(self, args, N):
-        h, H, l, L, xr, yr = args
+        H, h, la, lb, xr, yr = args
         x0 = 0
-        xf = L
-        x_reattatch = l + xr
+        xf = la+lb
+        x_reattatch = la - xr
         y_reattatch = H - yr
         N_regions = 3
-        x_peaks = np.asarray([x0, l, x_reattatch, xf], float)
-        h_peaks = np.asarray( [[0, h], [h, y_reattatch], [H, H], [H, 0]], float)
+        x_peaks = np.asarray([x0, la-xr, la, xf], float)
+        h_peaks = np.asarray( [[0, H], [H, H], [H-yr, h], [h, 0]], float)
         namestr = ''#f'cBFS_H{int(H)}L{int(xf)}_xr{int(xr)}yr{int(yr)}'
         titlestr = ''#f'Corner removed BFS $H/h={H/h : .3f}$, $x_r = {x_reattatch:.2f}$, $y_r = {y_reattatch:.2f}$, $L={L : .1f}$ '
         super().__init__(x0, xf, N, N_regions, x_peaks, h_peaks, namestr)
@@ -139,7 +139,9 @@ class multi_tri(PWL_Height):
 
 class TriCavity(PWL_Height):
     def __init__(self, args, N):
-        H, l_a, l_b = args
+        H, L = args
+        l_a = L/2
+        l_b = L/2
         x0 = 0
         xf = x0 + l_a + l_b
         N_regions = 2

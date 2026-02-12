@@ -130,6 +130,6 @@ fun_labels = ["$\mathcal{H}$ = %.2f"%h_in for h_in in h_ins]
 
 fun_labels_2 = [label + " Reyn" for label in fun_labels] + [label + " Stokes" for label in fun_labels] 
 
-graphics.plot_2D_multi(l2_V_errs, deltas, f'Velocity $L_2$ rel. %-error, {exstr}',fun_labels,  [label, 'Velocity $L_2$ rel. %-error'])#,loc='right')
-graphics.plot_2D_multi(l2_P_errs, deltas, f'Pressure $L_2$ rel. %-error, {exstr}', fun_labels, [label, 'Pressure $L_2$ rel. %-error '])#,loc='lower')
-graphics.plot_2D_multi(dP_errs, deltas, f'Pressure $\Delta p$ rel. %-error, {exstr}',fun_labels, [label, 'Pressure $\Delta p$ rel. %-error '])#,loc='lower')
+graphics.plot_2D_multi(l2_V_errs, deltas, f'Velocity rel. %-error, {exstr}',fun_labels,  [label, 'rel. %-error'])#,loc='right')
+graphics.plot_2D_multi(l2_P_errs, deltas, f'Pressure $L_2$ rel. %-error, {exstr}', fun_labels, [label, 'rel. %-error '])#,loc='lower')
+graphics.plot_2D_multi(dP_errs, deltas, f'Pressure $\Delta p$ rel. %-error, {exstr}',fun_labels, [label, 'rel. %-error '])#,loc='lower')

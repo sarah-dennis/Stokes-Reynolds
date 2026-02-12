@@ -166,10 +166,10 @@ def plot_2D_multi(fs, xs, title, fun_labels, ax_labels, loc='upper', colors='pri
     if loc== 'upper':
         fig.legend(bbox_to_anchor=(0.9, 0.875))
     elif loc=='left':
-        fig.legend(bbox_to_anchor=(0.25, 0.875))
+        fig.legend(bbox_to_anchor=(0.275, 0.875))
     elif loc=='lower':
         
-        fig.legend(bbox_to_anchor=(0.25, 0.45))
+        fig.legend(bbox_to_anchor=(0.275, 0.275))
     elif loc=='center':
         fig.legend(bbox_to_anchor=(0.5, 0.875))
     else: 

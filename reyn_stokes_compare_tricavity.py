@@ -38,10 +38,10 @@ def l2(ax,ay,bx,by):
 #------------------------------------------------------------------------------
 
 # U: velocity {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U =0
+U =1
 
 
-Q=1
+Q=0
 
 
 BC = rbc.Mixed(U, Q)
@@ -49,26 +49,25 @@ BC = rbc.Mixed(U, Q)
 Re=0
 
 
-N = 80 # grid size |1|= N
+N = 160 # grid size |1|= N
 
 #------------------------------------------------------------------------------
 #TODO: select example
 
 #------------------------------------------------------------------------------
-Reyn_Example = reyn_examples.BFS
-Stokes_Example = stokes_examples.BFS
+Reyn_Example = reyn_examples.TriCavity
+Stokes_Example = stokes_examples.TriCavity
 
-# h_in=1  # inlet height
-h_out=1   # outlet height 
-l_in = 8  # inlet length
-l_out = 8  #outlet length
+# H
+L = 2 
+# args = [H, L]
 
-h_ins = [1.125, 1.25, 1.5, 2, 2.5, 2.75, 3]
-num_tests=len(h_ins)
-test_args = [[h_in, h_out, l_in, l_out] for h_in in h_ins]
+Hs = [0.35, 0.5, 0.75, 1, 2, 3, 4]
+num_tests=len(Hs)
+test_args = [[H, L] for H in Hs]
 
-exstr = 'BFS'
-label = '$\mathcal{H}=H_{in}/H_{out}$'
+exstr = 'Triangular Cavity'
+label = '$H$'
 
 #------------------------------------------------------------------------------
 
@@ -78,19 +77,13 @@ l1_V_errs= np.zeros(num_tests)
 linf_V_errs =  np.zeros(num_tests)
 l2_V_errs =  np.zeros(num_tests)
 
-l1_P_errs = np.zeros(num_tests)
-linf_P_errs = np.zeros(num_tests)
-l2_P_errs =  np.zeros(num_tests)
-
-dP_errs =  np.zeros(num_tests)
-
 for args in test_args:
 #------------------------------------------------------------------------------
 # Reynolds 
 #------------------------------------------------------------------------------
     reyn_solver = reyn_solvers.Reynolds_Solver(Reyn_Example, BC, args)
     reyn_solution = reyn_solver.fd_solve(N)
-    reyn_dp=reyn_solution.dP
+
     reyn_ps, reyn_us, reyn_vs = np.nan_to_num(reyn_solution.pressure.ps_2D),reyn_solution.velocity.u,reyn_solution.velocity.v
     
 #------------------------------------------------------------------------------
@@ -99,8 +92,7 @@ for args in test_args:
     
     stokes_solver = stokes_control.Stokes_Solver(Stokes_Example, args, U, Q, Re)
     stokes_ps, stokes_us, stokes_vs, stokes_dp = stokes_solver.load(N)
-    stokes_ps = np.nan_to_num(stokes_ps)
-    
+
 
 #------------------------------------------------------------------------------
 # relative norm
@@ -108,9 +100,6 @@ for args in test_args:
     linf_stokes_V = linf(stokes_us, stokes_vs, 0, 0)
     l2_stokes_V = l2(stokes_us, stokes_vs, 0, 0)
 
-    l1_stokes_P = l1(stokes_ps, 0, 0, 0)
-    linf_stokes_P = linf(stokes_ps, 0, 0, 0)
-    l2_stokes_P = l2(stokes_ps, 0, 0, 0)
 #------------------------------------------------------------------------------
 
 
@@ -118,21 +107,9 @@ for args in test_args:
     l2_V_errs[k] = l2(stokes_us, stokes_vs, reyn_us, reyn_vs)/l2_stokes_V *100
     linf_V_errs[k] = linf(stokes_us, stokes_vs,  reyn_us, reyn_vs)/linf_stokes_V *100
 
-
-    l1_P_errs[k] = l1(stokes_ps, 0, reyn_ps, 0)/l1_stokes_P *100
-    l2_P_errs[k] = l2(stokes_ps, 0, reyn_ps, 0)/l2_stokes_P *100
-    linf_P_errs[k] = linf(stokes_ps, 0, reyn_ps, 0)/linf_stokes_P *100
- 
-    dP_errs[k] = abs(reyn_dp-stokes_dp)/stokes_dp *100   
- 
     k+=1
     
     
-graphics.plot_2D(l2_V_errs, h_ins, f'Velocity rel. %-error, {exstr}', [label, 'rel. %-error'], color='forestgreen')
-
-# graphics.plot_2D(l2_P_errs, h_ins, f'Pressure $L_2$ rel. %-error, {exstr}', [label, 'Pressure $L_2$ rel. %-error '])
-# graphics.plot_2D(dP_errs, h_ins, f'Pressure $\Delta p$ rel. %-error, {exstr}', [label, 'Pressure $\Delta p$ rel. %-error '])
-graphics.plot_2D_multi([dP_errs, l2_P_errs], h_ins, f'Pressure rel. %-error, {exstr}', ['$\Delta p$', '$|p|_2$'], [label, 'rel. %-error'],loc='left')
-
+graphics.plot_2D(l2_V_errs, Hs, f'Velocity rel. %-error, {exstr}', [label, 'rel. %-error'], color='forestgreen')
 
 

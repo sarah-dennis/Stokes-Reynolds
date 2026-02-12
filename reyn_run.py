@@ -48,14 +48,14 @@ zoom_on =False        # plot a zoomed-in window, set location in reyn_solution.p
 # args = [H,h,L,delta]
 
 
-# Example = examples.BFS_noEddy
-# h = 1
-# H = 2
-# l = 1
-# L = 4
-# xr = 0.5
-# yr = 0.5
-# args = [h, H, l, L, xr, yr]
+Example = examples.BFS_wedge
+h = 1
+H = 2
+l = 3
+L = 3
+xr = 0.5
+yr = 0.5
+args = [H, h, l, L, xr, yr]
 
 
 # Example = examples.TriSlider
@@ -70,11 +70,10 @@ zoom_on =False        # plot a zoomed-in window, set location in reyn_solution.p
 
 
 
-Example = examples.TriCavity
-H=4 # apex height
-l_a = 1
-l_b = 1
-args = [H, l_a, l_b]
+# Example = examples.TriCavity
+# H=4 # apex height
+# L=2
+# args = [H, L]
 
 #------------------------------------------------------------------------------
 ## Smooth examples  
@@ -125,14 +124,14 @@ args = [H, l_a, l_b]
 #------------------------------------------------------------------------------
 
 ## U: velocity BC {u(x,y0)=U, u(x,h(x))=0}  {v(x,y0)=0, v(x,h(x))=0} 
-U = 1
+U = 0
 
 #fixed pressure BC {p(x0,y)=-dP, p(xL,y)=0} 
 # dP = 8
 # BC = bc.Fixed(U,dP)
 
 # mixed pressure BC {dp/dx (x0,y) ~ Q, p(xL,y)=0}
-Q = 0
+Q = 1
 BC = bc.Mixed(U, Q)
 
 #------------------------------------------------------------------------------
@@ -143,7 +142,7 @@ solver = solvers.Reynolds_Solver(Example, BC, args)
 # solution methods (plots  and returns pressure, velocity )
 
 
-N = 200
+N = 100
 # solution = solver.fd_solve(N)
 # 
 # solution = solver.pwc_schur_solve(N)

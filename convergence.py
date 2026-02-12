@@ -61,6 +61,8 @@ def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
             i = k_min % ex_min.Nx
             j = (k_min // ex_min.Nx)
             
+            
+            
             # -> indices on grid N || N_min
             i_n = mult * i
             j_n = mult * j
@@ -68,7 +70,8 @@ def stokes_cnvg_self(Ex, args, U, Q, Re, N_min, Ns, N_max, p_err=True):
             # -> indices on grid N_max || N_min
             i_max = mult_max * i
             j_max = mult_max * j
-            
+            if ex_max.space[j_max,i_max] != 1 or ex_n.space[j, i] !=1:
+                continue
             err_psi_n_ij = abs(psi_max[j_max,i_max] - psi_n[j_n,i_n])
             err_psi[n,j,i] = err_psi_n_ij
             err_psi_l1[n] += err_psi_n_ij
@@ -122,7 +125,7 @@ def convg_rate(errs):
     rates = np.zeros(n-1)
     
     for k in range(n-1):
-        rates[k]=errs[k]/errs[k+1]
+        rates[k]=errs[k+1]/errs[k]
     
     return rates
 
