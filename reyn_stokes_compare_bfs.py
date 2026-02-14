@@ -132,7 +132,7 @@ graphics.plot_2D(l2_V_errs, h_ins, f'Velocity rel. %-error, {exstr}', [label, 'r
 
 # graphics.plot_2D(l2_P_errs, h_ins, f'Pressure $L_2$ rel. %-error, {exstr}', [label, 'Pressure $L_2$ rel. %-error '])
 # graphics.plot_2D(dP_errs, h_ins, f'Pressure $\Delta p$ rel. %-error, {exstr}', [label, 'Pressure $\Delta p$ rel. %-error '])
-graphics.plot_2D_multi([dP_errs, l2_P_errs], h_ins, f'Pressure rel. %-error, {exstr}', ['$\Delta p$', '$|p|_2$'], [label, 'rel. %-error'],loc='left')
+graphics.plot_2D_multi([dP_errs, l2_P_errs], h_ins, f'Pressure rel. %-error, {exstr}', ['$\Delta p$', '$||p||_2$'], [label, 'rel. %-error'],loc='left')
 
 
 

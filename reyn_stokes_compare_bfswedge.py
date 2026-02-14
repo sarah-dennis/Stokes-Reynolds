@@ -159,7 +159,7 @@ for args in test_args:
 
 # graphics.plot_2D(stokes_dPs, xrs, f'Stokes Pressure Drop, {exstr}', [label, '$\Delta p$'])
 # graphics.plot_2D(stokes_l2Ps, xrs, f'Stokes Pressure, {exstr}', [label, '$|p|_2$'])
-graphics.plot_2D_multi([100 - 100*stokes_dPs/stokes_dPs[-1],100 - 100*stokes_l2Ps/stokes_l2Ps[-1]], xrs, f'Stokes Pressure, {exstr} vs BFS', ['$\Delta p$', '$|p|_2$'], [label, '% Change'],loc='left')
+graphics.plot_2D_multi([100 - 100*stokes_dPs/stokes_dPs[-1],100 - 100*stokes_l2Ps/stokes_l2Ps[-1]], xrs, f'Stokes Pressure, {exstr} vs BFS', ['$\Delta p$', '$||p||_2$'], [label, '% Change'],loc='left')
 
 
 # graphics.plot_2D_multi([stokes_dPs, reyn_dPs], xrs, f'Pressure Drop, {exstr}', ['Stokes', 'Reynolds'], [label, '$\Delta p$'],loc='left')

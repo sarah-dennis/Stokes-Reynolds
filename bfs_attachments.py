@@ -55,50 +55,50 @@ Q=1
 Re=0
 #------------------------------------------------------------------------------
 
-Example = examples.BFS
-h_ins = [1.125, 1.25, 1.5, 2, 2.5, 2.75, 3] #N=80
-# h_ins = [1.25, 2, 2.75] #N=160
-# h_ins = [2] #N=160
-h_out = 1
-l_in = 8
-l_out = 8
-
-args_all = [[h_in, h_out, l_in, l_out] for h_in in h_ins]
-
-num_tests = len(h_ins)
-
-#------------------------------------------------------------------------------
-# Example = examples.BFS_wedge
-
-# h_in = 2
+# Example = examples.BFS
+# h_ins = [1.125, 1.25, 1.5, 2, 2.5, 2.75, 3] #N=80
+# # h_ins = [1.25, 2, 2.75] #N=160
+# # h_ins = [2] #N=160
 # h_out = 1
 # l_in = 8
-# l_out=8
+# l_out = 8
 
-# xyws = [[0.35,0.4],[0.2625, 0.3],[0.175,0.2]]
+# args_all = [[h_in, h_out, l_in, l_out] for h_in in h_ins]
 
-# args_all = [[h_in, h_out, l_in, l_out, xw, yw] for (xw, yw) in xyws]
+# num_tests = len(h_ins)
+
+#------------------------------------------------------------------------------
+Example = examples.BFS_wedge
+
+h_in = 2
+h_out = 1
+l_in = 8
+l_out=8
+
+xyws = [[0.35,0.4],[0.2625, 0.3],[0.175,0.2]]
+
+args_all = [[h_in, h_out, l_in, l_out, xw, yw] for (xw, yw) in xyws]
 
 
-# num_tests = len(xyws)
+num_tests = len(xyws)
 
 
 #------------------------------------------------------------------------------
 xrs = np.zeros(num_tests)
 yrs = np.zeros(num_tests)
-N = 80
+N = 160
 
 for k in range(num_tests):
     args = args_all[k]         
     ex = Example(args, U, Q, Re, N)
     xr, yr = get_bfs_attachments(ex)
     
-    print(h_ins[k], xr, yr)
+    # print(h_ins[k], xr, yr)
     #primary
     xrs[k] = xr[0]
     yrs[k] = yr[0]
 
 print(xrs,yrs)
 
-graphics.plot_2D_multi([xrs, yrs], h_ins, 'BFS Points of Flow Separation', ['$x_r$', '$y_r$'], ['$\mathcal{H}=H_{in}/H_{out}$', 'length'], loc='left')
+# graphics.plot_2D_multi([xrs, yrs], h_ins, 'BFS Points of Flow Separation', ['$x_r$', '$y_r$'], ['$\mathcal{H}=H_{in}/H_{out}$', 'length'], loc='left')
     
