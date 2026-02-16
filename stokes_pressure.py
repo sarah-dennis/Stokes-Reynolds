@@ -15,13 +15,23 @@ def get_dp(ex, p):
 
 
 def pressure(ex, u, v):
-    px, py = px_py(ex, u, v)
+    px, py = px_py(ex, u, v)    
+
     n = ex.Nx
     m = ex.Ny
-    dy = ex.dy
-    dx = ex.dx
+
     shape = n*m
     p = np.zeros(shape)
+    
+    
+    L_x = (ex.xf-ex.x0)
+    dy = ex.dy/L_x
+    dx = ex.dx/L_x
+    if ex.flux == 0:
+        U_star = ex.U
+    else:   
+        U_star = ex.flux/L_x
+    P_star = U_star/L_x
     
     
     p[2*n-1] = ex.p_ambient  # i=n-1, j=1
@@ -51,7 +61,7 @@ def pressure(ex, u, v):
             p[k] = p[k_S] + py[k_S]*dy
           
             j+=1  
-    
+    p=p*P_star
     return p
             
     
@@ -63,8 +73,18 @@ def px_py(ex, u, v):
     shape = n*m
     space = ex.space #[0: boundry, 1: interior, -1: exterior]
     
+    L_x = (ex.xf-ex.x0)
+    if ex.flux == 0:
+        U_star = ex.U
+    else:   
+        U_star = ex.flux/L_x
+    u = u/U_star
+    v = v/U_star
+    dx = ex.dx/L_x
+    
     px = np.zeros(shape)
     py = np.zeros(shape)
+
     for k in range(shape):
         i = k % n
         j = k // n
@@ -95,11 +115,11 @@ def px_py(ex, u, v):
                 u_W = u[k_W]
                 v_W = v[k_W]
                  
-            uxx_k = (u_E -2*u_k + u_W)/ex.dx**2
-            vxx_k = (v_E -2*v_k + v_W)/ex.dx**2
+            uxx_k = (u_E -2*u_k + u_W)/dx**2
+            vxx_k = (v_E -2*v_k + v_W)/dx**2
             
-            ux_k = (u_E - u_W)/(2*ex.dx)
-            vx_k = (v_E - v_W)/(2*ex.dx)
+            ux_k = (u_E - u_W)/(2*dx)
+            vx_k = (v_E - v_W)/(2*dx)
 
             # uyy & vyy <--| N:j+1 & S:j-1
             k_N=(j+1)*n + i
@@ -117,14 +137,15 @@ def px_py(ex, u, v):
                 u_N = u[k_N]
                 v_N = v[k_N]
             
-            uyy_k = (u_N -2*u_k + u_S)/ex.dx**2
-            vyy_k = (v_N -2*v_k + v_S)/ex.dx**2
+            uyy_k = (u_N -2*u_k + u_S)/dx**2
+            vyy_k = (v_N -2*v_k + v_S)/dx**2
             
-            uy_k = (u_N - u_S)/(2*ex.dx)
-            vy_k = (v_N - v_S)/(2*ex.dx)
+            uy_k = (u_N - u_S)/(2*dx)
+            vy_k = (v_N - v_S)/(2*dx)
 
-            px[k] = (uxx_k + uyy_k) - (u_k*ux_k + v_k*uy_k)
-            py[k] = (vxx_k + vyy_k) - (u_k*vx_k + v_k*vy_k)
             
+            px[k] = (uxx_k + uyy_k) - ex.Re* (u_k*ux_k + v_k*uy_k)
+            py[k] = (vxx_k + vyy_k) - ex.Re* (u_k*vx_k + v_k*vy_k)
+
     return px, py
 
