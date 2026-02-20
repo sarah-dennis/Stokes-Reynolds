@@ -145,7 +145,7 @@ class Stokes_Solver:
         ax_labels = ["$N$", "$||\psi _{N^{*}} - \psi_{N}||_p$"]
         leg_labels = ['$L^1$', '$L^2$','$L^\infty$']
         
-        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels,bigO_on=True,loc='lower' )
+        graphics.plot_log_multi([l1_errs, l2_errs, inf_errs], [N_min]+Ns, title, leg_labels, ax_labels,bigO_on=True,loc='upper' )
 
 #------------------------------------------------------------------------------
 # PLOTTING 

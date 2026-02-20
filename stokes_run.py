@@ -13,11 +13,11 @@ import stokes_examples as examples
 
 zoom_on=  False   
 
-U=0
-Q=1
+# U=0
+# Q=1
 
-# U=1
-# Q=0
+U=1
+Q=0
 
 Re=0
 
@@ -32,19 +32,19 @@ Re=0
 
 
 #------------------------------------------------------------------------------
-h_in = 2
-h_out = 1
-l_in = 8
-l_out=8
+# h_in = 2
+# h_out = 1
+# l_in = 8
+# l_out=8
 
 # xr = 0.35
 # yr = 0.4
 # xr_0p75 = 0.2625
 # yr_0p75 = 0.3
-xr_0p5 = 0.175
-yr_0p5 = 0.2
-xr_0p25 = 0.0875
-yr_0p25 = 0.1
+# xr_0p5 = 0.175
+# yr_0p5 = 0.2
+# xr_0p25 = 0.0875
+# yr_0p25 = 0.1
 
 # args = [h_in, h_out, l_in, l_out, xr, yr]
 # Example = examples.BFS_wedge
@@ -54,8 +54,8 @@ yr_0p25 = 0.1
 
 # args = [h_in, h_out, l_in, l_out, xr_0p75, yr_0p75]
 # Example = examples.BFS_wedge
-args = [h_in, h_out, l_in, l_out, xr_0p25, yr_0p25]
-Example = examples.BFS_wedge
+# args = [h_in, h_out, l_in, l_out, xr_0p25, yr_0p25]
+# Example = examples.BFS_wedge
 
 #------------------------------------------------------------------------------
 
@@ -90,10 +90,10 @@ Example = examples.BFS_wedge
 
 
 #------------------------------------------------------------------------------
-# H = 3
-# L = 2 
-# args = [H, L]# tri slope = 2H/L
-# Example = examples.TriCavity
+H = 4
+L = 2 
+args = [H, L]# tri slope = 2H/L
+Example = examples.TriCavity
 
 #------------------------------------------------------------------------------
 # H = 4
@@ -118,7 +118,7 @@ solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)
 N=80
 
 # solver.new_run(N) 
-solver.load_run(N)
+# solver.load_run(N)
 
 # solver.load_scale(N,2*N) 
 # 
@@ -134,7 +134,7 @@ solver.load_run(N)
 # ------------------------------------------------------------------------------
 # solver.compare(args, U, Q, Re, 10,[20,40,80,160],320)
 # solver.compare(args, U, Q, Re, 20,[40,80],160)
-# solver.compare(args, U, Q, Re, 20,[40,80,160],320)
+# solver.compare(args, U, Q, Re, 20,[40,80,160,320],640)
 # solver.compare(args, U, Q, Re, 10,[20,40,80],160)
 
 
