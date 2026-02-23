@@ -24,7 +24,7 @@ class Pressure:
 
         else:
             ps_2D = np.nan_to_num(self.ps_2D)
-            dP = (sum(ps_2D[:,0])/height.hs[0] - sum(ps_2D[:,-1])/height.hs[-1])*height.dy
+            dP = (sum(ps_2D[:,0]) - sum(ps_2D[:,-1]))*height.dy
         return dP
 
 class Reyn_Pressure(Pressure):

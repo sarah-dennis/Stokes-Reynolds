@@ -13,22 +13,22 @@ import stokes_examples as examples
 
 zoom_on=  False   
 
-# U=0
-# Q=1
+U=0
+Q=2
 
-U=1
-Q=0
+# U=1
+# Q=0
 
 Re=0
 
 
 #------------------------------------------------------------------------------
-# h_in = 2
-# h_out = 1
-# l_in = 8
-# l_out=8
-# args = [h_in, h_out, l_in, l_out]
-# Example = examples.BFS
+h_in = 2
+h_out = 1
+l_in = 2
+l_out=2
+args = [h_in, h_out, l_in, l_out]
+Example = examples.BFS
 
 
 #------------------------------------------------------------------------------
@@ -90,10 +90,10 @@ Re=0
 
 
 #------------------------------------------------------------------------------
-H = 4
-L = 2 
-args = [H, L]# tri slope = 2H/L
-Example = examples.TriCavity
+# H = 4
+# L = 2 
+# args = [H, L]# tri slope = 2H/L
+# Example = examples.TriCavity
 
 #------------------------------------------------------------------------------
 # H = 4
@@ -115,9 +115,9 @@ Example = examples.TriCavity
 #------------------------------------------------------------------------------
 solver = control.Stokes_Solver(Example, args, U, Q, Re, max_iters=500000)                
 
-N=80
+N=10
 
-# solver.new_run(N) 
+solver.new_run(N) 
 # solver.load_run(N)
 
 # solver.load_scale(N,2*N) 
@@ -129,11 +129,11 @@ N=80
 # solver.new_run_many(N, 2, 4)  
 # solver.load_run_new_many(N, 2,3)
 
-# solver.load_plot(N, zoom=zoom_on)
+solver.load_plot(N, zoom=zoom_on)
 
 # ------------------------------------------------------------------------------
 # solver.compare(args, U, Q, Re, 10,[20,40,80,160],320)
-# solver.compare(args, U, Q, Re, 20,[40,80],160)
+# solver.compare(args, U, Q, Re, 20,[40,80,160],320)
 # solver.compare(args, U, Q, Re, 20,[40,80,160,320],640)
 # solver.compare(args, U, Q, Re, 10,[20,40,80],160)
 
