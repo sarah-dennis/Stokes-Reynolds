@@ -65,7 +65,7 @@ num_h = len(h_ins)
 num_d = len(deltas)
 num_tests =num_d*num_h
 
-exstr = 'Wedge slider'
+exstr = 'Regularized BFS'
 label = '$\delta$'
 #------------------------------------------------------------------------------
 
