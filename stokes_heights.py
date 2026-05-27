@@ -146,7 +146,6 @@ class PWLinear(Space):
 #------------------------------------------------------------------------------
     def interp(self, scale, v_opp, v_bdry=0):
         v_nbr = v_bdry + (v_bdry - v_opp)*scale
-
         return v_nbr
 
     def scale_N(self, i,j): #N: (s=i, t=j+1)
